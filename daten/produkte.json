@@ -1,0 +1,1365 @@
+{
+ "kategorien": [
+  {
+   "id": "sport",
+   "name": "Sport & Stars",
+   "emoji": "⚽",
+   "beschreibung": "Ablösesummen, Gehälter, Preisgelder"
+  },
+  {
+   "id": "bau",
+   "name": "Mega-Bauwerke",
+   "emoji": "🏗️",
+   "beschreibung": "Wolkenkratzer, Stadien, Großprojekte"
+  },
+  {
+   "id": "technik",
+   "name": "Technik & Raumfahrt",
+   "emoji": "🚀",
+   "beschreibung": "Raketen, Jets, Panzer, High-Tech"
+  },
+  {
+   "id": "luxus",
+   "name": "Luxus & Supercars",
+   "emoji": "💎",
+   "beschreibung": "Hypercars, Privatjets, Yachten"
+  },
+  {
+   "id": "auktion",
+   "name": "Rekord-Auktionen",
+   "emoji": "🔨",
+   "beschreibung": "Die teuersten Verkäufe aller Zeiten"
+  },
+  {
+   "id": "film",
+   "name": "Film, Games & Business",
+   "emoji": "🎬",
+   "beschreibung": "Budgets, Deals, Mega-Übernahmen"
+  },
+  {
+   "id": "kurios",
+   "name": "Kurios & Krass",
+   "emoji": "🤯",
+   "beschreibung": "Absurde Preise, die keiner kennt"
+  },
+  {
+   "id": "alltag",
+   "name": "Alltag & Gadgets",
+   "emoji": "🛒",
+   "beschreibung": "Dinge, die du kennst (oder glaubst zu kennen)"
+  }
+ ],
+ "produkte": [
+  {
+   "id": "neymar",
+   "kat": "sport",
+   "emoji": "💸",
+   "wiki": "Neymar",
+   "name": "Neymars Wechsel zu Paris Saint-Germain",
+   "info": "Ablösesumme 2017, bis heute Weltrekord",
+   "preis": 222000000,
+   "w": "€",
+   "fakt": "Das war mehr als doppelt so viel wie der alte Rekord (Paul Pogba, 105 Mio €).",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Neymar_Junior_Brazil_V_Morocco_13_June_2026-40.jpg/960px-Neymar_Junior_Brazil_V_Morocco_13_June_2026-40.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bryan Berlin",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Neymar_Junior_Brazil_V_Morocco_13_June_2026-40.jpg"
+   }
+  },
+  {
+   "id": "kane",
+   "kat": "sport",
+   "emoji": "⚽",
+   "wiki": "Harry Kane",
+   "name": "Harry Kanes Wechsel zum FC Bayern",
+   "info": "Ablöse an Tottenham, 2023 (ohne Bonuszahlungen)",
+   "preis": 100000000,
+   "w": "€",
+   "fakt": "Teuerster Einkauf der Bundesliga-Geschichte.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Harry_Kane_England_v_Ghana_23_June_2026-024_%28cropped%29.jpg/960px-Harry_Kane_England_v_Ghana_23_June_2026-024_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bryan Berlin",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Harry_Kane_England_v_Ghana_23_June_2026-024_(cropped).jpg"
+   }
+  },
+  {
+   "id": "bellingham",
+   "kat": "sport",
+   "emoji": "⚽",
+   "wiki": "Jude Bellingham",
+   "name": "Jude Bellinghams Wechsel zu Real Madrid",
+   "info": "Feste Ablöse an Borussia Dortmund, 2023",
+   "preis": 103000000,
+   "w": "€",
+   "fakt": "Der BVB hatte ihn 2020 für rund 25 Mio € aus Birmingham geholt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Jude_Bellingham_England_v_Ghana_23_June_2026-061_%28cropped%29.jpg/960px-Jude_Bellingham_England_v_Ghana_23_June_2026-061_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bryan Berlin",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Jude_Bellingham_England_v_Ghana_23_June_2026-061_(cropped).jpg"
+   }
+  },
+  {
+   "id": "ronaldo",
+   "kat": "sport",
+   "emoji": "🤑",
+   "wiki": "Cristiano Ronaldo",
+   "name": "Cristiano Ronaldos Jahresgehalt bei Al-Nassr",
+   "info": "Geschätzt, inkl. Werbedeals, 2023",
+   "preis": 200000000,
+   "w": "€",
+   "fakt": "Das sind über 540.000 € pro Tag, auch sonntags.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg/960px-Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bryan Berlin",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_(cropped).jpg"
+   }
+  },
+  {
+   "id": "f1cap",
+   "kat": "sport",
+   "emoji": "🏎️",
+   "wiki": "Formula One",
+   "name": "Budget-Obergrenze eines Formel-1-Teams",
+   "info": "Maximale Ausgaben pro Saison (Kostendeckel 2023)",
+   "preis": 135000000,
+   "w": "$",
+   "fakt": "Fahrergehälter zählen nicht dazu, sonst wäre der Deckel schnell gesprengt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/2010_Malaysian_GP_opening_lap.jpg/960px-2010_Malaysian_GP_opening_lap.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Morio",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:2010_Malaysian_GP_opening_lap.jpg"
+   }
+  },
+  {
+   "id": "superbowl",
+   "kat": "sport",
+   "emoji": "📺",
+   "wiki": "Super Bowl",
+   "name": "30 Sekunden Werbung beim Super Bowl",
+   "info": "Durchschnittspreis 2025",
+   "preis": 8000000,
+   "w": "$",
+   "fakt": "Das sind rund 266.000 $ pro Sekunde.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Super_Bowl_rings_on_display.jpg/960px-Super_Bowl_rings_on_display.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "John Tornow",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Super_Bowl_rings_on_display.jpg"
+   }
+  },
+  {
+   "id": "wimbledon",
+   "kat": "sport",
+   "emoji": "🎾",
+   "wiki": "Centre Court",
+   "name": "Siegprämie im Einzel von Wimbledon",
+   "info": "Preisgeld für Sieger/Siegerin, 2025",
+   "preis": 3000000,
+   "w": "£",
+   "fakt": "1968 bekam der Sieger noch 2.000 £.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/London_Centre_Court_Wimbledon_%2853284151591%29.jpg/960px-London_Centre_Court_Wimbledon_%2853284151591%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Arne Müseler from Salzburg, AT",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:London_Centre_Court_Wimbledon_(53284151591).jpg"
+   }
+  },
+  {
+   "id": "tdf",
+   "kat": "sport",
+   "emoji": "🚴",
+   "wiki": "Yellow jersey",
+   "name": "Preisgeld für den Sieg der Tour de France",
+   "info": "Gesamtsieger, Gelbes Trikot",
+   "preis": 500000,
+   "w": "€",
+   "fakt": "Traditionell teilt der Sieger das Geld mit seinem ganzen Team.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Gele_Trui_Cancellara_2015_-_voorkant.jpg/960px-Gele_Trui_Cancellara_2015_-_voorkant.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Le Coq Sportif",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Gele_Trui_Cancellara_2015_-_voorkant.jpg"
+   }
+  },
+  {
+   "id": "masters",
+   "kat": "sport",
+   "emoji": "⛳",
+   "wiki": "Augusta National Golf Club",
+   "name": "Siegprämie beim Golf-Masters in Augusta",
+   "info": "2025",
+   "preis": 4200000,
+   "w": "$",
+   "fakt": "Dazu gibt es das berühmte grüne Jackett.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/AugustaNationalMastersLogoFlowers.jpg/960px-AugustaNationalMastersLogoFlowers.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "pocketwiley",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:AugustaNationalMastersLogoFlowers.jpg"
+   }
+  },
+  {
+   "id": "allianz",
+   "kat": "bau",
+   "emoji": "🏟️",
+   "wiki": "Allianz Arena",
+   "name": "Bau der Allianz Arena",
+   "info": "Baukosten, Eröffnung 2005",
+   "preis": 340000000,
+   "w": "€",
+   "fakt": "Die Außenhülle besteht aus rund 2.800 aufgeblasenen Kunststoff-Kissen.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Allianz_Arena_2008-02-09.jpg/960px-Allianz_Arena_2008-02-09.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "2015 Michael 2015",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Allianz_Arena_2008-02-09.jpg"
+   }
+  },
+  {
+   "id": "windrad",
+   "kat": "bau",
+   "emoji": "🌬️",
+   "wiki": "Wind turbine",
+   "name": "Ein modernes Windrad an Land",
+   "info": "Ca. 5 Megawatt, inkl. Aufbau (Deutschland)",
+   "preis": 7000000,
+   "w": "€",
+   "fakt": "Ein solches Windrad kann rechnerisch über 3.000 Haushalte mit Strom versorgen.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Windmills_D1-D4_%28Thornton_Bank%29.jpg/960px-Windmills_D1-D4_%28Thornton_Bank%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Hans Hillewaert",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Windmills_D1-D4_(Thornton_Bank).jpg"
+   }
+  },
+  {
+   "id": "burj",
+   "kat": "bau",
+   "emoji": "🏙️",
+   "wiki": "Burj Khalifa",
+   "name": "Bau des Burj Khalifa",
+   "info": "Höchstes Gebäude der Welt (828 m), Dubai",
+   "preis": 1500000000,
+   "w": "$",
+   "fakt": "Von der Spitze sieht man bei klarer Sicht bis zu 95 km weit.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg/960px-Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "imran shahabuddin",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Burj_Khalifa_(worlds_tallest_building)_and_the_Dubai_skyline_(25781049892).jpg"
+   }
+  },
+  {
+   "id": "elphi",
+   "kat": "bau",
+   "emoji": "🎼",
+   "wiki": "Elbphilharmonie",
+   "name": "Bau der Elbphilharmonie",
+   "info": "Kosten für die Stadt Hamburg, Eröffnung 2017",
+   "preis": 866000000,
+   "w": "€",
+   "fakt": "Ursprünglich geplant waren 77 Mio €, also mehr als 11-mal weniger.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Elbphilharmonie_2025.jpg/960px-Elbphilharmonie_2025.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Evgenii Salganik",
+    "lizenz": "CC BY 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Elbphilharmonie_2025.jpg"
+   }
+  },
+  {
+   "id": "ber",
+   "kat": "bau",
+   "emoji": "✈️",
+   "wiki": "Berlin Brandenburg Airport",
+   "name": "Bau des Flughafens BER",
+   "info": "Gesamtkosten bis zur Eröffnung 2020",
+   "preis": 6000000000,
+   "w": "€",
+   "fakt": "Er eröffnete 9 Jahre später als geplant.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Berlin_Brandenburg_Airport_Terminal_1.jpg/960px-Berlin_Brandenburg_Airport_Terminal_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Arne Müseler",
+    "lizenz": "CC BY-SA 3.0 de",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Berlin_Brandenburg_Airport_Terminal_1.jpg"
+   }
+  },
+  {
+   "id": "s21",
+   "kat": "bau",
+   "emoji": "🚉",
+   "wiki": "Stuttgart Hauptbahnhof",
+   "name": "Bahnprojekt Stuttgart 21",
+   "info": "Aktuell geschätzte Gesamtkosten",
+   "preis": 11000000000,
+   "w": "€",
+   "fakt": "Bei der Planung in den 90ern war von rund 2,5 Mrd € die Rede.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/2018-08-30_EC_218_%22Chiemgau%22_Salzburg_-_Stuttgart_%2842581205930%29.jpg/960px-2018-08-30_EC_218_%22Chiemgau%22_Salzburg_-_Stuttgart_%2842581205930%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Dining Car from Wien",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:2018-08-30_EC_218_%22Chiemgau%22_Salzburg_-_Stuttgart_(42581205930).jpg"
+   }
+  },
+  {
+   "id": "gotthard",
+   "kat": "bau",
+   "emoji": "🚇",
+   "wiki": "Gotthard Base Tunnel",
+   "name": "Gotthard-Basistunnel",
+   "info": "Längster Eisenbahntunnel der Welt (57 km), Schweiz",
+   "preis": 12000000000,
+   "w": "CHF",
+   "fakt": "Beim Bau wurden 28 Millionen Tonnen Gestein ausgebrochen.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/20141120_gotthard-basistunnel02-wikipedia-hannes-ortlieb.jpg/960px-20141120_gotthard-basistunnel02-wikipedia-hannes-ortlieb.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Hannes Ortlieb (Diskussion)",
+    "lizenz": "CC BY-SA 3.0 de",
+    "quelle": "https://commons.wikimedia.org/wiki/File:20141120_gotthard-basistunnel02-wikipedia-hannes-ortlieb.jpg"
+   }
+  },
+  {
+   "id": "giga",
+   "kat": "bau",
+   "emoji": "🔋",
+   "wiki": "Gigafactory Berlin-Brandenburg",
+   "name": "Teslas Gigafactory in Grünheide",
+   "info": "Investition bis zur Eröffnung 2022",
+   "preis": 5000000000,
+   "w": "€",
+   "fakt": "Von der Genehmigung bis zur Eröffnung vergingen nur gut zwei Jahre.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/25_10_13_Tesla_0143.jpg/960px-25_10_13_Tesla_0143.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Ralf Roletschek",
+    "lizenz": "GFDL 1.2",
+    "quelle": "https://commons.wikimedia.org/wiki/File:25_10_13_Tesla_0143.jpg"
+   }
+  },
+  {
+   "id": "spurs",
+   "kat": "bau",
+   "emoji": "🏟️",
+   "wiki": "Tottenham Hotspur Stadium",
+   "name": "Bau des Tottenham-Hotspur-Stadions",
+   "info": "London, eröffnet 2019",
+   "preis": 1000000000,
+   "w": "£",
+   "fakt": "Das Stadion hat eine eigene Mikrobrauerei.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/London_Tottenham_Hotspur_Stadium.jpg/960px-London_Tottenham_Hotspur_Stadium.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Arne Müseler",
+    "lizenz": "CC BY-SA 3.0 de",
+    "quelle": "https://commons.wikimedia.org/wiki/File:London_Tottenham_Hotspur_Stadium.jpg"
+   }
+  },
+  {
+   "id": "dreischluchten",
+   "kat": "bau",
+   "emoji": "🌊",
+   "wiki": "Three Gorges Dam",
+   "name": "Drei-Schluchten-Damm",
+   "info": "Größtes Wasserkraftwerk der Welt, China",
+   "preis": 31000000000,
+   "w": "$",
+   "fakt": "Für den Stausee mussten über 1,3 Millionen Menschen umgesiedelt werden.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/ThreeGorgesDam-China2009.jpg/960px-ThreeGorgesDam-China2009.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Source file: Le Grand Portage\nDerivative work: Rehman",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:ThreeGorgesDam-China2009.jpg"
+   }
+  },
+  {
+   "id": "hinkley",
+   "kat": "bau",
+   "emoji": "☢️",
+   "wiki": "Hinkley Point C nuclear power station",
+   "name": "Atomkraftwerk Hinkley Point C",
+   "info": "Großbritannien, aktuelle Kostenschätzung",
+   "preis": 46000000000,
+   "w": "£",
+   "fakt": "Bei der Investitionsentscheidung 2016 ging man noch von rund 18 Mrd £ aus.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/a6/S960_Hinkley_Sept_2015.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "gov.uk",
+    "lizenz": "OGL 3",
+    "quelle": "https://commons.wikimedia.org/wiki/File:S960_Hinkley_Sept_2015.jpg"
+   }
+  },
+  {
+   "id": "iss",
+   "kat": "technik",
+   "emoji": "🛰️",
+   "wiki": "International Space Station",
+   "name": "Die Internationale Raumstation ISS",
+   "info": "Geschätzte Gesamtkosten aller Länder",
+   "preis": 150000000000,
+   "w": "$",
+   "fakt": "Gilt als das teuerste Objekt, das Menschen je gebaut haben.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/The_station_pictured_from_the_SpaceX_Crew_Dragon_5.jpg/960px-The_station_pictured_from_the_SpaceX_Crew_Dragon_5.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "NASA",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:The_station_pictured_from_the_SpaceX_Crew_Dragon_5.jpg"
+   }
+  },
+  {
+   "id": "jwst",
+   "kat": "technik",
+   "emoji": "🔭",
+   "wiki": "James Webb Space Telescope",
+   "name": "James-Webb-Weltraumteleskop",
+   "info": "Gesamtkosten der NASA",
+   "preis": 10000000000,
+   "w": "$",
+   "fakt": "Der Hauptspiegel ist mit einer hauchdünnen Goldschicht überzogen.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/JWST_spacecraft_model_3.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "NASA",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:JWST_spacecraft_model_3.png"
+   }
+  },
+  {
+   "id": "falcon9",
+   "kat": "technik",
+   "emoji": "🚀",
+   "wiki": "Falcon 9 Full Thrust",
+   "name": "Ein Raketenstart mit der Falcon 9",
+   "info": "Listenpreis von SpaceX für einen Start",
+   "preis": 70000000,
+   "w": "$",
+   "fakt": "Die erste Stufe landet wieder und fliegt teils über 20-mal.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/ORBCOMM-2_%2823802549782%29.jpg/960px-ORBCOMM-2_%2823802549782%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "SpaceX Photos",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:ORBCOMM-2_(23802549782).jpg"
+   }
+  },
+  {
+   "id": "a380",
+   "kat": "technik",
+   "emoji": "✈️",
+   "wiki": "Airbus A380",
+   "name": "Ein Airbus A380",
+   "info": "Listenpreis 2018 (größtes Passagierflugzeug)",
+   "preis": 445600000,
+   "w": "$",
+   "fakt": "Airlines zahlen meist deutlich weniger. Rabatte von 50 % sind normal.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/A6-EDY_A380_Emirates_31_jan_2013_jfk_%288442269364%29_%28cropped%29.jpg/960px-A6-EDY_A380_Emirates_31_jan_2013_jfk_%288442269364%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Maarten Visser from Capelle aan den IJssel, Nederland",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:A6-EDY_A380_Emirates_31_jan_2013_jfk_(8442269364)_(cropped).jpg"
+   }
+  },
+  {
+   "id": "f35",
+   "kat": "technik",
+   "emoji": "🛩️",
+   "wiki": "Lockheed Martin F-35 Lightning II",
+   "name": "Ein Kampfjet F-35A",
+   "info": "Stückpreis ohne Wartung",
+   "preis": 82000000,
+   "w": "$",
+   "fakt": "Eine Flugstunde kostet zusätzlich rund 40.000 $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/F-35A_flight_%28cropped%29.jpg/960px-F-35A_flight_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "U.S. Air Force photo by Master Sgt. Donald R. Allen",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:F-35A_flight_(cropped).jpg"
+   }
+  },
+  {
+   "id": "ford",
+   "kat": "technik",
+   "emoji": "🚢",
+   "wiki": "USS Gerald R. Ford",
+   "name": "Flugzeugträger USS Gerald R. Ford",
+   "info": "Baukosten, Indienststellung 2017",
+   "preis": 13000000000,
+   "w": "$",
+   "fakt": "An Bord leben über 4.500 Menschen.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/USS_Gerald_R._Ford_%28CVN-78%29_underway_in_the_Atlantic_Ocean_on_9_October_2022_%28221009-N-TL968-1248%29.JPG/960px-USS_Gerald_R._Ford_%28CVN-78%29_underway_in_the_Atlantic_Ocean_on_9_October_2022_%28221009-N-TL968-1248%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "U.S. Navy photo by Mass Communication Specialist 2nd Class Jackson Adkins",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:USS_Gerald_R._Ford_(CVN-78)_underway_in_the_Atlantic_Ocean_on_9_October_2022_(221009-N-TL968-1248).JPG"
+   }
+  },
+  {
+   "id": "leo2",
+   "kat": "technik",
+   "emoji": "🪖",
+   "wiki": "Leopard 2",
+   "name": "Ein Kampfpanzer Leopard 2A8",
+   "info": "Stückpreis bei der Bundeswehr-Bestellung 2023",
+   "preis": 29000000,
+   "w": "€",
+   "fakt": "Er wiegt rund 64 Tonnen, so viel wie etwa 40 Autos.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Leopard_2_A7V_313_Bad_Frankenhausen_2024.JPG/960px-Leopard_2_A7V_313_Bad_Frankenhausen_2024.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Boevaya mashina",
+    "lizenz": "CC BY-SA 3.0 de",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Leopard_2_A7V_313_Bad_Frankenhausen_2024.JPG"
+   }
+  },
+  {
+   "id": "perseverance",
+   "kat": "technik",
+   "emoji": "🤖",
+   "wiki": "Perseverance (rover)",
+   "name": "Mars-Rover Perseverance",
+   "info": "Gesamte Mission inkl. Start und Betrieb",
+   "preis": 2700000000,
+   "w": "$",
+   "fakt": "Er hatte einen kleinen Hubschrauber dabei: Ingenuity flog als erstes Fluggerät auf einem anderen Planeten.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Perseverance-Selfie-at-Rochette-Horizontal-V2.gif/960px-Perseverance-Selfie-at-Rochette-Horizontal-V2.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "NASA/JPL-Caltech",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Perseverance-Selfie-at-Rochette-Horizontal-V2.gif"
+   }
+  },
+  {
+   "id": "h100",
+   "kat": "technik",
+   "emoji": "🧠",
+   "wiki": "Hopper (microarchitecture)",
+   "name": "Eine Nvidia-H100-KI-Grafikkarte",
+   "info": "Ungefährer Stückpreis 2024",
+   "preis": 30000,
+   "w": "$",
+   "fakt": "Große KI-Rechenzentren nutzen davon zehntausende Stück.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/NVIDIA_H100_%28%E6%9E%81%E5%AE%A2%E6%B9%BEGeekerwan%29_025.png/960px-NVIDIA_H100_%28%E6%9E%81%E5%AE%A2%E6%B9%BEGeekerwan%29_025.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "极客湾Geekerwan",
+    "lizenz": "CC BY 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:NVIDIA_H100_(%E6%9E%81%E5%AE%A2%E6%B9%BEGeekerwan)_025.png"
+   }
+  },
+  {
+   "id": "apollo",
+   "kat": "technik",
+   "emoji": "🌕",
+   "wiki": "Apollo 11",
+   "name": "Das Apollo-Mondprogramm",
+   "info": "Kosten damals (1960–1973), ohne Inflation",
+   "preis": 25800000000,
+   "w": "$",
+   "fakt": "Heute entspräche das deutlich über 250 Mrd $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/A_Man_on_the_Moon%2C_AS11-40-5903_%28cropped%29.jpg/960px-A_Man_on_the_Moon%2C_AS11-40-5903_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Neil A. Armstrong",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:A_Man_on_the_Moon,_AS11-40-5903_(cropped).jpg"
+   }
+  },
+  {
+   "id": "visionpro",
+   "kat": "alltag",
+   "emoji": "🥽",
+   "wiki": "Apple Vision Pro",
+   "name": "Apple Vision Pro",
+   "info": "Startpreis in Deutschland, 2024",
+   "preis": 3999,
+   "w": "€",
+   "fakt": "Der Akku hält rund 2 Stunden.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Apple_Vision_Pro_with_Solo_Knit_Band.jpg/960px-Apple_Vision_Pro_with_Solo_Knit_Band.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "BobSmith810",
+    "lizenz": "CC BY 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Apple_Vision_Pro_with_Solo_Knit_Band.jpg"
+   }
+  },
+  {
+   "id": "chiron",
+   "kat": "luxus",
+   "emoji": "🏎️",
+   "wiki": "Bugatti Chiron",
+   "name": "Bugatti Chiron",
+   "info": "Grundpreis netto",
+   "preis": 2400000,
+   "w": "€",
+   "fakt": "Ein Satz Reifen kostet rund 40.000 €.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Bugatti_Chiron_1.jpg/960px-Bugatti_Chiron_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Calreyn88",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Bugatti_Chiron_1.jpg"
+   }
+  },
+  {
+   "id": "noire",
+   "kat": "luxus",
+   "emoji": "🖤",
+   "wiki": null,
+   "name": "Bugatti La Voiture Noire",
+   "info": "Einzelstück, Preis netto (2019)",
+   "preis": 11000000,
+   "w": "€",
+   "fakt": "Es gibt nur ein einziges Exemplar."
+  },
+  {
+   "id": "boattail",
+   "kat": "luxus",
+   "emoji": "🛥️",
+   "wiki": "Rolls-Royce Boat Tail",
+   "name": "Rolls-Royce Boat Tail",
+   "info": "Geschätzter Preis pro Auto (nur 3 gebaut)",
+   "preis": 28000000,
+   "w": "$",
+   "fakt": "Im Heck ist ein ausklappbares Picknick-Set mit Champagnerkühler eingebaut.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Rolls-Royce_Boat_Tail_side.png/960px-Rolls-Royce_Boat_Tail_side.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "pelican-actor",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Rolls-Royce_Boat_Tail_side.png"
+   }
+  },
+  {
+   "id": "revuelto",
+   "kat": "luxus",
+   "emoji": "🐂",
+   "wiki": "Lamborghini Revuelto",
+   "name": "Lamborghini Revuelto",
+   "info": "Ungefährer Grundpreis in Deutschland",
+   "preis": 500000,
+   "w": "€",
+   "fakt": "Der V12-Hybrid hat über 1.000 PS.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Lamborghini_Revuelto_DSC_6985_%28cropped%29.jpg/960px-Lamborghini_Revuelto_DSC_6985_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Alexander Migl",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Lamborghini_Revuelto_DSC_6985_(cropped).jpg"
+   }
+  },
+  {
+   "id": "rolex",
+   "kat": "luxus",
+   "emoji": "⌚",
+   "wiki": "Rolex Submariner",
+   "name": "Rolex Submariner Date (Edelstahl)",
+   "info": "Ungefährer Listenpreis beim Händler",
+   "preis": 11000,
+   "w": "€",
+   "fakt": "Wartelisten von mehreren Jahren sind keine Seltenheit.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Rolex-Submariner.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "FrankWilliams",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Rolex-Submariner.jpg"
+   }
+  },
+  {
+   "id": "g650",
+   "kat": "luxus",
+   "emoji": "🛫",
+   "wiki": "Gulfstream G650",
+   "name": "Privatjet Gulfstream G650ER",
+   "info": "Ungefährer Neupreis",
+   "preis": 70000000,
+   "w": "$",
+   "fakt": "Er fliegt nonstop von New York bis Hongkong.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/G-ULFS_Gulfstream_G650_CVT_05-05-16_%2827046023031%29_%28cropped%29.jpg/960px-G-ULFS_Gulfstream_G650_CVT_05-05-16_%2827046023031%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Rob Hodgkins",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:G-ULFS_Gulfstream_G650_CVT_05-05-16_(27046023031)_(cropped).jpg"
+   }
+  },
+  {
+   "id": "azzam",
+   "kat": "luxus",
+   "emoji": "🛳️",
+   "wiki": "Azzam (yacht)",
+   "name": "Superyacht Azzam",
+   "info": "Längste Privatyacht der Welt (180 m), geschätzt",
+   "preis": 600000000,
+   "w": "$",
+   "fakt": "Sie ist länger als zwei Fußballfelder.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/AzzamCadiz.jpg/960px-AzzamCadiz.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Javier Virués Ortega",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:AzzamCadiz.jpg"
+   }
+  },
+  {
+   "id": "antilia",
+   "kat": "luxus",
+   "emoji": "🏢",
+   "wiki": "Antilia (building)",
+   "name": "Antilia: Privathaus in Mumbai",
+   "info": "27 Etagen, geschätzter Wert",
+   "preis": 2000000000,
+   "w": "$",
+   "fakt": "Für eine Familie arbeiten dort rund 600 Angestellte.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Mumbai_03-2016_19_Antilia_Tower.jpg/960px-Mumbai_03-2016_19_Antilia_Tower.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "A.Savin",
+    "lizenz": "FAL",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Mumbai_03-2016_19_Antilia_Tower.jpg"
+   }
+  },
+  {
+   "id": "salvator",
+   "kat": "auktion",
+   "emoji": "🖼️",
+   "wiki": "Salvator Mundi (Leonardo)",
+   "name": "Gemälde „Salvator Mundi“ von Leonardo da Vinci",
+   "info": "Auktion 2017, teuerstes Gemälde aller Zeiten",
+   "preis": 450300000,
+   "w": "$",
+   "fakt": "Das Bild wurde 1958 für 45 £ verkauft. Damals hielt man es nicht für einen echten Leonardo.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/960px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Leonardo da Vinci",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Leonardo_da_Vinci,_Salvator_Mundi,_c.1500,_oil_on_walnut,_45.4_%C3%97_65.6_cm.jpg"
+   }
+  },
+  {
+   "id": "slr",
+   "kat": "auktion",
+   "emoji": "🏁",
+   "wiki": "Mercedes-Benz 300 SLR",
+   "name": "Mercedes 300 SLR Uhlenhaut Coupé",
+   "info": "Auktion 2022, teuerstes Auto aller Zeiten",
+   "preis": 135000000,
+   "w": "€",
+   "fakt": "Es wurden nur zwei Stück gebaut.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Mercedes-Benz_300_SLR_1955.jpg/960px-Mercedes-Benz_300_SLR_1955.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "LSDSL",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_300_SLR_1955.jpg"
+   }
+  },
+  {
+   "id": "banksy",
+   "kat": "auktion",
+   "emoji": "🎈",
+   "wiki": "Banksy",
+   "name": "Banksys halb geschreddertes Bild „Love Is in the Bin“",
+   "info": "Erneute Versteigerung 2021",
+   "preis": 18600000,
+   "w": "£",
+   "fakt": "2018 schredderte es sich direkt nach der Auktion für 1 Mio £ selbst, und wurde dadurch noch wertvoller."
+  },
+  {
+   "id": "stan",
+   "kat": "auktion",
+   "emoji": "🦖",
+   "wiki": "Stan (dinosaur)",
+   "name": "T.-rex-Skelett „Stan“",
+   "info": "Auktion 2020",
+   "preis": 31800000,
+   "w": "$",
+   "fakt": "Stan ist rund 67 Millionen Jahre alt.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/33/Stan_the_Trex_at_Manchester_Museum.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "The original uploader was Billlion at English Wikipedia.",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Stan_the_Trex_at_Manchester_Museum.jpg"
+   }
+  },
+  {
+   "id": "apex",
+   "kat": "auktion",
+   "emoji": "🦕",
+   "wiki": "Apex (dinosaur)",
+   "name": "Stegosaurus-Skelett „Apex“",
+   "info": "Auktion 2024, teuerstes Fossil aller Zeiten",
+   "preis": 44600000,
+   "w": "$",
+   "fakt": "Der Schätzpreis lag vorher bei nur 4–6 Mio $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Apex_%28dinosaur%29.jpg/960px-Apex_%28dinosaur%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "DraconicDark",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Apex_(dinosaur).jpg"
+   }
+  },
+  {
+   "id": "pikachu",
+   "kat": "auktion",
+   "emoji": "⚡",
+   "wiki": null,
+   "name": "Pokémon-Karte „Pikachu Illustrator“",
+   "info": "Privatverkauf an Logan Paul, 2022 (Weltrekord)",
+   "preis": 5275000,
+   "w": "$",
+   "fakt": "Es gibt nur rund 40 Exemplare, ursprünglich Preise für einen Zeichenwettbewerb."
+  },
+  {
+   "id": "jordan",
+   "kat": "auktion",
+   "emoji": "🏀",
+   "wiki": "Michael Jordan",
+   "name": "Michael Jordans Trikot aus Spiel 1 der NBA-Finals 1998",
+   "info": "Auktion 2022",
+   "preis": 10100000,
+   "w": "$",
+   "fakt": "Das Spiel ist Teil der Doku „The Last Dance“.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Michael_Jordan_in_2014.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "DOD photo by D. Myles Cullen",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Michael_Jordan_in_2014.jpg"
+   }
+  },
+  {
+   "id": "marilyn",
+   "kat": "auktion",
+   "emoji": "🎨",
+   "wiki": "Andy Warhol",
+   "name": "Warhols „Shot Sage Blue Marilyn“",
+   "info": "Auktion 2022",
+   "preis": 195000000,
+   "w": "$",
+   "fakt": "Teuerstes Kunstwerk des 20. Jahrhunderts, das je versteigert wurde.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Andy_Warhol_by_Bernard_Gotfryd_1980.png/960px-Andy_Warhol_by_Bernard_Gotfryd_1980.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bernard Gotfryd",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Andy_Warhol_by_Bernard_Gotfryd_1980.png"
+   }
+  },
+  {
+   "id": "birkin",
+   "kat": "auktion",
+   "emoji": "👜",
+   "wiki": "Birkin bag",
+   "name": "Die allererste Hermès Birkin Bag",
+   "info": "Original von Jane Birkin, Auktion 2025",
+   "preis": 8600000,
+   "w": "€",
+   "fakt": "Teuerste Handtasche, die je versteigert wurde.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Pink_Birkin_bag.jpg/960px-Pink_Birkin_bag.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Yvette Religioso-Ilagan from Philippines",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Pink_Birkin_bag.jpg"
+   }
+  },
+  {
+   "id": "pinkstar",
+   "kat": "auktion",
+   "emoji": "💎",
+   "wiki": "Diamond",
+   "name": "Diamant „Pink Star“",
+   "info": "59,6 Karat, Auktion 2017",
+   "preis": 71200000,
+   "w": "$",
+   "fakt": "Teuerster Edelstein, der je versteigert wurde.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Rough_Diamond.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "DGPC/ADF Luísa Oliveira",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Rough_Diamond.jpg"
+   }
+  },
+  {
+   "id": "mario64",
+   "kat": "auktion",
+   "emoji": "🍄",
+   "wiki": "Nintendo 64",
+   "name": "Originalverpacktes „Super Mario 64“",
+   "info": "Ungeöffnet, Auktion 2021",
+   "preis": 1560000,
+   "w": "$",
+   "fakt": "Damals kostete das Spiel im Laden rund 60 $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Nintendo-64-wController-L.jpg/960px-Nintendo-64-wController-L.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Evan-Amos",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Nintendo-64-wController-L.jpg"
+   }
+  },
+  {
+   "id": "action1",
+   "kat": "auktion",
+   "emoji": "🦸",
+   "wiki": "Action Comics 1",
+   "name": "Comic „Action Comics #1“",
+   "info": "Erster Auftritt von Superman, Auktion 2024",
+   "preis": 6000000,
+   "w": "$",
+   "fakt": "1938 kostete das Heft 10 Cent."
+  },
+  {
+   "id": "wutang",
+   "kat": "auktion",
+   "emoji": "💿",
+   "wiki": "Wu-Tang Clan",
+   "name": "Wu-Tang-Clan-Album „Once Upon a Time in Shaolin“",
+   "info": "Einziges Exemplar, Verkauf 2015",
+   "preis": 2000000,
+   "w": "$",
+   "fakt": "Laut Vertrag darf es erst ab 2103 kommerziell veröffentlicht werden.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Wu-Tang_Clan_at_Exit_festival_2023.jpg/960px-Wu-Tang_Clan_at_Exit_festival_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Miloš Krstić",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Wu-Tang_Clan_at_Exit_festival_2023.jpg"
+   }
+  },
+  {
+   "id": "gta5",
+   "kat": "film",
+   "emoji": "🎮",
+   "wiki": null,
+   "name": "Entwicklung und Marketing von GTA V",
+   "info": "Geschätztes Budget, 2013",
+   "preis": 265000000,
+   "w": "$",
+   "fakt": "Nach 3 Tagen hatte es schon über 1 Mrd $ eingespielt."
+  },
+  {
+   "id": "titanic",
+   "kat": "film",
+   "emoji": "🚢",
+   "wiki": "RMS Titanic",
+   "name": "Produktion des Films „Titanic“",
+   "info": "Budget 1997",
+   "preis": 200000000,
+   "w": "$",
+   "fakt": "Eingespielt hat er über 2,2 Mrd $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/RMS_Titanic_3_%28cropped_to_ship%29.jpg/960px-RMS_Titanic_3_%28cropped_to_ship%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Francis Godolphin Osbourne Stuart",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:RMS_Titanic_3_(cropped_to_ship).jpg"
+   }
+  },
+  {
+   "id": "endgame",
+   "kat": "film",
+   "emoji": "🦾",
+   "wiki": "Avengers: Endgame",
+   "name": "Produktion von „Avengers: Endgame“",
+   "info": "Geschätztes Budget, 2019",
+   "preis": 356000000,
+   "w": "$",
+   "fakt": "Eingespielt hat er fast 2,8 Mrd $."
+  },
+  {
+   "id": "eras",
+   "kat": "film",
+   "emoji": "🎤",
+   "wiki": "Taylor Swift",
+   "name": "Einnahmen der „Eras Tour“ von Taylor Swift",
+   "info": "Ticketeinnahmen 2023–2024",
+   "preis": 2077000000,
+   "w": "$",
+   "fakt": "Die erfolgreichste Konzerttour aller Zeiten.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png/960px-Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "iHeartRadioCA",
+    "lizenz": "CC BY 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_(3).png"
+   }
+  },
+  {
+   "id": "minecraft",
+   "kat": "film",
+   "emoji": "⛏️",
+   "wiki": "Minecraft",
+   "name": "Kauf von Minecraft durch Microsoft",
+   "info": "2014",
+   "preis": 2500000000,
+   "w": "$",
+   "fakt": "Minecraft ist das meistverkaufte Videospiel aller Zeiten."
+  },
+  {
+   "id": "activision",
+   "kat": "film",
+   "emoji": "🕹️",
+   "wiki": "Activision Blizzard",
+   "name": "Kauf von Activision Blizzard durch Microsoft",
+   "info": "Angekündigt 2022 (Call of Duty, WoW, Candy Crush)",
+   "preis": 68700000000,
+   "w": "$",
+   "fakt": "Die größte Übernahme der Gaming-Geschichte.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/2701_Olympic_Boulevard.jpg/960px-2701_Olympic_Boulevard.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Coolcaesar",
+    "lizenz": "CC BY 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:2701_Olympic_Boulevard.jpg"
+   }
+  },
+  {
+   "id": "whatsapp",
+   "kat": "film",
+   "emoji": "💬",
+   "wiki": "WhatsApp",
+   "name": "Kauf von WhatsApp durch Facebook",
+   "info": "2014",
+   "preis": 19000000000,
+   "w": "$",
+   "fakt": "WhatsApp hatte damals nur rund 55 Mitarbeitende.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/WhatsApp_Logo_green.svg/960px-WhatsApp_Logo_green.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "WhatsApp",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:WhatsApp_Logo_green.svg"
+   }
+  },
+  {
+   "id": "twitter",
+   "kat": "film",
+   "emoji": "🐦",
+   "wiki": "Twitter, Inc.",
+   "name": "Kauf von Twitter durch Elon Musk",
+   "info": "2022",
+   "preis": 44000000000,
+   "w": "$",
+   "fakt": "Kurz danach wurde Twitter in „X“ umbenannt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/960px-Logo_of_Twitter.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Martin Grasser, per source",
+    "lizenz": "Apache License 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Logo_of_Twitter.svg"
+   }
+  },
+  {
+   "id": "friends",
+   "kat": "film",
+   "emoji": "🛋️",
+   "wiki": "Friends Reunion",
+   "name": "Gage pro Friends-Folge (pro Hauptdarsteller)",
+   "info": "Staffeln 9 und 10",
+   "preis": 1000000,
+   "w": "$",
+   "fakt": "In Staffel 1 waren es noch rund 22.500 $ pro Folge."
+  },
+  {
+   "id": "spotify",
+   "kat": "film",
+   "emoji": "🎧",
+   "wiki": "Spotify",
+   "name": "Auszahlung pro Spotify-Stream",
+   "info": "Ungefährer Durchschnitt an Rechteinhaber",
+   "preis": 0.004,
+   "w": "$",
+   "fakt": "Für 1.000 $ braucht man also rund 250.000 Streams.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Spotify_HK_Stockholm.jpg/960px-Spotify_HK_Stockholm.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Goombah",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Spotify_HK_Stockholm.jpg"
+   }
+  },
+  {
+   "id": "fortnite",
+   "kat": "film",
+   "emoji": "🪂",
+   "wiki": "Epic Games",
+   "name": "Strafe gegen Epic Games (Fortnite)",
+   "info": "Einigung mit US-Behörde FTC, 2022",
+   "preis": 520000000,
+   "w": "$",
+   "fakt": "Es ging u. a. um versehentliche Käufe durch Kinder.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Epic_Games_office.jpg/960px-Epic_Games_office.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Sergey Galyonkin from Berlin, Germany",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Epic_Games_office.jpg"
+   }
+  },
+  {
+   "id": "antimaterie",
+   "kat": "kurios",
+   "emoji": "⚛️",
+   "wiki": "Antimatter",
+   "name": "1 Gramm Antimaterie",
+   "info": "Schätzung der NASA zur Herstellung",
+   "preis": 62500000000000,
+   "w": "$",
+   "fakt": "Teuerster Stoff der Welt. Bisher wurden nur Milliardstel Gramm hergestellt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/PositronDiscovery.png/960px-PositronDiscovery.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Carl D. Anderson (1905–1991)",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:PositronDiscovery.png"
+   }
+  },
+  {
+   "id": "safran",
+   "kat": "kurios",
+   "emoji": "🌸",
+   "wiki": "Saffron",
+   "name": "1 Kilogramm Safran",
+   "info": "Ungefährer Handelspreis, gute Qualität",
+   "preis": 10000,
+   "w": "€",
+   "fakt": "Für 1 kg braucht man rund 150.000 Krokusblüten, alle von Hand gepflückt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Saffron_-_premium_spice.jpg/960px-Saffron_-_premium_spice.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Shaharbano",
+    "lizenz": "CC BY 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Saffron_-_premium_spice.jpg"
+   }
+  },
+  {
+   "id": "kaviar",
+   "kat": "kurios",
+   "emoji": "🐟",
+   "wiki": "Beluga (sturgeon)",
+   "name": "1 Kilogramm Beluga-Kaviar",
+   "info": "Ungefährer Ladenpreis",
+   "preis": 10000,
+   "w": "€",
+   "fakt": "Ein Beluga-Stör wird erst mit rund 15–20 Jahren geschlechtsreif.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/%D0%91%D1%96%D0%BB%D1%83%D0%B3%D0%B0_%28Huso_huso%29.jpg/960px-%D0%91%D1%96%D0%BB%D1%83%D0%B3%D0%B0_%28Huso_huso%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Максим Яковлєв",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:%D0%91%D1%96%D0%BB%D1%83%D0%B3%D0%B0_(Huso_huso).jpg"
+   }
+  },
+  {
+   "id": "musk",
+   "kat": "kurios",
+   "emoji": "💰",
+   "wiki": "Elon Musk",
+   "name": "Elon Musks Tesla-Vergütungspaket von 2018",
+   "info": "Wert bei Genehmigung durch die Aktionäre 2024",
+   "preis": 56000000000,
+   "w": "$",
+   "fakt": "Das größte Vergütungspaket der Geschichte, ein Gericht kippte es später.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Elon_Musk_-_54820081119_%283x4_cropped%2C_Rule_of_thirds%29.jpg/960px-Elon_Musk_-_54820081119_%283x4_cropped%2C_Rule_of_thirds%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Gage Skidmore",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Elon_Musk_-_54820081119_(3x4_cropped,_Rule_of_thirds).jpg"
+   }
+  },
+  {
+   "id": "diaet",
+   "kat": "kurios",
+   "emoji": "🏛️",
+   "wiki": "Reichstag building",
+   "name": "Monatliche Diät eines Bundestagsabgeordneten",
+   "info": "Ab Juli 2025, vor Steuern",
+   "preis": 11833,
+   "w": "€",
+   "fakt": "Dazu kommt eine steuerfreie Kostenpauschale von über 5.000 € im Monat.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Berlin_reichstag_west_panorama_2.jpg/960px-Berlin_reichstag_west_panorama_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Mfield, Matthew Field, http://www.photography.mattfield.com; edit by Waugsberg (",
+    "lizenz": "GFDL 1.2",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Berlin_reichstag_west_panorama_2.jpg"
+   }
+  },
+  {
+   "id": "monalisa",
+   "kat": "kurios",
+   "emoji": "🖼️",
+   "wiki": "Mona Lisa",
+   "name": "Versicherungswert der Mona Lisa",
+   "info": "Für eine Ausstellung 1962 (Guinness-Rekord)",
+   "preis": 100000000,
+   "w": "$",
+   "fakt": "Heute wäre das inflationsbereinigt fast 1 Mrd $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/960px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Leonardo da Vinci",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg"
+   }
+  },
+  {
+   "id": "pegasus",
+   "kat": "kurios",
+   "emoji": "🐎",
+   "wiki": "Thoroughbred",
+   "name": "Rennpferd Fusaichi Pegasus",
+   "info": "Verkauf als Zuchthengst, 2000",
+   "preis": 70000000,
+   "w": "$",
+   "fakt": "Teuerstes Pferd aller Zeiten.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/36/Applebite-Gentlemen.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Unbekannt",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Applebite-Gentlemen.jpg"
+   }
+  },
+  {
+   "id": "gold",
+   "kat": "kurios",
+   "emoji": "🥇",
+   "wiki": "Gold bar",
+   "name": "1 Kilogramm Gold",
+   "info": "Ungefährer Preis Ende 2025",
+   "preis": 110000,
+   "w": "€",
+   "fakt": "Alles jemals geförderte Gold würde in einen Würfel mit rund 22 m Kantenlänge passen.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Gold_bullion_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Szaaman",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Gold_bullion_2.jpg"
+   }
+  },
+  {
+   "id": "trueffel",
+   "kat": "kurios",
+   "emoji": "🍄",
+   "wiki": "Tuber magnatum",
+   "name": "1 Kilogramm weiße Alba-Trüffel",
+   "info": "Ungefährer Marktpreis in einer guten Saison",
+   "preis": 4500,
+   "w": "€",
+   "fakt": "Sie lassen sich nicht züchten und werden mit Hunden gesucht.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Truffle_washed_and_cut.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "MatthiasKabel",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Truffle_washed_and_cut.jpg"
+   }
+  },
+  {
+   "id": "oktoberfest",
+   "kat": "alltag",
+   "emoji": "🍻",
+   "wiki": "Oktoberfest",
+   "name": "Eine Maß Bier auf dem Oktoberfest",
+   "info": "Durchschnittspreis 2025",
+   "preis": 15.5,
+   "w": "€",
+   "fakt": "1950 kostete die Maß umgerechnet rund 0,87 €.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/O%27zapft_is%21_M%C3%BCnchens_5_Jahreszeit_hat_begonnen_-_O%27zapft_is%21_Munich_5_season%2C_the_Oktoberfest_has_begun_%289855483374%29.jpg/960px-O%27zapft_is%21_M%C3%BCnchens_5_Jahreszeit_hat_begonnen_-_O%27zapft_is%21_Munich_5_season%2C_the_Oktoberfest_has_begun_%289855483374%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Heribert Pohl --- Thanks for half  a million clicks! from Germering bei München,",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:O%27zapft_is!_M%C3%BCnchens_5_Jahreszeit_hat_begonnen_-_O%27zapft_is!_Munich_5_season,_the_Oktoberfest_has_begun_(9855483374).jpg"
+   }
+  },
+  {
+   "id": "ps5pro",
+   "kat": "alltag",
+   "emoji": "🎮",
+   "wiki": "PlayStation 5",
+   "name": "PlayStation 5 Pro",
+   "info": "Startpreis in Deutschland, 2024 (ohne Laufwerk)",
+   "preis": 799.99,
+   "w": "€",
+   "fakt": "Das Disc-Laufwerk kostet nochmal rund 80 € extra.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Black_and_white_Playstation_5_base_edition_with_controller.png/960px-Black_and_white_Playstation_5_base_edition_with_controller.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Howardcorn33",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Black_and_white_Playstation_5_base_edition_with_controller.png"
+   }
+  },
+  {
+   "id": "switch2",
+   "kat": "alltag",
+   "emoji": "🕹️",
+   "wiki": null,
+   "name": "Nintendo Switch 2",
+   "info": "Startpreis in Deutschland, 2025",
+   "preis": 469.99,
+   "w": "€",
+   "fakt": "In den ersten 4 Tagen wurden über 3,5 Mio. Stück verkauft."
+  },
+  {
+   "id": "iphone",
+   "kat": "alltag",
+   "emoji": "📱",
+   "wiki": "iPhone 15 Pro",
+   "name": "iPhone 15 Pro Max mit 1 TB",
+   "info": "Startpreis in Deutschland, 2023",
+   "preis": 1949,
+   "w": "€",
+   "fakt": "Das erste iPhone kostete 2007 in Deutschland 399 € (mit Vertrag).",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/IPhone_15_Pro_Vector.svg/960px-IPhone_15_Pro_Vector.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Rafael Fernandez",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:IPhone_15_Pro_Vector.svg"
+   }
+  },
+  {
+   "id": "thermomix",
+   "kat": "alltag",
+   "emoji": "🍲",
+   "wiki": null,
+   "name": "Thermomix TM7",
+   "info": "Startpreis, 2025",
+   "preis": 1549,
+   "w": "€",
+   "fakt": "Er wird nicht im Laden verkauft, sondern nur über Vorführungen."
+  },
+  {
+   "id": "lego",
+   "kat": "alltag",
+   "emoji": "🧱",
+   "wiki": null,
+   "name": "LEGO Millennium Falcon (75192)",
+   "info": "Unverbindliche Preisempfehlung",
+   "preis": 849.99,
+   "w": "€",
+   "fakt": "Das Set hat 7.541 Teile."
+  },
+  {
+   "id": "doener",
+   "kat": "alltag",
+   "emoji": "🥙",
+   "wiki": "Doner kebab",
+   "name": "Ein Döner",
+   "info": "Durchschnitt in deutschen Großstädten 2025",
+   "preis": 7.5,
+   "w": "€",
+   "fakt": "In Deutschland wird jeden Tag weit über eine Million Döner gegessen.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/D%C3%B6ner_kebab_slicing.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Unbekannt",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:D%C3%B6ner_kebab_slicing.jpg"
+   }
+  },
+  {
+   "id": "dticket",
+   "kat": "alltag",
+   "emoji": "🚆",
+   "wiki": "Deutschlandticket",
+   "name": "Deutschlandticket",
+   "info": "Pro Monat, ab 2026",
+   "preis": 63,
+   "w": "€",
+   "fakt": "Zum Start 2023 kostete es 49 €.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/D-Ticket_des_VBN_Vorderseite.jpg/960px-D-Ticket_des_VBN_Vorderseite.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Sänger",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:D-Ticket_des_VBN_Vorderseite.jpg"
+   }
+  },
+  {
+   "id": "fuehrerschein",
+   "kat": "alltag",
+   "emoji": "🚗",
+   "wiki": "Driving licence in Germany",
+   "name": "Führerschein Klasse B",
+   "info": "Durchschnittliche Gesamtkosten",
+   "preis": 3500,
+   "w": "€",
+   "fakt": "Etwa jeder Dritte fällt beim ersten Versuch durch die Prüfung.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/DE_Licence_2021_Front.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Bundesdruckerei",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:DE_Licence_2021_Front.jpg"
+   }
+  }
+ ]
+}
