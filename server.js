@@ -20,6 +20,13 @@ const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯",
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
+// Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
+const { wartung: WARTUNG } = require("./config.json");
+if (WARTUNG) {
+  app.use((req, res) => res.status(503).set("Retry-After", "600").sendFile(path.join(__dirname, "wartung.html")));
+  io.use((_socket, next) => next(new Error("wartung")));
+}
+
 app.use(express.static(path.join(__dirname, "public"), { maxAge: "1h" }));
 
 const raeume = {};

@@ -52,6 +52,9 @@ GN.spieler = (id) => GN.zustand?.spieler.find((s) => s.id === id) || { name: "?"
 // =============================================================
 socket.on("meta", (m) => { GN.meta = m; if (!GN.zustand) zeigeStart(); });
 
+// Wartungsmodus: Seite neu laden, dann erscheint die Wartungsseite
+socket.on("connect_error", (err) => { if (err.message === "wartung") location.reload(); });
+
 socket.on("connect", () => {
   const raum = speicher("raum");
   if (raum) socket.emit("raumBeitreten", { code: raum, name: speicher("name"), spielerId });
