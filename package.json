@@ -1,7 +1,7 @@
 {
-  "name": "preis-schaetzer",
+  "name": "game-night",
   "version": "1.0.0",
-  "description": "Online-Partyspiel: Wer schätzt Preise am besten?",
+  "description": "Eure Spieleseite: Preis-Schätzer, Stadt Land Fluss und mehr",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
     "express": "^4.22.3",
-    "socket.io": "^4.8.4"
+    "socket.io": "^4.8.4",
+    "zod": "^4.6.7"
   },
   "engines": {
     "node": ">=18"

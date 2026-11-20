@@ -74,6 +74,9 @@ const Ton = (() => {
     richtig() { [523, 659, 784].forEach((f, i) => ton(f, 0.18, { typ: "triangle", start: i * 0.08 })); },
     falsch() { ton(220, 0.35, { typ: "sawtooth", laut: 0.08, gleitenZu: 110 }); },
     volltreffer() { [784, 988, 1175, 1568].forEach((f, i) => ton(f, 0.2, { typ: "square", laut: 0.06, start: i * 0.07 })); },
+    alarm() {
+      for (let i = 0; i < 3; i++) ton(880, 0.16, { typ: "square", laut: 0.07, start: i * 0.22, gleitenZu: 660 });
+    },
     fanfare() {
       const noten = [[523, 0], [523, 0.15], [523, 0.3], [659, 0.45], [784, 0.75], [659, 1.0], [784, 1.15], [1047, 1.35]];
       noten.forEach(([f, s]) => ton(f, 0.25, { typ: "square", laut: 0.06, start: s }));

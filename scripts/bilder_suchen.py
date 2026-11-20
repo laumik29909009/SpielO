@@ -7,7 +7,7 @@ Bereits gefundene Bilder werden nicht neu gesucht.
 """
 import json, re, time, html, urllib.parse, urllib.request, pathlib
 
-DATEI = pathlib.Path(__file__).resolve().parent.parent / "daten" / "produkte.json"
+DATEI = pathlib.Path(__file__).resolve().parent.parent / "daten" / "preis-produkte.json"
 UA = {"User-Agent": "PreisSchaetzerGame/1.0 (hobby party game; image lookup)"}
 
 

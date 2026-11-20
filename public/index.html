@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d0b1f" />
-  <title>Preis-Schätzer</title>
-  <meta name="description" content="Das Online-Partyspiel: Schätz Preise von Windrädern, Fußballstars, Supercars und mehr." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>" />
+  <meta name="theme-color" content="#120b26" />
+  <title>Game Night</title>
+  <meta name="description" content="Euer Spieleabend im Browser: Preis-Schätzer, Stadt Land Fluss und mehr." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet" />
@@ -16,9 +16,10 @@
   <div class="hintergrund" aria-hidden="true"></div>
 
   <header class="topbar">
-    <div class="logo"><span class="muenze">€</span>PREIS<span class="punkt">·</span>SCHÄTZER</div>
+    <div class="logo"><span class="muenze">★</span>GAME<span class="punkt">·</span>NIGHT</div>
     <div class="topbar-rechts">
       <button id="raumChip" class="raum-chip versteckt" title="Einladungslink kopieren"></button>
+      <button id="stoppSpielBtn" class="icon-btn versteckt" title="Spiel abbrechen" aria-label="Spiel abbrechen">⏹</button>
       <button id="tonBtn" class="icon-btn" title="Ton an/aus" aria-label="Ton an/aus">🔊</button>
     </div>
   </header>
@@ -31,6 +32,8 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="ton.js"></script>
-  <script src="app.js"></script>
+  <script src="kern.js"></script>
+  <script src="spiele/preis.js"></script>
+  <script src="spiele/slf.js"></script>
 </body>
 </html>

@@ -1,0 +1,69 @@
+{
+  "gruppen": [
+    {
+      "name": "Klassiker",
+      "kategorien": [
+        { "id": "stadt", "name": "Stadt", "emoji": "🏙️" },
+        { "id": "land", "name": "Land", "emoji": "🌍" },
+        { "id": "fluss", "name": "Fluss", "emoji": "🌊" },
+        { "id": "name", "name": "Vorname", "emoji": "🙋" },
+        { "id": "tier", "name": "Tier", "emoji": "🐾" },
+        { "id": "beruf", "name": "Beruf", "emoji": "👷" }
+      ]
+    },
+    {
+      "name": "Beliebt",
+      "kategorien": [
+        { "id": "pflanze", "name": "Pflanze", "emoji": "🌱" },
+        { "id": "essen", "name": "Essen & Gericht", "emoji": "🍝" },
+        { "id": "getraenk", "name": "Getränk", "emoji": "🥤" },
+        { "id": "marke", "name": "Marke", "emoji": "🏷️" },
+        { "id": "automarke", "name": "Automarke", "emoji": "🚗" },
+        { "id": "sportart", "name": "Sportart", "emoji": "🏅" },
+        { "id": "promi", "name": "Promi", "emoji": "⭐" },
+        { "id": "film", "name": "Film oder Serie", "emoji": "🎬" },
+        { "id": "musik", "name": "Band oder Musiker", "emoji": "🎸" },
+        { "id": "kleidung", "name": "Kleidungsstück", "emoji": "👕" },
+        { "id": "koerperteil", "name": "Körperteil", "emoji": "💪" },
+        { "id": "farbe", "name": "Farbe", "emoji": "🎨" },
+        { "id": "instrument", "name": "Musikinstrument", "emoji": "🎺" },
+        { "id": "verein", "name": "Fußballverein", "emoji": "⚽" },
+        { "id": "game", "name": "Videospiel", "emoji": "🎮" },
+        { "id": "haushalt", "name": "Ding im Haushalt", "emoji": "🏠" }
+      ]
+    },
+    {
+      "name": "Lustig & Party",
+      "kategorien": [
+        { "id": "anmachspruch", "name": "Anmachspruch", "emoji": "😏", "frei": true },
+        { "id": "ausrede", "name": "Ausrede fürs Zuspätkommen", "emoji": "🙈", "frei": true },
+        { "id": "weltuntergang", "name": "Grund für den Weltuntergang", "emoji": "☄️", "frei": true },
+        { "id": "babyname", "name": "Verrückter Babyname", "emoji": "👶", "frei": true },
+        { "id": "schimpfwort", "name": "Harmloses Schimpfwort", "emoji": "🤬", "frei": true },
+        { "id": "letztewort", "name": "Berühmte letzte Worte", "emoji": "💀", "frei": true },
+        { "id": "superkraft", "name": "Nutzlose Superkraft", "emoji": "🦸", "frei": true },
+        { "id": "kuehlschrank", "name": "Was im Kühlschrank liegt", "emoji": "🧊" },
+        { "id": "urlaub", "name": "Was man im Urlaub vergisst", "emoji": "🧳" },
+        { "id": "spitzname", "name": "Spitzname", "emoji": "🏷️", "frei": true }
+      ]
+    },
+    {
+      "name": "Für Profis",
+      "kategorien": [
+        { "id": "hauptstadt", "name": "Hauptstadt", "emoji": "🏛️" },
+        { "id": "insel", "name": "Insel", "emoji": "🏝️" },
+        { "id": "gebirge", "name": "Berg oder Gebirge", "emoji": "⛰️" },
+        { "id": "element", "name": "Chemisches Element", "emoji": "⚗️" },
+        { "id": "krankheit", "name": "Krankheit", "emoji": "🤒" },
+        { "id": "maerchen", "name": "Märchen- oder Sagenfigur", "emoji": "🧚" },
+        { "id": "zeichentrick", "name": "Zeichentrickfigur", "emoji": "🐭" }
+      ]
+    }
+  ],
+  "pakete": [
+    { "id": "klassisch", "name": "Klassisch", "emoji": "📜", "kategorien": ["stadt", "land", "fluss", "name", "tier", "beruf"] },
+    { "id": "party", "name": "Party", "emoji": "🎉", "kategorien": ["stadt", "land", "tier", "promi", "anmachspruch", "ausrede", "weltuntergang"] },
+    { "id": "popkultur", "name": "Popkultur", "emoji": "🍿", "kategorien": ["promi", "film", "musik", "game", "marke", "zeichentrick"] },
+    { "id": "profi", "name": "Profi", "emoji": "🧠", "kategorien": ["hauptstadt", "fluss", "insel", "gebirge", "element", "krankheit"] }
+  ]
+}
