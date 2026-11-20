@@ -1,6 +1,8 @@
 # 🎲 SpielO
 
-Eure eigene Spieleseite für bis zu 10 Leute: Ein Raum, ein Link, und der Host wählt das Spiel.
+Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host wählt das Spiel. Alles ist auch solo spielbar.
+
+_developed by laumik_
 
 | Spiel | Worum es geht |
 |---|---|
@@ -16,20 +18,22 @@ Eure eigene Spieleseite für bis zu 10 Leute: Ein Raum, ein Link, und der Host w
 | 0 | Leer oder ungültig |
 | +3 | pro ⭐, den andere für eine kreative Antwort vergeben |
 
-**Wer entscheidet, ob eine Antwort gilt?**
+**Solo:** 10 Punkte pro gültiger Antwort, dazu Tempo-Bonus (1 Punkt pro 3 Sekunden, die beim Stopp noch übrig sind). Dein Rekord wird im Browser gespeichert.
+
+**Wer entscheidet, ob eine Antwort gilt?** (alles automatisch)
 1. Feste Regeln: leer, falscher Anfangsbuchstabe, Buchstabensalat
 2. Wortlisten (`daten/slf/woerter.js`), mit Toleranz für Tippfehler
-3. Optional die KI (Claude). Sie erkennt auch Antworten, die nicht in den Listen stehen, und gleichbedeutende Antworten („NYC“ = „New York“)
-4. Danach können alle mit 👍/👎 abstimmen (die Mehrheit gewinnt), und der Host 👑 kann jede Antwort endgültig entscheiden.
+3. Wikipedia (kostenlos, ohne Schlüssel): Gibt es den Begriff? Passt die Kurzbeschreibung zur Kategorie? („Nashorn“ als Stadt → abgelehnt)
+4. Wenn ein API-Schlüssel eingetragen ist, prüft stattdessen Claude (KI) alles und erkennt auch gleichbedeutende Antworten („NYC“ = „New York“). Fällt die KI aus, wird mit Wikipedia geprüft.
+5. Danach können alle mit 👍/👎 abstimmen (die Mehrheit gewinnt), und der Host 👑 kann jede Antwort endgültig entscheiden.
 
-## KI-Schiedsrichter einschalten (optional)
-Ohne KI funktioniert alles mit Wortlisten und Abstimmung. Mit KI:
-1. Auf https://platform.claude.com einen API-Schlüssel erstellen und etwas Guthaben aufladen.
-2. Bei Render: dein Web Service → **Environment** → **Add Environment Variable**
-   - Key: `ANTHROPIC_API_KEY`, Value: dein Schlüssel
-3. Speichern. Render startet neu, und in der Lobby lässt sich „🤖 KI-Schiedsrichter“ einschalten.
+## KI-Schiedsrichter (Claude) einrichten
+Eine KI braucht ein eigenes, kostenpflichtiges API-Konto. Ohne Schlüssel läuft die Prüfung über Wortlisten und Wikipedia.
+1. Auf https://platform.claude.com einen API-Schlüssel erstellen und Guthaben aufladen.
+2. Bei Render: dein Web Service → **Environment** → `ANTHROPIC_API_KEY` = dein Schlüssel.
+3. Speichern. Ab dann wird die KI automatisch benutzt.
 
-Standardmäßig wird `claude-opus-5-5` benutzt. Über die Variable `ANTHROPIC_MODEL` lässt sich ein anderes Modell wählen, z. B. `claude-haiku-5-5` (deutlich günstiger).
+Standardmodell: `claude-opus-5-5`. Günstiger: Variable `ANTHROPIC_MODEL` = `claude-haiku-5-5`.
 
 ## Lokal starten
 ```bash

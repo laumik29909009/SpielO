@@ -8,7 +8,7 @@
 // ★ Hier kannst du die Seite personalisieren ★
 const SEITE = {
   name: "SpielO",
-  slogan: "Euer Spieleabend im Browser. Ein Link, alle sind dabei.",
+  slogan: "Partyspiele für dich und deine Freunde. Ein Link, alle sind dabei.",
 };
 
 const GN = (window.GN = {
@@ -79,6 +79,29 @@ socket.on("zustand", (z) => {
 });
 
 // =============================================================
+//  Logo
+// =============================================================
+GN.logo = (klasse = "") => `
+  <span class="spielo-logo ${klasse}" aria-label="${esc(SEITE.name)}">
+    ${[..."Spiel"].map((b, i) => `<span class="b" style="--i:${i}">${b}</span>`).join("")}<span class="o-chip" style="--i:5"><span class="o-ring"></span><span class="o-punkt"></span></span>
+  </span>`;
+
+// Große Spielkarte für Startseite und Lobby
+function spielKarte(id, s, { knopf = "", aktiv = false, deaktiviert = false, alsKnopf = false } = {}) {
+  const tag = alsKnopf ? "button" : "div";
+  return `
+    <${tag} class="spiel-gross ${aktiv ? "aktiv" : ""}" data-farbe="${id}" ${alsKnopf ? `data-spiel-wahl="${id}" ${deaktiviert ? "disabled" : ""}` : ""}>
+      <span class="spiel-bild"><span class="spiel-icon">${s.icon}</span>${aktiv ? '<span class="gewaehlt-marke">✓ Ausgewählt</span>' : ""}</span>
+      <span class="spiel-text">
+        <span class="spiel-titel">${s.titel}</span>
+        <span class="spiel-beschreibung">${s.beschreibung}</span>
+        <span class="spiel-tags">${s.tags.map((t) => `<span>${t}</span>`).join("")}</span>
+        ${knopf}
+      </span>
+    </${tag}>`;
+}
+
+// =============================================================
 //  Startseite
 // =============================================================
 function zeigeStart() {
@@ -88,50 +111,71 @@ function zeigeStart() {
   $("#raumChip").classList.add("versteckt");
   $("#stoppSpielBtn").classList.add("versteckt");
   const codeAusLink = (new URLSearchParams(location.search).get("raum") || "").toUpperCase();
-  const karten = Object.entries(GN.spiele).map(([id, s]) => `
-    <div class="spiel-vorschau" data-farbe="${id}">
-      <span class="icon">${s.icon}</span>
-      <div><div class="titel">${s.titel}</div><div class="text">${s.kurz}</div></div>
-    </div>`).join("");
+
+  const beitreten = `
+    <section class="kapitel ${codeAusLink ? "einladung" : ""}">
+      <h2 class="kapitel-titel">${codeAusLink ? "🎉 Du wurdest eingeladen!" : "Hast du einen Raum-Code?"}</h2>
+      <div class="beitreten-zeile">
+        <input id="codeInput" class="feld code-feld" maxlength="4" placeholder="ABCD" autocomplete="off" value="${esc(codeAusLink)}" aria-label="Raum-Code" />
+        <button id="beitretenBtn" class="btn ${codeAusLink ? "" : "zweit"}">Beitreten ➜</button>
+      </div>
+    </section>`;
 
   app.innerHTML = `
-    <section class="start">
-      <div class="hero">
-        <h1>Willkommen bei<br><span class="gold">${esc(SEITE.name)}</span></h1>
-        <p>${esc(SEITE.slogan)}</p>
-        <div class="spiel-vorschauen">${karten}
-          <div class="spiel-vorschau bald"><span class="icon">✨</span><div><div class="titel">Bald mehr</div><div class="text">Weitere Spiele kommen</div></div></div>
-        </div>
-      </div>
-      <div class="karte start-karte">
-        <div>
-          <label class="feld-label" for="nameInput">Dein Name</label>
-          <input id="nameInput" class="feld" maxlength="16" placeholder="z. B. Alex" autocomplete="off" value="${esc(speicher("name") || "")}" />
-        </div>
-        ${codeAusLink ? "" : `<button id="erstellenBtn" class="btn gross voll">🎉 Neuen Raum erstellen</button><div class="trenner">ODER BEITRETEN</div>`}
-        <div>
-          <label class="feld-label" for="codeInput">Raum-Code</label>
-          <div class="beitreten-zeile">
-            <input id="codeInput" class="feld code-feld" maxlength="4" placeholder="ABCD" autocomplete="off" value="${esc(codeAusLink)}" />
-            <button id="beitretenBtn" class="btn ${codeAusLink ? "" : "zweit"}">Los ➜</button>
-          </div>
-        </div>
-        ${codeAusLink ? `<button id="andererBtn" class="btn link">Stattdessen eigenen Raum erstellen</button>` : ""}
-        <p class="leise klein-text">Bis zu ${GN.meta.maxSpieler} Spieler pro Raum.</p>
+    <section class="hero-start">
+      <h1 class="hero-logo">${GN.logo("riesig")}</h1>
+      <p class="hero-slogan">${esc(SEITE.slogan)}</p>
+      <div class="hero-fakten"><span>👥 1–${GN.meta.maxSpieler} Spieler</span><span>📱 Handy &amp; PC</span><span>⚡ Kein Download</span></div>
+    </section>
+
+    <section class="kapitel name-kapitel">
+      <label class="kapitel-titel" for="nameInput">Wie heißt du?</label>
+      <input id="nameInput" class="feld name-feld" maxlength="16" placeholder="Dein Name" autocomplete="off" value="${esc(speicher("name") || "")}" />
+    </section>
+
+    ${codeAusLink ? beitreten : ""}
+
+    <section class="kapitel">
+      <h2 class="kapitel-titel">${codeAusLink ? "Oder starte ein eigenes Spiel" : "Wähle ein Spiel"}</h2>
+      <div class="spiele-gitter">
+        ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, {
+          knopf: `<button class="btn voll" data-erstellen="${id}">▶ Raum erstellen</button>`,
+        })).join("")}
+        <div class="spiel-gross bald"><span class="spiel-bild"><span class="spiel-icon">✨</span></span>
+          <span class="spiel-text"><span class="spiel-titel">Bald mehr</span><span class="spiel-beschreibung">Weitere Spiele sind in Arbeit.</span></span></div>
       </div>
     </section>
-    <p class="fuss">Bilder im Preis-Schätzer: Wikimedia Commons (Urheber &amp; Lizenz am jeweiligen Bild).</p>`;
 
-  const name = () => { const n = $("#nameInput").value.trim(); speicher("name", n); return n; };
-  $("#erstellenBtn")?.addEventListener("click", () => { Ton.entsperren(); socket.emit("raumErstellen", { name: name(), spielerId }); });
-  $("#beitretenBtn").addEventListener("click", () => {
+    ${codeAusLink ? "" : beitreten}`;
+
+  const name = () => {
+    const n = $("#nameInput").value.trim();
+    speicher("name", n);
+    if (!n) {
+      $("#nameInput").scrollIntoView({ behavior: "smooth", block: "center" });
+      $("#nameInput").focus();
+      $("#nameInput").classList.add("fehlt");
+      setTimeout(() => $("#nameInput")?.classList.remove("fehlt"), 700);
+      toast("Gib zuerst deinen Namen ein.");
+    }
+    return n;
+  };
+  $$("[data-erstellen]").forEach((b) => (b.onclick = () => {
     Ton.entsperren();
-    socket.emit("raumBeitreten", { code: $("#codeInput").value, name: name(), spielerId });
-  });
-  $("#andererBtn")?.addEventListener("click", () => { history.replaceState(null, "", "/"); zeigeStart(); });
+    const n = name();
+    if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel: b.dataset.erstellen });
+  }));
+  $("#beitretenBtn").onclick = () => {
+    Ton.entsperren();
+    const n = name();
+    if (n) socket.emit("raumBeitreten", { code: $("#codeInput").value, name: n, spielerId });
+  };
   $("#codeInput").addEventListener("keydown", (e) => e.key === "Enter" && $("#beitretenBtn").click());
-  $("#nameInput").addEventListener("keydown", (e) => e.key === "Enter" && ($("#erstellenBtn") || $("#beitretenBtn")).click());
-  if (!$("#nameInput").value) $("#nameInput").focus();
+  $("#nameInput").addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    if (codeAusLink) $("#beitretenBtn").click();
+    else $("#nameInput").blur();
+  });
 }
 
 // =============================================================
@@ -146,55 +190,66 @@ function zeigeLobby() {
   GN.stoppeTimer();
   $("#intro").classList.add("versteckt");
 
-  // Fokus in Textfeldern der Einstellungen nicht verlieren
+  // Fokus in Textfeldern und Scroll-Position nicht verlieren
   const fokus = document.activeElement?.id;
   const fokusWert = document.activeElement?.value;
   const scroll = scrollY;
+  const abschnitte = spiel.abschnitte(z, host);
+  const offen = (id) => speicher(`offen-${z.spiel}-${id}`) === "1";
 
   app.innerHTML = `
-    <section class="lobby">
-      <div>
-        <div class="karte code-karte">
-          <div class="leise">Raum-Code</div>
-          <div class="code-gross">${z.code}</div>
-          <button class="btn zweit" id="teilenBtn">🔗 Freunde einladen</button>
-        </div>
-        <div class="abschnitt-titel">Spieler (${z.spieler.length}/${GN.meta.maxSpieler})</div>
-        <div class="spieler-gitter">
+    <section class="raum-kopf karte">
+      <div class="raum-code-block">
+        <span class="leise klein-text">Raum-Code</span>
+        <span class="code-gross">${z.code}</span>
+      </div>
+      <div class="raum-spieler">
+        <span class="leise klein-text">Spieler ${z.spieler.length}/${GN.meta.maxSpieler} · tippe auf deinen Avatar, um ihn zu wechseln</span>
+        <div class="spieler-reihe">
           ${z.spieler.map((s) => `
-            <div class="spieler-kachel ${s.id === spielerId ? "ich" : ""} ${s.online ? "" : "offline"}">
-              ${s.id === z.hostId ? '<span class="krone" title="Host">👑</span>' : ""}
+            <span class="spieler-chip ${s.id === spielerId ? "ich" : ""} ${s.online ? "" : "offline"}">
               ${s.id === spielerId
                 ? `<button class="avatar" id="avatarBtn" title="Avatar wechseln">${s.avatar}</button>`
                 : `<span class="avatar">${s.avatar}</span>`}
-              <div class="name">${esc(s.name)}</div>
-            </div>`).join("")}
-        </div>
-        <p class="leise klein-text" style="margin-top:10px">Tipp: Tippe auf deinen Avatar, um ihn zu wechseln.</p>
-      </div>
-
-      <div>
-        <div class="abschnitt-titel" style="margin-top:0">Spiel</div>
-        <div class="spiel-wahl">
-          ${Object.entries(GN.spiele).map(([id, s]) => `
-            <button class="spiel-karte ${z.spiel === id ? "aktiv" : ""}" data-spiel-wahl="${id}" data-farbe="${id}" ${host ? "" : "disabled"}>
-              <span class="icon">${s.icon}</span>
-              <span><span class="titel">${s.titel}</span><span class="text">${s.kurz}</span></span>
-            </button>`).join("")}
-        </div>
-        <div id="spielEinstellungen"></div>
-        <div class="start-leiste">
-          ${host
-            ? `<button class="btn gross voll" id="startBtn">▶ ${spiel.titel} starten</button>
-               ${z.spieler.length < 2 ? '<div class="leise klein-text" style="text-align:center">Du kannst auch alleine testen, mit Freunden macht es aber mehr Spaß!</div>' : ""}`
-            : `<div class="warte">Warte, bis der Host das Spiel startet${punkte()}</div>`}
-          <button class="btn link" id="verlassenBtn">Raum verlassen</button>
+              <span class="name">${esc(s.name)}${s.id === z.hostId ? " 👑" : ""}</span>
+            </span>`).join("")}
         </div>
       </div>
-    </section>`;
+      <button class="btn zweit" id="teilenBtn">🔗 Einladen</button>
+    </section>
 
-  spiel.lobby($("#spielEinstellungen"), z, host);
+    <section class="kapitel">
+      <h2 class="kapitel-titel">${host ? "Wähle ein Spiel" : "Gewähltes Spiel"}</h2>
+      <div class="spiele-gitter zwei">
+        ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, { aktiv: z.spiel === id, deaktiviert: !host, alsKnopf: true })).join("")}
+      </div>
+    </section>
 
+    <section class="kapitel">
+      <h2 class="kapitel-titel">Einstellungen</h2>
+      <div class="abschnitte" id="spielEinstellungen">
+        ${abschnitte.map((a) => `
+          <details class="abschnitt" data-abschnitt="${a.id}" ${offen(a.id) ? "open" : ""}>
+            <summary>
+              <span class="abschnitt-icon">${a.icon}</span>
+              <span class="abschnitt-kopf"><b>${a.titel}</b><span>${a.info}</span></span>
+              <span class="pfeil" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="abschnitt-inhalt">${a.html}</div>
+          </details>`).join("")}
+      </div>
+    </section>
+
+    <div class="start-leiste">
+      ${host
+        ? `<button class="btn gross voll" id="startBtn">▶ ${spiel.titel} starten</button>
+           ${z.spieler.length < 2 ? '<div class="leise klein-text" style="text-align:center">Du kannst auch alleine spielen. Mit Freunden macht es noch mehr Spaß!</div>' : ""}`
+        : `<div class="warte">Warte, bis der Host das Spiel startet${punkte()}</div>`}
+      <button class="btn link" id="verlassenBtn">Raum verlassen</button>
+    </div>`;
+
+  if (host) spiel.binde?.($("#spielEinstellungen"), z);
+  $$(".abschnitt").forEach((d) => d.addEventListener("toggle", () => speicher(`offen-${z.spiel}-${d.dataset.abschnitt}`, d.open ? "1" : "0")));
   $("#teilenBtn").onclick = teilen;
   $("#avatarBtn")?.addEventListener("click", () => { Ton.klick(); socket.emit("avatarWechseln"); });
   $("#verlassenBtn").onclick = verlassen;
@@ -204,11 +259,8 @@ function zeigeLobby() {
   }
   if (!ersterAufbau) {
     scrollTo(0, scroll);
-    if (fokus && document.getElementById(fokus)) {
-      const el = document.getElementById(fokus);
-      el.value = fokusWert;
-      el.focus();
-    }
+    const el = fokus && document.getElementById(fokus);
+    if (el) { el.value = fokusWert; el.focus(); }
   }
 }
 
@@ -318,12 +370,21 @@ GN.podest = (key, { einheit = "Pkt." } = {}) => {
         <div class="podest-sockel">${i + 1}</div></div>`
     : `<div></div>`;
   const gleichstand = sortiert[1] && sortiert[0].punkte === sortiert[1].punkte;
-  const titel = gleichstand ? "🤝 Gleichstand an der Spitze!"
+  let rekordInfo = "";
+  if (sortiert.length === 1) {
+    const schluessel = `rekord-${z.spiel}`;
+    const alt = Number(speicher(schluessel) || 0);
+    const jetzt = sortiert[0].punkte;
+    if (jetzt > alt) { speicher(schluessel, String(jetzt)); rekordInfo = alt ? `🎉 Neuer Rekord! Vorher: ${alt.toLocaleString("de-DE")}` : "🎯 Dein erster Rekord ist gesetzt!"; }
+    else rekordInfo = `Dein Rekord: ${alt.toLocaleString("de-DE")} ${einheit}`;
+  }
+  const titel = sortiert.length === 1 ? `🏁 ${sortiert[0].punkte.toLocaleString("de-DE")} ${einheit}` : gleichstand ? "🤝 Gleichstand an der Spitze!"
     : sortiert[0]?.id === spielerId ? "🏆 Du hast gewonnen!" : `🏆 ${esc(sortiert[0]?.name || "")} gewinnt!`;
 
   app.innerHTML = `
     <div class="max-breite">
       <div class="sieger-titel">${titel}</div>
+      ${rekordInfo ? `<div class="rekord-info">${rekordInfo}</div>` : ""}
       <div class="podest">${platz(1)}${platz(0)}${platz(2)}</div>
       <div class="abschnitt-titel">Endstand</div>
       <div class="rangliste" id="rangliste"></div>

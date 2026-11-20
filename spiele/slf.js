@@ -6,6 +6,7 @@
 // =============================================================
 const KATALOG = require("../daten/slf/kategorien.json");
 const { pruefe, kiBereit, beginntMit } = require("./slf-pruefer");
+const istSolo = (raum) => Object.keys(raum.spieler).length === 1;
 
 const ALLE_KATEGORIEN = KATALOG.gruppen.flatMap((g) => g.kategorien);
 const NACH_ID = Object.fromEntries(ALLE_KATEGORIEN.map((k) => [k.id, k]));
@@ -18,7 +19,7 @@ const BUCHSTABEN_SCHWER = ["C", "J", "Q", "X", "Y"];
 const RAD_MS = 3600; // Glücksrad-Animation
 const STOPP_MS = 10_000; // Countdown nach "Stopp!"
 const NACHZUEGLER_MS = 1500; // Zeit, damit alle letzten Eingaben ankommen
-const PUNKTE = { allein: 20, einzigartig: 10, doppelt: 5, stern: 3 };
+const PUNKTE = { allein: 20, einzigartig: 10, doppelt: 5, stern: 3, solo: 10 };
 
 // ---------- Einstellungen ----------
 function kategorieAusId(id) {
@@ -33,7 +34,6 @@ function standardEinstellungen() {
     sekunden: 90,
     stopp: true,
     schwer: false,
-    ki: true,
   };
 }
 
@@ -63,7 +63,6 @@ function einstellungenSetzen(alt, e) {
   if (e.sekunden !== undefined) neu.sekunden = Math.min(300, Math.max(30, parseInt(e.sekunden) || 90));
   if (typeof e.stopp === "boolean") neu.stopp = e.stopp;
   if (typeof e.schwer === "boolean") neu.schwer = e.schwer;
-  if (typeof e.ki === "boolean") neu.ki = e.ki;
   return neu;
 }
 
@@ -106,7 +105,8 @@ function starteRunde(raum, ctx) {
   d.stoppVon = null;
   d.bewertung = null;
   d.bereit = new Set();
-  d.kiFehler = null;
+  d.hinweis = null;
+  d.tempoBonus = {};
   d.endetUm = Date.now() + RAD_MS;
   d.timer = setTimeout(() => {
     d.phase = "schreiben";
@@ -135,10 +135,10 @@ async function auswerten(raum, ctx) {
     antworten[k.id] = {};
     for (const s of Object.values(raum.spieler)) antworten[k.id][s.id] = (d.entwuerfe[s.id]?.[k.id] || "").trim();
   }
-  const { ergebnis, kiFehler } = await pruefe(d.buchstabe, d.kategorien, antworten, { ki: einst(raum).ki });
+  const { ergebnis, hinweis } = await pruefe(d.buchstabe, d.kategorien, antworten);
   if (raum.daten !== d || d.rundeNr !== rundeNr || d.phase !== "pruefen") return; // Spiel wurde inzwischen beendet
 
-  d.kiFehler = kiFehler;
+  d.hinweis = hinweis;
   d.bewertung = {};
   for (const k of d.kategorien) {
     d.bewertung[k.id] = {};
@@ -164,7 +164,8 @@ function berechnePunkte(raum) {
   const d = raum.daten;
   const runde = {};
   const proEintrag = {};
-  for (const s of Object.keys(raum.spieler)) runde[s] = 0;
+  for (const s of Object.keys(raum.spieler)) runde[s] = d.tempoBonus?.[s] || 0;
+  const solo = istSolo(raum);
   for (const k of d.kategorien) {
     proEintrag[k.id] = {};
     const eintraege = Object.entries(d.bewertung[k.id] || {});
@@ -175,7 +176,8 @@ function berechnePunkte(raum) {
       let p = 0;
       let art = "ungueltig";
       if (entscheidung(e).gilt) {
-        if (gueltig.length === 1) { p = PUNKTE.allein; art = "allein"; }
+        if (solo) { p = PUNKTE.solo; art = "gueltig"; }
+        else if (gueltig.length === 1) { p = PUNKTE.allein; art = "allein"; }
         else if (zaehler[e.auto.kanonisch] > 1) { p = PUNKTE.doppelt; art = "doppelt"; }
         else { p = PUNKTE.einzigartig; art = "einzigartig"; }
       }
@@ -249,6 +251,11 @@ module.exports = {
         if (!allesKorrektAusgefuellt(raum, spielerId)) return "Erst alle Kategorien mit dem richtigen Buchstaben ausfüllen!";
         d.phase = "stopp";
         d.stoppVon = spielerId;
+        // Solo: Runde endet sofort, übrige Zeit gibt Tempo-Bonus (1 Punkt pro 3 Sekunden)
+        if (ctx.onlineSpieler(raum).length === 1) {
+          d.tempoBonus[spielerId] = Math.floor(Math.max(0, d.endetUm - Date.now()) / 3000);
+          return zeitAbgelaufen(raum, ctx);
+        }
         if (d.endetUm - Date.now() > STOPP_MS) {
           clearTimeout(d.timer);
           d.endetUm = Date.now() + STOPP_MS;
@@ -339,8 +346,10 @@ module.exports = {
       restMs: d.endetUm ? Math.max(0, d.endetUm - Date.now()) : 0,
       stoppErlaubt: e.stopp,
       stoppVon: d.stoppVon,
-      kiAktiv: e.ki && kiBereit(),
-      kiFehler: d.kiFehler,
+      kiAktiv: kiBereit(),
+      hinweis: d.hinweis,
+      solo: istSolo(raum),
+      tempoBonus: d.tempoBonus || {},
       bewertung,
       rundenPunkte: rundenPunkte || (d.phase === "ende" ? d.letzteRunde : null),
       verlauf: d.verlauf,

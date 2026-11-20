@@ -19,75 +19,102 @@
   });
 
   // =============================================================
-  //  Lobby-Einstellungen
+  //  Lobby-Einstellungen (aufklappbare Abschnitte)
   // =============================================================
-  function lobby(el, z, host) {
+  function abschnitte(z, host) {
     const e = z.einstellungen;
     const m = meta();
     const dis = host ? "" : "disabled";
     const aktiv = new Set(e.kategorien.map((k) => k.id));
     const p = m.punkte;
+    const namen = e.kategorien.map((k) => k.name);
+    const katInfo = namen.slice(0, 4).join(", ") + (namen.length > 4 ? ` +${namen.length - 4}` : "");
+    const pruefung = m.kiVerfuegbar ? "🤖 KI (Claude) + 📚 Wortlisten" : "📚 Wortlisten + 🌐 Wikipedia";
 
-    el.innerHTML = `
-      <div class="abschnitt-titel">Kategorien <span class="normal">· ${e.kategorien.length}/${m.maxKategorien} · 3 bis 8 sind ideal</span></div>
-      <div class="gewaehlt-liste">
-        ${e.kategorien.map((k) => `
-          <span class="gewaehlt-chip">${k.emoji} ${esc(k.name)}${k.frei ? ' <span class="mini-tag">kreativ</span>' : ""}
-            ${host ? `<button data-weg="${k.id}" aria-label="${esc(k.name)} entfernen">✕</button>` : ""}</span>`).join("")}
-      </div>
-      ${host ? `
-        <div class="paket-reihe">
-          ${m.pakete.map((x) => `<button class="paket" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
-          <button class="paket" data-zufall="1">🎲 Zufall</button>
-        </div>
-        <details class="kat-auswahl" ${GN.speicher("slfAuswahlOffen") === "1" ? "open" : ""}>
-          <summary>Alle Kategorien anzeigen</summary>
-          ${m.gruppen.map((g) => `
-            <div class="gruppe-titel">${esc(g.name)}</div>
-            <div class="chip-reihe">
-              ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""}" data-kat="${k.id}">${k.emoji} ${esc(k.name)}</button>`).join("")}
-            </div>`).join("")}
-        </details>
-        <form class="eigene-zeile" id="eigeneForm" autocomplete="off">
-          <input class="feld" id="eigeneInput" maxlength="32" placeholder="Eigene Kategorie, z. B. „Etwas Rundes“" />
-          <label class="check"><input type="checkbox" id="eigeneFrei"> kreativ</label>
-          <button class="btn zweit" type="submit">＋</button>
-        </form>
-        <p class="leise klein-text">„kreativ“ heißt: Jede passende Antwort zählt, z. B. bei Sprüchen oder Ausreden.</p>` : ""}
+    return [
+      {
+        id: "kategorien", icon: "🗂️", titel: `Kategorien (${e.kategorien.length})`, info: esc(katInfo),
+        html: `
+          <div class="gewaehlt-liste">
+            ${e.kategorien.map((k) => `
+              <span class="gewaehlt-chip">${k.emoji} ${esc(k.name)}${k.frei ? ' <span class="mini-tag">kreativ</span>' : ""}
+                ${host ? `<button data-weg="${k.id}" aria-label="${esc(k.name)} entfernen">✕</button>` : ""}</span>`).join("")}
+          </div>
+          <p class="leise klein-text">3 bis 8 Kategorien sind ideal, maximal ${m.maxKategorien}.</p>
+          ${host ? `
+            <div class="unter-titel">Schnellauswahl</div>
+            <div class="paket-reihe">
+              ${m.pakete.map((x) => `<button class="paket" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
+              <button class="paket" data-zufall="1">🎲 Zufall</button>
+            </div>
+            ${m.gruppen.map((g) => `
+              <div class="unter-titel">${esc(g.name)}</div>
+              <div class="chip-reihe">
+                ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""}" data-kat="${k.id}">${k.emoji} ${esc(k.name)}</button>`).join("")}
+              </div>`).join("")}
+            <div class="unter-titel">Eigene Kategorie</div>
+            <form class="eigene-zeile" id="eigeneForm" autocomplete="off">
+              <input class="feld" id="eigeneInput" maxlength="32" placeholder="z. B. „Etwas Rundes“" />
+              <label class="check"><input type="checkbox" id="eigeneFrei"> kreativ</label>
+              <button class="btn zweit" type="submit">＋</button>
+            </form>
+            <p class="leise klein-text">„kreativ“ heißt: Jede passende Antwort zählt, z. B. bei Sprüchen oder Ausreden.</p>` : ""}`,
+      },
+      {
+        id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min"} pro Runde`,
+        html: `<div class="einstellungs-zeile">
+          <div><div class="unter-titel">Runden</div>
+            <div class="segment">${[3, 5, 8, 10].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
+          <div><div class="unter-titel">Zeit pro Runde</div>
+            <div class="segment">${[60, 90, 120, 180].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n < 120 ? n + "s" : n / 60 + " min"}</button>`).join("")}</div></div>
+        </div>`,
+      },
+      {
+        id: "regeln", icon: "⚙️", titel: "Regeln",
+        info: `Stopp ${e.stopp ? "an" : "aus"} · Schwere Buchstaben ${e.schwer ? "an" : "aus"}`,
+        html: `<div class="schalter-liste">
+          ${schalter("stopp", e.stopp, "🛑 Stopp-Knopf", "Wer alles ausgefüllt hat, kann Stopp drücken. Dann haben alle noch 10 Sekunden. Solo endet die Runde sofort und es gibt Tempo-Bonus.", dis)}
+          ${schalter("schwer", e.schwer, "🧨 Schwere Buchstaben", "C, J, Q, X und Y kommen auch vor.", dis)}
+        </div>`,
+      },
+      {
+        id: "punkte", icon: "🏆", titel: "Punkte & Prüfung", info: `20 · 10 · 5 · ⭐ +${p.stern} · ${pruefung}`,
+        html: `
+          <div class="punkte-info">
+            <div><b>${p.allein}</b><span>Nur du hast eine gültige Antwort</span></div>
+            <div><b>${p.einzigartig}</b><span>Deine Antwort hat sonst keiner</span></div>
+            <div><b>${p.doppelt}</b><span>Jemand hat dasselbe</span></div>
+            <div><b>+${p.stern}</b><span>pro ⭐ für kreative Antworten</span></div>
+          </div>
+          <p class="leise klein-text"><b>Solo:</b> ${p.solo} Punkte pro gültiger Antwort und Tempo-Bonus, wenn du früh Stopp drückst.</p>
+          <div class="pruef-info">
+            <b>So wird geprüft:</b>
+            <ol>
+              <li>📏 Regeln: Anfangsbuchstabe, leer, Buchstabensalat</li>
+              <li>📚 Wortlisten mit Tippfehler-Toleranz</li>
+              ${m.kiVerfuegbar
+                ? "<li>🤖 KI-Schiedsrichter (Claude) prüft alles und erkennt gleiche Antworten</li>"
+                : "<li>🌐 Wikipedia: Gibt es das wirklich, und passt es zur Kategorie?</li>"}
+              <li>👍👎 Am Ende stimmt ihr ab, der Host 👑 hat das letzte Wort</li>
+            </ol>
+          </div>`,
+      },
+    ];
+  }
 
-      <div class="einstellungs-zeile">
-        <div><div class="abschnitt-titel">Runden</div>
-          <div class="segment">${[3, 5, 8, 10].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
-        <div><div class="abschnitt-titel">Zeit pro Runde</div>
-          <div class="segment">${[60, 90, 120, 180].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n < 120 ? n + "s" : n / 60 + " min"}</button>`).join("")}</div></div>
-      </div>
-
-      <div class="abschnitt-titel">Regeln</div>
-      <div class="schalter-liste">
-        ${schalter("stopp", e.stopp, "🛑 Stopp-Knopf", "Wer alles ausgefüllt hat, kann Stopp drücken. Dann haben alle noch 10 Sekunden.", dis)}
-        ${schalter("schwer", e.schwer, "🧨 Schwere Buchstaben", "C, J, Q, X und Y kommen auch vor.", dis)}
-        ${schalter("ki", e.ki && m.kiVerfuegbar, "🤖 KI-Schiedsrichter", m.kiVerfuegbar
-          ? "Claude prüft jede Antwort und erklärt kurz, warum sie zählt oder nicht."
-          : "Nicht eingerichtet: Es wird mit Wortlisten geprüft. (Anleitung im README)", m.kiVerfuegbar ? dis : "disabled")}
-      </div>
-
-      <div class="punkte-info">
-        <div><b>${p.allein}</b><span>Nur du hast eine gültige Antwort</span></div>
-        <div><b>${p.einzigartig}</b><span>Deine Antwort hat sonst keiner</span></div>
-        <div><b>${p.doppelt}</b><span>Jemand hat dasselbe</span></div>
-        <div><b>+${p.stern}</b><span>pro ⭐ für kreative Antworten</span></div>
-      </div>`;
-
-    if (!host) return;
+  function binde(el, z) {
+    const e = z.einstellungen;
+    const m = meta();
+    const aktiv = new Set(e.kategorien.map((k) => k.id));
     $$("[data-weg]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ umschalten: b.dataset.weg })));
     $$("[data-kat]", el).forEach((b) => (b.onclick = () => {
       if (!aktiv.has(b.dataset.kat) && e.kategorien.length >= m.maxKategorien) return GN.toast(`Maximal ${m.maxKategorien} Kategorien.`);
       GN.einstellungen({ umschalten: b.dataset.kat });
     }));
     $$("[data-paket]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ paket: b.dataset.paket })));
-    $("[data-zufall]", el).onclick = () => GN.einstellungen({ zufall: true });
-    $(".kat-auswahl", el).addEventListener("toggle", (ev) => GN.speicher("slfAuswahlOffen", ev.target.open ? "1" : "0"));
-    $("#eigeneForm", el).onsubmit = (ev) => {
+    $("[data-zufall]", el)?.addEventListener("click", () => GN.einstellungen({ zufall: true }));
+    const form = $("#eigeneForm", el);
+    if (form) form.onsubmit = (ev) => {
       ev.preventDefault();
       const name = $("#eigeneInput").value.trim();
       if (name.length < 2) return GN.toast("Der Name ist zu kurz.");
@@ -304,9 +331,10 @@
     Ton.abgeben();
     app.innerHTML = `
       <div class="pruefen-buehne">
-        <div class="lupe">${z.kiAktiv ? "🤖" : "📚"}</div>
-        <h2>${z.kiAktiv ? "Die KI prüft eure Antworten" : "Antworten werden geprüft"}${GN.wartePunkte()}</h2>
-        <p class="leise">${z.kiAktiv ? "Gibt es das wirklich? Passt es zur Kategorie? Hat jemand dasselbe?" : "Wortlisten, Anfangsbuchstaben und doppelte Antworten"}</p>
+        <div class="lupe">${z.kiAktiv ? "🤖" : "🔎"}</div>
+        <h2>${z.kiAktiv ? `Die KI prüft ${z.solo ? "deine" : "eure"} Antworten` : "Der Schiedsrichter prüft"}${GN.wartePunkte()}</h2>
+        <p class="leise">Gibt es das wirklich? Passt es zur Kategorie? Hat jemand dasselbe?</p>
+        <div class="pruef-schritte"><span>📏 Regeln</span><span>📚 Wortlisten</span><span>${z.kiAktiv ? "🤖 KI" : "🌐 Wikipedia"}</span></div>
         <div class="scan"><span></span></div>
       </div>`;
   }
@@ -314,8 +342,8 @@
   // =============================================================
   //  4) Bewerten & Abstimmen
   // =============================================================
-  const QUELLE = { liste: "📚", ki: "🤖", regel: "📏", abstimmung: "🗳️", host: "👑" };
-  const ART = { allein: "nur du!", einzigartig: "einzigartig", doppelt: "doppelt", ungueltig: "" };
+  const QUELLE = { liste: "📚", ki: "🤖", wiki: "🌐", regel: "📏", abstimmung: "🗳️", host: "👑" };
+  const ART = { allein: "nur du!", einzigartig: "einzigartig", doppelt: "doppelt", gueltig: "gültig", ungueltig: "" };
 
   function zeigeBewerten(key, neu) {
     const z = GN.zustand;
@@ -337,10 +365,12 @@
         <span></span>
       </div>
       <div class="hinweis-box">
-        <span>👍 👎 Stimmt ab, wenn ihr eine Entscheidung anders seht. Die Mehrheit gewinnt.
-        ⭐ gibt +${meta().punkte.stern} für besonders kreative Antworten.${host ? " Als Host 👑 kannst du jede Antwort endgültig entscheiden." : ""}</span>
+        <span>${z.solo
+          ? "Solo: Jede gültige Antwort gibt 10 Punkte. Der Schiedsrichter lag falsch? Mit 👑✓ / 👑✗ korrigierst du ihn."
+          : `👍 👎 Stimmt ab, wenn ihr eine Entscheidung anders seht. Die Mehrheit gewinnt. ⭐ gibt +${meta().punkte.stern} für besonders kreative Antworten.${host ? " Als Host 👑 kannst du jede Antwort endgültig entscheiden." : ""}`}</span>
       </div>
-      ${z.kiFehler ? `<div class="hinweis-box warnung">⚠️ ${esc(z.kiFehler)}</div>` : ""}
+      ${z.hinweis ? `<div class="hinweis-box warnung">⚠️ ${esc(z.hinweis)}</div>` : ""}
+      ${z.tempoBonus?.[GN.ich] ? `<div class="hinweis-box bonus">⚡ Tempo-Bonus: <b>+${z.tempoBonus[GN.ich]}</b> Punkte, weil du früh fertig warst!</div>` : ""}
       <div class="bewerten-layout">
         <div class="kategorie-liste">
           ${z.bewertung.map((k, i) => kategorieKarte(k, i, neu, host)).join("")}
@@ -349,8 +379,8 @@
           <div class="abschnitt-titel" style="margin-top:0">Punktestand</div>
           <div class="rangliste" id="rangliste"></div>
           <div class="start-leiste">
-            <div class="bereit-reihe">${z.spieler.filter((s) => s.online).map((s) => `<span class="status ${s.bereit ? "fertig" : ""}" title="${esc(s.name)}"><span class="avatar">${s.avatar}</span></span>`).join("")}</div>
-            <div class="leise klein-text" style="text-align:center">${bereitAnzahl}/${online} sind fertig mit Prüfen</div>
+            ${z.solo ? "" : `<div class="bereit-reihe">${z.spieler.filter((s) => s.online).map((s) => `<span class="status ${s.bereit ? "fertig" : ""}" title="${esc(s.name)}"><span class="avatar">${s.avatar}</span></span>`).join("")}</div>
+            <div class="leise klein-text" style="text-align:center">${bereitAnzahl}/${online} sind fertig mit Prüfen</div>`}
             ${host
               ? `<button class="btn gross voll" id="weiterBtn">${letzte ? "🏆 Zur Siegerehrung" : "Nächste Runde ➜"}</button>`
               : `<button class="btn ${ichBereit ? "zweit" : ""} gross voll" id="bereitBtn">${ichBereit ? "↩ Doch nicht fertig" : "✅ Fertig geprüft"}</button>`}
@@ -425,8 +455,11 @@
   GN.spiele.slf = {
     icon: "🌍",
     titel: "Stadt Land Fluss",
-    kurz: "Der Klassiker mit eigenen Kategorien und KI-Schiedsrichter.",
-    lobby,
+    kurz: "Der Klassiker mit eigenen Kategorien und schlauem Schiedsrichter.",
+    beschreibung: "Der Klassiker neu gedacht: Glücksrad, Stopp-Knopf, eigene Kategorien und ein Schiedsrichter, der Antworten wirklich prüft.",
+    tags: ["🗂️ 39 Kategorien", "✏️ Eigene Kategorien", "🌐 Auto-Prüfung"],
+    abschnitte,
+    binde,
     zeige,
   };
 })();

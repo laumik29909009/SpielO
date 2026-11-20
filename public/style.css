@@ -87,7 +87,7 @@ img { display: block; }
   cursor: pointer; font-size: 1.1rem;
 }
 
-#app { max-width: 980px; margin: 0 auto; padding: 4px 16px 64px; }
+#app { max-width: 980px; margin: 0 auto; padding: 4px 16px 24px; }
 .versteckt { display: none !important; }
 
 /* ---------- Grundelemente ---------- */
@@ -653,3 +653,126 @@ body.wackeln #app { animation: wackeln 0.45s; }
 .eintrag.gilt-nicht .pkt, .eintrag.leer .pkt { color: var(--leise); }
 .bereit-reihe { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .bereit-reihe .avatar { width: 34px; height: 34px; font-size: 1.1rem; }
+
+/* =============================================================
+   SpielO: Logo
+   ============================================================= */
+.spielo-logo { display: inline-flex; align-items: center; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+.spielo-logo .b { display: inline-block; }
+.spielo-logo .o-chip { position: relative; display: inline-block; width: 0.78em; height: 0.78em; margin-left: 0.04em; }
+.spielo-logo .o-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(#c58bff, #ff5fa8, #ffcb47, #2ee6c5, #5cc8ff, #c58bff);
+  -webkit-mask: radial-gradient(circle, transparent 47%, #000 49%); mask: radial-gradient(circle, transparent 47%, #000 49%);
+  animation: drehen 5s linear infinite;
+}
+.spielo-logo .o-punkt {
+  position: absolute; width: 22%; height: 22%; left: 39%; top: 39%; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0.25em rgba(255, 255, 255, 0.8);
+}
+@keyframes drehen { to { transform: rotate(360deg); } }
+.spielo-logo.riesig { font-size: clamp(4rem, 19vw, 9rem); }
+.spielo-logo.riesig .b, .spielo-logo.riesig .o-chip { animation: buchstabe-rein 0.7s cubic-bezier(.2,1.6,.4,1) both; animation-delay: calc(var(--i) * 70ms); }
+.spielo-logo.riesig .o-chip { animation-name: chip-rein; }
+.spielo-logo.riesig .b:hover { animation: huepfen 0.5s; }
+@keyframes buchstabe-rein { from { transform: translateY(0.5em) scale(0.6); opacity: 0; } }
+@keyframes chip-rein { from { transform: scale(0) rotate(-180deg); opacity: 0; } }
+@keyframes huepfen { 40% { transform: translateY(-0.15em); } }
+.spielo-logo.klein { font-size: 1.45rem; }
+.logo { display: flex; align-items: center; }
+
+/* =============================================================
+   SpielO: Startseite
+   ============================================================= */
+.hero-start { text-align: center; padding: clamp(24px, 6vw, 64px) 0 10px; }
+.hero-logo { margin: 0; text-shadow: 0 10px 40px rgba(197, 139, 255, 0.35); }
+.hero-slogan { font-size: clamp(1.05rem, 3.6vw, 1.35rem); color: var(--leise); margin: 14px auto 0; max-width: 32ch; }
+.hero-fakten { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+.hero-fakten span { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 0.9rem; }
+
+.kapitel { margin-top: clamp(28px, 5vw, 44px); }
+.kapitel-titel { display: block; font-size: clamp(1.25rem, 4vw, 1.6rem); font-weight: 800; margin: 0 0 14px; }
+.name-kapitel { max-width: 460px; margin-left: auto; margin-right: auto; text-align: center; }
+.name-feld { text-align: center; font-size: 1.3rem !important; padding: 16px !important; }
+.fehlt { animation: wackeln 0.45s; border-color: var(--rot) !important; }
+.einladung { background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 16%, transparent), var(--flaeche)); border: 1px solid var(--gold); border-radius: var(--radius); padding: 18px; max-width: 460px; margin-left: auto; margin-right: auto; text-align: center; }
+.kapitel .beitreten-zeile { max-width: 460px; }
+.kapitel:not(.einladung) > .beitreten-zeile { margin: 0; }
+
+.spiele-gitter { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.spiel-gross {
+  display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden; color: var(--text);
+  background: var(--flaeche); border: 2px solid color-mix(in srgb, var(--gold) 30%, var(--rand)); border-radius: 24px;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s; font: inherit;
+}
+button.spiel-gross { cursor: pointer; }
+.spiel-gross:hover:not(:disabled):not(.bald) { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); border-color: var(--gold); }
+.spiel-gross.aktiv { border-color: var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 25%, transparent); }
+.spiel-gross:disabled { cursor: default; }
+.spiel-gross:disabled:not(.aktiv) { opacity: 0.55; }
+.spiel-bild {
+  position: relative; display: grid; place-items: center; height: clamp(120px, 22vw, 170px);
+  background:
+    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--gold) 45%, transparent), transparent 55%),
+    radial-gradient(circle at 80% 90%, color-mix(in srgb, var(--gold-2) 40%, transparent), transparent 55%),
+    var(--flaeche-2);
+}
+.spiel-icon { font-size: clamp(3.6rem, 10vw, 5rem); filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35)); transition: transform 0.3s; }
+.spiel-gross:hover .spiel-icon { transform: scale(1.1) rotate(-6deg); }
+.gewaehlt-marke { position: absolute; top: 12px; right: 12px; background: var(--gold); color: var(--gold-text); font-weight: 800; font-size: 0.8rem; padding: 4px 10px; border-radius: 999px; }
+.spiel-text { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 18px; flex: 1; }
+.spiel-titel { font-size: 1.4rem; font-weight: 900; color: var(--gold); }
+.spiel-beschreibung { color: var(--leise); line-height: 1.4; }
+.spiel-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.spiel-tags span { font-size: 0.78rem; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: var(--flaeche-2); }
+.spiel-text .btn { margin-top: auto; }
+.spiel-gross.bald { border-style: dashed; border-color: var(--rand-stark); opacity: 0.65; }
+.spiel-gross.bald .spiel-titel { color: var(--text); }
+
+/* =============================================================
+   SpielO: Lobby
+   ============================================================= */
+.raum-kopf { display: grid; gap: 16px; align-items: center; grid-template-columns: auto 1fr auto; }
+@media (max-width: 700px) { .raum-kopf { grid-template-columns: 1fr auto; } .raum-spieler { grid-column: 1 / -1; grid-row: 2; } }
+.raum-code-block { display: grid; }
+.raum-code-block .code-gross { font-size: 2.4rem; padding-left: 0; letter-spacing: 0.16em; }
+.raum-spieler { display: grid; gap: 8px; min-width: 0; }
+.spieler-reihe { display: flex; flex-wrap: wrap; gap: 8px; }
+.spieler-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--flaeche-2); border: 1px solid var(--rand); border-radius: 999px; padding: 4px 12px 4px 4px; animation: reinploppen 0.3s; }
+.spieler-chip .avatar { width: 34px; height: 34px; font-size: 1.15rem; }
+.spieler-chip .name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+.spieler-chip.ich { border-color: var(--gold); }
+.spieler-chip.offline { opacity: 0.4; }
+.spiele-gitter.zwei .spiel-bild { height: clamp(96px, 16vw, 130px); }
+.spiele-gitter.zwei .spiel-icon { font-size: clamp(3rem, 8vw, 4rem); }
+
+.abschnitte { display: grid; gap: 10px; }
+.abschnitt { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 18px; overflow: hidden; }
+.abschnitt[open] { border-color: color-mix(in srgb, var(--gold) 40%, var(--rand)); }
+.abschnitt summary { list-style: none; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; cursor: pointer; }
+.abschnitt summary::-webkit-details-marker { display: none; }
+.abschnitt-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.3rem; background: var(--flaeche-2); }
+.abschnitt-kopf { display: grid; min-width: 0; }
+.abschnitt-kopf b { font-size: 1.05rem; }
+.abschnitt-kopf span { color: var(--leise); font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pfeil { font-size: 1.4rem; color: var(--leise); transition: transform 0.2s; line-height: 1; }
+.abschnitt[open] .pfeil { transform: rotate(180deg); }
+.abschnitt-inhalt { padding: 4px 16px 18px; animation: einblenden 0.25s; }
+.unter-titel { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--leise); margin: 16px 0 8px; }
+.abschnitt-inhalt > .unter-titel:first-child, .abschnitt-inhalt .einstellungs-zeile .unter-titel { margin-top: 6px; }
+.pruef-info { background: var(--flaeche-2); border-radius: 14px; padding: 12px 14px; margin-top: 12px; font-size: 0.9rem; }
+.pruef-info ol { margin: 6px 0 0; padding-left: 20px; color: var(--leise); display: grid; gap: 3px; }
+.pruef-schritte { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.pruef-schritte span { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px; padding: 6px 12px; font-weight: 700; animation: blinken 1.5s infinite; }
+.pruef-schritte span:nth-child(2) { animation-delay: 0.5s; }
+.pruef-schritte span:nth-child(3) { animation-delay: 1s; }
+.hinweis-box.bonus { border-color: rgba(255, 209, 102, 0.5); color: #ffe3a3; }
+.rekord-info { text-align: center; color: var(--gold); font-weight: 800; margin-top: 6px; }
+
+/* =============================================================
+   SpielO: Fußzeile
+   ============================================================= */
+.seiten-fuss { max-width: 980px; margin: 0 auto; padding: 28px 16px 36px; text-align: center; color: var(--leise); font-size: 0.85rem; display: grid; gap: 4px; }
+.seiten-fuss .dev { font-weight: 600; }
+.seiten-fuss .dev b { background: linear-gradient(135deg, var(--gold), var(--gold-2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 900; letter-spacing: 0.02em; }
+.seiten-fuss .klein { opacity: 0.7; font-size: 0.75rem; }

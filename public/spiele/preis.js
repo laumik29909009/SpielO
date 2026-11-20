@@ -22,34 +22,48 @@
   const app = GN.app;
 
   // =============================================================
-  //  Lobby-Einstellungen
+  //  Lobby-Einstellungen (aufklappbare Abschnitte)
   // =============================================================
-  function lobby(el, z, host) {
+  function abschnitte(z, host) {
     const e = z.einstellungen;
     const dis = host ? "" : "disabled";
-    const anzahl = meta().kategorien.filter((k) => e.kategorien.includes(k.id)).reduce((s, k) => s + k.anzahl, 0);
-    el.innerHTML = `
-      <div class="abschnitt-titel">Spielmodus</div>
-      <div class="modus-gitter">
-        ${Object.entries(MODI).map(([id, m]) => `
-          <button class="modus-karte ${e.modus === id ? "aktiv" : ""}" data-modus="${id}" ${dis}>
-            <div class="icon">${m.icon}</div><div class="titel">${m.titel}</div><div class="text">${m.text}</div>
-          </button>`).join("")}
-      </div>
-      <div class="abschnitt-titel">Kategorien <span class="normal">· ${anzahl} Fragen</span></div>
-      <div class="kat-gitter">
-        ${meta().kategorien.map((k) => `
-          <button class="kat-chip ${e.kategorien.includes(k.id) ? "aktiv" : ""}" data-kat="${k.id}" title="${esc(k.beschreibung)}" ${dis}>
-            <span class="e">${k.emoji}</span><span><div class="n">${esc(k.name)}</div><div class="z">${k.anzahl} Fragen</div></span>
-          </button>`).join("")}
-      </div>
-      <div class="einstellungs-zeile">
-        <div><div class="abschnitt-titel">Runden</div>
-          <div class="segment">${[5, 10, 15, 20].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
-        <div><div class="abschnitt-titel">Zeit pro Frage</div>
-          <div class="segment">${[20, 30, 45, 60].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n}s</button>`).join("")}</div></div>
-      </div>`;
-    if (!host) return;
+    const kats = meta().kategorien;
+    const anzahl = kats.filter((k) => e.kategorien.includes(k.id)).reduce((s, k) => s + k.anzahl, 0);
+    const m = MODI[e.modus];
+    return [
+      {
+        id: "modus", icon: "🎮", titel: "Spielmodus", info: `${m.icon} ${m.titel}`,
+        html: `<div class="modus-gitter">
+          ${Object.entries(MODI).map(([id, x]) => `
+            <button class="modus-karte ${e.modus === id ? "aktiv" : ""}" data-modus="${id}" ${dis}>
+              <div class="icon">${x.icon}</div><div class="titel">${x.titel}</div><div class="text">${x.text}</div>
+            </button>`).join("")}
+        </div>`,
+      },
+      {
+        id: "kategorien", icon: "🗂️", titel: "Kategorien",
+        info: `${e.kategorien.length === kats.length ? "Alle" : `${e.kategorien.length} von ${kats.length}`} · ${anzahl} Fragen`,
+        html: `<div class="kat-gitter">
+          ${kats.map((k) => `
+            <button class="kat-chip ${e.kategorien.includes(k.id) ? "aktiv" : ""}" data-kat="${k.id}" title="${esc(k.beschreibung)}" ${dis}>
+              <span class="e">${k.emoji}</span><span><div class="n">${esc(k.name)}</div><div class="z">${k.anzahl} Fragen</div></span>
+            </button>`).join("")}
+        </div>`,
+      },
+      {
+        id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden} s pro Frage`,
+        html: `<div class="einstellungs-zeile">
+          <div><div class="unter-titel">Runden</div>
+            <div class="segment">${[5, 10, 15, 20].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
+          <div><div class="unter-titel">Zeit pro Frage</div>
+            <div class="segment">${[20, 30, 45, 60].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n}s</button>`).join("")}</div></div>
+        </div>`,
+      },
+    ];
+  }
+
+  function binde(el, z) {
+    const e = z.einstellungen;
     $$("[data-modus]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ modus: b.dataset.modus })));
     $$("[data-runden]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ runden: +b.dataset.runden })));
     $$("[data-sek]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ sekunden: +b.dataset.sek })));
@@ -473,7 +487,10 @@
     icon: "💰",
     titel: "Preis-Schätzer",
     kurz: "Was kostet ein Windrad? 4 Modi, 81 Fragen.",
-    lobby,
+    beschreibung: "Was kostet ein Windrad, ein Bugatti oder 1 Gramm Antimaterie? Schätzt, sortiert und zockt um Punkte.",
+    tags: ["💰 81 Fragen", "🎮 4 Modi", "🖼️ Echte Fotos"],
+    abschnitte,
+    binde,
     zeige,
   };
 })();
