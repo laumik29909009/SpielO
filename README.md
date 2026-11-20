@@ -1,4 +1,4 @@
-# 🎲 Game Night
+# 🎲 SpielO
 
 Eure eigene Spieleseite für bis zu 10 Leute: Ein Raum, ein Link, und der Host wählt das Spiel.
 

@@ -7,7 +7,7 @@
 
 // ★ Hier kannst du die Seite personalisieren ★
 const SEITE = {
-  name: "GAME NIGHT",
+  name: "SpielO",
   slogan: "Euer Spieleabend im Browser. Ein Link, alle sind dabei.",
 };
 
@@ -97,7 +97,7 @@ function zeigeStart() {
   app.innerHTML = `
     <section class="start">
       <div class="hero">
-        <h1>${esc(SEITE.name).replace(" ", "<br><span class='gold'>")}</span></h1>
+        <h1>Willkommen bei<br><span class="gold">${esc(SEITE.name)}</span></h1>
         <p>${esc(SEITE.slogan)}</p>
         <div class="spiel-vorschauen">${karten}
           <div class="spiel-vorschau bald"><span class="icon">✨</span><div><div class="titel">Bald mehr</div><div class="text">Weitere Spiele kommen</div></div></div>

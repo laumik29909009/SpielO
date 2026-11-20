@@ -70,7 +70,7 @@ img { display: block; }
   display: flex; align-items: center; justify-content: space-between;
   max-width: 980px; margin: 0 auto; padding: 14px 16px;
 }
-.logo { font-weight: 900; letter-spacing: 0.06em; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+.logo { font-weight: 900; letter-spacing: 0.02em; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
 .logo .punkt { color: var(--gold); }
 .muenze {
   display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
