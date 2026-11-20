@@ -1,0 +1,19 @@
+{
+  "name": "preis-schaetzer",
+  "version": "1.0.0",
+  "description": "Online-Partyspiel: Wer schätzt Preise am besten?",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.22.3",
+    "socket.io": "^4.8.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

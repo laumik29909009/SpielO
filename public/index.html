@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preis-Schätzer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="app">
+    <header class="kopf">
+      <h1>💰 Preis-Schätzer</h1>
+      <span id="raumAnzeige" class="raum-chip versteckt"></span>
+    </header>
+
+    <!-- ===== Start ===== -->
+    <section id="start" class="screen">
+      <p class="untertitel">Wer schätzt am besten? Erstelle einen Raum oder tritt einem bei.</p>
+      <label>Dein Name
+        <input id="nameInput" maxlength="16" placeholder="z. B. Laurin" autocomplete="off" />
+      </label>
+      <button id="erstellenBtn" class="btn gross">Neuen Raum erstellen</button>
+      <div class="trenner"><span>oder</span></div>
+      <label>Raum-Code
+        <input id="codeInput" maxlength="4" placeholder="ABCD" autocomplete="off" class="code-input" />
+      </label>
+      <button id="beitretenBtn" class="btn zweit gross">Beitreten</button>
+    </section>
+
+    <!-- ===== Lobby ===== -->
+    <section id="lobby" class="screen versteckt">
+      <div class="karte zentriert">
+        <div class="klein">Raum-Code</div>
+        <div id="lobbyCode" class="riesen-code"></div>
+        <button id="linkBtn" class="btn zweit">🔗 Einladungslink kopieren</button>
+      </div>
+      <h2>Spieler</h2>
+      <ul id="lobbySpieler" class="spielerliste"></ul>
+      <div id="hostBereich" class="versteckt">
+        <div class="einstellungen">
+          <label>Runden <input id="rundenInput" type="number" min="1" max="20" /></label>
+          <label>Sekunden pro Runde <input id="sekundenInput" type="number" min="10" max="120" step="5" /></label>
+        </div>
+        <button id="startBtn" class="btn gross">▶ Spiel starten</button>
+      </div>
+      <p id="warteHinweis" class="hinweis versteckt">Warte, bis der Host das Spiel startet …</p>
+      <button id="verlassenBtn" class="btn link">Raum verlassen</button>
+    </section>
+
+    <!-- ===== Schätzen ===== -->
+    <section id="schaetzen" class="screen versteckt">
+      <div class="runden-info" id="rundenInfo"></div>
+      <div class="zeitleiste"><div id="zeitBalken"></div></div>
+      <div class="karte produkt">
+        <div id="pEmoji" class="emoji"></div>
+        <div id="pName" class="produkt-name"></div>
+        <div id="pInfo" class="produkt-info"></div>
+      </div>
+      <form id="tippForm" class="tipp-form">
+        <div class="euro-feld">
+          <input id="tippInput" inputmode="decimal" placeholder="0,00" autocomplete="off" />
+          <span>€</span>
+        </div>
+        <button class="btn gross" type="submit">Tipp abgeben</button>
+      </form>
+      <p id="tippBestaetigt" class="hinweis versteckt"></p>
+      <ul id="tippStatus" class="status-chips"></ul>
+    </section>
+
+    <!-- ===== Auflösung / Ende ===== -->
+    <section id="aufloesung" class="screen versteckt">
+      <div class="runden-info" id="aufloesungInfo"></div>
+      <div class="karte produkt">
+        <div id="aEmoji" class="emoji"></div>
+        <div id="aName" class="produkt-name"></div>
+        <div class="klein">Der echte Preis:</div>
+        <div id="aPreis" class="preis"></div>
+      </div>
+      <h2>Tipps dieser Runde</h2>
+      <ul id="ergebnisListe" class="ergebnisliste"></ul>
+      <h2 id="standTitel">Punktestand</h2>
+      <ol id="punkteListe" class="punkteliste"></ol>
+      <button id="weiterBtn" class="btn gross versteckt">Nächste Runde ➜</button>
+      <div id="endeButtons" class="versteckt">
+        <button id="nochmalBtn" class="btn gross">🔁 Nochmal spielen</button>
+        <button id="lobbyBtn" class="btn zweit">Zurück zur Lobby</button>
+      </div>
+      <p id="weiterHinweis" class="hinweis versteckt">Warte auf den Host …</p>
+    </section>
+
+    <div id="toast" class="toast versteckt"></div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
