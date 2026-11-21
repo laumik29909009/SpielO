@@ -32,11 +32,15 @@
 
   <main id="app"></main>
 
-  <footer class="seiten-fuss">
-    <span>SpielO by laumik</span>
-    <span class="klein">Bilder: Wikipedia / Wikimedia Commons</span>
-  </footer>
 
+  <div id="sparmodus" class="sparmodus versteckt" role="button" tabindex="0" aria-label="Weiterspielen">
+    <div class="spar-karte">
+      <div class="spar-icon">💤</div>
+      <b>Pausiert</b>
+      <span>Damit der Server Pause machen kann, wurde die Verbindung getrennt.</span>
+      <span class="btn">Tippen zum Weiterspielen</span>
+    </div>
+  </div>
   <div id="intro" class="intro versteckt" aria-live="polite"></div>
   <div id="toast" class="toast versteckt" role="status"></div>
   <canvas id="konfetti" aria-hidden="true"></canvas>

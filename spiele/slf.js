@@ -34,7 +34,6 @@ function standardEinstellungen() {
     sekunden: 90,
     stopp: true,
     schwer: false,
-    ue18: false,
   };
 }
 
@@ -43,7 +42,7 @@ function einstellungenSetzen(alt, e) {
   if (typeof e.umschalten === "string") {
     const i = neu.kategorien.findIndex((k) => k.id === e.umschalten);
     if (i >= 0) neu.kategorien.splice(i, 1);
-    else if (NACH_ID[e.umschalten] && (!NACH_ID[e.umschalten].ue18 || neu.ue18) && neu.kategorien.length < MAX_KATEGORIEN) {
+    else if (NACH_ID[e.umschalten] && neu.kategorien.length < MAX_KATEGORIEN) {
       neu.kategorien.push(kategorieAusId(e.umschalten));
     }
   }
@@ -56,21 +55,16 @@ function einstellungenSetzen(alt, e) {
   }
   if (typeof e.paket === "string") {
     const p = KATALOG.pakete.find((x) => x.id === e.paket);
-    if (p && (!p.ue18 || neu.ue18)) neu.kategorien = p.kategorien.map(kategorieAusId);
+    if (p) neu.kategorien = p.kategorien.map(kategorieAusId);
   }
   if (e.zufall) {
-    const pool = ALLE_KATEGORIEN.filter((k) => !k.ue18 || neu.ue18).map((k) => k.id).sort(() => Math.random() - 0.5);
+    const pool = ALLE_KATEGORIEN.filter((k) => !k.ue18).map((k) => k.id).sort(() => Math.random() - 0.5); // Zufall nie Ü18
     neu.kategorien = ["stadt", "land", ...pool.filter((id) => id !== "stadt" && id !== "land").slice(0, 4)].map(kategorieAusId);
   }
   if (e.runden !== undefined) neu.runden = Math.min(15, Math.max(1, parseInt(e.runden) || 5));
   if (e.sekunden !== undefined) neu.sekunden = Math.min(300, Math.max(30, parseInt(e.sekunden) || 90));
   if (typeof e.stopp === "boolean") neu.stopp = e.stopp;
   if (typeof e.schwer === "boolean") neu.schwer = e.schwer;
-  if (typeof e.ue18 === "boolean") {
-    neu.ue18 = e.ue18;
-    if (!neu.ue18) neu.kategorien = neu.kategorien.filter((k) => !k.ue18);
-    if (!neu.kategorien.length) neu.kategorien = KATALOG.pakete[0].kategorien.map(kategorieAusId);
-  }
   return neu;
 }
 

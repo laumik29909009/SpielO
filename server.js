@@ -23,11 +23,22 @@ const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
 const { wartung: WARTUNG } = require("./config.json");
 if (WARTUNG) {
-  app.use((req, res) => res.status(503).set("Retry-After", "600").sendFile(path.join(__dirname, "wartung.html")));
+  app.use((req, res) => res.status(503).set({ "Retry-After": "600", "Cache-Control": "no-store" }).sendFile(path.join(__dirname, "wartung.html")));
   io.use((_socket, next) => next(new Error("wartung")));
 }
 
-app.use(express.static(path.join(__dirname, "public"), { maxAge: "1h" }));
+// Jede neue Version bekommt eine eigene Kennung. Sie wird an alle CSS-/JS-Dateien
+// gehängt, damit Browser nach einem Update nie alte Dateien mit der neuen Seite mischen.
+const VERSION = (process.env.RENDER_GIT_COMMIT || Date.now().toString(36)).slice(0, 10);
+const fs = require("fs");
+const INDEX = fs.readFileSync(path.join(__dirname, "public", "index.html"), "utf8")
+  .replace(/(href|src)="(?!https?:|\/socket\.io)([^"]+\.(?:css|js))"/g, `$1="$2?v=${VERSION}"`);
+app.get(["/", "/index.html"], (_req, res) => res.set("Cache-Control", "no-cache").type("html").send(INDEX));
+
+app.use(express.static(path.join(__dirname, "public"), {
+  // Versionierte Dateien dürfen lange im Cache bleiben, alles andere nur kurz
+  setHeaders: (res, datei) => res.set("Cache-Control", /\.(css|js)$/.test(datei) ? "public, max-age=604800, immutable" : "public, max-age=3600"),
+}));
 
 const raeume = {};
 

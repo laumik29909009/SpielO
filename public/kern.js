@@ -110,6 +110,22 @@ GN.logo = (klasse = "") => `
     ${[..."Spiel"].map((b, i) => `<span class="b" style="--i:${i}">${b}</span>`).join("")}<span class="o-chip" style="--i:5"><span class="o-zeichnen"><span class="o-ring"></span></span><span class="o-punkt"></span></span>
   </span>`;
 
+// Spiele, die noch im Aufbau sind (werden ausgegraut angezeigt)
+GN.imAufbau = [
+  { id: "quartett", icon: "🃏", titel: "Quartett", beschreibung: "Das Karten-Duell: Wer hat den höheren Wert? Mit eigenen Kartendecks zu Autos, Promis und mehr.", tags: ["🚧 Im Aufbau"] },
+];
+function aufbauKarte(s, klein = false) {
+  return `
+    <div class="spiel-gross im-aufbau" aria-disabled="true">
+      <span class="spiel-bild"><span class="spiel-icon">${s.icon}</span><span class="aufbau-marke">🚧 Im Aufbau</span></span>
+      <span class="spiel-text">
+        <span class="spiel-titel">${s.titel}</span>
+        <span class="spiel-beschreibung">${s.beschreibung}</span>
+        ${klein ? "" : `<button class="btn zweit voll" disabled>Bald verfügbar</button>`}
+      </span>
+    </div>`;
+}
+
 // Große Spielkarte für Startseite und Lobby
 function spielKarte(id, s, { knopf = "", aktiv = false, deaktiviert = false, alsKnopf = false } = {}) {
   const tag = alsKnopf ? "button" : "div";
@@ -150,7 +166,7 @@ function zeigeStart() {
   app.innerHTML = `
     <section class="hero-start ${schnell ? "schnell" : ""}">
       <h1 class="hero-logo">${GN.logo("riesig")}</h1>
-      <p class="hero-slogan rein" style="--d:1.15s">${esc(SEITE.slogan)}</p>
+      <p class="hero-by rein" style="--d:1.15s">by <b>laumik</b></p>
       <div class="hero-fakten rein" style="--d:1.3s"><span>👥 1–${GN.meta.maxSpieler} Spieler</span><span>📱 Handy &amp; PC</span><span>⚡ Kein Download</span></div>
     </section>
 
@@ -167,8 +183,7 @@ function zeigeStart() {
         ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, {
           knopf: `<button class="btn voll" data-erstellen="${id}">▶ Raum erstellen</button>`,
         })).join("")}
-        <div class="spiel-gross bald"><span class="spiel-bild"><span class="spiel-icon">✨</span></span>
-          <span class="spiel-text"><span class="spiel-titel">Bald mehr</span><span class="spiel-beschreibung">Weitere Spiele sind in Arbeit.</span></span></div>
+        ${GN.imAufbau.map((s) => aufbauKarte(s)).join("")}
       </div>
     </section>
 
@@ -248,6 +263,7 @@ function zeigeLobby() {
       <h2 class="kapitel-titel">${host ? "Wähle ein Spiel" : "Gewähltes Spiel"}</h2>
       <div class="spiele-gitter zwei">
         ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, { aktiv: z.spiel === id, deaktiviert: !host, alsKnopf: true })).join("")}
+        ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
     </section>
 
@@ -477,6 +493,45 @@ function konfetti(anzahl = 150) {
   requestAnimationFrame(frame);
 }
 GN.konfetti = konfetti;
+
+// =============================================================
+//  Sparmodus: spart Server-Stunden (Render Free schläft ohne Verbindungen)
+//  - Tab im Hintergrund > 3 Min.   → Verbindung trennen
+//  - Startseite ohne Aktivität 5 Min. → trennen
+//  - Lobby / Endstand ohne Aktivität 20 Min. → trennen
+//  Ein Tipp (oder Zurückkehren in den Tab) verbindet sofort wieder.
+// =============================================================
+const SPAR = { verstecktMs: 3 * 60e3, startseiteMs: 5 * 60e3, lobbyMs: 20 * 60e3 };
+let letzteAktivitaet = Date.now();
+let verstecktSeit = null;
+let pausiert = false;
+
+function schlafen() {
+  pausiert = true;
+  socket.disconnect();
+  GN.stoppeTimer();
+  $("#sparmodus").classList.remove("versteckt");
+}
+function aufwachen() {
+  pausiert = false;
+  letzteAktivitaet = Date.now();
+  $("#sparmodus").classList.add("versteckt");
+  if (!socket.connected) socket.connect(); // meldet sich automatisch wieder im Raum an
+}
+const aktiv = () => { letzteAktivitaet = Date.now(); if (pausiert && !document.hidden) aufwachen(); };
+for (const ereignis of ["pointerdown", "keydown", "touchstart", "wheel"]) addEventListener(ereignis, aktiv, { passive: true });
+$("#sparmodus").addEventListener("click", aufwachen);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) verstecktSeit = Date.now();
+  else { verstecktSeit = null; aktiv(); }
+});
+setInterval(() => {
+  if (pausiert || !socket.connected) return;
+  const jetzt = Date.now();
+  const phase = GN.zustand?.phase;
+  const grenze = !GN.zustand ? SPAR.startseiteMs : phase === "lobby" || phase === "ende" ? SPAR.lobbyMs : null;
+  if ((verstecktSeit && jetzt - verstecktSeit > SPAR.verstecktMs) || (grenze && jetzt - letzteAktivitaet > grenze)) schlafen();
+}, 15000);
 
 // Erste Anzeige (wird ersetzt, sobald der Server antwortet). Wartet, bis alle Spiel-Skripte geladen sind.
 addEventListener("DOMContentLoaded", () => { if (!GN.zustand) zeigeStart(); });

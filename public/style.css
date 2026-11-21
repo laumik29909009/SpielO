@@ -960,3 +960,41 @@ button, a, input, summary, label { touch-action: manipulation; }
   .rad-rahmen { width: 240px; height: 240px; --rad-r: 92px; }
   .rad-mitte { width: 100px; height: 100px; margin: -50px 0 0 -50px; font-size: 3.2rem; }
 }
+
+/* =============================================================
+   SpielO: "by laumik", Spiele im Aufbau, Ü18-Kennzeichnung
+   ============================================================= */
+.hero-by { margin: 6px 0 0; color: var(--leise); font-size: clamp(1rem, 3.4vw, 1.2rem); letter-spacing: 0.04em; }
+.hero-by b { color: var(--text); font-weight: 800; }
+.hero-fakten { margin-top: 16px; }
+
+.spiel-gross.im-aufbau { border-style: dashed; border-color: var(--rand-stark); cursor: default; }
+.spiel-gross.im-aufbau .spiel-bild { filter: grayscale(0.6); background: var(--flaeche-2); }
+.spiel-gross.im-aufbau .spiel-titel { color: var(--text); }
+.spiel-gross.im-aufbau .spiel-text { opacity: 0.75; }
+.aufbau-marke {
+  position: absolute; top: 12px; right: 12px; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 999px;
+  background: #ffcb47; color: #2b1c00; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.auswahl-chip.ue18, .paket.ue18 { border-color: rgba(255, 93, 115, 0.55); }
+.auswahl-chip.ue18:not(.aktiv)::after { content: " 🔞"; font-size: 0.8em; }
+
+@media (max-width: 700px) {
+  .spiele-gitter.zwei .im-aufbau .spiel-beschreibung { display: none; }
+  .spiele-gitter.zwei .aufbau-marke { top: 6px; right: 6px; font-size: 0.62rem; padding: 3px 7px; }
+}
+
+/* Sparmodus-Hinweis */
+.sparmodus {
+  position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 20px; cursor: pointer;
+  background: rgba(8, 6, 20, 0.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: einblenden 0.3s;
+}
+.spar-karte {
+  display: grid; gap: 8px; justify-items: center; text-align: center; max-width: 340px; padding: 26px 22px; border-radius: 24px;
+  background: var(--flaeche); border: 1px solid var(--rand-stark); box-shadow: var(--schatten);
+}
+.spar-icon { font-size: 3rem; animation: schweben 2.4s ease-in-out infinite; }
+.spar-karte b { font-size: 1.3rem; }
+.spar-karte span { color: var(--leise); }
+.spar-karte .btn { margin-top: 8px; color: var(--gold-text); }

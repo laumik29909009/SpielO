@@ -27,7 +27,7 @@
   function abschnitte(z, host) {
     const e = z.einstellungen;
     const dis = host ? "" : "disabled";
-    const kats = meta().kategorien.filter((k) => !k.ue18 || e.ue18);
+    const kats = meta().kategorien;
     const anzahl = kats.filter((k) => e.kategorien.includes(k.id)).reduce((s, k) => s + k.anzahl, 0);
     const m = MODI[e.modus];
     return [
@@ -42,20 +42,16 @@
       },
       {
         id: "kategorien", icon: "🗂️", titel: "Kategorien",
-        info: `${e.kategorien.length === kats.length ? "Alle" : `${e.kategorien.length} von ${kats.length}`} · ${anzahl} Fragen`,
+        info: `${e.kategorien.length} von ${kats.length} · ${anzahl} Fragen`,
         html: `
-          ${host ? `<div class="paket-reihe" style="margin:4px 0 12px"><button class="paket" data-alle="1">✅ Alle auswählen</button></div>` : ""}
+          ${host ? `<div class="paket-reihe" style="margin:4px 0 12px"><button class="paket" data-alle="1">✅ Alle auswählen (ohne Ü18)</button></div>` : ""}
           <div class="kat-gitter">
           ${kats.map((k) => `
             <button class="kat-chip ${e.kategorien.includes(k.id) ? "aktiv" : ""}" data-kat="${k.id}" title="${esc(k.beschreibung)}" ${dis}>
               <span class="e">${k.emoji}</span><span><div class="n">${k.ue18 ? "🔞 " : ""}${esc(k.name)}</div><div class="z">${k.anzahl} Fragen · ${esc(k.beschreibung)}</div></span>
             </button>`).join("")}
           </div>
-          <div class="schalter-liste" style="margin-top:12px">
-            <button class="schalter" role="switch" aria-checked="${!!e.ue18}" data-schalter="ue18" ${dis}>
-              <span class="schalter-text"><b>🔞 Ü18-Kategorie</b><span>Schaltet „Nachtleben &amp; Zocken“ frei: Jackpots, Casinos, Promille.</span></span><span class="schalter-knopf"></span>
-            </button>
-          </div>`,
+          <p class="leise klein-text" style="margin-top:10px">🔞 Ü18-Kategorien sind gekennzeichnet und standardmäßig nicht ausgewählt.</p>`,
       },
       {
         id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden} s pro Frage`,
@@ -81,7 +77,6 @@
       GN.einstellungen({ kategorien: neu });
     }));
     $("[data-alle]", el)?.addEventListener("click", () => GN.einstellungen({ alleKategorien: true }));
-    $$("[data-schalter]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ [b.dataset.schalter]: b.getAttribute("aria-checked") !== "true" })));
   }
 
   // =============================================================

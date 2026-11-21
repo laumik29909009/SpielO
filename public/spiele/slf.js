@@ -30,8 +30,8 @@
     const namen = e.kategorien.map((k) => k.name);
     const katInfo = namen.slice(0, 4).join(", ") + (namen.length > 4 ? ` +${namen.length - 4}` : "");
     const pruefung = "📚 Wortlisten + 🌐 Wikipedia";
-    const pakete = m.pakete.filter((x) => !x.ue18 || e.ue18);
-    const gruppen = m.gruppen.filter((g) => !g.ue18 || e.ue18);
+    const pakete = m.pakete;
+    const gruppen = m.gruppen;
 
     return [
       {
@@ -46,13 +46,13 @@
           ${host ? `
             <div class="unter-titel">Schnellauswahl</div>
             <div class="paket-reihe">
-              ${pakete.map((x) => `<button class="paket" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
+              ${pakete.map((x) => `<button class="paket ${x.ue18 ? "ue18" : ""}" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
               <button class="paket" data-zufall="1">🎲 Zufall</button>
             </div>
             ${gruppen.map((g) => `
               <div class="unter-titel">${g.ue18 ? "🔞 " : ""}${esc(g.name)} <span class="normal">(${g.kategorien.length})</span></div>
               <div class="chip-reihe">
-                ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""}" data-kat="${k.id}">${k.emoji} ${esc(k.name)}</button>`).join("")}
+                ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""} ${k.ue18 ? "ue18" : ""}" data-kat="${k.id}">${k.emoji} ${esc(k.name)}</button>`).join("")}
               </div>`).join("")}
             <div class="unter-titel">Eigene Kategorie</div>
             <form class="eigene-zeile" id="eigeneForm" autocomplete="off">
@@ -61,7 +61,7 @@
               <button class="btn zweit" type="submit">＋</button>
             </form>
             <p class="leise klein-text">„kreativ“ heißt: Jede passende Antwort zählt, z. B. bei Sprüchen oder Ausreden.</p>
-            ${e.ue18 ? "" : '<p class="leise klein-text">🔞 Ü18-Kategorien kannst du unter „Regeln“ freischalten.</p>'}` : ""}`,
+            <p class="leise klein-text">🔞 Ü18-Kategorien sind gekennzeichnet. „Zufall“ wählt sie nie aus.</p>` : ""}`,
       },
       {
         id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min"} pro Runde`,
@@ -74,11 +74,10 @@
       },
       {
         id: "regeln", icon: "⚙️", titel: "Regeln",
-        info: `Stopp ${e.stopp ? "an" : "aus"} · Schwere Buchstaben ${e.schwer ? "an" : "aus"} · Ü18 ${e.ue18 ? "an" : "aus"}`,
+        info: `Stopp ${e.stopp ? "an" : "aus"} · Schwere Buchstaben ${e.schwer ? "an" : "aus"}`,
         html: `<div class="schalter-liste">
           ${schalter("stopp", e.stopp, "🛑 Stopp-Knopf", "Wer alles ausgefüllt hat, kann Stopp drücken. Dann haben alle noch 10 Sekunden. Solo endet die Runde sofort und es gibt Tempo-Bonus.", dis)}
           ${schalter("schwer", e.schwer, "🧨 Schwere Buchstaben", "C, J, Q, X und Y kommen auch vor.", dis)}
-          ${schalter("ue18", e.ue18, "🔞 Ü18-Kategorien", "Schaltet freche Kategorien frei: Trinkspiele, Red Flags, Dates und mehr.", dis)}
         </div>`,
       },
       {
