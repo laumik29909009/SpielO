@@ -68,6 +68,8 @@
     spiele();
   }
 
+  // Manche Browser pausieren den Ton im Hintergrund: beim Zurückkommen fortsetzen
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx && !audio.paused) ctx.resume?.(); });
   audio.addEventListener("ended", () => weiter(1));
   audio.addEventListener("error", () => { if (richtung && richtung.titel.length > 1) setTimeout(() => weiter(1), 800); });
   audio.addEventListener("play", zeichne);

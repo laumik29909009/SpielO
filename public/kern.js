@@ -109,6 +109,11 @@ function verarbeiteZustand(z) {
   $("#raumChip").classList.remove("versteckt");
   $("#stoppSpielBtn").classList.toggle("versteckt", !(GN.istHost() && z.phase !== "lobby"));
   if (z.phase === "lobby") return zeigeLobby();
+  // Bin ich gerade neuer Host geworden? Dann Ansichten mit Host-Knöpfen neu aufbauen
+  if (vorher && vorher.hostId !== z.hostId && z.hostId === spielerId) {
+    if (/podest/.test(GN.ansicht)) return GN.podest(GN.ansicht);
+    if (z.phase === "aufloesung") GN.ansicht = "";
+  }
   GN.spiele[z.spiel].zeige(z, vorher);
 }
 

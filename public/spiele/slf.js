@@ -119,7 +119,8 @@
       $$(".kat-panel", el).forEach((p) => p.classList.toggle("versteckt", p.dataset.panel !== String(i)));
     };
     $$(".kat-tab", el).forEach((t) => (t.onclick = () => { Ton.klick(); zeigeGruppe(t.dataset.tab); }));
-    zeigeGruppe(GN.speicher("slfGruppe") || "0");
+    const gespeichert = GN.speicher("slfGruppe") || "0";
+    zeigeGruppe($(`.kat-panel[data-panel="${gespeichert}"]`, el) ? gespeichert : "0");
     // Suche über alle Gruppen
     const suche = $("#katSuche", el);
     if (suche) {
