@@ -13,8 +13,9 @@
 
   // Eigene Antworten nach Verbindungsabbruch zurückbekommen
   GN.socket.on("slf:entwurf", (d) => {
-    entwurf = { ...d };
-    $$("[data-feld]").forEach((i) => { i.value = entwurf[i.dataset.feld] || ""; pruefeFeld(i); });
+    for (const [k, v] of Object.entries(d || {})) if (!(entwurf[k] || "").trim()) entwurf[k] = v;
+    $$("[data-feld]").forEach((i) => { if (!i.value.trim()) i.value = entwurf[i.dataset.feld] || ""; pruefeFeld(i); });
+    sendeEntwurf(true);
     aktualisiereStoppKnopf();
   });
 
@@ -302,6 +303,7 @@
       }
     }
     if (!vorher || vorher.phase !== z.phase || stoppNeu || GN.timerNeu) {
+      GN.timerNeu = false;
       GN.starteTimer(z.restMs, z.phase === "stopp" ? 10000 : z.sekunden * 1000, { tickAb: 10000 });
     }
   }

@@ -52,6 +52,9 @@ function neuerRaumCode() {
   return code;
 }
 
+const saubereId = (id) => String(id || "").replace(/[^a-z0-9]/gi, "").slice(0, 40);
+const daten = (d) => (d && typeof d === "object" ? d : {});
+
 function modul(raum) {
   return SPIELE[raum.spiel];
 }
@@ -136,8 +139,13 @@ io.on("connection", (socket) => {
   });
 
   const istHost = () => meinRaum && meinRaum.hostId === meineId;
+  const auf = (ereignis, fn) => socket.on(ereignis, (...args) => {
+    try { fn(...args); } catch (err) { console.error(`Fehler bei "${ereignis}":`, err.message); }
+  });
 
   function beitreten(raum, spielerId, name) {
+    // Wer schon in einem anderen Raum ist, verlässt ihn zuerst (sonst bleibt dort ein "Geist" online)
+    if (meinRaum && meinRaum !== raum) entfernen(true);
     meinRaum = raum;
     meineId = spielerId;
     socket.join(raum.code);
@@ -163,9 +171,10 @@ io.on("connection", (socket) => {
     sendeZustand(raum);
   }
 
-  socket.on("raumErstellen", ({ name, spielerId, spiel } = {}) => {
+  auf("raumErstellen", (d) => {
+    let { name, spielerId, spiel } = daten(d);
     name = String(name || "").trim().slice(0, 16);
-    spielerId = String(spielerId || "").slice(0, 40);
+    spielerId = saubereId(spielerId);
     if (!name) return socket.emit("fehler", "Bitte gib einen Namen ein.");
     if (!spielerId) return;
     const code = neuerRaumCode();
@@ -181,42 +190,44 @@ io.on("connection", (socket) => {
     beitreten(raeume[code], spielerId, name);
   });
 
-  socket.on("raumBeitreten", ({ code, name, spielerId } = {}) => {
-    code = String(code || "").trim().toUpperCase();
+  auf("raumBeitreten", (d) => {
+    let { code, name, spielerId } = daten(d);
+    code = String(code || "").trim().toUpperCase().slice(0, 4);
     name = String(name || "").trim().slice(0, 16);
-    spielerId = String(spielerId || "").slice(0, 40);
-    const raum = raeume[code];
-    if (!raum) return socket.emit("fehler", `Raum "${code}" gibt es nicht (mehr).`);
+    spielerId = saubereId(spielerId);
+    const raum = Object.hasOwn(raeume, code) ? raeume[code] : null;
+    // "abgelehnt": der Browser setzt sich zurück auf die Startseite (statt eingefroren stehen zu bleiben)
+    if (!raum) return socket.emit("abgelehnt", `Raum "${code}" gibt es nicht (mehr).`);
     if (!spielerId) return;
     if (!raum.spieler[spielerId]) {
       if (!name) return socket.emit("fehler", "Bitte gib einen Namen ein.");
-      if (raum.phase !== "lobby") return socket.emit("fehler", "Das Spiel läuft schon. Warte auf die nächste Partie.");
-      if (Object.keys(raum.spieler).length >= MAX_SPIELER) return socket.emit("fehler", `Der Raum ist voll (max. ${MAX_SPIELER}).`);
+      if (raum.phase !== "lobby") return socket.emit("abgelehnt", "Das Spiel läuft schon. Warte auf die nächste Partie.");
+      if (Object.keys(raum.spieler).length >= MAX_SPIELER) return socket.emit("abgelehnt", `Der Raum ist voll (max. ${MAX_SPIELER}).`);
     }
     beitreten(raum, spielerId, name);
   });
 
-  socket.on("avatarWechseln", () => {
+  auf("avatarWechseln", () => {
     if (!meinRaum || !meinRaum.spieler[meineId]) return;
     const s = meinRaum.spieler[meineId];
     s.avatar = freierAvatar(meinRaum, s.avatar);
     sendeZustand(meinRaum);
   });
 
-  socket.on("spielWaehlen", (spiel) => {
+  auf("spielWaehlen", (spiel) => {
     if (!istHost() || meinRaum.phase !== "lobby" || !SPIELE[spiel]) return;
     meinRaum.spiel = spiel;
     sendeZustand(meinRaum);
   });
 
-  socket.on("einstellungen", (e = {}) => {
-    if (!istHost() || meinRaum.phase !== "lobby" || typeof e !== "object") return;
+  auf("einstellungen", (e) => {
+    if (!istHost() || meinRaum.phase !== "lobby" || !e || typeof e !== "object") return;
     const m = modul(meinRaum);
     meinRaum.einstellungen[meinRaum.spiel] = m.einstellungenSetzen(meinRaum.einstellungen[meinRaum.spiel], e);
     sendeZustand(meinRaum);
   });
 
-  socket.on("spielStarten", () => {
+  auf("spielStarten", () => {
     if (!istHost()) return;
     const raum = meinRaum;
     if (raum.phase === "spiel" && !modul(raum).istVorbei?.(raum)) return;
@@ -235,21 +246,21 @@ io.on("connection", (socket) => {
   });
 
   // Alle spielspezifischen Aktionen (Antworten, Abstimmungen, ...)
-  socket.on("aktion", (typ, daten) => {
+  auf("aktion", (typ, nutzlast) => {
     const raum = meinRaum;
-    if (!raum || raum.phase !== "spiel" || typeof typ !== "string") return;
-    const ergebnis = modul(raum).aktion(raum, { spielerId: meineId, istHost: istHost() }, typ, daten, ctx);
+    if (!raum || raum.phase !== "spiel" || !raum.daten || typeof typ !== "string") return;
+    const ergebnis = modul(raum).aktion(raum, { spielerId: meineId, istHost: istHost() }, typ, nutzlast, ctx);
     if (typeof ergebnis === "string") socket.emit("fehler", ergebnis);
   });
 
-  socket.on("zurLobby", () => {
+  auf("zurLobby", () => {
     if (!istHost() || meinRaum.phase !== "spiel") return;
     zurLobby(meinRaum);
     sendeZustand(meinRaum);
   });
 
-  socket.on("verlassen", () => entfernen(true));
-  socket.on("disconnect", () => entfernen(false));
+  auf("verlassen", () => entfernen(true));
+  auf("disconnect", () => entfernen(false));
 
   function entfernen(sofort) {
     const raum = meinRaum;
@@ -280,6 +291,10 @@ io.on("connection", (socket) => {
     sendeZustand(raum);
   }
 });
+
+// Sicherheitsnetz: Ein Fehler darf nie den ganzen Server (und alle Räume) beenden
+process.on("uncaughtException", (err) => console.error("Unerwarteter Fehler:", err));
+process.on("unhandledRejection", (err) => console.error("Unbehandelter Fehler:", err));
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

@@ -86,6 +86,10 @@
     if (z.phase === "frage") {
       const key = "preis-frage-" + z.runde.nr;
       if (GN.ansicht !== key) return zeigeFrage(key, !vorher || vorher.phase !== "frage" || vorher.runde?.nr !== z.runde.nr);
+      if (GN.timerNeu) { // nach Neuverbindung: Countdown mit der Restzeit vom Server weiterlaufen lassen
+        GN.timerNeu = false;
+        GN.starteTimer(z.runde.restMs, z.runde.sekunden * 1000, { tonAus: () => !!$(".abgegeben") });
+      }
       return aktualisiereStatus();
     }
     const key = "preis-" + z.phase + "-" + z.runde.nr;
@@ -177,6 +181,7 @@
     bilderEinblenden();
     verbindeFrage(r);
     aktualisiereStatus();
+    GN.timerNeu = false;
     GN.starteTimer(r.restMs, r.sekunden * 1000, { tonAus: () => !!$(".abgegeben") });
   }
 

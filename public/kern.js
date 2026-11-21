@@ -56,6 +56,7 @@ socket.on("meta", (m) => { GN.meta = m; if (!GN.zustand) zeigeStart(); });
 socket.on("connect_error", (err) => { if (err.message === "wartung") location.reload(); });
 
 socket.on("connect", () => {
+  GN.timerNeu = true; // nach (Neu-)Verbindung den Countdown neu starten
   const raum = speicher("raum");
   if (raum) socket.emit("raumBeitreten", { code: raum, name: speicher("name"), spielerId });
 });
@@ -63,6 +64,15 @@ socket.on("connect", () => {
 socket.on("beigetreten", ({ code }) => {
   speicher("raum", code);
   history.replaceState(null, "", "?raum=" + code);
+});
+
+// Beitritt abgelehnt (Raum weg, Spiel läuft schon, voll): sauber zurück zur Startseite
+socket.on("abgelehnt", (text) => {
+  speicher("raum", null);
+  GN.zustand = null;
+  history.replaceState(null, "", "/");
+  zeigeStart();
+  toast(text);
 });
 
 socket.on("fehler", (text) => {

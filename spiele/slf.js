@@ -136,7 +136,7 @@ function zeitAbgelaufen(raum, ctx) {
   d.phase = "pruefen";
   d.endetUm = null;
   ctx.sende(raum); // Clients schicken jetzt sofort ihren letzten Stand
-  d.timer = setTimeout(() => auswerten(raum, ctx), NACHZUEGLER_MS);
+  d.timer = setTimeout(() => auswerten(raum, ctx).catch((err) => notfallAuswertung(raum, ctx, err)), NACHZUEGLER_MS);
 }
 
 async function auswerten(raum, ctx) {
@@ -157,6 +157,27 @@ async function auswerten(raum, ctx) {
     for (const [spielerId, auto] of Object.entries(ergebnis[k.id])) {
       d.bewertung[k.id][spielerId] = {
         text: antworten[k.id][spielerId], auto, fuer: new Set(), gegen: new Set(), sterne: new Set(), host: null,
+      };
+    }
+  }
+  d.phase = "bewerten";
+  ctx.sende(raum);
+}
+
+// Falls die Prüfung unerwartet scheitert: alle Antworten zur Abstimmung stellen, statt hängen zu bleiben
+function notfallAuswertung(raum, ctx, err) {
+  console.error("Auswertung fehlgeschlagen:", err);
+  const d = raum.daten;
+  if (!d || d.phase !== "pruefen") return;
+  d.hinweis = "Die automatische Prüfung hatte ein Problem. Bitte stimmt selbst ab.";
+  d.bewertung = {};
+  for (const k of d.kategorien) {
+    d.bewertung[k.id] = {};
+    for (const s of Object.values(raum.spieler)) {
+      const text = (d.entwuerfe[s.id]?.[k.id] || "").trim();
+      d.bewertung[k.id][s.id] = {
+        text, fuer: new Set(), gegen: new Set(), sterne: new Set(), host: null,
+        auto: { status: text ? "unsicher" : "leer", grund: text ? "Bitte prüfen" : "Keine Antwort", quelle: "regel", kanonisch: text.toLowerCase() },
       };
     }
   }
@@ -262,11 +283,10 @@ module.exports = {
         if (!allesKorrektAusgefuellt(raum, spielerId)) return "Erst alle Kategorien mit dem richtigen Buchstaben ausfüllen!";
         d.phase = "stopp";
         d.stoppVon = spielerId;
-        // Solo: Runde endet sofort, übrige Zeit gibt Tempo-Bonus (1 Punkt pro 3 Sekunden)
-        if (ctx.onlineSpieler(raum).length === 1) {
-          d.tempoBonus[spielerId] = Math.floor(Math.max(0, d.endetUm - Date.now()) / 3000);
-          return zeitAbgelaufen(raum, ctx);
-        }
+        // Solo: Runde endet sofort, übrige Zeit gibt Tempo-Bonus (1 Punkt pro 3 Sekunden).
+        // Sind alle anderen offline, endet die Runde auch sofort, aber ohne Bonus.
+        if (istSolo(raum)) d.tempoBonus[spielerId] = Math.floor(Math.max(0, d.endetUm - Date.now()) / 3000);
+        if (ctx.onlineSpieler(raum).length === 1) return zeitAbgelaufen(raum, ctx);
         if (d.endetUm - Date.now() > STOPP_MS) {
           clearTimeout(d.timer);
           d.endetUm = Date.now() + STOPP_MS;
@@ -278,9 +298,10 @@ module.exports = {
       case "stimme":
       case "stern":
       case "host": {
-        if (d.phase !== "bewerten" || !daten) return;
-        const e = d.bewertung[daten.kat]?.[daten.spieler];
-        if (!e) return;
+        if (d.phase !== "bewerten" || !daten || typeof daten !== "object") return;
+        const kat = String(daten.kat), wer = String(daten.spieler);
+        if (!Object.hasOwn(d.bewertung, kat) || !Object.hasOwn(d.bewertung[kat], wer)) return;
+        const e = d.bewertung[kat][wer];
         if (typ === "host") {
           if (!istHost) return;
           e.host = daten.wert === "ok" || daten.wert === "falsch" ? daten.wert : null;
