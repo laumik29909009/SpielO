@@ -24,7 +24,9 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 - **Decks:** Kung Fu Panda und Dragons – Die Reiter von Berk, je 32 Karten (8 Quartette A–H). Figuren © DreamWorks Animation, Nutzung mit Erlaubnis.
 - **Offizielle Bilder** kommen in `public/quartett/bilder/<deck>/<Karten-ID>.jpg`, Liste der IDs in `public/quartett/bilder/LIES_MICH.md`. Fehlt ein Bild, zeigt die Karte einen Platzhalter.
 - **Handkarten (1–3):** Wer dran ist, wählt eine Handkarte und sagt einen Wert an. Danach legt jeder andere die Karte, mit der er kontern will. Mit 1 Handkarte spielt es sich klassisch.
-- **Spieltisch:** Alle sitzen als Figuren (ihr Avatar) um einen Tisch, gelegte Karten liegen verdeckt in der Mitte.
+- **3D-Spieltisch** (`public/spiele/quartett-3d.js`, Three.js in `public/vendor/`, wird nur bei Bedarf geladen): runder Holztisch, Licht und Schatten, jede Person sitzt als eigene Toon-Figur passend zu ihrem Avatar. Figuren atmen, denken, jubeln oder sind traurig, gelegte Karten fliegen auf den Tisch. Knopf „2D/3D“ schaltet um; ohne WebGL gibt es automatisch die 2,5D-Ansicht.
+- **Seltenheit:** ● Gewöhnlich, ◆ Selten (Silber), ★★ Episch (Gold), ★★★ Legendär (Full-Art mit Regenbogenrahmen), berechnet aus der Kartenstärke.
+- **Bilder übernehmen:** Bilder nach Figur benannt in `bilder-eingang/<deck>/` legen, dann `python3 scripts/bilder_import.py`. Das Skript ordnet sie den Karten zu, schneidet auf 4:3 zu und speichert WebP.
 - **Spezialangriffe:** Jede Karte hat einen eigenen Angriff mit Namen (`ANGRIFFE` in `daten/quartett.js`, Effekte in `public/spiele/quartett-angriffe.js`). Im Kampf greifen alle gleichzeitig an, in der Mitte prallen die Angriffe aufeinander und der stärkere bricht durch.
 - **Regeln:** Wer dran ist, wählt einen Wert seiner obersten Karte. Der höchste Wert gewinnt alle Karten der Runde. Gleichstand → Karten in den Topf. Wer alle Karten hat (oder nach dem Rundenlimit die meisten), gewinnt.
 - **Decks** stehen in `daten/quartett.js`: 8 Gruppen (A–H) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.

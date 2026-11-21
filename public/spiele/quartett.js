@@ -14,6 +14,23 @@
   const gruppeVon = (deck, k) => deck.gruppen.find((g) => g.id === k.gruppe);
   const maxWerte = {};
   const maxWert = (deck, i) => (maxWerte[deck.id + i] ??= Math.max(...deck.karten.map((k) => k.w[i])));
+  // Seltenheit: aus der Summe aller (auf das Deck normierten) Werte
+  //   legendär = stärkste Hälfte der ★-Karten, episch = übrige ★-Karten,
+  //   selten = stärkstes Drittel der übrigen, sonst gewöhnlich
+  const STUFEN = { gewoehnlich: { name: "Gewöhnlich", zeichen: "●" }, selten: { name: "Selten", zeichen: "◆" }, episch: { name: "Episch", zeichen: "★★" }, legendaer: { name: "Legendär", zeichen: "★★★" } };
+  const stufenCache = {};
+  function stufeVon(deck, k) {
+    if (!stufenCache[deck.id]) {
+      const summe = (x) => x.w.reduce((a, v, i) => a + v / maxWert(deck, i), 0);
+      const sortiert = [...deck.karten].sort((a, b) => summe(b) - summe(a));
+      const stern = sortiert.filter((x) => x.selten), normal = sortiert.filter((x) => !x.selten);
+      const m = {};
+      stern.forEach((x, i) => (m[x.id] = i < Math.ceil(stern.length / 2) ? "legendaer" : "episch"));
+      normal.forEach((x, i) => (m[x.id] = i < Math.round(normal.length / 3) ? "selten" : "gewoehnlich"));
+      stufenCache[deck.id] = m;
+    }
+    return stufenCache[deck.id][k.id] || "gewoehnlich";
+  }
   const zahl = (v, w) => `${v.toLocaleString("de-DE")}${w.einheit ? `<small> ${w.einheit}</small>` : ""}`;
   const leute = (z) => z.teilnehmer || [];
   const person = (z, id) => leute(z).find((t) => t.id === id) || GN.spieler(id);
@@ -32,13 +49,15 @@
   function karte(deck, k, { klickbar = false, klasse = "" } = {}) {
     const g = gruppeVon(deck, k);
     const tag = klickbar ? "button" : "div";
+    const stufe = stufeVon(deck, k);
     return `
-      <div class="qkarte ${k.selten ? "selten" : ""} ${klasse}" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
+      <div class="qkarte stufe-${stufe} ${stufe === "legendaer" || stufe === "episch" ? "selten" : ""} ${klasse}" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
+        ${stufe === "legendaer" ? '<div class="qk-aura" aria-hidden="true"></div>' : ""}
         <div class="qk-innen">
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
           <div class="qk-bild">${deck.fotos?.[k.id]
             ? `<img src="${deck.fotos[k.id]}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
-            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${k.selten ? '<span class="qk-selten">★ selten</span>' : ""}</div>
+            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
           <div class="qk-unter">${esc(g.name)}${k.stil ? ` · ${esc(k.stil)}` : ""}</div>
           <div class="qk-werte">
             ${deck.werte.map((w, i) => `
@@ -49,6 +68,7 @@
               </${tag}>`).join("")}
           </div>
           <div class="qk-text">${esc(k.text)}</div>
+          <div class="qk-fuss"><span class="qk-stufe">${STUFEN[stufe].zeichen} ${STUFEN[stufe].name}</span><span>⚔️ ${esc(k.angriff?.name || "")}</span><span>${k.id} · ${deck.karten.length}</span></div>
         </div>
         <div class="qk-glanz" aria-hidden="true"></div>
       </div>`;
@@ -215,23 +235,42 @@
         <div class="runden-kopf">
           <span class="modus-badge">${deck.icon} ${esc(deck.name)}</span>
           <span class="runden-nr">Runde ${z.runde}${z.rundenMax ? ` / ${z.rundenMax}` : ""}</span>
+          <button class="q-3d-knopf" id="q3dKnopf" title="Zwischen 3D-Tisch und einfacher Ansicht wechseln">${QuartettTisch3D.moeglich() ? "2D" : "3D"}</button>
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
         <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
-        <div class="q-szene">
+        <div class="q-szene" id="qSzene">
           <div class="q-sitze" id="qSitze"></div>
           <div class="q-tisch"><div class="q-platte"><div class="q-platte-muster"></div><div class="q-gelegt" id="qGelegt"></div></div></div>
           <div class="q-tisch-mitte" id="qMitte"></div>
         </div>
         <div class="q-ich" id="qIch"></div>
       </div>`;
+    $("#q3dKnopf").onclick = () => { Ton.klick(); QuartettTisch3D.umschalten(); GN.ansicht = ""; zeige(GN.zustand, GN.zustand); };
+    // 3D-Tisch (falls möglich), sonst bleibt die 2,5D-Ansicht
+    if (QuartettTisch3D.moeglich()) {
+      $("#qSzene").classList.add("drei");
+      QuartettTisch3D.einhaengen($("#qSzene")).then(() => {
+        if (GN.ansicht !== key) return;
+        zeichneSitze(GN.zustand);
+        reaktionenZeigen(GN.zustand);
+      }).catch((e) => { console.warn("3D nicht möglich:", e); $("#qSzene")?.classList.remove("drei"); zeichneSitze(GN.zustand); });
+    }
     zeichneSitze(z);
     zeichneTischMitte(z);
     zeigeHand(z);
-    // Reaktionen nach dem letzten Kampf: Gewinner jubelt, Verlierer lassen den Kopf hängen
+    reaktionenZeigen(z);
+  }
+
+  // Reaktionen nach dem letzten Kampf: Gewinner jubelt, Verlierer lassen den Kopf hängen
+  function reaktionenZeigen(z) {
     if (letzterKampf?.runde === z.runde - 1) {
       const k = letzterKampf.kampf;
-      k.gespielt.forEach((g) => $(`.q-sitz[data-teilnehmer="${g.spieler}"]`)?.classList.add(g.spieler === k.sieger ? "jubelt" : k.gleichstand ? "staunt" : "traurig"));
+      k.gespielt.forEach((g) => {
+        const art = g.spieler === k.sieger ? "jubelt" : k.gleichstand ? "staunt" : "traurig";
+        $(`.q-sitz[data-teilnehmer="${g.spieler}"]`)?.classList.add(art);
+        if ($("#qSzene.drei")) QuartettTisch3D.tisch?.reaktion(g.spieler, art);
+      });
       setTimeout(() => $$(".q-sitz").forEach((s) => s.classList.remove("jubelt", "traurig", "staunt")), 1800);
     }
   }
@@ -240,6 +279,13 @@
   function zeichneSitze(z) {
     const box = $("#qSitze");
     if (!box) return;
+    // 3D: Figuren und Schilder zeichnet der 3D-Tisch
+    if ($("#qSzene.drei") && QuartettTisch3D.tisch) {
+      const w = z.angesagt ? deckVon(z.deck).werte[z.angesagt.wert] : null;
+      QuartettTisch3D.tisch.aktualisieren({ ...z, ansageText: w ? `${w.icon} ${esc(w.name)}!` : "" }, GN.ich);
+      box.innerHTML = "";
+      return;
+    }
     const andere = leute(z).filter((t) => t.id !== GN.ich);
     box.className = `q-sitze anzahl-${andere.length}`;
     box.innerHTML = andere.map((t, i) => {
@@ -308,7 +354,7 @@
     box.innerHTML = `
       ${hinweis}
       ${karten.length > 1 ? `<div class="q-hand" role="listbox" aria-label="Deine Handkarten">
-        ${karten.map((x, i) => `<button class="q-handkarte ${x.id === auswahl ? "gewaehlt" : ""}" data-hand="${x.id}" role="option" aria-selected="${x.id === auswahl}" style="--i:${i};--n:${karten.length}" ${gelegt || binIchAnsager ? "disabled" : ""}>
+        ${karten.map((x, i) => `<button class="q-handkarte ${x.id === auswahl ? "gewaehlt" : ""}" data-hand="${x.id}" role="option" aria-selected="${x.id === auswahl}" style="--i:${i};--n:${karten.length};--m:${(karten.length - 1) / 2}" ${gelegt || binIchAnsager ? "disabled" : ""}>
           ${karte(deck, x, { klasse: "mini" })}
           ${ansage !== null ? `<span class="q-hand-wert">${deck.werte[ansage].icon} ${x.w[ansage].toLocaleString("de-DE")}</span>` : ""}
         </button>`).join("")}
