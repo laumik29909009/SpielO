@@ -15,6 +15,7 @@ const SPIELE = {
   slf: require("./spiele/slf"),
   quartett: require("./spiele/quartett"),
   farbrausch: require("./spiele/farbrausch"),
+  skat: require("./spiele/skat"),
 };
 const MAX_SPIELER = 10;
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];

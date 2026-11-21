@@ -280,7 +280,7 @@ const QuartettTisch3D = (() => {
     // Zustand übernehmen: wer sitzt wo, wer ist dran, wer hat gelegt
     aktualisieren(z, ich) {
       const andere = (z.teilnehmer || []).filter((t) => t.id !== ich);
-      const fr = z.spiel === "farbrausch";
+      const fr = z.spiel === "farbrausch" || z.spiel === "skat";
       const ids = new Set(andere.map((t) => t.id));
       for (const [id, f] of this.figuren) if (!ids.has(id)) { this.szene.remove(f.g); f.schild.remove(); this.figuren.delete(id); }
       andere.forEach((t, i) => {
@@ -302,7 +302,7 @@ const QuartettTisch3D = (() => {
         f.g.scale.setScalar(1.25);
         f.g.lookAt(0, 0, 0.8);
         f.platz = p;
-        const fr = z.spiel === "farbrausch";
+        const fr = z.spiel === "farbrausch" || z.spiel === "skat";
         const dran = fr ? z.phase === "spielen" && z.dran === t.id : (z.phase === "waehlen" && z.waehler === t.id) || (z.phase === "kontern" && !z.gelegt?.includes(t.id) && t.karten > 0);
         f.dran = dran; f.denkt = fr ? dran : z.phase === "waehlen" && z.waehler === t.id; f.raus = fr ? false : !t.karten;
         f.karten = t.karten;
@@ -315,7 +315,8 @@ const QuartettTisch3D = (() => {
           ${fr && z.gerufen?.includes(t.id) && t.karten === 1 ? '<span class="q-blase">Letzte Karte!</span>' : ""}
           <span class="q-schild"><b>${t.name.replace(/[<>&]/g, "")}</b><span>${t.karten || fr ? `🃏 ${t.karten}` : "raus"}${fr && z.ziel ? ` · ${t.punkte} P.` : ""}${t.bot ? " · 🤖" : ""}${t.afk ? " · 💤" : ""}</span></span>`;
       });
-      if (fr) return this.farbrausch(z, ich);
+      if (z.spiel === "farbrausch") return this.farbrausch(z, ich);
+      if (fr) return;
       // Gelegte Karten (verdeckt) auf den Tisch
       const gelegt = new Set(z.phase === "kontern" ? z.gelegt : []);
       for (const [id, m] of this.karten) if (!gelegt.has(id)) { this.szene.remove(m); this.karten.delete(id); }

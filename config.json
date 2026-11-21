@@ -1,6 +1,8 @@
 {
   "wartung": false,
-  "imAufbau": [],
+  "imAufbau": [
+    "skat"
+  ],
   "wartungInfo": {
     "punkte": [
       "Neues Spiel: Farbrausch – der Karten-Klassiker am 3D-Tisch",
