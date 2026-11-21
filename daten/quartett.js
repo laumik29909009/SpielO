@@ -142,7 +142,107 @@ const DRACHEN = {
   ],
 };
 
-const DECKS = { kungfu: KUNGFU, drachen: DRACHEN };
+
+// =============================================================
+//  Lizenzierte Decks (Figuren © DreamWorks Animation, Nutzung mit Erlaubnis)
+//  Bilder: Die offiziellen Bilder legst du selbst in
+//  public/quartett/bilder/<deck-id>/<Karten-ID>.jpg (oder .png/.webp), z. B. kungfupanda/B1.jpg
+//  Fehlt ein Bild, zeigt die Karte ein neutrales Platzhalter-Symbol (tier = Twemoji-Code).
+//  Werte: eigene Einschätzung anhand der Filme (1–100), keine offiziellen Zahlen.
+// =============================================================
+const KUNGFUPANDA = {
+  id: "kungfupanda",
+  name: "Kung Fu Panda",
+  icon: "🐼",
+  lizenz: "Figuren © DreamWorks Animation",
+  beschreibung: "Po, die Furiosen Fünf, Meister und Bösewichte aus allen Filmen.",
+  platzhalter: true,
+  werte: KUNGFU.werte,
+  gruppen: [
+    { id: "A", name: "Die Furiosen Fünf", icon: "🥋", element: "feuer", farbe: "#e8452c", farbe2: "#ffc247" },
+    { id: "B", name: "Jadepalast", icon: "🏯", element: "licht", farbe: "#2fa86a", farbe2: "#c8f5a8" },
+    { id: "C", name: "Bösewichte", icon: "😈", element: "schatten", farbe: "#6d32c9", farbe2: "#ff6bd5" },
+    { id: "D", name: "Familie & Freunde", icon: "🍜", element: "wind", farbe: "#e08b1f", farbe2: "#ffe5a8" },
+    { id: "E", name: "Meister & Krieger", icon: "🛡️", element: "stein", farbe: "#8a6a4a", farbe2: "#e9d2a8" },
+    { id: "F", name: "Weitere Figuren", icon: "🏮", element: "wasser", farbe: "#1f86c9", farbe2: "#a8e6ff" },
+  ],
+  karten: [
+    { id: "A1", name: "Tigress", tier: "1f42f", stil: "Tigerstil", text: "Die Härteste der Fünf. Zerschlägt Eisenholz mit bloßen Fäusten.", w: [90, 86, 93, 70, 92] },
+    { id: "A2", name: "Monkey", tier: "1f412", stil: "Affenstil", text: "Akrobatisch, verspielt und mit Schwanz und Händen zugleich unterwegs.", w: [70, 88, 85, 62, 76] },
+    { id: "A3", name: "Mantis", tier: "1f997", stil: "Gottesanbeterin-Stil", text: "Der Kleinste, aber blitzschnell und kennt jeden Druckpunkt.", w: [58, 96, 89, 66, 70] },
+    { id: "A4", name: "Viper", tier: "1f40d", stil: "Schlangenstil", text: "Kämpft ohne Gift, aber mit unglaublicher Eleganz.", w: [52, 84, 91, 72, 74] },
+
+    { id: "B1", name: "Po", tier: "1f43c", stil: "Drachenkrieger", text: "Der Drachenkrieger. Unterschätzt, hungrig und am Ende immer siegreich.", w: [86, 62, 82, 96, 99], selten: true },
+    { id: "B2", name: "Crane", tier: "1f426", stil: "Kranichstil", text: "Ruhig, ausgeglichen und von oben immer im Überblick.", w: [56, 91, 82, 74, 70] },
+    { id: "B3", name: "Meister Shifu", tier: "1f94b", stil: "Meister des Jadepalasts", text: "Streng, klein, aber einer der größten Meister Chinas.", w: [72, 88, 98, 86, 76], selten: true },
+    { id: "B4", name: "Meister Oogway", tier: "1f422", stil: "Großmeister", text: "Der weise Schildkrötenmeister, der Kung Fu einst erfand.", w: [70, 66, 99, 100, 82], selten: true },
+
+    { id: "C1", name: "Tai Lung", tier: "1f406", stil: "Schneeleopard", text: "Shifus ehemaliger Schüler. Brach aus dem sichersten Gefängnis aus.", w: [95, 94, 95, 55, 92], selten: true },
+    { id: "C2", name: "Lord Shen", tier: "1f99a", stil: "Pfau mit Kanonen", text: "Will China mit Feuerwaffen erobern. Wirbelt mit Messern im Gefieder.", w: [62, 82, 91, 48, 66] },
+    { id: "C3", name: "General Kai", tier: "1f402", stil: "Krieger aus der Geisterwelt", text: "Stiehlt das Chi von Meistern und macht sie zu Jade-Kriegern.", w: [99, 72, 86, 97, 96], selten: true },
+    { id: "C4", name: "Das Chamäleon", tier: "1f98e", stil: "Gestaltwandlerin", text: "Kann jede Gestalt annehmen, auch die von großen Meistern.", w: [66, 80, 90, 91, 70] },
+
+    { id: "D1", name: "Mr. Ping", tier: "1fabf", stil: "Nudelsuppen-Koch", text: "Pos Adoptivvater. Seine geheime Zutat: Es gibt keine.", w: [15, 42, 28, 50, 62] },
+    { id: "D2", name: "Li Shan", tier: "1f43c", stil: "Pandadorf", text: "Pos leiblicher Vater. Bringt den Pandas das Faulenzen bei.", w: [88, 50, 58, 82, 86] },
+    { id: "D3", name: "Mei Mei", tier: "1f43c", stil: "Band-Tanz", text: "Kämpft mit einem Seidenband und sehr viel Selbstbewusstsein.", w: [62, 76, 84, 64, 72] },
+    { id: "D4", name: "Zhen", tier: "1f98a", stil: "Diebin", text: "Gerissene Füchsin, die Po zuerst bestiehlt und dann hilft.", w: [50, 92, 80, 60, 74] },
+
+    { id: "E1", name: "Meister Croc", tier: "1f40a", stil: "Krokodilstil", text: "Einer der Meister der Stadt Gongmen. Gefürchteter Schwanzschlag.", w: [82, 58, 74, 52, 86] },
+    { id: "E2", name: "Meister Storming Ox", tier: "1f402", stil: "Ochsenstil", text: "Stampft mit seinen Hörnern alles nieder.", w: [92, 52, 70, 56, 89] },
+    { id: "E3", name: "Meister Thundering Rhino", tier: "1f98f", stil: "Nashornstil", text: "Beschützer von Gongmen. Sein Hammer ist legendär.", w: [94, 48, 80, 60, 88] },
+    { id: "E4", name: "Kommandant Vachir", tier: "1f98f", stil: "Gefängnis-Kommandant", text: "Bewacht Chorh-Gom mit tausend Wachen. Glaubt er zumindest.", w: [84, 44, 55, 38, 82] },
+
+    { id: "F1", name: "Boss Wolf", tier: "1f43a", stil: "Anführer der Wölfe", text: "Shens Handlanger mit einem harten Kern.", w: [78, 72, 62, 36, 76] },
+    { id: "F2", name: "Die Wahrsagerin", tier: "1f410", stil: "Wahrsagerei", text: "Sieht die Zukunft. Und frisst gern mal Schuhe.", w: [25, 36, 42, 93, 58] },
+    { id: "F3", name: "Zeng", tier: "1fabf", stil: "Bote", text: "Der nervöse Bote des Jadepalasts.", w: [18, 86, 22, 30, 40] },
+    { id: "F4", name: "Han", tier: "1f994", stil: "Gauner-Meister", text: "Zhens Lehrmeister mit vielen Tricks im Panzer.", w: [56, 70, 82, 74, 72] },
+  ],
+};
+
+const DRAGONS = {
+  id: "dragons",
+  name: "Dragons – Die Reiter von Berk",
+  icon: "🐲",
+  lizenz: "Figuren © DreamWorks Animation",
+  beschreibung: "Ohnezahn, Sturmpfeil & Co. Die Drachen von Berk und ihre größten Gegner.",
+  platzhalter: true,
+  werte: DRACHEN.werte,
+  gruppen: [
+    { id: "A", name: "Drachen der Reiter", icon: "🛡️", element: "feuer", farbe: "#d9381e", farbe2: "#ffc247" },
+    { id: "B", name: "Freunde von Berk", icon: "⛵", element: "wind", farbe: "#1f9e7a", farbe2: "#b6f5d8" },
+    { id: "C", name: "Giganten", icon: "🌋", element: "stein", farbe: "#8a5a3a", farbe2: "#f0c58a" },
+    { id: "D", name: "Gefährliche Arten", icon: "⚡", element: "blitz", farbe: "#6b3fd4", farbe2: "#ffe14d" },
+    { id: "E", name: "Klein & flink", icon: "💨", element: "schatten", farbe: "#2b2a5e", farbe2: "#7fe3ff" },
+  ],
+  karten: [
+    { id: "A1", name: "Ohnezahn", tier: "1f409", stil: "Nachtschatten", text: "Hicks' Drache. Der schnellste und seltenste Drache von allen.", w: [92, 300, 60, 14, 95], selten: true },
+    { id: "A2", name: "Sturmpfeil", tier: "1f409", stil: "Tödlicher Nadder", text: "Astrids Drache. Schießt giftige Stacheln mit dem Schwanz.", w: [80, 200, 70, 13, 72] },
+    { id: "A3", name: "Fleischklops", tier: "1f409", stil: "Gronckel", text: "Fischbeins Drache. Frisst Steine und spuckt Lava.", w: [76, 60, 93, 7, 66] },
+    { id: "A4", name: "Hakenzahn", tier: "1f409", stil: "Riesenhafter Albtraum", text: "Rotzbakkes Drache. Setzt sich selbst in Flammen.", w: [88, 160, 62, 19, 52] },
+
+    { id: "B1", name: "Kotz und Würg", tier: "1f409", stil: "Wahnsinniger Zipper", text: "Ein Kopf gast, der andere zündet. Taffnuss und Raffnuss streiten ständig.", w: [86, 150, 55, 16, 44] },
+    { id: "B2", name: "Tagschatten", tier: "1f409", stil: "Tagschatten", text: "Kann sich mit ihrem Feuer unsichtbar machen.", w: [90, 290, 55, 14, 90], selten: true },
+    { id: "B3", name: "Wolkenspringer", tier: "1f409", stil: "Sturmbrecher", text: "Valkas Drache mit vier Flügeln.", w: [82, 220, 70, 18, 88] },
+    { id: "B4", name: "Schädelbrecher", tier: "1f409", stil: "Rumpelhorn", text: "Spürt mit seiner Nase jede Fährte auf.", w: [62, 140, 86, 12, 80] },
+
+    { id: "C1", name: "Der Rote Tod", tier: "1f409", stil: "Königin des Nests", text: "Riesig wie ein Berg. Herrschte über das Drachennest.", w: [99, 90, 99, 120, 40], selten: true },
+    { id: "C2", name: "Der Alpha", tier: "1f409", stil: "Bewilderbeast", text: "Befehligt alle Drachen und speit Eis statt Feuer. Kann nicht fliegen.", w: [95, 30, 100, 0, 92], selten: true },
+    { id: "C3", name: "Schreiender Tod", tier: "1f409", stil: "Tunnelgräber", text: "Gräbt sich mit einem ohrenbetäubenden Schrei durch Felsen.", w: [90, 120, 88, 12, 34] },
+    { id: "C4", name: "Taifumerang", tier: "1f409", stil: "Wirbelnder Feuerdrache", text: "Dreht sich im Flug und schleudert einen Feuerwirbel.", w: [92, 180, 66, 28, 60] },
+
+    { id: "D1", name: "Skrill", tier: "1f409", stil: "Blitzdrache", text: "Reitet auf Gewittern und speit Blitze.", w: [97, 250, 74, 14, 68], selten: true },
+    { id: "D2", name: "Flüsternder Tod", tier: "1f409", stil: "Tunneldrache", text: "Hat ringförmige Zahnreihen und lebt unter der Erde.", w: [70, 130, 80, 8, 50] },
+    { id: "D3", name: "Todesgreifer", tier: "1f409", stil: "Jagddrache", text: "Ein gefährlicher Jäger mit mächtigen Zangen.", w: [86, 200, 85, 18, 58] },
+    { id: "D4", name: "Donnertrommler", tier: "1f409", stil: "Meeresdrache", text: "Sein Brüllen ist so laut wie ein Donnerschlag.", w: [78, 170, 64, 15, 54] },
+
+    { id: "E1", name: "Schrecklicher Schrecken", tier: "1f409", stil: "Winzling", text: "Klein wie eine Katze und genauso frech.", w: [40, 110, 20, 1, 56] },
+    { id: "E2", name: "Die Nachtlichter", tier: "1f409", stil: "Drachenbabys", text: "Die Jungen von Ohnezahn und Tagschatten.", w: [68, 260, 40, 6, 84] },
+    { id: "E3", name: "Wechselflügler", tier: "1f409", stil: "Tarndrache", text: "Passt seine Farbe der Umgebung an.", w: [72, 150, 46, 9, 78] },
+    { id: "E4", name: "Windscherer", tier: "1f409", stil: "Klingenflügel", text: "Ihre Flügel und ihr Schwanz sind scharf wie Messer.", w: [66, 230, 86, 16, 72] },
+  ],
+};
+
+const DECKS = { kungfupanda: KUNGFUPANDA, dragons: DRAGONS, kungfu: KUNGFU, drachen: DRACHEN };
 // Gruppe aus der Karten-ID (A1 → A) ableiten
 for (const deck of Object.values(DECKS)) {
   for (const k of deck.karten) k.gruppe = k.id[0];

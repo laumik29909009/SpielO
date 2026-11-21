@@ -276,7 +276,8 @@ const QuartettBilder = (() => {
   return {
     bild(deck, k) {
       const gruppe = deck.gruppen.find((g) => g.id === k.gruppe);
-      return deck.id === "drachen" ? drache(k, gruppe) : meister(k, gruppe);
+      // Lizenzierte Decks: neutrales Symbol als Platzhalter, bis echte Bilder im Ordner liegen
+      return k.d ? drache(k, gruppe) : meister(k, gruppe);
     },
   };
 })();

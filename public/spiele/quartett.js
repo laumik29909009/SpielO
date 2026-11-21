@@ -36,7 +36,9 @@
       <div class="qkarte ${k.selten ? "selten" : ""} ${klasse}" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
         <div class="qk-innen">
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
-          <div class="qk-bild">${QuartettBilder.bild(deck, k)}${k.selten ? '<span class="qk-selten">★ selten</span>' : ""}</div>
+          <div class="qk-bild">${deck.fotos?.[k.id]
+            ? `<img src="${deck.fotos[k.id]}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
+            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${k.selten ? '<span class="qk-selten">★ selten</span>' : ""}</div>
           <div class="qk-unter">${esc(g.name)}${k.stil ? ` · ${esc(k.stil)}` : ""}</div>
           <div class="qk-werte">
             ${deck.werte.map((w, i) => `
@@ -51,6 +53,8 @@
         <div class="qk-glanz" aria-hidden="true"></div>
       </div>`;
   }
+  // Hinweis auf Rechte für lizenzierte Decks (Lobby & Galerie)
+  const lizenzZeile = (d) => (d.lizenz ? `<span class="q-lizenz">${esc(d.lizenz)}</span>` : "");
   const rueckseite = (deck, klasse = "") => `
     <div class="qkarte rueckseite ${klasse}" style="--typ:${deck.gruppen[0].farbe};--typ2:${deck.gruppen[3].farbe}">
       <div class="qk-ruecken"><span class="qk-r-icon">${deck.icon}</span><b>SpielO</b><span>Quartett</span></div>
@@ -90,7 +94,7 @@
             const vorschau = d.karten.filter((k) => k.selten).slice(0, 3);
             return `<button class="q-deck ${e.deck === d.id ? "aktiv" : ""}" data-deck="${d.id}" ${dis}>
               <span class="q-deck-faecher">${vorschau.map((k, i) => `<span style="--i:${i}">${karte(d, k, { klasse: "mini" })}</span>`).join("")}</span>
-              <span class="q-deck-text"><b>${d.icon} ${esc(d.name)}</b><span>${esc(d.beschreibung)}</span>
+              <span class="q-deck-text"><b>${d.icon} ${esc(d.name)}</b><span>${esc(d.beschreibung)}</span>${lizenzZeile(d)}
                 <span class="q-deck-werte">${d.werte.map((w) => `<span>${w.icon} ${esc(w.name)}</span>`).join("")}</span></span>
             </button>`;
           }).join("")}
@@ -153,6 +157,7 @@
     d.innerHTML = `
       <div class="fenster-kopf"><b>${deck.icon} ${esc(deck.name)} · ${deck.karten.length} Karten</b><button class="icon-btn" data-schliessen aria-label="Schließen">✕</button></div>
       <div class="fenster-inhalt">
+        ${deck.lizenz ? `<p class="leise klein-text" style="margin-top:0">${esc(deck.lizenz)} · Werte sind eine Fan-Einschätzung.</p>` : ""}
         ${deck.gruppen.map((g) => `
           <div class="q-gal-gruppe" style="--typ:${g.farbe}"><b>${g.icon} ${g.id} · ${esc(g.name)}</b></div>
           <div class="q-gal-reihe">${deck.karten.filter((k) => k.gruppe === g.id).map((k) => karte(deck, k, { klasse: "gal" })).join("")}</div>`).join("")}

@@ -23,7 +23,9 @@ const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
 // Was auf der Wartungsseite steht, kommt aus config.json ("wartungInfo")
-const { wartung: WARTUNG, wartungInfo: INFO = {} } = require("./config.json");
+const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [] } = require("./config.json");
+// Spiele "im Aufbau" sind nur über den Vorschau-Link wählbar: /?vorschau=1
+const waehlbar = (raum, spiel) => !!SPIELE[spiel] && (!IM_AUFBAU.includes(spiel) || raum.vorschau);
 if (WARTUNG) {
   const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const seite = require("fs").readFileSync(path.join(__dirname, "wartung.html"), "utf8")
@@ -157,6 +159,7 @@ function sendeZustand(raum) {
     code: raum.code,
     hostId: raum.hostId,
     spiel: raum.spiel,
+    vorschau: !!raum.vorschau,
     phase: "lobby", // wird vom Spiel-Modul überschrieben, solange ein Spiel läuft
     einstellungen: raum.einstellungen[raum.spiel],
     spieler: Object.values(raum.spieler).map((s) => ({
@@ -220,6 +223,7 @@ io.on("connection", (socket) => {
   socket.emit("meta", {
     spiele: Object.fromEntries(Object.entries(SPIELE).map(([id, m]) => [id, m.meta ? m.meta() : {}])),
     maxSpieler: MAX_SPIELER,
+    imAufbau: IM_AUFBAU,
   });
 
   // Spam-Schutz: höchstens 40 Nachrichten pro Sekunde (kurze Bursts sind erlaubt)
@@ -275,7 +279,7 @@ io.on("connection", (socket) => {
   }
 
   auf("raumErstellen", (d) => {
-    let { name, spielerId, spiel } = daten(d);
+    let { name, spielerId, spiel, vorschau } = daten(d);
     name = String(name || "").trim().slice(0, 16);
     spielerId = saubereId(spielerId);
     if (!name) return socket.emit("fehler", "Bitte gib einen Namen ein.");
@@ -284,7 +288,8 @@ io.on("connection", (socket) => {
     raeume[code] = {
       code,
       hostId: spielerId,
-      spiel: SPIELE[spiel] ? spiel : "preis",
+      spiel: SPIELE[spiel] && (!IM_AUFBAU.includes(spiel) || vorschau === true) ? spiel : "preis",
+      vorschau: vorschau === true,
       phase: "lobby",
       spieler: {},
       einstellungen: Object.fromEntries(Object.entries(SPIELE).map(([id, m]) => [id, m.standardEinstellungen()])),
@@ -318,7 +323,7 @@ io.on("connection", (socket) => {
   });
 
   auf("spielWaehlen", (spiel) => {
-    if (!istHost() || meinRaum.phase !== "lobby" || !SPIELE[spiel]) return;
+    if (!istHost() || meinRaum.phase !== "lobby" || !waehlbar(meinRaum, spiel)) return;
     meinRaum.spiel = spiel;
     sendeZustand(meinRaum);
   });

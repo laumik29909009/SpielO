@@ -19,11 +19,14 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 - **🏅 Siegerehrung:** Podest mit Animation und Auszeichnungen (z. B. Scharfschütze, Blitzmerker, Kreativkopf, Stopp-König, Seelenverwandte)
 
 ## Quartett
+> 🚧 **Im Aufbau:** In `config.json` steht `"imAufbau": ["quartett"]`. Dann ist Quartett für alle ausgegraut. Testen kannst du es über den Vorschau-Link **`/?vorschau=1`** (Raum darüber erstellen). Zum Freigeben `"imAufbau": []` setzen.
+
+- **Decks:** Kung Fu Panda (24 Karten) und Dragons – Die Reiter von Berk (20 Karten), Figuren © DreamWorks Animation, Nutzung mit Erlaubnis. Dazu zwei eigene Decks (Kung-Fu-Meister, Drachen).
+- **Offizielle Bilder** kommen in `public/quartett/bilder/<deck>/<Karten-ID>.jpg`, Liste der IDs in `public/quartett/bilder/LIES_MICH.md`. Fehlt ein Bild, zeigt die Karte einen Platzhalter.
 - **Regeln:** Wer dran ist, wählt einen Wert seiner obersten Karte. Der höchste Wert gewinnt alle Karten der Runde. Gleichstand → Karten in den Topf. Wer alle Karten hat (oder nach dem Rundenlimit die meisten), gewinnt.
 - **Decks** stehen in `daten/quartett.js`: 6 Gruppen (A–F) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.
 - **Bilder:** Drachen werden im Browser aus Bauteilen gezeichnet (`public/spiele/quartett-bilder.js`, Feld `d` pro Karte). Die Kung-Fu-Meister nutzen Twemoji-Tiere (CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
 - **Computer-Gegner** füllen freie Plätze auf und wählen meist ihren stärksten Wert. Solo spielt man immer gegen den Computer.
-- Alle Figuren sind eigene Erfindungen. Figuren aus Filmen oder Serien gehören den jeweiligen Studios und sind deshalb nicht dabei.
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |

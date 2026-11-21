@@ -139,8 +139,12 @@ GN.logo = (klasse = "") => `
     ${[..."Spiel"].map((b, i) => `<span class="b" style="--i:${i}">${b}</span>`).join("")}<span class="o-chip" style="--i:5"><span class="o-zeichnen"><span class="o-ring"></span></span><span class="o-punkt"></span></span>
   </span>`;
 
-// Spiele, die noch im Aufbau sind (werden ausgegraut angezeigt)
+// Spiele, die noch im Aufbau sind (config.json "imAufbau"): ausgegraut,
+// außer im Vorschau-Raum (Link mit ?vorschau=1)
 GN.imAufbau = [];
+const imAufbau = (id) => (GN.meta.imAufbau || []).includes(id);
+try { if (new URLSearchParams(location.search).get("vorschau") === "1") sessionStorage.setItem("vorschau", "1"); } catch {}
+const vorschauModus = () => { try { return sessionStorage.getItem("vorschau") === "1"; } catch { return false; } };
 function aufbauKarte(s, klein = false) {
   return `
     <div class="spiel-gross im-aufbau" aria-disabled="true">
@@ -209,7 +213,7 @@ function zeigeStart() {
     <section class="kapitel rein" style="--d:1.6s">
       <h2 class="kapitel-titel">Unsere Spiele</h2>
       <div class="spiele-gitter">
-        ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s)).join("")}
+        ${Object.entries(GN.spiele).map(([id, s]) => imAufbau(id) ? aufbauKarte({ ...s, id }, true) : spielKarte(id, s)).join("")}
         ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
     </section>`;
@@ -229,7 +233,7 @@ function zeigeStart() {
   $("#erstellenBtn")?.addEventListener("click", () => {
     Ton.entsperren();
     const n = name();
-    if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel: speicher("letztesSpiel") || "preis" });
+    if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel: speicher("letztesSpiel") || "preis", vorschau: vorschauModus() });
   });
   $("#beitretenBtn").onclick = () => {
     Ton.entsperren();
@@ -291,7 +295,9 @@ function zeigeLobby() {
     <section class="kapitel">
       <h2 class="kapitel-titel">${host ? "Wähle ein Spiel" : "Gewähltes Spiel"}</h2>
       <div class="spiele-gitter zwei">
-        ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, { aktiv: z.spiel === id, deaktiviert: !host, alsKnopf: true })).join("")}
+        ${Object.entries(GN.spiele).map(([id, s]) => imAufbau(id) && !z.vorschau
+          ? aufbauKarte({ ...s, id }, true)
+          : spielKarte(id, imAufbau(id) ? { ...s, tags: ["🚧 Vorschau", ...s.tags] } : s, { aktiv: z.spiel === id, deaktiviert: !host, alsKnopf: true })).join("")}
         ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
     </section>

@@ -9,7 +9,23 @@
 //    Ende alle Karten hat (oder nach dem Rundenlimit die meisten).
 //  2–4 Teilnehmer, fehlende Plätze füllen Computer-Gegner.
 // =============================================================
+const fs = require("fs");
+const path = require("path");
 const { DECKS } = require("../daten/quartett");
+
+// Eigene Bilder: public/quartett/bilder/<deck>/<Karten-ID>.jpg|png|webp (z. B. kungfupanda/B1.jpg)
+function fotosLesen(deckId) {
+  const ordner = path.join(__dirname, "..", "public", "quartett", "bilder", deckId);
+  const fotos = {};
+  try {
+    for (const datei of fs.readdirSync(ordner)) {
+      const m = datei.match(/^([A-F][1-4])\.(jpe?g|png|webp|avif)$/i);
+      if (m) fotos[m[1].toUpperCase()] = `/quartett/bilder/${deckId}/${encodeURIComponent(datei)}`;
+    }
+  } catch {}
+  return fotos;
+}
+const FOTOS = Object.fromEntries(Object.keys(DECKS).map((id) => [id, fotosLesen(id)]));
 
 const MAX_TEILNEHMER = 4;
 const KAMPF_MS = 5600; // so lange läuft die Kampf-Animation
@@ -227,12 +243,12 @@ function auszeichnungen(raum) {
 // ---------- Schnittstelle für den Server-Kern ----------
 module.exports = {
   meta: () => ({
-    decks: Object.values(DECKS).map((d) => ({ ...d })),
+    decks: Object.values(DECKS).map((d) => ({ ...d, fotos: FOTOS[d.id] })),
     maxTeilnehmer: MAX_TEILNEHMER,
     kampfMs: KAMPF_MS,
   }),
 
-  standardEinstellungen: () => ({ deck: "drachen", bots: 1, runden: 0, sekunden: 20 }),
+  standardEinstellungen: () => ({ deck: "kungfupanda", bots: 1, runden: 0, sekunden: 20 }),
 
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
