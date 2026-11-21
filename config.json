@@ -1,15 +1,18 @@
 {
-  "wartung": false,
+  "wartung": true,
   "wartungInfo": {
     "punkte": [
-      "Lobby: Kategorien und Zeit direkt wählbar, ohne Aufklappen",
-      "Nur noch ein „Raum erstellen“, das Spiel wählt ihr danach",
-      "Mehr Bilder im Preis-Schätzer",
-      "Kleine Verbesserungen für mehr Spielspaß"
+      "QR-Code zum Beitreten",
+      "Host kann Spieler entfernen",
+      "Kein Warten mehr auf Inaktive",
+      "Später einsteigen: ab der nächsten Runde mitspielen",
+      "Neue Timer-Optionen (auch ohne Zeitlimit)",
+      "Neue Siegerehrung mit Auszeichnungen",
+      "Eigener SpielO-Beat als Hintergrundmusik"
     ],
     "zahlen": [
-      { "wert": "92", "text": "Kategorien in Stadt Land Fluss" },
-      { "wert": "137", "text": "Fragen im Preis-Schätzer" }
+      { "wert": "9", "text": "Lieder im Jazz-Player" },
+      { "wert": "1", "text": "eigener SpielO-Beat" }
     ]
   }
 }
