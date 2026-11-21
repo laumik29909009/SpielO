@@ -7,7 +7,15 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 | 💰 **Preis-Schätzer** | Was kostet ein Windrad? 137 Fragen in 15 Themen, 4 Modi (Klassisch, Nicht drüber!, Teurer oder billiger?, Sortieren) und Mix |
 | 🌍 **Stadt Land Fluss** | 92 Kategorien in 7 Gruppen, eigene Kategorien, Stopp-Knopf, Live-Fortschritt, Abstimmung und automatischer Schiedsrichter |
 
-Ü18-Inhalte (Nachtleben, Dates, Trinkspiele …) sind in beiden Spielen standardmäßig aus und lassen sich in der Lobby einschalten.
+Ü18-Kategorien (Nachtleben, Dates, Trinkspiele …) sind mit 🔞 gekennzeichnet und standardmäßig nicht ausgewählt.
+
+## Komfort im Raum
+- **📱 Einladen:** QR-Code, Raum-Code und Link (Knopf „Einladen“ oder oben auf den Raum-Code tippen)
+- **Spieler entfernen:** Der Host 👑 tippt auf ✕ (Lobby) oder „Entfernen“ (Raum-Fenster). Wer entfernt wurde, kann 5 Minuten nicht zurück.
+- **Später einsteigen:** Wer während eines Spiels beitritt, schaut zu 👀 und spielt ab der nächsten Runde mit.
+- **💤 Abwesend:** Wer 2 Runden (Stadt Land Fluss: 1 Runde) nichts eingibt, wird als abwesend markiert. Auf ihn wird nicht mehr gewartet, und ein abwesender Host gibt die Krone weiter. Jede Eingabe oder „Bin wieder da!“ beendet das.
+- **⏱️ Zeit ∞:** Ohne Zeitlimit. Preis-Schätzer löst auf, wenn alle getippt haben; Stadt Land Fluss endet per Stopp. Der Host kann jederzeit auflösen bzw. beenden.
+- **🏅 Siegerehrung:** Podest mit Animation und Auszeichnungen (z. B. Scharfschütze, Blitzmerker, Kreativkopf, Stopp-König, Seelenverwandte)
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
@@ -33,6 +41,9 @@ Welche Wörter in der Wikipedia-Beschreibung zu welcher Kategorie passen, steht 
 
 ## Hintergrundmusik 🎵
 Oben rechts gibt es einen 🎵-Knopf mit Musikrichtungen, Wiedergabe-Steuerung und Lautstärkeregler.
+
+**🎹 SpielO-Beat** (`public/beat.js`): unser eigener Song, live im Browser erzeugt (C–G–Am–F, 100 BPM, 16 Takte im Kreis). Er läuft standardmäßig. Weil Browser Ton erst nach dem ersten Tippen erlauben, startet er spätestens beim ersten Tipp auf der Seite. Wer „Aus“ wählt, hört ihn auch beim nächsten Besuch nicht mehr.
+
 Jeder Ordner in `public/musik/` ist eine Musikrichtung (z. B. `public/musik/jazz/`). Lieder (MP3, M4A, OGG …) einfach dort hineinlegen.
 Bitte nur Musik verwenden, die ihr öffentlich abspielen dürft (eigene Aufnahmen oder lizenzfreie Musik), denn das Repository und die Seite sind öffentlich.
 
@@ -52,7 +63,8 @@ Dann http://localhost:3000 öffnen.
 - `spiele/preis.js`, `spiele/slf.js`: Spiel-Logik auf dem Server
 - `spiele/slf-pruefer.js`: Schiedsrichter für Stadt Land Fluss
 - `daten/`: Fragen, Kategorien, Wortlisten, Prüfregeln
-- `public/kern.js`: Startseite, Lobby, Podest; oben lässt sich der Name der Seite ändern (`SEITE`)
+- `public/beat.js`: der SpielO-Beat; `public/musik.js`: Musik-Player
+- `public/kern.js`: Startseite, Lobby, Raum-Fenster (QR, Spieler), Zuschauen, Podest; oben lässt sich der Name der Seite ändern (`SEITE`)
 - `public/spiele/*.js`: Oberfläche der einzelnen Spiele
 - `public/style.css`: Design; jedes Spiel hat seine eigene Farbwelt (`body[data-spiel="..."]`)
 - `scripts/bilder_suchen.py`: sucht frei lizenzierte Bilder für neue Preis-Schätzer-Fragen

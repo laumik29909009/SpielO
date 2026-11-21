@@ -66,14 +66,19 @@ socket.on("beigetreten", ({ code }) => {
   history.replaceState(null, "", "?raum=" + code);
 });
 
-// Beitritt abgelehnt (Raum weg, Spiel läuft schon, voll): sauber zurück zur Startseite
-socket.on("abgelehnt", (text) => {
+// Beitritt abgelehnt (Raum weg, voll) oder vom Host entfernt: sauber zurück zur Startseite
+function zurueckZumStart(text) {
   speicher("raum", null);
   GN.zustand = null;
   history.replaceState(null, "", "/");
+  if ($("#raumFenster").open) $("#raumFenster").close();
+  $("#afkHinweis").classList.add("versteckt");
+  $("#intro").classList.add("versteckt");
   zeigeStart();
   toast(text);
-});
+}
+socket.on("abgelehnt", zurueckZumStart);
+socket.on("rausgeworfen", zurueckZumStart);
 
 socket.on("fehler", (text) => {
   if (!GN.zustand) { speicher("raum", null); if (GN.ansicht !== "start") zeigeStart(); }
@@ -108,7 +113,14 @@ function verarbeiteZustand(z) {
   $("#raumChip").textContent = z.code;
   $("#raumChip").classList.remove("versteckt");
   $("#stoppSpielBtn").classList.toggle("versteckt", !(GN.istHost() && z.phase !== "lobby"));
+  const ich = z.spieler.find((s) => s.id === spielerId);
+  const warAfk = vorher?.spieler.find((s) => s.id === spielerId)?.afk;
+  $("#afkHinweis").classList.toggle("versteckt", !(ich?.afk && z.phase !== "lobby"));
+  if (ich?.afk && !warAfk && z.phase !== "lobby") navigator.vibrate?.(200);
+  if ($("#raumFenster").open) zeichneRaumSpieler();
   if (z.phase === "lobby") return zeigeLobby();
+  // Später eingestiegen: zuschauen, bis die nächste Runde beginnt
+  if (ich?.zuschauer) return zeigeZuschauer(z);
   // Bin ich gerade neuer Host geworden? Dann Ansichten mit Host-Knöpfen neu aufbauen
   if (vorher && vorher.hostId !== z.hostId && z.hostId === spielerId) {
     if (/podest/.test(GN.ansicht)) return GN.podest(GN.ansicht);
@@ -251,7 +263,7 @@ function zeigeLobby() {
   const abschnitte = spiel.abschnitte(z, host);
   const wichtig = abschnitte.filter((a) => a.wichtig);
   const extras = abschnitte.filter((a) => !a.wichtig);
-  const offenesFenster = $("dialog[open]")?.dataset.fenster; // bleibt nach Änderungen offen
+  const offenesFenster = $("dialog[data-fenster][open]")?.dataset.fenster; // bleibt nach Änderungen offen
   if (z.spiel !== speicher("letztesSpiel") && host) speicher("letztesSpiel", z.spiel);
 
   app.innerHTML = `
@@ -269,10 +281,11 @@ function zeigeLobby() {
                 ? `<button class="avatar" id="avatarBtn" title="Avatar wechseln">${s.avatar}</button>`
                 : `<span class="avatar">${s.avatar}</span>`}
               <span class="name">${esc(s.name)}${s.id === z.hostId ? " 👑" : ""}</span>
+              ${host && s.id !== spielerId ? `<button class="chip-weg" data-weg="${esc(s.id)}" title="${esc(s.name)} entfernen" aria-label="${esc(s.name)} entfernen">✕</button>` : ""}
             </span>`).join("")}
         </div>
       </div>
-      <button class="btn zweit" id="teilenBtn">🔗 Einladen</button>
+      <button class="btn zweit" id="teilenBtn">📱 Einladen</button>
     </section>
 
     <section class="kapitel">
@@ -315,13 +328,14 @@ function zeigeLobby() {
   if (host) spiel.binde?.($("#spielEinstellungen"), z);
   // Fenster für Regeln & Punkte
   $$("[data-oeffne]").forEach((b) => (b.onclick = () => { Ton.klick(); $(`dialog[data-fenster="${b.dataset.oeffne}"]`).showModal(); }));
-  $$("dialog.fenster").forEach((d) => {
+  $$("dialog.fenster[data-fenster]").forEach((d) => {
     d.querySelector("[data-schliessen]").onclick = () => d.close();
     d.addEventListener("click", (ev) => { if (ev.target === d) d.close(); }); // Klick neben das Fenster schließt
   });
   if (offenesFenster) $(`dialog[data-fenster="${offenesFenster}"]`)?.classList.add("ohne-animation");
   if (offenesFenster) $(`dialog[data-fenster="${offenesFenster}"]`)?.showModal();
-  $("#teilenBtn").onclick = teilen;
+  $("#teilenBtn").onclick = () => { Ton.klick(); oeffneRaumFenster(); };
+  $$("[data-weg]").forEach((b) => (b.onclick = () => rauswerfen(b.dataset.weg)));
   $("#avatarBtn")?.addEventListener("click", () => { Ton.klick(); socket.emit("avatarWechseln"); });
   $("#verlassenBtn").onclick = verlassen;
   if (host) {
@@ -337,15 +351,112 @@ function zeigeLobby() {
 
 GN.einstellungen = (e) => { Ton.klick(); socket.emit("einstellungen", e); };
 
-async function teilen() {
-  const link = `${location.origin}/?raum=${GN.zustand.code}`;
-  if (navigator.share && matchMedia("(pointer: coarse)").matches) {
-    try { await navigator.share({ title: SEITE.name, text: `Spiel mit! Raum-Code: ${GN.zustand.code}`, url: link }); return; } catch {}
-  }
-  try { await navigator.clipboard.writeText(link); toast("Link kopiert! Schick ihn deinen Freunden.", true); }
-  catch { prompt("Kopiere diesen Link:", link); }
+const einladungsLink = () => `${location.origin}/?raum=${GN.zustand.code}`;
+async function kopieren() {
+  try { await navigator.clipboard.writeText(einladungsLink()); toast("Link kopiert! Schick ihn deinen Freunden.", true); }
+  catch { prompt("Kopiere diesen Link:", einladungsLink()); }
 }
-$("#raumChip").onclick = () => GN.zustand && teilen();
+async function teilen() {
+  try { await navigator.share({ title: SEITE.name, text: `Spiel mit! Raum-Code: ${GN.zustand.code}`, url: einladungsLink() }); }
+  catch (e) { if (e?.name !== "AbortError") kopieren(); }
+}
+
+// ---------- Raum-Fenster: QR-Code, Link und Spielerliste ----------
+function oeffneRaumFenster() {
+  const z = GN.zustand;
+  if (!z) return;
+  const f = $("#raumFenster");
+  f.innerHTML = `
+    <div class="fenster-kopf"><b>📱 Freunde einladen</b><button class="icon-btn" data-schliessen aria-label="Schließen">✕</button></div>
+    <div class="fenster-inhalt">
+      <div class="einladen">
+        <div class="qr-rahmen"><img class="qr" src="/qr/${z.code}.svg" alt="QR-Code zum Beitreten von Raum ${z.code}" width="200" height="200"></div>
+        <div class="einladen-text">
+          <span class="leise klein-text">Mit der Handy-Kamera scannen oder diesen Code eingeben</span>
+          <span class="code-gross">${z.code}</span>
+          <div class="link-zeile">
+            <input class="feld" readonly value="${esc(einladungsLink())}" aria-label="Einladungslink" />
+            <button class="btn" id="linkKopieren">📋 Kopieren</button>
+          </div>
+          ${navigator.share ? '<button class="btn zweit voll" id="linkTeilen">📤 Teilen …</button>' : ""}
+        </div>
+      </div>
+      <div class="abschnitt-titel" id="raumSpielerTitel"></div>
+      <div class="raum-spieler-liste" id="raumSpieler"></div>
+    </div>`;
+  $("[data-schliessen]", f).onclick = () => f.close();
+  f.onclick = (ev) => { if (ev.target === f) f.close(); };
+  $("#linkKopieren").onclick = kopieren;
+  $("#linkTeilen")?.addEventListener("click", teilen);
+  $(".link-zeile input", f).onfocus = (ev) => ev.target.select();
+  zeichneRaumSpieler();
+  if (!f.open) f.showModal();
+}
+
+function zeichneRaumSpieler() {
+  const z = GN.zustand;
+  const box = $("#raumSpieler");
+  if (!z || !box) return;
+  const host = GN.istHost();
+  $("#raumSpielerTitel").textContent = `Spieler ${z.spieler.length}/${GN.meta.maxSpieler}`;
+  box.innerHTML = z.spieler.map((s) => {
+    const marken = [
+      s.id === z.hostId ? '<span class="marke gold">👑 Host</span>' : "",
+      s.id === spielerId ? '<span class="marke">Du</span>' : "",
+      !s.online ? '<span class="marke grau">📴 getrennt</span>' : "",
+      s.afk ? '<span class="marke grau">💤 abwesend</span>' : "",
+      s.zuschauer ? '<span class="marke">👀 steigt gleich ein</span>' : "",
+    ].join("");
+    return `<div class="raum-spieler-zeile ${s.online ? "" : "offline"}">
+      <span class="avatar">${s.avatar}</span>
+      <span class="name">${esc(s.name)}</span>
+      <span class="marken">${marken}</span>
+      ${host && s.id !== spielerId ? `<button class="btn zweit klein" data-weg="${esc(s.id)}">Entfernen</button>` : ""}
+    </div>`;
+  }).join("");
+  $$("[data-weg]", box).forEach((b) => (b.onclick = () => rauswerfen(b.dataset.weg)));
+  if (host && z.spieler.length > 1) box.insertAdjacentHTML("beforeend", '<p class="leise klein-text">Entfernte Spieler können 5 Minuten lang nicht zurück in den Raum.</p>');
+}
+
+function rauswerfen(id) {
+  const s = GN.spieler(id);
+  if (!confirm(`${s.name} aus dem Raum entfernen?`)) return;
+  socket.emit("rauswerfen", id);
+  toast(`${s.name} wurde entfernt.`);
+}
+
+$("#raumChip").onclick = () => { if (GN.zustand) { Ton.klick(); oeffneRaumFenster(); } };
+$("#afkBtn").onclick = () => { Ton.klick(); GN.aktion("da"); $("#afkHinweis").classList.add("versteckt"); };
+
+// ---------- Zuschauen (später eingestiegen) ----------
+function zeigeZuschauer(z) {
+  const ende = /ende/.test(z.phase);
+  const nr = z.rundeNr || z.runde?.nr || 0;
+  const gesamt = z.rundenGesamt || z.einstellungen?.runden || 0;
+  const key = "zuschauer";
+  if (GN.ansicht === key) {
+    $("#zuschauerInfo").textContent = ende ? "Die Partie ist gerade vorbei." : `Gerade läuft Runde ${nr} von ${gesamt}.`;
+    return GN.rangliste($("#rangliste"));
+  }
+  GN.ansicht = key;
+  GN.stoppeTimer();
+  $("#intro").classList.add("versteckt");
+  app.innerHTML = `
+    <div class="max-breite zuschauer">
+      <div class="karte zuschauer-karte">
+        <div class="zuschauer-icon">👀</div>
+        <h2>Du bist gleich dabei!</h2>
+        <p>${ende ? "Sobald der Host die nächste Partie startet, spielst du mit." : "Das Spiel läuft schon. <b>Ab der nächsten Runde</b> spielst du mit."}</p>
+        <div class="leise" id="zuschauerInfo">${ende ? "Die Partie ist gerade vorbei." : `Gerade läuft Runde ${nr} von ${gesamt}.`}</div>
+        <div class="warte">Gleich geht's los${punkte()}</div>
+      </div>
+      <div class="abschnitt-titel">Punktestand</div>
+      <div class="rangliste" id="rangliste"></div>
+      <div class="start-leiste"><button class="btn link" id="verlassenBtn">Raum verlassen</button></div>
+    </div>`;
+  GN.rangliste($("#rangliste"));
+  $("#verlassenBtn").onclick = verlassen;
+}
 $("#tonBtn").onclick = () => { $("#tonBtn").textContent = Ton.umschalten() ? "🔊" : "🔇"; };
 $("#tonBtn").textContent = Ton.an ? "🔊" : "🔇";
 $("#stoppSpielBtn").onclick = () => {
@@ -397,6 +508,13 @@ GN.starteTimer = (restMs, gesamtMs, { tickAb = 5000, tonAus = () => false } = {}
   timerInterval = setInterval(tick, 200);
 };
 GN.stoppeTimer = () => { clearInterval(timerInterval); timerInterval = null; };
+// Ohne Zeitlimit: Balken bleibt voll, statt Sekunden steht ∞
+GN.ohneZeitlimit = () => {
+  GN.stoppeTimer();
+  $("#timer")?.classList.add("unendlich");
+  const zahl = $("#timerZahl");
+  if (zahl) { zahl.textContent = "∞"; zahl.title = "Ohne Zeitlimit"; }
+};
 
 GN.intro = ({ oben, icon, titel, text, dauer = 1700, ton = true }) => {
   const intro = $("#intro");
@@ -415,48 +533,90 @@ GN.intro = ({ oben, icon, titel, text, dauer = 1700, ton = true }) => {
 GN.rangliste = (box, rundenPunkte = {}, mitAnimation = false) => {
   if (!box) return;
   const z = GN.zustand;
-  const sortiert = [...z.spieler].sort((a, b) => b.punkte - a.punkte);
+  const sortiert = [...z.spieler].filter((s) => !s.zuschauer).sort((a, b) => b.punkte - a.punkte);
   const max = Math.max(1, ...sortiert.map((s) => s.punkte));
   box.innerHTML = sortiert.map((s, i) => `
     <div class="rang ${s.id === spielerId ? "ich" : ""} ${s.online ? "" : "offline"}">
       <span class="balken" style="width:${mitAnimation ? 0 : (s.punkte / max) * 100}%" data-w="${(s.punkte / max) * 100}"></span>
       <span class="platz">${["🥇", "🥈", "🥉"][i] || i + 1}</span>
       <span class="avatar">${s.avatar}</span>
-      <span class="name">${esc(s.name)}</span>
+      <span class="name">${esc(s.name)}${s.afk ? ' <span title="abwesend">💤</span>' : ""}</span>
       <span class="pkt">${s.punkte.toLocaleString("de-DE")}${rundenPunkte[s.id] ? ` <span class="plus-klein">+${rundenPunkte[s.id]}</span>` : ""}</span>
     </div>`).join("");
   if (mitAnimation) setTimeout(() => $$(".balken", box).forEach((b) => (b.style.width = b.dataset.w + "%")), 900);
 };
 
-// Siegerehrung für alle Spiele
+// =============================================================
+//  Siegerehrung für alle Spiele
+//  Ablauf: Trommelwirbel → Säulen wachsen (3., 2., 1.) und Punkte zählen hoch
+//  → Sieger wird enthüllt (Fanfare, Konfetti) → Auszeichnungen erscheinen nacheinander
+// =============================================================
 GN.podest = (key, { einheit = "Pkt." } = {}) => {
+  const schonGesehen = GN.podest.zuletzt === key; // z. B. nach Host-Wechsel: ohne erneute Show
+  GN.podest.zuletzt = key;
   GN.ansicht = key;
   GN.stoppeTimer();
+  clearTimeout(GN.podest.t);
+  (GN.podest.timer || []).forEach(clearTimeout);
+  GN.podest.timer = [];
+  const spaeter = (ms, fn) => GN.podest.timer.push(setTimeout(() => GN.ansicht === key && fn(), schonGesehen ? 0 : ms));
   const z = GN.zustand;
   const host = GN.istHost();
-  const sortiert = [...z.spieler].sort((a, b) => b.punkte - a.punkte);
-  const platz = (i) => sortiert[i]
-    ? `<div class="podest-platz p${i + 1}"><span class="avatar">${sortiert[i].avatar}</span>
-        <div class="name">${esc(sortiert[i].name)}</div><div class="pkt">${sortiert[i].punkte.toLocaleString("de-DE")} ${einheit}</div>
-        <div class="podest-sockel">${i + 1}</div></div>`
-    : `<div></div>`;
-  const gleichstand = sortiert[1] && sortiert[0].punkte === sortiert[1].punkte;
+  const sortiert = [...z.spieler].filter((s) => !s.zuschauer).sort((a, b) => b.punkte - a.punkte);
+  const solo = sortiert.length === 1;
+  const fmt = (n) => Math.round(n).toLocaleString("de-DE");
+  // Plätze wie beim Sport: Gleichstand = gleicher Platz
+  const platzNr = sortiert.map((s, i) => (i > 0 && s.punkte === sortiert[i - 1].punkte ? null : i + 1));
+  platzNr.forEach((p, i) => { if (p === null) platzNr[i] = platzNr[i - 1]; });
+
+  const saeule = (i) => {
+    const s = sortiert[i];
+    if (!s) return `<div class="podest-platz leer"></div>`;
+    return `<div class="podest-platz p${i + 1}" data-platz="${i}">
+      <div class="podest-oben">
+        ${i === 0 && !solo && !gleichstand ? '<span class="krone" aria-hidden="true">👑</span>' : ""}
+        <span class="avatar">${s.avatar}</span>
+        <div class="name">${esc(s.name)}</div>
+        <div class="pkt"><span class="zaehler" data-ziel="${s.punkte}">0</span> ${einheit}</div>
+      </div>
+      <div class="podest-sockel"><span>${platzNr[i]}</span></div>
+    </div>`;
+  };
+
   let rekordInfo = "";
-  if (sortiert.length === 1) {
+  if (solo) {
     const schluessel = `rekord-${z.spiel}`;
     const alt = Number(speicher(schluessel) || 0);
     const jetzt = sortiert[0].punkte;
-    if (jetzt > alt) { speicher(schluessel, String(jetzt)); rekordInfo = alt ? `🎉 Neuer Rekord! Vorher: ${alt.toLocaleString("de-DE")}` : "🎯 Dein erster Rekord ist gesetzt!"; }
-    else rekordInfo = `Dein Rekord: ${alt.toLocaleString("de-DE")} ${einheit}`;
+    if (!schonGesehen && jetzt > alt) speicher(schluessel, String(jetzt));
+    const neuerRekord = jetzt > alt || (schonGesehen && jetzt === alt && jetzt > 0);
+    rekordInfo = neuerRekord ? (alt && jetzt > alt ? `🎉 Neuer Rekord! Vorher: ${fmt(alt)}` : "🎯 Neuer Rekord!") : `Dein Rekord: ${fmt(alt)} ${einheit}`;
   }
-  const titel = sortiert.length === 1 ? `🏁 ${sortiert[0].punkte.toLocaleString("de-DE")} ${einheit}` : gleichstand ? "🤝 Gleichstand an der Spitze!"
+  const gleichstand = sortiert[1] && sortiert[0].punkte === sortiert[1].punkte;
+  const titel = solo ? `🏁 ${fmt(sortiert[0].punkte)} ${einheit}` : gleichstand ? "🤝 Gleichstand an der Spitze!"
     : sortiert[0]?.id === spielerId ? "🏆 Du hast gewonnen!" : `🏆 ${esc(sortiert[0]?.name || "")} gewinnt!`;
 
+  const auszeichnungen = (z.auszeichnungen || z.runde?.auszeichnungen || []).filter((a) => a.spieler.some((id) => z.spieler.some((s) => s.id === id)));
+  const wer = (ids) => ids.map((id) => { const s = GN.spieler(id); return `<span class="az-person ${id === spielerId ? "ich" : ""}">${s.avatar} ${esc(s.name)}</span>`; }).join(ids.length === 2 ? " &amp; " : " ");
+
   app.innerHTML = `
-    <div class="max-breite">
-      <div class="sieger-titel">${titel}</div>
-      ${rekordInfo ? `<div class="rekord-info">${rekordInfo}</div>` : ""}
-      <div class="podest">${platz(1)}${platz(0)}${platz(2)}</div>
+    <div class="max-breite siegerehrung ${schonGesehen ? "schnell" : ""}">
+      <div class="sieger-titel" id="siegerTitel">${schonGesehen ? titel : solo ? "Dein Ergebnis …" : "Und der Sieg geht an …"}</div>
+      ${rekordInfo ? `<div class="rekord-info" id="rekordInfo">${rekordInfo}</div>` : ""}
+      <div class="podest ${solo ? "solo" : ""}">${solo ? saeule(0) : saeule(1) + saeule(0) + saeule(2)}</div>
+      ${auszeichnungen.length ? `
+        <div class="abschnitt-titel">${solo ? "🏅 Deine Bilanz" : "🏅 Auszeichnungen"}</div>
+        <div class="auszeichnungen">
+          ${auszeichnungen.map((a, i) => `
+            <div class="auszeichnung ${a.spieler.includes(spielerId) ? "meine" : ""}" style="--i:${i}">
+              <span class="az-icon">${a.icon}</span>
+              <div class="az-text">
+                <div class="az-titel">${esc(a.titel)}</div>
+                ${solo ? "" : `<div class="az-wer">${wer(a.spieler)}</div>`}
+                <div class="az-info">${esc(a.text)}</div>
+              </div>
+            </div>`).join("")}
+        </div>` : ""}
       <div class="abschnitt-titel">Endstand</div>
       <div class="rangliste" id="rangliste"></div>
       <div class="start-leiste">
@@ -471,8 +631,47 @@ GN.podest = (key, { einheit = "Pkt." } = {}) => {
   $("#nochmalBtn")?.addEventListener("click", () => socket.emit("spielStarten"));
   $("#lobbyBtn")?.addEventListener("click", () => socket.emit("zurLobby"));
   $("#verlassenBtn").onclick = verlassen;
-  setTimeout(() => { Ton.fanfare(); konfetti(180); }, 1300);
+
+  // Säulen wachsen nacheinander: 3. → 2. → 1.
+  const reihenfolge = [2, 1, 0].filter((i) => sortiert[i]);
+  const zeiten = solo ? [400] : [400, 1200, 2100];
+  if (!schonGesehen) Ton.trommel(solo ? 1.2 : 2.6);
+  reihenfolge.forEach((i, n) => spaeter(zeiten[n], () => {
+    const el = $(`.podest-platz[data-platz="${i}"]`);
+    if (!el) return;
+    el.classList.add("steigt");
+    if (!schonGesehen) Ton.aufsteigen(0.6, 1 + (2 - i) * 0.25);
+    hochzaehlen($(".zaehler", el), schonGesehen ? 0 : 900);
+  }));
+  const enthuellung = solo ? 1500 : 3000;
+  spaeter(enthuellung, () => {
+    $("#siegerTitel").innerHTML = titel;
+    $("#siegerTitel").classList.add("enthuellt");
+    $(".podest-platz.p1")?.classList.add("sieger");
+    if (schonGesehen) return;
+    Ton.fanfare();
+    konfetti(solo ? 120 : 200);
+  });
+  $$(".auszeichnung").forEach((el, i) => spaeter(enthuellung + 900 + i * 650, () => {
+    el.classList.add("sichtbar");
+    if (!schonGesehen) Ton.auszeichnung(i);
+    if (!schonGesehen && el.classList.contains("meine")) navigator.vibrate?.(40);
+  }));
 };
+
+// Zahl zählt weich hoch (für Podest-Punkte)
+function hochzaehlen(el, dauer) {
+  if (!el) return;
+  const ziel = Number(el.dataset.ziel) || 0;
+  if (!dauer) { el.textContent = ziel.toLocaleString("de-DE"); return; }
+  const start = performance.now();
+  const schritt = (jetzt) => {
+    const t = Math.min(1, (jetzt - start) / dauer);
+    el.textContent = Math.round(ziel * (1 - Math.pow(1 - t, 3))).toLocaleString("de-DE");
+    if (t < 1 && el.isConnected) requestAnimationFrame(schritt);
+  };
+  requestAnimationFrame(schritt);
+}
 
 // ---------- Kleine Helfer ----------
 function esc(text) {

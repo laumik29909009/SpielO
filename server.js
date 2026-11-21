@@ -75,6 +75,26 @@ function leseMusik() {
 const MUSIK = leseMusik();
 app.get("/api/musik", (_req, res) => res.set("Cache-Control", "no-cache").json({ richtungen: MUSIK }));
 
+// QR-Code zum Beitreten: /qr/ABCD.svg zeigt auf https://<diese Seite>/?raum=ABCD
+const QRCode = require("qrcode");
+const QR_CACHE = new Map();
+app.get("/qr/:code.svg", async (req, res) => {
+  const code = String(req.params.code || "").toUpperCase();
+  if (!/^[A-Z]{4}$/.test(code)) return res.status(404).end();
+  const proto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
+  const host = String(req.headers.host || "").replace(/[^\w.:-]/g, "");
+  const link = `${proto}://${host}/?raum=${code}`;
+  try {
+    let svg = QR_CACHE.get(link);
+    if (!svg) {
+      svg = await QRCode.toString(link, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#141022", light: "#ffffff" } });
+      if (QR_CACHE.size > 200) QR_CACHE.clear();
+      QR_CACHE.set(link, svg);
+    }
+    res.set("Cache-Control", "public, max-age=3600").type("image/svg+xml").send(svg);
+  } catch { res.status(500).end(); }
+});
+
 app.use(express.static(path.join(__dirname, "public"), {
   // Versionierte Dateien dürfen lange im Cache bleiben, alles andere nur kurz
   setHeaders: (res, datei) => res.set("Cache-Control", /\.(css|js)$/.test(datei) ? "public, max-age=604800, immutable" : "public, max-age=3600"),
@@ -107,6 +127,26 @@ const ctx = {
     if (s && s.online) io.to(s.socketId).emit(ereignis, daten);
   },
   onlineSpieler: (raum) => Object.values(raum.spieler).filter((s) => s.online),
+  // Wer spielt diese Runde mit? (ohne Zuschauer, die erst später eingestiegen sind)
+  teilnehmer: (raum) => Object.values(raum.spieler).filter((s) => !s.zuschauer),
+  // Auf wen wird gewartet? (online, spielt mit und ist nicht als abwesend markiert)
+  aktive: (raum) => Object.values(raum.spieler).filter((s) => s.online && !s.zuschauer && !s.afk),
+  // Neue Runde: Zuschauer steigen ein
+  neueRunde: (raum) => { for (const s of Object.values(raum.spieler)) s.zuschauer = false; },
+  // Nach jeder Runde: Wer nichts gemacht hat, zählt hoch; nach `grenze` Runden ohne Eingabe → 💤 abwesend
+  mitgemacht: (raum, ids, grenze = 2) => {
+    for (const s of Object.values(raum.spieler)) {
+      if (s.zuschauer || !s.online) continue;
+      if (ids.has(s.id)) { s.ohneEingabe = 0; s.afk = false; }
+      else if (++s.ohneEingabe >= grenze) s.afk = true;
+    }
+    neuerHostFallsNoetig(raum);
+  },
+  zurueck: (raum, id) => {
+    const s = raum.spieler[id];
+    if (s && (s.afk || s.ohneEingabe)) { s.afk = false; s.ohneEingabe = 0; return true; }
+    return false;
+  },
 };
 
 function sendeZustand(raum) {
@@ -124,17 +164,28 @@ function sendeZustand(raum) {
       avatar: s.avatar,
       punkte: s.punkte,
       online: s.online,
+      zuschauer: !!s.zuschauer,
+      afk: !!s.afk,
       ...(imSpiel && m.spielerInfo ? m.spielerInfo(raum, s) : {}),
     })),
     ...(imSpiel ? m.ansicht(raum) : {}),
   });
 }
 
+// Host muss online sein. Ist er abwesend (💤), übernimmt jemand, der gerade mitspielt.
 function neuerHostFallsNoetig(raum) {
   const host = raum.spieler[raum.hostId];
-  if (host && host.online) return;
-  const neuer = Object.values(raum.spieler).find((s) => s.online);
-  if (neuer) raum.hostId = neuer.id;
+  const alle = Object.values(raum.spieler);
+  const gut = (s) => s.online && !s.afk && !s.zuschauer;
+  if (host && host.online && (!host.afk || !alle.some(gut))) return;
+  const neuer = alle.find(gut) || alle.find((s) => s.online && !s.zuschauer) || alle.find((s) => s.online);
+  if (!neuer) return;
+  raum.hostId = neuer.id;
+  neuer.zuschauer = false; // ein Host schaut nie nur zu
+}
+
+function alleZuruecksetzen(raum) {
+  for (const s of Object.values(raum.spieler)) { s.zuschauer = false; s.afk = false; s.ohneEingabe = 0; }
 }
 
 function freierAvatar(raum, aktuell) {
@@ -156,6 +207,7 @@ function zurLobby(raum) {
     s.punkte = 0;
     if (!s.online) delete raum.spieler[s.id];
   }
+  alleZuruecksetzen(raum);
 }
 
 // ---------- Verbindungen ----------
@@ -179,6 +231,12 @@ io.on("connection", (socket) => {
   });
 
   const istHost = () => meinRaum && meinRaum.hostId === meineId;
+  // Wird aufgerufen, wenn der Host diesen Spieler entfernt
+  socket.data.rauswerfen = () => {
+    if (meinRaum) socket.leave(meinRaum.code);
+    meinRaum = null;
+    meineId = null;
+  };
   const auf = (ereignis, fn) => socket.on(ereignis, (...args) => {
     try { fn(...args); } catch (err) { console.error(`Fehler bei "${ereignis}":`, err.message); }
   });
@@ -203,6 +261,10 @@ io.on("connection", (socket) => {
         punkte: 0,
         online: true,
         socketId: socket.id,
+        // Läuft schon ein Spiel, schaut man zu und steigt ab der nächsten Runde ein
+        zuschauer: raum.phase === "spiel",
+        afk: false,
+        ohneEingabe: 0,
       };
     }
     neuerHostFallsNoetig(raum);
@@ -239,9 +301,9 @@ io.on("connection", (socket) => {
     // "abgelehnt": der Browser setzt sich zurück auf die Startseite (statt eingefroren stehen zu bleiben)
     if (!raum) return socket.emit("abgelehnt", `Raum "${code}" gibt es nicht (mehr).`);
     if (!spielerId) return;
+    if (raum.gesperrt?.[spielerId] > Date.now()) return socket.emit("abgelehnt", "Der Host hat dich aus diesem Raum entfernt.");
     if (!raum.spieler[spielerId]) {
       if (!name) return socket.emit("fehler", "Bitte gib einen Namen ein.");
-      if (raum.phase !== "lobby") return socket.emit("abgelehnt", "Das Spiel läuft schon. Warte auf die nächste Partie.");
       if (Object.keys(raum.spieler).length >= MAX_SPIELER) return socket.emit("abgelehnt", `Der Raum ist voll (max. ${MAX_SPIELER}).`);
     }
     beitreten(raum, spielerId, name);
@@ -275,6 +337,7 @@ io.on("connection", (socket) => {
       if (!s.online) delete raum.spieler[s.id];
       else s.punkte = 0;
     }
+    alleZuruecksetzen(raum);
     modul(raum).beenden?.(raum);
     raum.phase = "spiel";
     const fehler = modul(raum).starten(raum, ctx);
@@ -289,6 +352,16 @@ io.on("connection", (socket) => {
   auf("aktion", (typ, nutzlast) => {
     const raum = meinRaum;
     if (!raum || raum.phase !== "spiel" || !raum.daten || typeof typ !== "string") return;
+    const ich = raum.spieler[meineId];
+    if (!ich) return;
+    // "Ich bin wieder da" nach 💤, und jede echte Eingabe beendet die Abwesenheit
+    if (typ === "da" || (typ !== "entwurf" && ctx.zurueck(raum, meineId))) {
+      if (typ === "da") ctx.zurueck(raum, meineId);
+      neuerHostFallsNoetig(raum);
+      sendeZustand(raum);
+      if (typ === "da") return;
+    }
+    if (ich.zuschauer && !istHost()) return; // Zuschauer warten auf die nächste Runde
     const ergebnis = modul(raum).aktion(raum, { spielerId: meineId, istHost: istHost() }, typ, nutzlast, ctx);
     if (typeof ergebnis === "string") socket.emit("fehler", ergebnis);
   });
@@ -297,6 +370,25 @@ io.on("connection", (socket) => {
     if (!istHost() || meinRaum.phase !== "spiel") return;
     zurLobby(meinRaum);
     sendeZustand(meinRaum);
+  });
+
+  // Host entfernt einen Spieler (5 Minuten Sperre, damit er nicht sofort zurückkommt)
+  auf("rauswerfen", (id) => {
+    if (!istHost() || typeof id !== "string" || id === meineId) return;
+    const raum = meinRaum;
+    if (!Object.hasOwn(raum.spieler, id)) return;
+    const s = raum.spieler[id];
+    clearTimeout(s.entfernenTimer);
+    delete raum.spieler[id];
+    raum.gesperrt = Object.fromEntries(Object.entries(raum.gesperrt || {}).filter(([, bis]) => bis > Date.now()));
+    raum.gesperrt[id] = Date.now() + 5 * 60 * 1000;
+    const sock = s.online && io.sockets.sockets.get(s.socketId);
+    if (sock) {
+      sock.data.rauswerfen?.();
+      sock.emit("rausgeworfen", "Der Host hat dich aus dem Raum entfernt.");
+    }
+    if (raum.phase === "spiel") modul(raum).spielerWeg?.(raum, id, ctx);
+    sendeZustand(raum);
   });
 
   auf("verlassen", () => entfernen(true));
@@ -337,6 +429,7 @@ process.on("uncaughtException", (err) => console.error("Unerwarteter Fehler:", e
 process.on("unhandledRejection", (err) => console.error("Unbehandelter Fehler:", err));
 
 const PORT = process.env.PORT || 3000;
+server.on("error", (err) => { console.error("Server konnte nicht starten:", err.message); process.exit(1); });
 server.listen(PORT, () => {
   console.log(`SpielO läuft auf http://localhost:${PORT}`);
 });

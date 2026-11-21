@@ -24,7 +24,7 @@
   <header class="topbar">
     <div class="logo"><span class="spielo-logo klein" aria-label="SpielO"><span class="b">Spiel</span><span class="o-chip"><span class="o-zeichnen"><span class="o-ring"></span></span><span class="o-punkt"></span></span></span></div>
     <div class="topbar-rechts">
-      <button id="raumChip" class="raum-chip versteckt" title="Einladungslink kopieren"></button>
+      <button id="raumChip" class="raum-chip versteckt" title="Raum: Einladen & Spieler"></button>
       <button id="stoppSpielBtn" class="icon-btn versteckt" title="Spiel abbrechen" aria-label="Spiel abbrechen">⏹</button>
       <button id="musikBtn" class="icon-btn musik-btn" title="Hintergrundmusik" aria-label="Hintergrundmusik" aria-expanded="false">🎵</button>
       <button id="tonBtn" class="icon-btn" title="Soundeffekte an/aus" aria-label="Soundeffekte an/aus">🔊</button>
@@ -43,6 +43,12 @@
       <span class="btn">Tippen zum Weiterspielen</span>
     </div>
   </div>
+  <dialog id="raumFenster" class="fenster" aria-label="Raum & Einladen"></dialog>
+  <div id="afkHinweis" class="afk-hinweis versteckt" role="alert">
+    <span class="afk-icon">💤</span>
+    <span class="afk-text"><b>Bist du noch da?</b><span>Du warst inaktiv, daher wartet gerade niemand auf dich.</span></span>
+    <button class="btn" id="afkBtn">Bin wieder da!</button>
+  </div>
   <div id="intro" class="intro versteckt" aria-live="polite"></div>
   <div id="toast" class="toast versteckt" role="status"></div>
   <canvas id="konfetti" aria-hidden="true"></canvas>
@@ -52,6 +58,7 @@
   <script src="kern.js"></script>
   <script src="spiele/preis.js"></script>
   <script src="spiele/slf.js"></script>
+  <script src="beat.js"></script>
   <script src="musik.js"></script>
 </body>
 </html>

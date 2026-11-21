@@ -68,19 +68,20 @@
             <p class="leise klein-text">🔞 Ü18-Kategorien sind gekennzeichnet. „Zufall“ wählt sie nie aus.</p>` : ""}`,
       },
       {
-        id: "runden", wichtig: true, icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min"} pro Runde`,
+        id: "runden", wichtig: true, icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${!e.sekunden ? "ohne Zeitlimit" : (e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min") + " pro Runde"}`,
         html: `<div class="einstellungs-zeile">
           <div><div class="unter-titel">Runden</div>
             <div class="segment">${[3, 5, 8, 10].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
           <div><div class="unter-titel">Zeit pro Runde</div>
-            <div class="segment">${[60, 90, 120, 180].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n < 120 ? n + "s" : n / 60 + " min"}</button>`).join("")}</div></div>
-        </div>`,
+            <div class="segment">${[60, 90, 120, 180, 0].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis} ${n ? "" : 'title="Ohne Zeitlimit: Die Runde endet per Stopp"'}>${!n ? "∞" : n < 120 ? n + "s" : n / 60 + " min"}</button>`).join("")}</div></div>
+        </div>
+        ${e.sekunden ? "" : '<p class="leise klein-text" style="margin-top:10px">∞ Ohne Zeitlimit: Die Runde endet, wenn jemand Stopp drückt (danach 10 Sekunden). Der Host kann sie auch beenden.</p>'}`,
       },
       {
         id: "regeln", icon: "⚙️", titel: "Regeln",
         info: `Stopp ${e.stopp ? "an" : "aus"} · Schwere Buchstaben ${e.schwer ? "an" : "aus"}`,
         html: `<div class="schalter-liste">
-          ${schalter("stopp", e.stopp, "🛑 Stopp-Knopf", "Wer alles ausgefüllt hat, kann Stopp drücken. Dann haben alle noch 10 Sekunden. Solo endet die Runde sofort und es gibt Tempo-Bonus.", dis)}
+          ${schalter("stopp", e.stopp, "🛑 Stopp-Knopf", `Wer alles ausgefüllt hat, kann Stopp drücken. Dann haben alle noch 10 Sekunden. Solo endet die Runde sofort und es gibt Tempo-Bonus.${e.sekunden ? "" : " <b>Ohne Zeitlimit immer an</b> (ausschalten stellt 90 s ein)."}`, dis)}
           ${schalter("schwer", e.schwer, "🧨 Schwere Buchstaben", "C, J, Q, X und Y kommen auch vor.", dis)}
         </div>`,
       },
@@ -268,7 +269,8 @@
             </span>
           </label>`).join("")}
       </form>
-      ${z.stoppErlaubt ? `<button class="btn gross voll stopp-knopf" id="stoppBtn" disabled>🛑 STOPP!</button>` : ""}`;
+      ${z.stoppErlaubt ? `<button class="btn gross voll stopp-knopf" id="stoppBtn" disabled>🛑 STOPP!</button>` : ""}
+      <div class="host-aktion" id="hostAktion"></div>`;
 
     const felder = $$("[data-feld]");
     felder.forEach((input, i) => {
@@ -302,10 +304,10 @@
     const live = $("#fortschritt");
     if (live) {
       // Live: pro Mitspieler ein Balken mit einem Segment pro Kategorie
-      live.innerHTML = z.spieler.filter((s) => s.online && s.id !== GN.ich).map((s) => {
+      live.innerHTML = z.spieler.filter((s) => s.online && !s.zuschauer && s.id !== GN.ich).map((s) => {
         const felder = (s.felder || "").padEnd(gesamt, "0");
         const fertig = [...felder].filter((f) => f === "2").length;
-        return `<span class="live-spieler ${fertig === gesamt ? "voll" : ""}" title="${esc(s.name)}: ${fertig}/${gesamt}">
+        return `<span class="live-spieler ${fertig === gesamt ? "voll" : ""} ${s.afk ? "afk" : ""}" title="${esc(s.name)}: ${fertig}/${gesamt}${s.afk ? " (abwesend)" : ""}">
           <span class="avatar">${s.avatar}</span>
           <span class="live-info"><span class="live-name">${esc(s.name)}</span>
             <span class="segmente">${[...felder].map((f) => `<i class="f${f}"></i>`).join("")}</span></span>
@@ -333,7 +335,25 @@
     }
     if (!vorher || vorher.phase !== z.phase || stoppNeu || GN.timerNeu) {
       GN.timerNeu = false;
-      GN.starteTimer(z.restMs, z.phase === "stopp" ? 10000 : z.sekunden * 1000, { tickAb: 10000 });
+      if (z.phase === "schreiben" && !z.sekunden) GN.ohneZeitlimit();
+      else {
+        $("#timer")?.classList.remove("unendlich");
+        GN.starteTimer(z.restMs, z.phase === "stopp" ? 10000 : z.sekunden * 1000, { tickAb: 10000 });
+      }
+    }
+    // Ohne Zeitlimit: Host kann die Runde beenden (z. B. wenn niemand alles schafft)
+    const box = $("#hostAktion");
+    if (box) {
+      const zeigen = GN.istHost() && !z.sekunden && z.phase === "schreiben";
+      if (!zeigen) box.innerHTML = "";
+      else if (!$("#rundeBeendenBtn")) {
+        box.innerHTML = `<button class="btn zweit" id="rundeBeendenBtn">⏭ ${z.solo ? "Runde beenden" : "Runde für alle beenden"}</button>`;
+        $("#rundeBeendenBtn").onclick = () => {
+          if (!confirm("Runde jetzt für alle beenden? Was bisher eingetragen ist, wird gewertet.")) return;
+          sendeEntwurf(true);
+          GN.aktion("rundeBeenden");
+        };
+      }
     }
   }
 
@@ -400,8 +420,9 @@
     $("#intro").classList.add("versteckt");
 
     const ichBereit = GN.spieler(GN.ich).bereit;
-    const bereitAnzahl = z.spieler.filter((s) => s.online && s.bereit).length;
-    const online = z.spieler.filter((s) => s.online).length;
+    const dabei = z.spieler.filter((s) => s.online && !s.zuschauer);
+    const bereitAnzahl = dabei.filter((s) => s.bereit).length;
+    const online = dabei.length;
 
     app.innerHTML = `
       <div class="runden-kopf">
@@ -424,7 +445,7 @@
           <div class="abschnitt-titel" style="margin-top:0">Punktestand</div>
           <div class="rangliste" id="rangliste"></div>
           <div class="start-leiste">
-            ${z.solo ? "" : `<div class="bereit-reihe">${z.spieler.filter((s) => s.online).map((s) => `<span class="status ${s.bereit ? "fertig" : ""}" title="${esc(s.name)}"><span class="avatar">${s.avatar}</span></span>`).join("")}</div>
+            ${z.solo ? "" : `<div class="bereit-reihe">${dabei.map((s) => `<span class="status ${s.bereit ? "fertig" : ""} ${s.afk && !s.bereit ? "afk" : ""}" title="${esc(s.name)}"><span class="avatar">${s.avatar}</span></span>`).join("")}</div>
             <div class="leise klein-text" style="text-align:center">${bereitAnzahl}/${online} sind fertig mit Prüfen</div>`}
             ${host
               ? `<button class="btn gross voll" id="weiterBtn">${letzte ? "🏆 Zur Siegerehrung" : "Nächste Runde ➜"}</button>`

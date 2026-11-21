@@ -408,24 +408,57 @@ button.avatar:hover { border-color: var(--gold); }
 .rang.ich { border-color: var(--gold); }
 .rang.offline { opacity: 0.45; }
 
-/* ---------- Ende ---------- */
-.podest { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end; max-width: 560px; margin: 20px auto 8px; }
-.podest-platz { text-align: center; animation: aufsteigen 0.8s cubic-bezier(.2,1.2,.4,1) both; }
-.podest-platz:nth-child(1) { animation-delay: 0.6s; }
-.podest-platz:nth-child(2) { animation-delay: 1.2s; }
-.podest-platz:nth-child(3) { animation-delay: 0.2s; }
-@keyframes aufsteigen { from { transform: translateY(40px); opacity: 0; } }
+/* ---------- Ende: Siegerehrung ---------- */
+.podest { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end; max-width: 560px; margin: 20px auto 8px; min-height: 270px; }
+.podest.solo { grid-template-columns: minmax(0, 220px); justify-content: center; }
+.podest-platz { text-align: center; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+.podest-oben { opacity: 0; transform: translateY(-30px) scale(0.7); transition: opacity 0.4s, transform 0.6s cubic-bezier(.2,1.5,.4,1); position: relative; }
+.podest-platz.steigt .podest-oben { opacity: 1; transform: none; transition-delay: 0.45s; }
 .podest-platz .avatar { width: 64px; height: 64px; font-size: 2.2rem; }
 .podest-platz.p1 .avatar { width: 84px; height: 84px; font-size: 3rem; border-color: var(--gold); box-shadow: 0 0 30px rgba(255, 203, 71, 0.5); }
 .podest-platz .name { font-weight: 800; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.podest-platz .pkt { color: var(--leise); font-weight: 700; font-size: 0.9rem; }
+.podest-platz .pkt { color: var(--leise); font-weight: 700; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
 .podest-sockel {
   margin-top: 8px; border-radius: 14px 14px 0 0; display: grid; place-items: center; font-size: 2rem; font-weight: 900;
   background: linear-gradient(180deg, var(--flaeche-2), var(--flaeche)); border: 1px solid var(--rand); border-bottom: 0;
+  height: 0; overflow: hidden; transition: height 0.75s cubic-bezier(.2,1.25,.4,1);
 }
-.p1 .podest-sockel { height: 130px; background: linear-gradient(180deg, rgba(255, 203, 71, 0.35), var(--flaeche)); }
-.p2 .podest-sockel { height: 95px; }
-.p3 .podest-sockel { height: 70px; }
+.podest-sockel span { opacity: 0; transition: opacity 0.3s 0.4s; }
+.podest-platz.steigt .podest-sockel span { opacity: 1; }
+.p1 .podest-sockel { background: linear-gradient(180deg, rgba(255, 203, 71, 0.35), var(--flaeche)); }
+.podest-platz.p1.steigt .podest-sockel { height: 130px; }
+.podest-platz.p2.steigt .podest-sockel { height: 95px; }
+.podest-platz.p3.steigt .podest-sockel { height: 70px; }
+.podest.solo .podest-platz.steigt .podest-sockel { height: 110px; }
+.krone { position: absolute; left: 50%; top: -34px; font-size: 2rem; transform: translate(-50%, -40px) rotate(-20deg); opacity: 0; transition: transform 0.6s cubic-bezier(.2,1.8,.4,1), opacity 0.3s; }
+.podest-platz.sieger .krone { opacity: 1; transform: translate(-50%, 0) rotate(-8deg); }
+.podest-platz.sieger .avatar { animation: sieger-huepfen 0.9s cubic-bezier(.3,1.6,.5,1) 2; }
+.podest-platz.sieger .podest-sockel { box-shadow: 0 0 40px rgba(255, 203, 71, 0.35); }
+@keyframes sieger-huepfen { 30% { transform: translateY(-14px) scale(1.08); } }
+#siegerTitel { min-height: 1.3em; }
+#siegerTitel.enthuellt { animation: titel-enthuellen 0.7s cubic-bezier(.2,1.5,.4,1); }
+@keyframes titel-enthuellen { from { transform: scale(0.6); opacity: 0; filter: blur(8px); } }
+.siegerehrung .rekord-info { opacity: 0; animation: einblenden 0.5s 1.6s forwards; }
+.siegerehrung.schnell .rekord-info { animation: none; opacity: 1; }
+.siegerehrung.schnell * { transition: none !important; }
+
+.auszeichnungen { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 10px; }
+.auszeichnung {
+  display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px; min-width: 0;
+  background: var(--flaeche); border: 1px solid var(--rand);
+  opacity: 0; transform: perspective(600px) rotateX(-70deg) translateY(10px); transform-origin: top;
+  transition: opacity 0.35s, transform 0.6s cubic-bezier(.2,1.4,.4,1);
+}
+.auszeichnung.sichtbar { opacity: 1; transform: none; }
+.auszeichnung.meine { border-color: var(--gold); background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 14%, var(--flaeche)), var(--flaeche)); }
+.az-icon { font-size: 2rem; flex: none; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 14px; background: var(--flaeche-2); }
+.auszeichnung.sichtbar .az-icon { animation: plopp 0.5s cubic-bezier(.2,1.8,.4,1); }
+.az-text { min-width: 0; }
+.az-titel { font-weight: 900; }
+.az-wer { font-weight: 700; font-size: 0.92rem; }
+.az-person.ich { color: var(--gold); }
+.az-info { color: var(--leise); font-size: 0.88rem; overflow-wrap: anywhere; }
+
 .sieger-titel { text-align: center; font-size: clamp(1.8rem, 7vw, 2.6rem); font-weight: 900; margin-top: 10px; }
 .max-breite { max-width: 640px; margin: 0 auto; }
 
@@ -1097,3 +1130,67 @@ dialog.fenster::backdrop { background: rgba(8, 6, 20, 0.6); backdrop-filter: blu
 @media (max-width: 700px) {
   .musik-panel { right: 12px; left: 12px; width: auto; top: calc(58px + env(safe-area-inset-top)); }
 }
+
+
+/* ---------- Raum-Fenster: QR-Code & Spieler ---------- */
+.einladen { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.qr-rahmen { background: #fff; border-radius: 18px; padding: 10px; box-shadow: var(--schatten); animation: reinploppen 0.35s cubic-bezier(.2,1.5,.4,1); }
+.qr-rahmen .qr { display: block; width: 200px; height: 200px; image-rendering: pixelated; }
+.einladen-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.einladen-text .code-gross { font-size: 2.6rem; }
+.link-zeile { display: flex; gap: 8px; min-width: 0; }
+.link-zeile .feld { flex: 1; min-width: 0; font-size: 0.85rem; padding: 10px 12px; }
+.raum-spieler-liste { display: grid; gap: 8px; }
+.raum-spieler-zeile { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: var(--flaeche-2); border: 1px solid var(--rand); min-width: 0; }
+.raum-spieler-zeile.offline { opacity: 0.55; }
+.raum-spieler-zeile .avatar { width: 36px; height: 36px; font-size: 1.2rem; flex: none; }
+.raum-spieler-zeile .name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.raum-spieler-zeile .marken { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
+.raum-spieler-zeile .marke { font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--flaeche); border: 1px solid var(--rand); white-space: nowrap; }
+.raum-spieler-zeile .marke.gold { border-color: var(--gold); color: var(--gold); }
+.raum-spieler-zeile .marke.grau { color: var(--leise); }
+.btn.klein { padding: 7px 12px; font-size: 0.85rem; min-height: 0; box-shadow: none; }
+.chip-weg { border: 0; background: transparent; color: var(--leise); font-size: 0.8rem; padding: 2px 4px; margin-left: -4px; cursor: pointer; border-radius: 50%; line-height: 1; }
+.chip-weg:hover { color: var(--rot); }
+@media (max-width: 700px) {
+  .einladen { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+  .einladen-text { width: 100%; align-items: stretch; }
+  .qr-rahmen .qr { width: 180px; height: 180px; }
+}
+
+/* ---------- Abwesend 💤 & Zuschauer 👀 ---------- */
+.afk-hinweis {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 55;
+  display: flex; align-items: center; gap: 12px; width: min(560px, calc(100% - 24px));
+  padding: 12px 14px; border-radius: 18px; background: var(--flaeche-2); border: 2px solid var(--gold); box-shadow: var(--schatten);
+  animation: hochgleiten 0.35s cubic-bezier(.2,1.4,.4,1);
+}
+.afk-icon { font-size: 2rem; animation: schweben 2s ease-in-out infinite; }
+.afk-text { display: flex; flex-direction: column; flex: 1; min-width: 0; font-size: 0.88rem; }
+.afk-text b { font-size: 1rem; }
+.afk-text span { color: var(--leise); }
+.afk-hinweis .btn { flex: none; }
+.status.afk .avatar { opacity: 0.3; filter: grayscale(1); }
+.status.afk::before, .live-spieler.afk .avatar::after { content: "💤"; position: absolute; top: -8px; right: -6px; font-size: 0.85rem; z-index: 1; }
+.live-spieler.afk { opacity: 0.5; }
+.live-spieler.afk .avatar { position: relative; }
+@media (max-width: 700px) {
+  /* Handy: oben anzeigen, damit Eingabe und Knöpfe unten frei bleiben */
+  .afk-hinweis { top: calc(68px + env(safe-area-inset-top)); bottom: auto; padding: 10px 12px; gap: 10px; }
+  .afk-icon { font-size: 1.6rem; }
+  .afk-hinweis .btn { padding: 10px 12px; font-size: 0.9rem; }
+}
+.zuschauer-karte { text-align: center; padding: 28px 20px; margin-top: 10px; }
+.zuschauer-icon { font-size: 4rem; animation: schweben 2.4s ease-in-out infinite; }
+.zuschauer-karte h2 { margin: 8px 0 6px; font-size: 1.6rem; }
+.zuschauer-karte p { margin: 0 0 8px; }
+.zuschauer-karte .warte { margin-top: 14px; }
+.host-aktion { display: flex; justify-content: center; margin-top: 12px; }
+.host-aktion:empty { display: none; }
+.timer.unendlich .timer-balken { transform: none !important; opacity: 0.35; background: repeating-linear-gradient(90deg, var(--gold) 0 14px, transparent 14px 22px); animation: band-laufen 1.2s linear infinite; background-size: 22px 100%; }
+@keyframes band-laufen { to { background-position: 22px 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .podest-sockel, .podest-oben, .auszeichnung, .krone { transition: none !important; }
+  .timer.unendlich .timer-balken, .afk-icon, .zuschauer-icon { animation: none; }
+}
+.musik-notiz { margin: 4px 2px 10px; }

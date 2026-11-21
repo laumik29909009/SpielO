@@ -77,6 +77,15 @@ const Ton = (() => {
     alarm() {
       for (let i = 0; i < 3; i++) ton(880, 0.16, { typ: "square", laut: 0.07, start: i * 0.22, gleitenZu: 660 });
     },
+    // Auszeichnung erscheint: kurzes Glitzern, mit jeder Karte etwas höher
+    auszeichnung(stufe = 0) {
+      const basis = 660 * Math.pow(2, (stufe % 6) * 2 / 12);
+      ton(basis, 0.14, { typ: "triangle", laut: 0.09 });
+      ton(basis * 1.5, 0.22, { typ: "sine", laut: 0.08, start: 0.06 });
+      ton(basis * 2, 0.3, { typ: "sine", laut: 0.04, start: 0.12 });
+    },
+    // Podest-Säule wächst: aufsteigender Ton
+    aufsteigen(dauer = 0.6, hoch = 1) { ton(180 * hoch, dauer, { typ: "triangle", laut: 0.06, gleitenZu: 520 * hoch }); },
     fanfare() {
       const noten = [[523, 0], [523, 0.15], [523, 0.3], [659, 0.45], [784, 0.75], [659, 1.0], [784, 1.15], [1047, 1.35]];
       noten.forEach(([f, s]) => ton(f, 0.25, { typ: "square", laut: 0.06, start: s }));

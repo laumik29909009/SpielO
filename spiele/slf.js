@@ -6,7 +6,8 @@
 // =============================================================
 const KATALOG = require("../daten/slf/kategorien.json");
 const { pruefe, beginntMit } = require("./slf-pruefer");
-const istSolo = (raum) => Object.keys(raum.spieler).length === 1;
+// Solo = nur eine Person spielt mit (Zuschauer, die später eingestiegen sind, zählen erst ab der nächsten Runde)
+const istSolo = (raum) => Object.values(raum.spieler).filter((s) => !s.zuschauer).length === 1;
 
 const ALLE_KATEGORIEN = KATALOG.gruppen.flatMap((g) => g.kategorien);
 const NACH_ID = Object.fromEntries(ALLE_KATEGORIEN.map((k) => [k.id, k]));
@@ -62,8 +63,14 @@ function einstellungenSetzen(alt, e) {
     neu.kategorien = ["stadt", "land", ...pool.filter((id) => id !== "stadt" && id !== "land").slice(0, 4)].map(kategorieAusId);
   }
   if (e.runden !== undefined) neu.runden = Math.min(15, Math.max(1, parseInt(e.runden) || 5));
-  if (e.sekunden !== undefined) neu.sekunden = Math.min(300, Math.max(30, parseInt(e.sekunden) || 90));
+  if (e.sekunden !== undefined) {
+    const sek = parseInt(e.sekunden);
+    neu.sekunden = sek === 0 ? 0 : Math.min(300, Math.max(30, sek || 90)); // 0 = ohne Zeitlimit
+  }
   if (typeof e.stopp === "boolean") neu.stopp = e.stopp;
+  // Ohne Zeitlimit endet die Runde nur per Stopp: Stopp ausschalten heißt also wieder mit Zeit spielen
+  if (neu.sekunden === 0 && e.stopp === false) neu.sekunden = 90;
+  if (neu.sekunden === 0) neu.stopp = true;
   if (typeof e.schwer === "boolean") neu.schwer = e.schwer;
   return neu;
 }
@@ -119,11 +126,13 @@ function starteRunde(raum, ctx) {
   d.bereit = new Set();
   d.hinweis = null;
   d.tempoBonus = {};
+  ctx.neueRunde(raum); // Zuschauer steigen jetzt ein
   d.endetUm = Date.now() + RAD_MS;
   d.timer = setTimeout(() => {
+    const sek = einst(raum).sekunden;
     d.phase = "schreiben";
-    d.endetUm = Date.now() + einst(raum).sekunden * 1000;
-    d.timer = setTimeout(() => zeitAbgelaufen(raum, ctx), einst(raum).sekunden * 1000);
+    d.endetUm = sek ? Date.now() + sek * 1000 : null; // ohne Zeitlimit: nur Stopp beendet die Runde
+    if (sek) d.timer = setTimeout(() => zeitAbgelaufen(raum, ctx), sek * 1000);
     ctx.sende(raum);
   }, RAD_MS);
   ctx.sende(raum);
@@ -135,6 +144,7 @@ function zeitAbgelaufen(raum, ctx) {
   clearTimeout(d.timer);
   d.phase = "pruefen";
   d.endetUm = null;
+  ctx.mitgemacht(raum, new Set(Object.keys(d.entwuerfe).filter((id) => ausgefuellt(raum, id) > 0)), 1); // leere Runde → 💤
   ctx.sende(raum); // Clients schicken jetzt sofort ihren letzten Stand
   d.timer = setTimeout(() => auswerten(raum, ctx).catch((err) => notfallAuswertung(raum, ctx, err)), NACHZUEGLER_MS);
 }
@@ -145,7 +155,7 @@ async function auswerten(raum, ctx) {
   const antworten = {};
   for (const k of d.kategorien) {
     antworten[k.id] = {};
-    for (const s of Object.values(raum.spieler)) antworten[k.id][s.id] = (d.entwuerfe[s.id]?.[k.id] || "").trim();
+    for (const s of Object.values(raum.spieler)) if (!s.zuschauer) antworten[k.id][s.id] = (d.entwuerfe[s.id]?.[k.id] || "").trim();
   }
   const { ergebnis, hinweis } = await pruefe(d.buchstabe, d.kategorien, antworten);
   if (raum.daten !== d || d.rundeNr !== rundeNr || d.phase !== "pruefen") return; // Spiel wurde inzwischen beendet
@@ -173,7 +183,7 @@ function notfallAuswertung(raum, ctx, err) {
   d.bewertung = {};
   for (const k of d.kategorien) {
     d.bewertung[k.id] = {};
-    for (const s of Object.values(raum.spieler)) {
+    for (const s of Object.values(raum.spieler).filter((x) => !x.zuschauer)) {
       const text = (d.entwuerfe[s.id]?.[k.id] || "").trim();
       d.bewertung[k.id][s.id] = {
         text, fuer: new Set(), gegen: new Set(), sterne: new Set(), host: null,
@@ -197,7 +207,7 @@ function berechnePunkte(raum) {
   const d = raum.daten;
   const runde = {};
   const proEintrag = {};
-  for (const s of Object.keys(raum.spieler)) runde[s] = d.tempoBonus?.[s] || 0;
+  for (const s of Object.values(raum.spieler)) if (!s.zuschauer) runde[s.id] = d.tempoBonus?.[s.id] || 0;
   const solo = istSolo(raum);
   for (const k of d.kategorien) {
     proEintrag[k.id] = {};
@@ -222,13 +232,80 @@ function berechnePunkte(raum) {
   return { runde, proEintrag };
 }
 
+// ---------- Statistik für die Auszeichnungen am Ende ----------
+function merkeStatistik(raum, runde, proEintrag) {
+  const d = raum.daten;
+  const st = (id) => (d.statistik[id] ||= { gueltig: 0, unikat: 0, sterne: 0, stopps: 0, besteRunde: 0, besteRundeNr: 0, laengste: "" });
+  for (const [id, p] of Object.entries(runde)) {
+    const s = st(id);
+    if (p > s.besteRunde) { s.besteRunde = p; s.besteRundeNr = d.rundeNr; }
+  }
+  if (d.stoppVon && runde[d.stoppVon] !== undefined) st(d.stoppVon).stopps++;
+  for (const k of d.kategorien) {
+    const gleich = {}; // gleiche gültige Antworten → Seelenverwandte
+    for (const [id, e] of Object.entries(d.bewertung[k.id] || {})) {
+      const x = proEintrag[k.id][id];
+      if (!x || runde[id] === undefined) continue;
+      const s = st(id);
+      s.sterne += e.sterne.size;
+      if (x.art === "ungueltig") continue;
+      s.gueltig++;
+      if (x.art === "einzigartig" || x.art === "allein") s.unikat++;
+      if (e.text.length > s.laengste.length) s.laengste = e.text;
+      (gleich[e.auto.kanonisch] ||= []).push(id);
+    }
+    for (const gruppe of Object.values(gleich)) {
+      for (let i = 0; i < gruppe.length; i++) for (let j = i + 1; j < gruppe.length; j++) {
+        const paar = [gruppe[i], gruppe[j]].sort().join("|");
+        d.paare[paar] = (d.paare[paar] || 0) + 1;
+      }
+    }
+  }
+}
+
+function berechneAuszeichnungen(raum) {
+  const d = raum.daten;
+  const st = d.statistik;
+  const ids = Object.keys(st).filter((id) => raum.spieler[id]);
+  const kandidaten = [];
+  const beste = (wert, min = 1) => {
+    const werte = ids.map((id) => [id, wert(st[id])]).filter(([, w]) => w >= min);
+    if (!werte.length) return null;
+    const ziel = Math.max(...werte.map(([, w]) => w));
+    return { wert: ziel, spieler: werte.filter(([, w]) => w === ziel).map(([id]) => id) };
+  };
+  const neu = (icon, titel, b, text) => b && kandidaten.push({ icon, titel, spieler: b.spieler, text: text(b.wert, st[b.spieler[0]]) });
+  const mehrere = ids.length > 1;
+
+  neu("📚", "Wortschatz", beste((s) => s.gueltig), (w) => `${w} gültige Antworten`);
+  if (mehrere) neu("🦄", "Unikat", beste((s) => s.unikat, 2), (w) => `${w} Antworten, die sonst keiner hatte`);
+  neu("⭐", "Kreativkopf", beste((s) => s.sterne), (w) => `${w} ${w === 1 ? "Stern" : "Sterne"} für kreative Antworten`);
+  if (mehrere) neu("🛑", "Stopp-König", beste((s) => s.stopps), (w) => `${w}× als Erstes fertig`);
+  if (mehrere) {
+    const [paar, anzahl] = Object.entries(d.paare).filter(([k]) => k.split("|").every((id) => raum.spieler[id])).sort((a, b) => b[1] - a[1])[0] || [];
+    if (anzahl >= 2) kandidaten.push({ icon: "👯", titel: "Seelenverwandte", spieler: paar.split("|"), text: `${anzahl}× dieselbe Antwort`, paar: true });
+  }
+  neu("📏", "Längste Antwort", beste((s) => s.laengste.length, 12), (_w, s) => `„${s.laengste}“`);
+  neu("🔥", "Beste Runde", beste((s) => s.besteRunde), (w, s) => `${w} Punkte in Runde ${s.besteRundeNr}`);
+
+  const anzahl = {};
+  return kandidaten.filter((k) => {
+    if (mehrere && !k.paar && k.spieler.length === ids.length) return false; // alle gleich gut → sagt nichts aus
+    if (k.spieler.length === 1 && (anzahl[k.spieler[0]] || 0) >= 2) return false;
+    if (k.spieler.length === 1) anzahl[k.spieler[0]] = (anzahl[k.spieler[0]] || 0) + 1;
+    return true;
+  }).slice(0, 6);
+}
+
 function naechsteRunde(raum, ctx) {
   const d = raum.daten;
-  const { runde } = berechnePunkte(raum);
+  const { runde, proEintrag } = berechnePunkte(raum);
   for (const [id, p] of Object.entries(runde)) if (raum.spieler[id]) raum.spieler[id].punkte += p;
+  merkeStatistik(raum, runde, proEintrag);
   d.verlauf.push({ nr: d.rundeNr, buchstabe: d.buchstabe, punkte: runde });
   if (d.rundeNr >= einst(raum).runden) {
     d.phase = "ende";
+    d.auszeichnungen = berechneAuszeichnungen(raum);
     d.letzteRunde = runde;
     ctx.sende(raum);
   } else {
@@ -253,7 +330,7 @@ module.exports = {
     if (e.kategorien.length < 2) return "Wähle mindestens 2 Kategorien.";
     raum.daten = {
       phase: "buchstabe", rundeNr: 0, kategorien: e.kategorien.map((k) => ({ ...k })),
-      benutzt: [], entwuerfe: {}, verlauf: [], timer: null, bereit: new Set(),
+      benutzt: [], entwuerfe: {}, verlauf: [], timer: null, bereit: new Set(), statistik: {}, paare: {}, auszeichnungen: [],
     };
     starteRunde(raum, ctx);
   },
@@ -274,6 +351,7 @@ module.exports = {
         const entwurf = {};
         for (const k of d.kategorien) entwurf[k.id] = String(daten[k.id] || "").slice(0, MAX_TEXT);
         d.entwuerfe[spielerId] = entwurf;
+        if (Object.values(entwurf).some((t) => t.trim()) && ctx.zurueck(raum, spielerId)) ctx.sende(raum); // 💤 vorbei
         if (felderStatus(raum, spielerId) !== vorher && d.phase !== "pruefen") ctx.sende(raum);
         return;
       }
@@ -285,9 +363,9 @@ module.exports = {
         d.stoppVon = spielerId;
         // Solo: Runde endet sofort, übrige Zeit gibt Tempo-Bonus (1 Punkt pro 3 Sekunden).
         // Sind alle anderen offline, endet die Runde auch sofort, aber ohne Bonus.
-        if (istSolo(raum)) d.tempoBonus[spielerId] = Math.floor(Math.max(0, d.endetUm - Date.now()) / 3000);
-        if (ctx.onlineSpieler(raum).length === 1) return zeitAbgelaufen(raum, ctx);
-        if (d.endetUm - Date.now() > STOPP_MS) {
+        if (istSolo(raum) && d.endetUm) d.tempoBonus[spielerId] = Math.floor(Math.max(0, d.endetUm - Date.now()) / 3000);
+        if (ctx.aktive(raum).length <= 1) return zeitAbgelaufen(raum, ctx);
+        if (!d.endetUm || d.endetUm - Date.now() > STOPP_MS) {
           clearTimeout(d.timer);
           d.endetUm = Date.now() + STOPP_MS;
           d.timer = setTimeout(() => zeitAbgelaufen(raum, ctx), STOPP_MS);
@@ -327,6 +405,10 @@ module.exports = {
         ctx.sende(raum);
         return;
       }
+      case "rundeBeenden": { // Host beendet das Schreiben (praktisch ohne Zeitlimit)
+        if (istHost && (d.phase === "schreiben" || d.phase === "stopp")) zeitAbgelaufen(raum, ctx);
+        return;
+      }
       case "weiter": {
         if (istHost && d.phase === "bewerten") naechsteRunde(raum, ctx);
         return;
@@ -357,7 +439,7 @@ module.exports = {
       rundenPunkte = runde;
       bewertung = d.kategorien.map((k) => ({
         ...k,
-        eintraege: Object.entries(d.bewertung[k.id]).map(([spielerId, x]) => {
+        eintraege: Object.entries(d.bewertung[k.id]).filter(([spielerId]) => raum.spieler[spielerId]).map(([spielerId, x]) => {
           const ent = entscheidung(x);
           return {
             spielerId, text: x.text, gilt: ent.gilt, durch: ent.durch,
@@ -384,6 +466,7 @@ module.exports = {
       bewertung,
       rundenPunkte: rundenPunkte || (d.phase === "ende" ? d.letzteRunde : null),
       verlauf: d.verlauf,
+      auszeichnungen: d.phase === "ende" ? d.auszeichnungen : null,
     };
   },
 };

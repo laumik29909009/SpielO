@@ -54,13 +54,14 @@
           <p class="leise klein-text" style="margin-top:10px">🔞 Ü18-Kategorien sind gekennzeichnet und standardmäßig nicht ausgewählt.</p>`,
       },
       {
-        id: "runden", wichtig: true, icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden} s pro Frage`,
+        id: "runden", wichtig: true, icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden ? e.sekunden + " s pro Frage" : "ohne Zeitlimit"}`,
         html: `<div class="einstellungs-zeile">
           <div><div class="unter-titel">Runden</div>
             <div class="segment">${[5, 10, 15, 20].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
           <div><div class="unter-titel">Zeit pro Frage</div>
-            <div class="segment">${[20, 30, 45, 60].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n}s</button>`).join("")}</div></div>
-        </div>`,
+            <div class="segment">${[15, 30, 45, 60, 0].map((n) => `<button data-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis} ${n ? "" : 'title="Ohne Zeitlimit: aufgelöst wird, wenn alle getippt haben"'}>${n ? n + "s" : "∞"}</button>`).join("")}</div></div>
+        </div>
+        ${e.sekunden ? "" : '<p class="leise klein-text" style="margin-top:10px">∞ Ohne Zeitlimit: Aufgelöst wird, sobald alle getippt haben. Der Host kann jederzeit auflösen.</p>'}`,
       },
     ];
   }
@@ -88,7 +89,7 @@
       if (GN.ansicht !== key) return zeigeFrage(key, !vorher || vorher.phase !== "frage" || vorher.runde?.nr !== z.runde.nr);
       if (GN.timerNeu) { // nach Neuverbindung: Countdown mit der Restzeit vom Server weiterlaufen lassen
         GN.timerNeu = false;
-        GN.starteTimer(z.runde.restMs, z.runde.sekunden * 1000, { tonAus: () => !!$(".abgegeben") });
+        if (z.runde.sekunden) GN.starteTimer(z.runde.restMs, z.runde.sekunden * 1000, { tonAus: () => !!$(".abgegeben") });
       }
       return aktualisiereStatus();
     }
@@ -110,7 +111,7 @@
     const m = MODI[r.modus];
     eingabe = { einheit: 0, text: "" };
     sortierung = [];
-    if (neueRunde) GN.intro({ oben: `Runde ${r.nr} von ${z.einstellungen.runden}`, icon: m.icon, titel: m.titel, text: m.text, dauer: Math.max(0, Math.min(1700, r.restMs - r.sekunden * 1000)) });
+    if (neueRunde) GN.intro({ oben: `Runde ${r.nr} von ${z.einstellungen.runden}`, icon: m.icon, titel: m.titel, text: m.text, dauer: Math.max(0, Math.min(1700, r.introMs - 100)) });
 
     const kopf = `
       <div class="runden-kopf">
@@ -177,12 +178,13 @@
         </div>`;
     }
 
-    app.innerHTML = kopf + inhalt + `<div class="status-reihe" id="statusReihe"></div>`;
+    app.innerHTML = kopf + inhalt + `<div class="status-reihe" id="statusReihe"></div><div class="host-aktion" id="hostAktion"></div>`;
     bilderEinblenden();
     verbindeFrage(r);
     aktualisiereStatus();
     GN.timerNeu = false;
-    GN.starteTimer(r.restMs, r.sekunden * 1000, { tonAus: () => !!$(".abgegeben") });
+    if (r.sekunden) GN.starteTimer(r.restMs, r.sekunden * 1000, { tonAus: () => !!$(".abgegeben") });
+    else GN.ohneZeitlimit();
   }
 
   function verbindeFrage(r) {
@@ -260,10 +262,19 @@
     const z = GN.zustand;
     const reihe = $("#statusReihe");
     if (!reihe) return;
-    reihe.innerHTML = z.spieler.filter((s) => s.online).map((s) =>
-      `<span class="status ${s.fertig ? "fertig" : ""}" title="${esc(s.name)}"><span class="avatar">${s.avatar}</span></span>`).join("");
+    reihe.innerHTML = z.spieler.filter((s) => s.online && !s.zuschauer).map((s) =>
+      `<span class="status ${s.fertig ? "fertig" : ""} ${s.afk && !s.fertig ? "afk" : ""}" title="${esc(s.name)}${s.afk ? " (abwesend, es wird nicht gewartet)" : ""}"><span class="avatar">${s.avatar}</span></span>`).join("");
     const ich = z.spieler.find((s) => s.id === GN.ich);
     if (ich?.fertig && !$(".abgegeben")) zeigeAbgegeben("");
+    // Ohne Zeitlimit kann der Host die Runde jederzeit auflösen
+    const box = $("#hostAktion");
+    const offen = z.spieler.filter((s) => s.online && !s.zuschauer && !s.afk && !s.fertig).length;
+    if (box) box.innerHTML = GN.istHost() && !z.runde.sekunden
+      ? `<button class="btn zweit" id="aufloesenBtn">⏭ Jetzt auflösen${offen ? ` <span class="leise">(${offen} ${offen === 1 ? "tippt" : "tippen"} noch)</span>` : ""}</button>` : "";
+    $("#aufloesenBtn")?.addEventListener("click", () => {
+      if (offen && !confirm("Noch nicht alle haben getippt. Trotzdem auflösen?")) return;
+      GN.aktion("aufloesen");
+    });
   }
 
   // =============================================================
