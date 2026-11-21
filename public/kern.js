@@ -45,7 +45,9 @@ GN.ich = spielerId;
 
 GN.aktion = (typ, daten) => socket.emit("aktion", typ, daten);
 GN.istHost = () => GN.zustand?.hostId === spielerId;
-GN.spieler = (id) => GN.zustand?.spieler.find((s) => s.id === id) || { name: "?", avatar: "👤" };
+// Alle, die mitspielen: Menschen und (bei Quartett) Computer-Gegner
+GN.alle = (z = GN.zustand) => [...(z?.spieler || []), ...(z?.bots || [])];
+GN.spieler = (id) => GN.alle().find((s) => s.id === id) || { name: "?", avatar: "👤" };
 
 // =============================================================
 //  Verbindung
@@ -120,7 +122,7 @@ function verarbeiteZustand(z) {
   if ($("#raumFenster").open) zeichneRaumSpieler();
   if (z.phase === "lobby") return zeigeLobby();
   // Später eingestiegen: zuschauen, bis die nächste Runde beginnt
-  if (ich?.zuschauer) return zeigeZuschauer(z);
+  if (ich?.zuschauer && z.spiel !== "quartett") return zeigeZuschauer(z); // Quartett zeigt Zuschauern die Kämpfe
   // Bin ich gerade neuer Host geworden? Dann Ansichten mit Host-Knöpfen neu aufbauen
   if (vorher && vorher.hostId !== z.hostId && z.hostId === spielerId) {
     if (/podest/.test(GN.ansicht)) return GN.podest(GN.ansicht);
@@ -138,9 +140,7 @@ GN.logo = (klasse = "") => `
   </span>`;
 
 // Spiele, die noch im Aufbau sind (werden ausgegraut angezeigt)
-GN.imAufbau = [
-  { id: "quartett", icon: "🃏", titel: "Quartett", beschreibung: "Das Karten-Duell: Wer hat den höheren Wert? Mit eigenen Kartendecks zu Autos, Promis und mehr.", tags: ["🚧 Im Aufbau"] },
-];
+GN.imAufbau = [];
 function aufbauKarte(s, klein = false) {
   return `
     <div class="spiel-gross im-aufbau" aria-disabled="true">
@@ -533,7 +533,7 @@ GN.intro = ({ oben, icon, titel, text, dauer = 1700, ton = true }) => {
 GN.rangliste = (box, rundenPunkte = {}, mitAnimation = false) => {
   if (!box) return;
   const z = GN.zustand;
-  const sortiert = [...z.spieler].filter((s) => !s.zuschauer).sort((a, b) => b.punkte - a.punkte);
+  const sortiert = GN.alle(z).filter((s) => !s.zuschauer && (z.spiel !== "quartett" || !z.teilnehmer || z.teilnehmer.some((t) => t.id === s.id))).sort((a, b) => b.punkte - a.punkte);
   const max = Math.max(1, ...sortiert.map((s) => s.punkte));
   box.innerHTML = sortiert.map((s, i) => `
     <div class="rang ${s.id === spielerId ? "ich" : ""} ${s.online ? "" : "offline"}">
@@ -562,7 +562,7 @@ GN.podest = (key, { einheit = "Pkt." } = {}) => {
   const spaeter = (ms, fn) => GN.podest.timer.push(setTimeout(() => GN.ansicht === key && fn(), schonGesehen ? 0 : ms));
   const z = GN.zustand;
   const host = GN.istHost();
-  const sortiert = [...z.spieler].filter((s) => !s.zuschauer).sort((a, b) => b.punkte - a.punkte);
+  const sortiert = GN.alle(z).filter((s) => !s.zuschauer && (z.spiel !== "quartett" || !z.teilnehmer || z.teilnehmer.some((t) => t.id === s.id))).sort((a, b) => b.punkte - a.punkte);
   const solo = sortiert.length === 1;
   const fmt = (n) => Math.round(n).toLocaleString("de-DE");
   // Plätze wie beim Sport: Gleichstand = gleicher Platz
@@ -596,7 +596,7 @@ GN.podest = (key, { einheit = "Pkt." } = {}) => {
   const titel = solo ? `🏁 ${fmt(sortiert[0].punkte)} ${einheit}` : gleichstand ? "🤝 Gleichstand an der Spitze!"
     : sortiert[0]?.id === spielerId ? "🏆 Du hast gewonnen!" : `🏆 ${esc(sortiert[0]?.name || "")} gewinnt!`;
 
-  const auszeichnungen = (z.auszeichnungen || z.runde?.auszeichnungen || []).filter((a) => a.spieler.some((id) => z.spieler.some((s) => s.id === id)));
+  const auszeichnungen = (z.auszeichnungen || z.runde?.auszeichnungen || []).filter((a) => a.spieler.some((id) => GN.alle(z).some((s) => s.id === id)));
   const wer = (ids) => ids.map((id) => { const s = GN.spieler(id); return `<span class="az-person ${id === spielerId ? "ich" : ""}">${s.avatar} ${esc(s.name)}</span>`; }).join(ids.length === 2 ? " &amp; " : " ");
 
   app.innerHTML = `

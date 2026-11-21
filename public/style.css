@@ -72,11 +72,7 @@ img { display: block; }
 }
 .logo { font-weight: 900; letter-spacing: 0.02em; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
 .logo .punkt { color: var(--gold); }
-.muenze {
-  display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: var(--gold-text);
-  font-weight: 900; box-shadow: 0 0 0 3px var(--rand-stark);
-}
+
 .topbar-rechts { display: flex; gap: 8px; align-items: center; }
 .raum-chip {
   background: var(--flaeche); border: 1px solid var(--rand-stark); border-radius: 999px;
@@ -120,7 +116,7 @@ input.feld {
   background: var(--bg); border: 2px solid var(--rand-stark); border-radius: 14px; padding: 14px 16px;
 }
 input.feld:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(255, 203, 71, 0.15); }
-label.feld-label { display: block; font-weight: 700; font-size: 0.9rem; color: var(--leise); margin-bottom: 6px; }
+
 
 /* ---------- Startseite ---------- */
 .start { display: grid; gap: 28px; align-items: center; padding-top: 12px; }
@@ -128,35 +124,29 @@ label.feld-label { display: block; font-weight: 700; font-size: 0.9rem; color: v
 .hero h1 { font-size: clamp(2.6rem, 9vw, 4.4rem); font-weight: 900; letter-spacing: -0.02em; }
 .hero h1 .gold { background: linear-gradient(135deg, var(--gold), var(--gold-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero p { font-size: 1.15rem; color: var(--leise); max-width: 34ch; margin: 14px 0 0; }
-.preisschilder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
-.preisschild {
-  background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px; padding: 8px 14px;
-  font-weight: 700; font-size: 0.95rem; animation: schweben 6s ease-in-out infinite;
-}
-.preisschild:nth-child(2n) { animation-delay: -2s; }
-.preisschild:nth-child(3n) { animation-delay: -4s; }
+
+
+
+
 @keyframes schweben { 50% { transform: translateY(-6px); } }
-.start-karte { display: grid; gap: 14px; padding: 22px; box-shadow: var(--schatten); }
-.trenner { display: flex; align-items: center; gap: 12px; color: var(--leise); font-size: 0.85rem; font-weight: 700; }
-.trenner::before, .trenner::after { content: ""; flex: 1; height: 1px; background: var(--rand-stark); }
+
+
+
 .beitreten-zeile { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .code-feld { text-transform: uppercase; letter-spacing: 0.4em; text-align: center; font-weight: 900 !important; }
 
 /* ---------- Lobby ---------- */
 .lobby { display: grid; gap: 18px; }
 @media (min-width: 860px) { .lobby { grid-template-columns: 340px 1fr; align-items: start; } }
-.code-karte { text-align: center; display: grid; gap: 10px; }
+
 .code-gross { font-size: 3.4rem; font-weight: 900; letter-spacing: 0.22em; color: var(--gold); line-height: 1; padding-left: 0.22em; }
-.knopf-reihe { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.spieler-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 10px; }
-.spieler-kachel {
-  background: var(--flaeche); border: 1px solid var(--rand); border-radius: 18px; padding: 12px 6px 10px;
-  text-align: center; position: relative; animation: reinploppen 0.35s cubic-bezier(.2,1.6,.4,1);
-}
-.spieler-kachel.ich { border-color: var(--gold); }
-.spieler-kachel .krone { position: absolute; top: -10px; right: -4px; font-size: 1.2rem; }
-.spieler-kachel .name { font-weight: 700; font-size: 0.9rem; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.spieler-kachel.offline { opacity: 0.4; }
+
+
+
+
+
+
+
 .avatar {
   width: 52px; height: 52px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 1.8rem;
   background: var(--flaeche-2); border: 2px solid var(--rand-stark);
@@ -482,8 +472,8 @@ button.avatar:hover { border-color: var(--gold); }
 .toast.ok { background: var(--gruen); color: #04220f; }
 #konfetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; width: 100%; height: 100%; }
 
-.fuss { text-align: center; color: var(--leise); font-size: 0.75rem; margin-top: 40px; opacity: 0.7; }
-.fuss a { color: inherit; }
+
+
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -497,34 +487,26 @@ button.avatar:hover { border-color: var(--gold); }
 .plus-klein { color: var(--gruen); font-size: 0.8rem; }
 .mini-tag { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 6px; background: var(--flaeche-2); color: var(--leise); vertical-align: 2px; }
 
-.spiel-vorschauen { display: grid; gap: 10px; margin-top: 24px; max-width: 460px; }
-.spiel-vorschau {
-  display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 18px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 16%, transparent), var(--flaeche));
-  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
-  animation: reinfliegen 0.5s both;
-}
-.spiel-vorschau:nth-child(2) { animation-delay: 0.08s; }
-.spiel-vorschau:nth-child(3) { animation-delay: 0.16s; }
-.spiel-vorschau .icon { font-size: 2rem; }
-.spiel-vorschau .titel { font-weight: 800; color: var(--gold); }
-.spiel-vorschau .text { color: var(--leise); font-size: 0.9rem; }
-.spiel-vorschau.bald { background: var(--flaeche); border-style: dashed; border-color: var(--rand-stark); opacity: 0.7; }
-.spiel-vorschau.bald .titel { color: var(--text); }
+
+
+
+
+
+
+
+
+
 
 .spiel-wahl { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-.spiel-karte {
-  display: flex; gap: 12px; align-items: center; text-align: left; padding: 14px; cursor: pointer;
-  background: var(--flaeche); border: 2px solid var(--rand); border-radius: 18px; transition: transform 0.15s, border-color 0.15s;
-}
-.spiel-karte .icon { font-size: 2rem; }
-.spiel-karte .titel { display: block; font-weight: 800; }
-.spiel-karte .text { display: block; color: var(--leise); font-size: 0.85rem; line-height: 1.3; }
-.spiel-karte.aktiv { border-color: var(--gold); background: linear-gradient(160deg, color-mix(in srgb, var(--gold) 18%, transparent), var(--flaeche)); }
-.spiel-karte.aktiv .titel { color: var(--gold); }
-.spiel-karte:hover:not(:disabled) { transform: translateY(-2px); }
-.spiel-karte:disabled { cursor: default; }
-.spiel-karte:disabled:not(.aktiv) { opacity: 0.5; }
+
+
+
+
+
+
+
+
+
 
 /* =============================================================
    Stadt Land Fluss: Lobby
@@ -542,10 +524,10 @@ button.avatar:hover { border-color: var(--gold); }
 .paket-reihe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .paket { border: 1px dashed var(--rand-stark); background: none; color: var(--text); border-radius: 12px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
 .paket:hover { border-color: var(--gold); color: var(--gold); }
-.kat-auswahl { margin-top: 12px; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 16px; padding: 4px 14px; }
-.kat-auswahl summary { cursor: pointer; font-weight: 700; padding: 10px 0; color: var(--leise); }
-.kat-auswahl[open] { padding-bottom: 14px; }
-.gruppe-titel { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--leise); margin: 10px 0 6px; }
+
+
+
+
 .chip-reihe { display: flex; flex-wrap: wrap; gap: 6px; }
 .auswahl-chip { border: 1px solid var(--rand-stark); background: var(--flaeche-2); color: var(--text); border-radius: 999px; padding: 7px 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
 .auswahl-chip.aktiv { background: var(--gold); color: var(--gold-text); border-color: var(--gold); }
@@ -632,7 +614,7 @@ button.avatar:hover { border-color: var(--gold); }
   background: linear-gradient(135deg, #ff6b6b, #e63946); color: #fff; font-weight: 700; padding: 12px 16px; border-radius: 14px;
   margin-bottom: 12px; text-align: center; animation: reinploppen 0.3s;
 }
-.fortschritt-reihe { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+
 .fortschritt { display: inline-flex; align-items: center; gap: 6px; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px; padding: 4px 10px 4px 4px; font-weight: 700; font-size: 0.85rem; }
 .fortschritt .avatar { width: 30px; height: 30px; font-size: 1rem; }
 .fortschritt.voll { border-color: var(--gruen); color: var(--gruen); }
@@ -714,7 +696,7 @@ body.wackeln #app { animation: wackeln 0.45s; }
    ============================================================= */
 .hero-start { text-align: center; padding: clamp(24px, 6vw, 64px) 0 10px; }
 .hero-logo { margin: 0; text-shadow: 0 10px 40px rgba(197, 139, 255, 0.35); }
-.hero-slogan { font-size: clamp(1.05rem, 3.6vw, 1.35rem); color: var(--leise); margin: 14px auto 0; max-width: 32ch; }
+
 .hero-fakten { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
 .hero-fakten span { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 0.9rem; }
 
@@ -779,15 +761,15 @@ button.spiel-gross { cursor: pointer; }
 .abschnitt[open] { border-color: color-mix(in srgb, var(--gold) 40%, var(--rand)); }
 .abschnitt summary { list-style: none; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; cursor: pointer; }
 .abschnitt summary::-webkit-details-marker { display: none; }
-.abschnitt-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.3rem; background: var(--flaeche-2); }
-.abschnitt-kopf { display: grid; min-width: 0; }
-.abschnitt-kopf b { font-size: 1.05rem; }
-.abschnitt-kopf span { color: var(--leise); font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pfeil { font-size: 1.4rem; color: var(--leise); transition: transform 0.2s; line-height: 1; }
-.abschnitt[open] .pfeil { transform: rotate(180deg); }
-.abschnitt-inhalt { padding: 4px 16px 18px; animation: einblenden 0.25s; }
+
+
+
+
+
+
+
 .unter-titel { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--leise); margin: 16px 0 8px; }
-.abschnitt-inhalt > .unter-titel:first-child, .abschnitt-inhalt .einstellungs-zeile .unter-titel { margin-top: 6px; }
+
 .pruef-info { background: var(--flaeche-2); border-radius: 14px; padding: 12px 14px; margin-top: 12px; font-size: 0.9rem; }
 .pruef-info ol { margin: 6px 0 0; padding-left: 20px; color: var(--leise); display: grid; gap: 3px; }
 .pruef-schritte { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
@@ -838,9 +820,8 @@ button.spiel-gross { cursor: pointer; }
 
 /* =============================================================
    SpielO: Fußzeile
-   ============================================================= */
-.seiten-fuss { max-width: 980px; margin: 0 auto; padding: 32px 16px 36px; text-align: center; color: var(--leise); font-size: 0.85rem; display: grid; gap: 2px; opacity: 0.75; }
-.seiten-fuss .klein { font-size: 0.72rem; opacity: 0.8; }
+   ============================================================= *
+
 
 /* =============================================================
    Stadt Land Fluss: fester Kopf beim Schreiben, Live-Fortschritt, Stopp
@@ -906,8 +887,8 @@ button, a, input, summary, label { touch-action: manipulation; }
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
   }
   #app:has(.start-leiste) { padding-bottom: 150px; }
-  .seiten-fuss { padding-bottom: 24px; }
-  body:has(.start-leiste) .seiten-fuss { padding-bottom: 150px; }
+  
+  
   .start-leiste .btn.gross { padding: 14px 16px; font-size: 1.1rem; }
   .start-leiste .btn.link { padding: 2px; font-size: 0.85rem; }
   .start-leiste > .leise.klein-text, .start-leiste .bereit-reihe { display: none; }
@@ -934,8 +915,8 @@ button, a, input, summary, label { touch-action: manipulation; }
   .spiele-gitter.zwei .spiel-beschreibung, .spiele-gitter.zwei .spiel-tags { display: none; }
   .spiele-gitter.zwei .gewaehlt-marke { top: 6px; right: 6px; font-size: 0.68rem; padding: 3px 7px; }
   .abschnitt summary { padding: 12px 14px; gap: 12px; }
-  .abschnitt-icon { width: 38px; height: 38px; font-size: 1.15rem; }
-  .abschnitt-inhalt { padding: 2px 14px 16px; }
+  
+  
   .modus-gitter { grid-template-columns: 1fr 1fr; gap: 8px; }
   .modus-karte { padding: 12px; }
   .modus-karte .text { font-size: 0.8rem; }

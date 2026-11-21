@@ -13,6 +13,7 @@ const { Server } = require("socket.io");
 const SPIELE = {
   preis: require("./spiele/preis"),
   slf: require("./spiele/slf"),
+  quartett: require("./spiele/quartett"),
 };
 const MAX_SPIELER = 10;
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];

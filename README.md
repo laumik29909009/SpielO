@@ -5,6 +5,7 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 | Spiel | Worum es geht |
 |---|---|
 | 💰 **Preis-Schätzer** | Was kostet ein Windrad? 137 Fragen in 15 Themen, 4 Modi (Klassisch, Nicht drüber!, Teurer oder billiger?, Sortieren) und Mix |
+| 🃏 **Quartett** | Karten-Duelle mit 2 eigenen Decks (Drachen, Kung-Fu-Meister), je 24 Karten mit Bild und 5 Werten, animierte Kämpfe, 1–4 Spieler (auch gegen den Computer) |
 | 🌍 **Stadt Land Fluss** | 92 Kategorien in 7 Gruppen, eigene Kategorien, Stopp-Knopf, Live-Fortschritt, Abstimmung und automatischer Schiedsrichter |
 
 Ü18-Kategorien (Nachtleben, Dates, Trinkspiele …) sind mit 🔞 gekennzeichnet und standardmäßig nicht ausgewählt.
@@ -16,6 +17,13 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 - **💤 Abwesend:** Wer 2 Runden (Stadt Land Fluss: 1 Runde) nichts eingibt, wird als abwesend markiert. Auf ihn wird nicht mehr gewartet, und ein abwesender Host gibt die Krone weiter. Jede Eingabe oder „Bin wieder da!“ beendet das.
 - **⏱️ Zeit ∞:** Ohne Zeitlimit. Preis-Schätzer löst auf, wenn alle getippt haben; Stadt Land Fluss endet per Stopp. Der Host kann jederzeit auflösen bzw. beenden.
 - **🏅 Siegerehrung:** Podest mit Animation und Auszeichnungen (z. B. Scharfschütze, Blitzmerker, Kreativkopf, Stopp-König, Seelenverwandte)
+
+## Quartett
+- **Regeln:** Wer dran ist, wählt einen Wert seiner obersten Karte. Der höchste Wert gewinnt alle Karten der Runde. Gleichstand → Karten in den Topf. Wer alle Karten hat (oder nach dem Rundenlimit die meisten), gewinnt.
+- **Decks** stehen in `daten/quartett.js`: 6 Gruppen (A–F) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.
+- **Bilder:** Drachen werden im Browser aus Bauteilen gezeichnet (`public/spiele/quartett-bilder.js`, Feld `d` pro Karte). Die Kung-Fu-Meister nutzen Twemoji-Tiere (CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
+- **Computer-Gegner** füllen freie Plätze auf und wählen meist ihren stärksten Wert. Solo spielt man immer gegen den Computer.
+- Alle Figuren sind eigene Erfindungen. Figuren aus Filmen oder Serien gehören den jeweiligen Studios und sind deshalb nicht dabei.
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
@@ -62,10 +70,11 @@ Dann http://localhost:3000 öffnen.
 - `server.js`: Räume, Spieler, Host, Wartungsmodus (Socket.IO)
 - `spiele/preis.js`, `spiele/slf.js`: Spiel-Logik auf dem Server
 - `spiele/slf-pruefer.js`: Schiedsrichter für Stadt Land Fluss
+- `spiele/quartett.js`: Quartett (Verteilen, Kämpfe, Computer-Gegner, Auszeichnungen)
 - `daten/`: Fragen, Kategorien, Wortlisten, Prüfregeln
 - `public/beat.js`: der SpielO-Beat; `public/musik.js`: Musik-Player
 - `public/kern.js`: Startseite, Lobby, Raum-Fenster (QR, Spieler), Zuschauen, Podest; oben lässt sich der Name der Seite ändern (`SEITE`)
-- `public/spiele/*.js`: Oberfläche der einzelnen Spiele
+- `public/spiele/*.js`: Oberfläche der einzelnen Spiele; `public/quartett.css`: Karten und Kampf-Animationen
 - `public/style.css`: Design; jedes Spiel hat seine eigene Farbwelt (`body[data-spiel="..."]`)
 - `scripts/bilder_suchen.py`: sucht frei lizenzierte Bilder für neue Preis-Schätzer-Fragen
 

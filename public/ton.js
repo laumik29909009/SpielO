@@ -86,6 +86,16 @@ const Ton = (() => {
     },
     // Podest-Säule wächst: aufsteigender Ton
     aufsteigen(dauer = 0.6, hoch = 1) { ton(180 * hoch, dauer, { typ: "triangle", laut: 0.06, gleitenZu: 520 * hoch }); },
+    // Quartett: Karte fliegt, Treffer, Schwerter klirren, Drachenatem
+    wusch() { rauschen(0.25, 0.06); ton(500, 0.22, { typ: "sine", laut: 0.03, gleitenZu: 1400 }); },
+    treffer() { ton(150, 0.25, { typ: "sine", laut: 0.3, gleitenZu: 50 }); rauschen(0.12, 0.14); },
+    klirr() { [1568, 2093, 2637].forEach((f, i) => ton(f, 0.5, { typ: "triangle", laut: 0.05, start: i * 0.02 })); rauschen(0.1, 0.1); },
+    feuerstoss(element = "feuer") {
+      if (element === "blitz") { for (let i = 0; i < 4; i++) ton(1800 - i * 300, 0.06, { typ: "square", laut: 0.05, start: i * 0.05 }); rauschen(0.3, 0.1); return; }
+      if (element === "eis") { [2400, 3000, 2700].forEach((f, i) => ton(f, 0.25, { typ: "sine", laut: 0.04, start: i * 0.06 })); rauschen(0.35, 0.05); return; }
+      rauschen(0.5, 0.16);
+      ton(120, 0.45, { typ: "sawtooth", laut: 0.05, gleitenZu: 60 });
+    },
     fanfare() {
       const noten = [[523, 0], [523, 0.15], [523, 0.3], [659, 0.45], [784, 0.75], [659, 1.0], [784, 1.15], [1047, 1.35]];
       noten.forEach(([f, s]) => ton(f, 0.25, { typ: "square", laut: 0.06, start: s }));
