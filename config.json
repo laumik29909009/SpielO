@@ -1,18 +1,17 @@
 {
-  "wartung": false,
+  "wartung": true,
   "wartungInfo": {
     "punkte": [
-      "QR-Code zum Beitreten",
-      "Host kann Spieler entfernen",
-      "Kein Warten mehr auf Inaktive",
-      "Später einsteigen: ab der nächsten Runde mitspielen",
-      "Neue Timer-Optionen (auch ohne Zeitlimit)",
-      "Neue Siegerehrung mit Auszeichnungen",
-      "Eigener SpielO-Beat als Hintergrundmusik"
+      "Neues Spiel: Quartett ⚔️",
+      "Zwei Decks: Kung Fu Panda & Dragons – Die Reiter von Berk",
+      "Jede Karte mit eigenem Bild und 5 Werten",
+      "Kampf-Animationen wie bei Sammelkarten",
+      "Für 1–4 Spieler, solo gegen den Computer",
+      "Großer Bug-Test und Aufräumen"
     ],
     "zahlen": [
-      { "wert": "9", "text": "Lieder im Jazz-Player" },
-      { "wert": "1", "text": "eigener SpielO-Beat" }
+      { "wert": "2", "text": "Kartendecks" },
+      { "wert": "4", "text": "Spieler pro Duell" }
     ]
   }
 }
