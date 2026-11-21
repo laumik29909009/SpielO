@@ -31,6 +31,12 @@
     }
     return stufenCache[deck.id][k.id] || "gewoehnlich";
   }
+  // Champion: Die Karte mit dem besten Wert einer Kategorie im ganzen Deck (bei Gleichstand alle)
+  const championCache = {};
+  function championVon(deck, k) {
+    championCache[deck.id] ||= deck.werte.map((_, i) => maxWert(deck, i));
+    return championCache[deck.id].map((m, i) => (k.w[i] === m ? i : -1)).filter((i) => i >= 0);
+  }
   const zahl = (v, w) => `${v.toLocaleString("de-DE")}${w.einheit ? `<small> ${w.einheit}</small>` : ""}`;
   const leute = (z) => z.teilnehmer || [];
   const person = (z, id) => leute(z).find((t) => t.id === id) || GN.spieler(id);
@@ -50,18 +56,19 @@
     const g = gruppeVon(deck, k);
     const tag = klickbar ? "button" : "div";
     const stufe = stufeVon(deck, k);
+    const champ = championVon(deck, k);
     return `
-      <div class="qkarte stufe-${stufe} ${stufe === "legendaer" || stufe === "episch" ? "selten" : ""} ${klasse}" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
+      <div class="qkarte stufe-${stufe} ${stufe === "legendaer" || stufe === "episch" ? "selten" : ""} ${champ.length ? "champion" : ""} ${klasse}" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
         ${stufe === "legendaer" ? '<div class="qk-aura" aria-hidden="true"></div>' : ""}
         <div class="qk-innen">
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
           <div class="qk-bild ${deck.fotos?.[k.id]?.frei ? "frei" : ""}">${deck.fotos?.[k.id]
             ? `${deck.fotos[k.id].frei ? QuartettBilder.bild(deck, k, { nurSzene: true }) : ""}<img src="${deck.fotos[k.id].url}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
-            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
+            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}${champ.length ? `<span class="qk-champion" title="Bester Wert im ganzen Deck">👑 ${champ.map((i) => esc(deck.werte[i].name)).join(" & ")}-Champion</span>` : ""}</div>
           <div class="qk-unter">${esc(g.name)}${k.stil ? ` · ${esc(k.stil)}` : ""}</div>
           <div class="qk-werte">
             ${deck.werte.map((w, i) => `
-              <${tag} class="qk-wert" data-wert="${i}" ${klickbar ? `aria-label="${esc(w.name)}: ${k.w[i]} wählen"` : ""}>
+              <${tag} class="qk-wert ${champ.includes(i) ? "bester" : ""}" data-wert="${i}" ${klickbar ? `aria-label="${esc(w.name)}: ${k.w[i]} wählen"` : ""}>
                 <span class="qk-w-icon">${w.icon}</span><span class="qk-w-name">${esc(w.name)}</span>
                 <span class="qk-w-balken"><i style="width:${Math.round((k.w[i] / maxWert(deck, i)) * 100)}%"></i></span>
                 <b class="qk-w-zahl" data-ziel="${k.w[i]}">${zahl(k.w[i], w)}</b>

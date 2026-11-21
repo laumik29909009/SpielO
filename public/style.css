@@ -1198,3 +1198,23 @@ dialog.fenster::backdrop { background: rgba(8, 6, 20, 0.6); backdrop-filter: blu
 
 /* "Wird gestartet": drehender Spielstein */
 .start-kreis { width: 54px; height: 54px; margin: 0 auto 6px; border-radius: 50%; border: 6px solid color-mix(in srgb, var(--gold) 25%, transparent); border-top-color: var(--gold); animation: drehen 0.9s linear infinite; }
+
+/* Preis-Schätzer: Fragen ohne Foto sind animiert (Zoom, schwebendes Symbol, Glanz, Funken) */
+.bild-box.gezeichnet { overflow: hidden; }
+.bild-box.gezeichnet .zeichnung { animation: z-kamera 14s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+@keyframes z-kamera { from { transform: scale(1.02) translate(0, 0); } to { transform: scale(1.14) translate(-2%, 1.5%); } }
+.bild-box.gezeichnet .emoji-gross { animation: z-schweben 3.4s ease-in-out infinite; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45)); }
+@keyframes z-schweben { 0%, 100% { transform: translateY(0) rotate(-4deg) scale(1); } 50% { transform: translateY(-9px) rotate(4deg) scale(1.06); } }
+.bild-box.gezeichnet::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.16) 50%, transparent 65%); background-size: 260% 100%; animation: z-glanz 5.5s ease-in-out infinite; }
+@keyframes z-glanz { 0%, 55% { background-position: 160% 0; } 100% { background-position: -100% 0; } }
+.zeichnung .z-ring { transform-origin: 200px 125px; animation: z-drehen 18s linear infinite; }
+@keyframes z-drehen { to { transform: rotate(360deg); } }
+.zeichnung .z-funken circle { opacity: 0; animation: z-funkeln 3s ease-in-out infinite; animation-delay: calc(var(--i) * 0.37s); transform-box: fill-box; transform-origin: center; }
+@keyframes z-funkeln { 0%, 100% { opacity: 0; transform: scale(0.3); } 50% { opacity: 0.85; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .bild-box.gezeichnet .zeichnung, .bild-box.gezeichnet .emoji-gross, .bild-box.gezeichnet::after, .zeichnung .z-ring, .zeichnung .z-funken circle { animation: none; }
+}
+/* Fotos bekommen einen sanften Zoom beim Erscheinen */
+.bild-box:not(.gezeichnet) img { animation: foto-rein 6s ease-out both; }
+@keyframes foto-rein { from { transform: scale(1.08); } to { transform: scale(1); } }

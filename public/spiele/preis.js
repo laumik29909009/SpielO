@@ -472,7 +472,8 @@
     return `<svg class="zeichnung" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs><radialGradient id="zg-${p.id}" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="var(--gold)" stop-opacity=".45"/><stop offset="1" stop-color="var(--flaeche-2)" stop-opacity="0"/></radialGradient></defs>
       <rect width="400" height="250" fill="var(--flaeche-2)"/>${motiv}<rect width="400" height="250" fill="url(#zg-${p.id})"/>
-      <circle cx="200" cy="125" r="62" fill="var(--bg)" opacity=".55"/><circle cx="200" cy="125" r="62" fill="none" stroke="var(--gold)" stroke-width="3" opacity=".8"/>
+      <circle cx="200" cy="125" r="62" fill="var(--bg)" opacity=".55"/><circle class="z-ring" cx="200" cy="125" r="62" fill="none" stroke="var(--gold)" stroke-width="3" stroke-dasharray="8 6" opacity=".8"/>
+      <g class="z-funken">${Array.from({ length: 9 }, (_, i) => `<circle cx="${40 + ((i * 47) % 330)}" cy="${30 + ((i * 71) % 190)}" r="${2 + (i % 3)}" fill="#fff" style="--i:${i}"/>`).join("")}</g>
     </svg>`;
   }
 

@@ -456,3 +456,33 @@ dialog.q-galerie .fenster-inhalt { max-height: calc(min(86vh, 900px) - 64px); }
 @media (max-width: 700px) {
   .q-hand { --B: min(270px, 62vw); }
 }
+
+/* =============================================================
+   Champion-Karten: bester Wert einer Kategorie im ganzen Deck
+   ============================================================= */
+.qk-champion {
+  position: absolute; left: 50%; top: 2cqw; transform: translateX(-50%); z-index: 3; white-space: nowrap;
+  font-size: 3.2cqw; font-weight: 900; letter-spacing: 0.02em; padding: 0.8cqw 3cqw; border-radius: 99px;
+  color: #3a2200; background: linear-gradient(90deg, #ffe27a, #ffb300, #ffe27a); background-size: 200% 100%;
+  box-shadow: 0 0.8cqw 2.4cqw rgba(0, 0, 0, 0.45), 0 0 3cqw rgba(255, 210, 60, 0.6);
+  animation: champion-glanz 3s linear infinite;
+}
+@keyframes champion-glanz { to { background-position: -200% 0; } }
+.qkarte.champion .qk-bild { box-shadow: 0 0 0 0.5cqw #ffd23f, 0 1cqw 2cqw rgba(0, 0, 0, 0.5), inset 0 0 6cqw rgba(255, 210, 60, 0.35); }
+.qk-wert.bester { background: linear-gradient(90deg, rgba(255, 210, 60, 0.28), rgba(255, 210, 60, 0.06)); box-shadow: inset 0 0 0 0.35cqw rgba(255, 210, 60, 0.7); }
+.qk-wert.bester .qk-w-icon::after { content: "👑"; position: absolute; left: 0.6cqw; top: -1.6cqw; font-size: 3cqw; }
+.qk-wert.bester .qk-w-zahl { color: #ffe27a; }
+.qkarte.mini .qk-champion { font-size: 4.2cqw; padding: 0.6cqw 2cqw; }
+@media (prefers-reduced-motion: reduce) { .qk-champion { animation: none; } }
+
+/* =============================================================
+   Tisch besser eingebunden: kein Kasten, weicher Übergang, Hand liegt an der Tischkante
+   ============================================================= */
+.q-szene.drei { border-radius: 0; box-shadow: none; background: transparent; height: clamp(300px, 70vw, 460px);
+  -webkit-mask: linear-gradient(180deg, transparent 0, #000 9%, #000 78%, transparent 100%); mask: linear-gradient(180deg, transparent 0, #000 9%, #000 78%, transparent 100%); }
+.q-buehne { position: relative; }
+.q-buehne::before { content: ""; position: absolute; inset: 40px -10vw auto; height: 520px; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, rgba(255, 196, 107, 0.16), transparent 60%); }
+.q-szene.drei + .q-ich, .q-szene.drei ~ .q-ich { margin-top: -84px; position: relative; z-index: 4; }
+.q-szene.drei .q-tisch-mitte { bottom: 26%; }
+@media (min-width: 1000px) { .q-szene.drei { height: min(470px, 54vh); } }
