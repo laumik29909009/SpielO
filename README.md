@@ -31,6 +31,11 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 
 Welche Wörter in der Wikipedia-Beschreibung zu welcher Kategorie passen, steht in `daten/slf/pruefregeln.js`.
 
+## Hintergrundmusik 🎵
+Oben rechts gibt es einen 🎵-Knopf mit Musikrichtungen, Wiedergabe-Steuerung und Lautstärkeregler.
+Jeder Ordner in `public/musik/` ist eine Musikrichtung (z. B. `public/musik/jazz/`). Lieder (MP3, M4A, OGG …) einfach dort hineinlegen.
+Bitte nur Musik verwenden, die ihr öffentlich abspielen dürft (eigene Aufnahmen oder lizenzfreie Musik), denn das Repository und die Seite sind öffentlich.
+
 ## Wartungsmodus
 In `config.json` `"wartung": true` setzen und hochladen. Dann sehen alle nur eine Wartungsseite. Zum Beenden wieder auf `false`.
 Was auf der Wartungsseite steht, kommt aus `"wartungInfo"`: `"punkte"` (kurze Stichpunkte, was gemacht wird) und optional `"zahlen"` (große Kennzahlen).

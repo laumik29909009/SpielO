@@ -1058,3 +1058,42 @@ dialog.fenster::backdrop { background: rgba(8, 6, 20, 0.6); backdrop-filter: blu
 .bild-box .zeichnung { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bild-box.gezeichnet .emoji-gross { background: none; z-index: 1; filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)); }
 .bild-box.gezeichnet .kat-badge { z-index: 2; }
+
+/* =============================================================
+   Hintergrundmusik
+   ============================================================= */
+.musik-btn { position: relative; }
+.musik-btn.spielt { border-color: var(--gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 30%, transparent); animation: musik-puls 1.6s ease-in-out infinite; }
+.musik-btn.wartet::after { content: ""; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+@keyframes musik-puls { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--gold) 15%, transparent); } }
+.musik-panel {
+  position: fixed; z-index: 65; top: calc(64px + env(safe-area-inset-top)); right: max(16px, calc((100vw - 980px) / 2 + 16px));
+  width: min(340px, calc(100vw - 24px)); padding: 14px; border-radius: 20px; display: grid; gap: 12px;
+  background: var(--flaeche); border: 1px solid var(--rand-stark); box-shadow: var(--schatten); animation: fenster-rein 0.25s cubic-bezier(.16, 1, .3, 1);
+}
+.musik-kopf { display: flex; align-items: center; justify-content: space-between; }
+.icon-btn.klein { width: 32px; height: 32px; font-size: 0.85rem; }
+.musik-richtungen { display: flex; flex-wrap: wrap; gap: 6px; }
+.musik-richtung { border: 1px solid var(--rand-stark); background: var(--flaeche-2); color: var(--text); border-radius: 999px; padding: 7px 12px; font-weight: 700; cursor: pointer; }
+.musik-richtung span { color: var(--leise); font-weight: 600; font-size: 0.8rem; margin-left: 2px; }
+.musik-richtung.aktiv { background: var(--gold); color: var(--gold-text); border-color: var(--gold); }
+.musik-richtung.aktiv span { color: inherit; opacity: 0.7; }
+.musik-titel { display: flex; align-items: center; gap: 10px; background: var(--flaeche-2); border-radius: 14px; padding: 10px 12px; }
+.musik-name { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.musik-nr { color: var(--leise); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.wellen { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+.wellen i { width: 3px; height: 4px; border-radius: 2px; background: var(--gold); }
+.wellen.an i { animation: welle 0.9s ease-in-out infinite; }
+.wellen.an i:nth-child(2) { animation-delay: -0.3s; }
+.wellen.an i:nth-child(3) { animation-delay: -0.6s; }
+.wellen.an i:nth-child(4) { animation-delay: -0.15s; }
+@keyframes welle { 50% { height: 16px; } }
+.musik-steuerung { display: flex; justify-content: center; gap: 10px; }
+.musik-steuerung .icon-btn.gross { width: 50px; height: 50px; font-size: 1.3rem; background: var(--gold); color: var(--gold-text); border-color: var(--gold); }
+.musik-steuerung .icon-btn.an { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 20%, var(--flaeche)); }
+.musik-lautstaerke { display: flex; align-items: center; gap: 10px; }
+.musik-lautstaerke input { flex: 1; accent-color: var(--gold); height: 28px; }
+.musik-prozent { width: 3.2ch; text-align: right; color: var(--leise); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 700px) {
+  .musik-panel { right: 12px; left: 12px; width: auto; top: calc(58px + env(safe-area-inset-top)); }
+}

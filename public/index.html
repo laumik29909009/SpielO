@@ -26,13 +26,15 @@
     <div class="topbar-rechts">
       <button id="raumChip" class="raum-chip versteckt" title="Einladungslink kopieren"></button>
       <button id="stoppSpielBtn" class="icon-btn versteckt" title="Spiel abbrechen" aria-label="Spiel abbrechen">⏹</button>
-      <button id="tonBtn" class="icon-btn" title="Ton an/aus" aria-label="Ton an/aus">🔊</button>
+      <button id="musikBtn" class="icon-btn musik-btn" title="Hintergrundmusik" aria-label="Hintergrundmusik" aria-expanded="false">🎵</button>
+      <button id="tonBtn" class="icon-btn" title="Soundeffekte an/aus" aria-label="Soundeffekte an/aus">🔊</button>
     </div>
   </header>
 
   <main id="app"></main>
 
 
+  <div id="musikPanel" class="musik-panel versteckt" role="dialog" aria-label="Hintergrundmusik"></div>
   <div id="sparmodus" class="sparmodus versteckt" role="button" tabindex="0" aria-label="Weiterspielen">
     <div class="spar-karte">
       <div class="spar-icon">💤</div>
@@ -50,5 +52,6 @@
   <script src="kern.js"></script>
   <script src="spiele/preis.js"></script>
   <script src="spiele/slf.js"></script>
+  <script src="musik.js"></script>
 </body>
 </html>

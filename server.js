@@ -42,6 +42,33 @@ const INDEX = fs.readFileSync(path.join(__dirname, "public", "index.html"), "utf
   .replace(/(href|src)="(?!https?:|\/socket\.io)([^"]+\.(?:css|js))"/g, `$1="$2?v=${VERSION}"`);
 app.get(["/", "/index.html"], (_req, res) => res.set("Cache-Control", "no-cache").type("html").send(INDEX));
 
+// Hintergrundmusik: jeder Unterordner von public/musik ist eine Musikrichtung (z. B. "jazz").
+// Neue Lieder einfach in den Ordner legen, sie erscheinen nach dem nächsten Start automatisch.
+const MUSIK_ORDNER = path.join(__dirname, "public", "musik");
+const AUDIO = /\.(mp3|m4a|aac|ogg|oga|opus|wav|webm|flac)$/i;
+const SYMBOLE = { jazz: "🎷", lofi: "🎧", chill: "🌙", klassik: "🎻", party: "🎉", rock: "🎸", pop: "🎤" };
+function leseMusik() {
+  try {
+    return fs.readdirSync(MUSIK_ORDNER, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => ({
+        id: d.name,
+        name: d.name.charAt(0).toUpperCase() + d.name.slice(1),
+        symbol: SYMBOLE[d.name.toLowerCase()] || "🎵",
+        titel: fs.readdirSync(path.join(MUSIK_ORDNER, d.name))
+          .filter((f) => AUDIO.test(f))
+          .sort((a, b) => a.localeCompare(b, "de", { numeric: true }))
+          .map((f) => ({
+            datei: `/musik/${encodeURIComponent(d.name)}/${encodeURIComponent(f)}`,
+            name: f.replace(AUDIO, "").replace(/^\d+[\s._-]*/, "").replace(/_+/g, " ").trim() || f,
+          })),
+      }))
+      .filter((k) => k.titel.length);
+  } catch { return []; }
+}
+const MUSIK = leseMusik();
+app.get("/api/musik", (_req, res) => res.set("Cache-Control", "no-cache").json({ richtungen: MUSIK }));
+
 app.use(express.static(path.join(__dirname, "public"), {
   // Versionierte Dateien dürfen lange im Cache bleiben, alles andere nur kurz
   setHeaders: (res, datei) => res.set("Cache-Control", /\.(css|js)$/.test(datei) ? "public, max-age=604800, immutable" : "public, max-age=3600"),
