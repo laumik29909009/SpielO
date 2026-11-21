@@ -52,7 +52,28 @@ GN.spieler = (id) => GN.alle().find((s) => s.id === id) || { name: "?", avatar: 
 // =============================================================
 //  Verbindung
 // =============================================================
-socket.on("meta", (m) => { GN.meta = m; if (!GN.zustand) zeigeStart(); });
+socket.on("meta", (m) => {
+  // Neue Version auf dem Server (z. B. nach einem Update)? Dann einmal neu laden
+  if (m.version && window.SPIELO_VERSION && m.version !== window.SPIELO_VERSION) {
+    try { if (sessionStorage.getItem("neuGeladen") !== m.version) { sessionStorage.setItem("neuGeladen", m.version); return location.reload(); } } catch {}
+  }
+  GN.meta = m;
+  if (!GN.zustand) zeigeStart();
+});
+
+// "SpielO wird gestartet": erscheint, wenn der Server nach dem Schlafen erst aufwachen muss
+let startHinweisTimer = setTimeout(() => { if (!socket.connected) $("#startHinweis").classList.remove("versteckt"); }, 1800);
+socket.on("connect", () => { clearTimeout(startHinweisTimer); $("#startHinweis").classList.add("versteckt"); });
+socket.on("disconnect", () => {
+  if (pausiert) return; // Sparmodus zeigt seinen eigenen Hinweis
+  clearTimeout(startHinweisTimer);
+  startHinweisTimer = setTimeout(() => { if (!socket.connected && !pausiert) $("#startHinweis").classList.remove("versteckt"); }, 4000);
+});
+
+// Offline-Kopie der Seite (zeigt die Seite sofort, auch wenn der Server noch aufwacht)
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
 
 // Wartungsmodus: Seite neu laden, dann erscheint die Wartungsseite
 socket.on("connect_error", (err) => { if (err.message === "wartung") location.reload(); });
@@ -217,7 +238,7 @@ function zeigeStart() {
         ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
     </section>
-    ${patchBlock()}`;
+    <div class="fuss-bloecke">${patchBlock()}${spendenBlock()}</div>`;
 
   const name = () => {
     const n = $("#nameInput").value.trim();
@@ -247,6 +268,20 @@ function zeigeStart() {
     if (codeAusLink) $("#beitretenBtn").click();
     else $("#erstellenBtn").click();
   });
+}
+
+// Kleiner Spenden-Block (Link und Text aus config.json → "spende")
+function spendenBlock() {
+  const sp = GN.meta.spende;
+  if (!sp) return "";
+  return `
+    <div class="spende rein" style="--d:1.8s">
+      <img class="spende-qr" src="/qr/spende.svg" alt="QR-Code: Spenden per PayPal" width="84" height="84" loading="lazy">
+      <div class="spende-text">
+        <span>${esc(sp.text)}</span>
+        <a class="btn klein spende-btn" href="/spenden" target="_blank" rel="noopener">💛 Spenden per PayPal</a>
+      </div>
+    </div>`;
 }
 
 // Kleiner Block mit dem letzten Update (Inhalt aus config.json → "patch")
@@ -747,7 +782,8 @@ GN.konfetti = konfetti;
 //  - Lobby / Endstand ohne Aktivität 20 Min. → trennen
 //  Ein Tipp (oder Zurückkehren in den Tab) verbindet sofort wieder.
 // =============================================================
-const SPAR = { verstecktMs: 3 * 60e3, startseiteMs: 5 * 60e3, lobbyMs: 20 * 60e3 };
+// Render schläft 15 Min. nach der letzten Verbindung. Je früher alle trennen, desto eher schläft er.
+const SPAR = { verstecktMs: 2 * 60e3, startseiteMs: 2 * 60e3, lobbyMs: 10 * 60e3 };
 let letzteAktivitaet = Date.now();
 let verstecktSeit = null;
 let pausiert = false;

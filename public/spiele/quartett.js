@@ -17,7 +17,7 @@
   // Seltenheit: aus der Summe aller (auf das Deck normierten) Werte
   //   legendär = stärkste Hälfte der ★-Karten, episch = übrige ★-Karten,
   //   selten = stärkstes Drittel der übrigen, sonst gewöhnlich
-  const STUFEN = { gewoehnlich: { name: "Common", zeichen: "●" }, selten: { name: "Rare", zeichen: "◆" }, episch: { name: "Epic", zeichen: "★★" }, legendaer: { name: "Legendary", zeichen: "★★★" } };
+  const STUFEN = { gewoehnlich: { name: "Gewöhnlich", zeichen: "●" }, selten: { name: "Selten", zeichen: "◆" }, episch: { name: "Episch", zeichen: "★★" }, legendaer: { name: "Legendär", zeichen: "★★★" } };
   const stufenCache = {};
   function stufeVon(deck, k) {
     if (!stufenCache[deck.id]) {
@@ -57,7 +57,7 @@
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
           <div class="qk-bild ${deck.fotos?.[k.id]?.frei ? "frei" : ""}">${deck.fotos?.[k.id]
             ? `${deck.fotos[k.id].frei ? QuartettBilder.bild(deck, k, { nurSzene: true }) : ""}<img src="${deck.fotos[k.id].url}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
-            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Image coming soon</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
+            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
           <div class="qk-unter">${esc(g.name)}${k.stil ? ` · ${esc(k.stil)}` : ""}</div>
           <div class="qk-werte">
             ${deck.werte.map((w, i) => `
@@ -181,7 +181,7 @@
     d.innerHTML = `
       <div class="fenster-kopf"><b>${deck.icon} ${esc(deck.name)} · ${deck.karten.length} Karten</b><button class="icon-btn" data-schliessen aria-label="Schließen">✕</button></div>
       <div class="fenster-inhalt">
-        ${deck.lizenz ? `<p class="leise klein-text" style="margin-top:0">${esc(deck.lizenz)} · Stats are a fan estimate.</p>` : ""}
+        ${deck.lizenz ? `<p class="leise klein-text" style="margin-top:0">${esc(deck.lizenz)} · Werte sind eine Fan-Einschätzung.</p>` : ""}
         ${deck.gruppen.map((g) => `
           <div class="q-gal-gruppe" style="--typ:${g.farbe}"><b>${g.icon} ${g.id} · ${esc(g.name)}</b></div>
           <div class="q-gal-reihe">${deck.karten.filter((k) => k.gruppe === g.id).map((k) => karte(deck, k, { klasse: "gal" })).join("")}</div>`).join("")}

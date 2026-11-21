@@ -30,5 +30,12 @@
       "Alle Karten einheitlich auf Englisch (Namen, Werte, Texte, Angriffe)",
       "Seltenheit: Common, Rare, Epic, Legendary"
     ]
+  },
+  "musikAus": [
+    "jazz"
+  ],
+  "spende": {
+    "text": "Gefällt dir SpielO? Über eine kleine Spende freue ich mich riesig! ☕",
+    "link": "https://www.paypal.com/donate/?business=laurin.vogt01%40web.de&currency_code=EUR"
   }
 }

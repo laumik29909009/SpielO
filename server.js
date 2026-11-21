@@ -23,7 +23,7 @@ const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
 // Was auf der Wartungsseite steht, kommt aus config.json ("wartungInfo")
-const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [], patch: PATCH = null } = require("./config.json");
+const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [], patch: PATCH = null, musikAus: MUSIK_AUS = [], spende: SPENDE = null } = require("./config.json");
 // Spiele "im Aufbau" sind nur über den Vorschau-Link wählbar: /?vorschau=1
 const waehlbar = (raum, spiel) => !!SPIELE[spiel] && (!IM_AUFBAU.includes(spiel) || raum.vorschau);
 if (WARTUNG) {
@@ -43,7 +43,12 @@ const VERSION = (process.env.RENDER_GIT_COMMIT || Date.now().toString(36)).slice
 const fs = require("fs");
 const INDEX = fs.readFileSync(path.join(__dirname, "public", "index.html"), "utf8")
   .replace(/(href|src)="(?!https?:|\/socket\.io)([^"]+\.(?:css|js))"/g, `$1="$2?v=${VERSION}"`);
-app.get(["/", "/index.html"], (_req, res) => res.set("Cache-Control", "no-cache").type("html").send(INDEX));
+// Link-Vorschau (Discord & Co.) braucht eine vollständige Bild-Adresse
+app.get(["/", "/index.html"], (req, res) => {
+  const proto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
+  const host = String(req.headers.host || "").replace(/[^\w.:-]/g, "");
+  res.set("Cache-Control", "no-cache").type("html").send(INDEX.replace('content="/og.png"', `content="${proto}://${host}/og.png"`).replace("<!--VERSION-->", `<script>window.SPIELO_VERSION=${JSON.stringify(VERSION)}</script>`));
+});
 
 // Hintergrundmusik: jeder Unterordner von public/musik ist eine Musikrichtung (z. B. "jazz").
 // Neue Lieder einfach in den Ordner legen, sie erscheinen nach dem nächsten Start automatisch.
@@ -53,7 +58,7 @@ const SYMBOLE = { jazz: "🎷", lofi: "🎧", chill: "🌙", klassik: "🎻", pa
 function leseMusik() {
   try {
     return fs.readdirSync(MUSIK_ORDNER, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
+      .filter((d) => d.isDirectory() && !MUSIK_AUS.includes(d.name.toLowerCase())) // config.json "musikAus": vorübergehend abgeschaltet
       .map((d) => {
         // Optional: titel.json im Ordner mit schönen Namen { "datei.mp3": "Künstler – Titel" }
         let namen = {};
@@ -78,6 +83,17 @@ function leseMusik() {
 const MUSIK = leseMusik();
 app.get("/api/musik", (_req, res) => res.set("Cache-Control", "no-cache").json({ richtungen: MUSIK }));
 
+// Spenden: /spenden leitet zu PayPal weiter, /qr/spende.svg ist der QR-Code dazu (Link aus config.json "spende")
+app.get("/spenden", (_req, res) => (SPENDE?.link ? res.redirect(302, SPENDE.link) : res.status(404).end()));
+let SPENDE_QR = null;
+app.get("/qr/spende.svg", async (_req, res) => {
+  if (!SPENDE?.link) return res.status(404).end();
+  try {
+    SPENDE_QR ||= await require("qrcode").toString(SPENDE.link, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#141022", light: "#ffffff" } });
+    res.set("Cache-Control", "public, max-age=86400").type("image/svg+xml").send(SPENDE_QR);
+  } catch { res.status(500).end(); }
+});
+
 // QR-Code zum Beitreten: /qr/ABCD.svg zeigt auf https://<diese Seite>/?raum=ABCD
 const QRCode = require("qrcode");
 const QR_CACHE = new Map();
@@ -100,7 +116,7 @@ app.get("/qr/:code.svg", async (req, res) => {
 
 app.use(express.static(path.join(__dirname, "public"), {
   // Versionierte Dateien dürfen lange im Cache bleiben, alles andere nur kurz
-  setHeaders: (res, datei) => res.set("Cache-Control", /\.(css|js)$/.test(datei) ? "public, max-age=604800, immutable" : "public, max-age=3600"),
+  setHeaders: (res, datei) => res.set("Cache-Control", /sw\.js$/.test(datei) ? "no-cache" : /\.(css|js)$/.test(datei) ? "public, max-age=604800, immutable" : "public, max-age=3600"),
 }));
 
 const raeume = {};
@@ -223,8 +239,10 @@ io.on("connection", (socket) => {
   socket.emit("meta", {
     spiele: Object.fromEntries(Object.entries(SPIELE).map(([id, m]) => [id, m.meta ? m.meta() : {}])),
     maxSpieler: MAX_SPIELER,
+    version: VERSION,
     imAufbau: IM_AUFBAU,
     patch: PATCH,
+    spende: SPENDE ? { text: SPENDE.text } : null,
   });
 
   // Spam-Schutz: höchstens 40 Nachrichten pro Sekunde (kurze Bursts sind erlaubt)
