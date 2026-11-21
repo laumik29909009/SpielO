@@ -177,7 +177,7 @@ button.avatar:hover { border-color: var(--gold); }
 .modus-karte .titel { font-weight: 800; font-size: 1.05rem; margin: 6px 0 4px; }
 .modus-karte .text { color: var(--leise); font-size: 0.86rem; line-height: 1.35; }
 
-.kat-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.kat-gitter { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
 .kat-chip {
   display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px;
   background: var(--flaeche); border: 2px solid var(--rand); border-radius: 14px; cursor: pointer;
@@ -660,6 +660,7 @@ body.wackeln #app { animation: wackeln 0.45s; }
 .spielo-logo { display: inline-flex; align-items: center; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
 .spielo-logo .b { display: inline-block; }
 .spielo-logo .o-chip { position: relative; display: inline-block; width: 0.78em; height: 0.78em; margin-left: 0.04em; }
+.spielo-logo .o-zeichnen { position: absolute; inset: 0; }
 .spielo-logo .o-ring {
   position: absolute; inset: 0; border-radius: 50%;
   background: conic-gradient(#c58bff, #ff5fa8, #ffcb47, #2ee6c5, #5cc8ff, #c58bff);
@@ -671,13 +672,6 @@ body.wackeln #app { animation: wackeln 0.45s; }
   background: #fff; box-shadow: 0 0 0.25em rgba(255, 255, 255, 0.8);
 }
 @keyframes drehen { to { transform: rotate(360deg); } }
-.spielo-logo.riesig { font-size: clamp(4rem, 19vw, 9rem); }
-.spielo-logo.riesig .b, .spielo-logo.riesig .o-chip { animation: buchstabe-rein 0.7s cubic-bezier(.2,1.6,.4,1) both; animation-delay: calc(var(--i) * 70ms); }
-.spielo-logo.riesig .o-chip { animation-name: chip-rein; }
-.spielo-logo.riesig .b:hover { animation: huepfen 0.5s; }
-@keyframes buchstabe-rein { from { transform: translateY(0.5em) scale(0.6); opacity: 0; } }
-@keyframes chip-rein { from { transform: scale(0) rotate(-180deg); opacity: 0; } }
-@keyframes huepfen { 40% { transform: translateY(-0.15em); } }
 .spielo-logo.klein { font-size: 1.45rem; }
 .logo { display: flex; align-items: center; }
 
@@ -770,9 +764,86 @@ button.spiel-gross { cursor: pointer; }
 .rekord-info { text-align: center; color: var(--gold); font-weight: 800; margin-top: 6px; }
 
 /* =============================================================
+   SpielO: Logo-Intro
+   ============================================================= */
+@property --winkel { syntax: "<angle>"; inherits: false; initial-value: 360deg; }
+.spielo-logo.riesig { font-size: clamp(4rem, 19vw, 9rem); }
+.spielo-logo.riesig .b {
+  background: linear-gradient(105deg, #fff 0 40%, #ffd6f0 50%, #fff 60% 100%) 0 0 / 300% 100% repeat-x;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation:
+    buchstabe-auftauchen 0.9s cubic-bezier(.16, 1, .3, 1) both calc(var(--i) * 75ms + 0.1s),
+    schimmer 1.4s ease-in-out 1.15s both;
+}
+.spielo-logo.riesig .o-chip { animation: chip-auftauchen 0.6s cubic-bezier(.16, 1, .3, 1) both 0.45s; }
+.spielo-logo.riesig .o-zeichnen {
+  -webkit-mask: conic-gradient(#000 var(--winkel), transparent 0); mask: conic-gradient(#000 var(--winkel), transparent 0);
+  animation: ring-zeichnen 0.8s cubic-bezier(.65, 0, .35, 1) both 0.5s;
+}
+.spielo-logo.riesig .o-punkt { animation: punkt-ploppen 0.5s cubic-bezier(.2, 1.9, .4, 1) both 1.15s; }
+@keyframes buchstabe-auftauchen { from { opacity: 0; transform: translateY(0.35em); filter: blur(14px); } }
+@keyframes chip-auftauchen { from { opacity: 0; transform: scale(0.6) rotate(-90deg); } }
+@keyframes ring-zeichnen { from { --winkel: 0deg; } to { --winkel: 360deg; } }
+@keyframes punkt-ploppen { from { transform: scale(0); } }
+@keyframes schimmer { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+.hero-logo { animation: glow-rein 1.6s ease-out both 0.4s; }
+@keyframes glow-rein { from { text-shadow: 0 10px 40px rgba(197, 139, 255, 0); } }
+
+/* Zweiter Besuch in derselben Sitzung: alles schneller */
+.hero-start.schnell .b, .hero-start.schnell .o-chip, .hero-start.schnell .o-zeichnen, .hero-start.schnell .o-punkt { animation-duration: 0.45s; animation-delay: 0s; }
+.hero-start.schnell .b { animation: buchstabe-auftauchen 0.5s cubic-bezier(.16, 1, .3, 1) both calc(var(--i) * 30ms); }
+
+/* Gestaffeltes Einblenden der Startseite */
+.rein { animation: hochgleiten 0.7s cubic-bezier(.16, 1, .3, 1) both var(--d, 0s); }
+.schnell .rein, .schnell ~ .rein { animation-delay: calc(var(--d, 0s) * 0.2); }
+@keyframes hochgleiten { from { opacity: 0; transform: translateY(18px); } }
+
+/* Weicher Übergang zwischen Ansichten */
+.seite-rein { animation: seite-rein 0.4s cubic-bezier(.16, 1, .3, 1); }
+@keyframes seite-rein { from { opacity: 0; transform: translateY(10px); } }
+
+/* =============================================================
    SpielO: Fußzeile
    ============================================================= */
-.seiten-fuss { max-width: 980px; margin: 0 auto; padding: 28px 16px 36px; text-align: center; color: var(--leise); font-size: 0.85rem; display: grid; gap: 4px; }
-.seiten-fuss .dev { font-weight: 600; }
-.seiten-fuss .dev b { background: linear-gradient(135deg, var(--gold), var(--gold-2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 900; letter-spacing: 0.02em; }
-.seiten-fuss .klein { opacity: 0.7; font-size: 0.75rem; }
+.seiten-fuss { max-width: 980px; margin: 0 auto; padding: 32px 16px 36px; text-align: center; color: var(--leise); font-size: 0.85rem; display: grid; gap: 2px; opacity: 0.75; }
+.seiten-fuss .klein { font-size: 0.72rem; opacity: 0.8; }
+
+/* =============================================================
+   Stadt Land Fluss: fester Kopf beim Schreiben, Live-Fortschritt, Stopp
+   ============================================================= */
+.schreib-kopf {
+  position: sticky; top: 0; z-index: 20; margin: 0 -16px 14px; padding: 10px 16px 12px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rand);
+}
+.schreib-kopf .timer { margin-bottom: 10px; }
+.schreib-kopf .runden-kopf { margin-bottom: 8px; }
+.live-leiste { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.live-leiste::-webkit-scrollbar { display: none; }
+.live-spieler {
+  flex: none; display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border-radius: 14px;
+  background: var(--flaeche); border: 1px solid var(--rand); transition: border-color 0.3s;
+}
+.live-spieler .avatar { width: 30px; height: 30px; font-size: 1rem; }
+.live-info { display: grid; gap: 4px; }
+.live-name { font-size: 0.75rem; font-weight: 700; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.segmente { display: flex; gap: 2px; }
+.segmente i { width: 9px; height: 6px; border-radius: 2px; background: var(--flaeche-2); transition: background 0.25s, transform 0.25s; }
+.segmente i.f2 { background: var(--gruen); }
+.segmente i.f1 { background: var(--rot); }
+.live-zahl { font-weight: 900; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.live-spieler.voll { border-color: var(--gruen); }
+.live-spieler.voll .live-zahl { color: var(--gruen); }
+
+.stopp-banner {
+  display: flex; align-items: center; gap: 12px; margin: 0 0 10px; padding: 12px 14px; border-radius: 16px; text-align: left;
+  background: linear-gradient(135deg, #ff5a5a, #d7263d); color: #fff; box-shadow: 0 10px 30px rgba(215, 38, 61, 0.35);
+}
+.stopp-banner.neu { animation: stopp-rein 0.5s cubic-bezier(.2, 1.6, .4, 1), stopp-puls 1s ease-in-out 0.5s infinite alternate; }
+.stopp-icon { font-size: 2rem; line-height: 1; }
+.stopp-text { display: grid; }
+.stopp-text b { font-size: 1.15rem; }
+.stopp-text span { font-size: 0.88rem; opacity: 0.9; }
+@keyframes stopp-rein { from { transform: scale(0.85); opacity: 0; } }
+@keyframes stopp-puls { to { box-shadow: 0 10px 40px rgba(215, 38, 61, 0.7); } }
+.schreib-kopf.alarm .timer-zahl { font-size: 1.6rem; }

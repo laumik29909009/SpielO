@@ -5,7 +5,7 @@
 //  → pruefen (Schiedsrichter) → bewerten (Abstimmung) → nächste Runde / ende
 // =============================================================
 const KATALOG = require("../daten/slf/kategorien.json");
-const { pruefe, kiBereit, beginntMit } = require("./slf-pruefer");
+const { pruefe, beginntMit } = require("./slf-pruefer");
 const istSolo = (raum) => Object.keys(raum.spieler).length === 1;
 
 const ALLE_KATEGORIEN = KATALOG.gruppen.flatMap((g) => g.kategorien);
@@ -24,7 +24,7 @@ const PUNKTE = { allein: 20, einzigartig: 10, doppelt: 5, stern: 3, solo: 10 };
 // ---------- Einstellungen ----------
 function kategorieAusId(id) {
   const k = NACH_ID[id];
-  return k ? { id: k.id, name: k.name, emoji: k.emoji, frei: !!k.frei } : null;
+  return k ? { id: k.id, name: k.name, emoji: k.emoji, frei: !!k.frei, ue18: !!k.ue18 } : null;
 }
 
 function standardEinstellungen() {
@@ -34,6 +34,7 @@ function standardEinstellungen() {
     sekunden: 90,
     stopp: true,
     schwer: false,
+    ue18: false,
   };
 }
 
@@ -42,7 +43,9 @@ function einstellungenSetzen(alt, e) {
   if (typeof e.umschalten === "string") {
     const i = neu.kategorien.findIndex((k) => k.id === e.umschalten);
     if (i >= 0) neu.kategorien.splice(i, 1);
-    else if (NACH_ID[e.umschalten] && neu.kategorien.length < MAX_KATEGORIEN) neu.kategorien.push(kategorieAusId(e.umschalten));
+    else if (NACH_ID[e.umschalten] && (!NACH_ID[e.umschalten].ue18 || neu.ue18) && neu.kategorien.length < MAX_KATEGORIEN) {
+      neu.kategorien.push(kategorieAusId(e.umschalten));
+    }
   }
   if (typeof e.eigene === "string") {
     const name = e.eigene.replace(/\s+/g, " ").trim().slice(0, 32);
@@ -53,21 +56,36 @@ function einstellungenSetzen(alt, e) {
   }
   if (typeof e.paket === "string") {
     const p = KATALOG.pakete.find((x) => x.id === e.paket);
-    if (p) neu.kategorien = p.kategorien.map(kategorieAusId);
+    if (p && (!p.ue18 || neu.ue18)) neu.kategorien = p.kategorien.map(kategorieAusId);
   }
   if (e.zufall) {
-    const pool = ALLE_KATEGORIEN.map((k) => k.id).sort(() => Math.random() - 0.5);
+    const pool = ALLE_KATEGORIEN.filter((k) => !k.ue18 || neu.ue18).map((k) => k.id).sort(() => Math.random() - 0.5);
     neu.kategorien = ["stadt", "land", ...pool.filter((id) => id !== "stadt" && id !== "land").slice(0, 4)].map(kategorieAusId);
   }
   if (e.runden !== undefined) neu.runden = Math.min(15, Math.max(1, parseInt(e.runden) || 5));
   if (e.sekunden !== undefined) neu.sekunden = Math.min(300, Math.max(30, parseInt(e.sekunden) || 90));
   if (typeof e.stopp === "boolean") neu.stopp = e.stopp;
   if (typeof e.schwer === "boolean") neu.schwer = e.schwer;
+  if (typeof e.ue18 === "boolean") {
+    neu.ue18 = e.ue18;
+    if (!neu.ue18) neu.kategorien = neu.kategorien.filter((k) => !k.ue18);
+    if (!neu.kategorien.length) neu.kategorien = KATALOG.pakete[0].kategorien.map(kategorieAusId);
+  }
   return neu;
 }
 
 // ---------- Hilfen ----------
 const einst = (raum) => raum.einstellungen.slf;
+
+// Live-Fortschritt: pro Kategorie 0 = leer, 1 = falscher Buchstabe, 2 = passt
+function felderStatus(raum, spielerId) {
+  const d = raum.daten;
+  const entwurf = d.entwuerfe[spielerId] || {};
+  return d.kategorien.map((k) => {
+    const t = (entwurf[k.id] || "").trim();
+    return !t ? 0 : beginntMit(t, d.buchstabe) ? 2 : 1;
+  }).join("");
+}
 
 function ausgefuellt(raum, spielerId) {
   const d = raum.daten;
@@ -207,8 +225,7 @@ function naechsteRunde(raum, ctx) {
 module.exports = {
   meta: () => ({
     gruppen: KATALOG.gruppen,
-    pakete: KATALOG.pakete.map(({ id, name, emoji, kategorien }) => ({ id, name, emoji, kategorien })),
-    kiVerfuegbar: kiBereit(),
+    pakete: KATALOG.pakete.map(({ id, name, emoji, kategorien, ue18 }) => ({ id, name, emoji, kategorien, ue18: !!ue18 })),
     maxKategorien: MAX_KATEGORIEN,
     punkte: PUNKTE,
   }),
@@ -238,11 +255,11 @@ module.exports = {
       case "entwurf": {
         // Spieler schicken ihren Zwischenstand regelmäßig, damit bei Abbruch nichts verloren geht
         if (!["schreiben", "stopp", "pruefen"].includes(d.phase) || !daten || typeof daten !== "object") return;
-        const vorher = ausgefuellt(raum, spielerId);
+        const vorher = felderStatus(raum, spielerId);
         const entwurf = {};
         for (const k of d.kategorien) entwurf[k.id] = String(daten[k.id] || "").slice(0, MAX_TEXT);
         d.entwuerfe[spielerId] = entwurf;
-        if (ausgefuellt(raum, spielerId) !== vorher && d.phase !== "pruefen") ctx.sende(raum);
+        if (felderStatus(raum, spielerId) !== vorher && d.phase !== "pruefen") ctx.sende(raum);
         return;
       }
       case "stopp": {
@@ -312,7 +329,7 @@ module.exports = {
   spielerInfo(raum, s) {
     const d = raum.daten;
     if (!d) return {};
-    return { fortschritt: ausgefuellt(raum, s.id), bereit: d.bereit.has(s.id) };
+    return { fortschritt: ausgefuellt(raum, s.id), felder: felderStatus(raum, s.id), bereit: d.bereit.has(s.id) };
   },
 
   ansicht(raum) {
@@ -346,7 +363,6 @@ module.exports = {
       restMs: d.endetUm ? Math.max(0, d.endetUm - Date.now()) : 0,
       stoppErlaubt: e.stopp,
       stoppVon: d.stoppVon,
-      kiAktiv: kiBereit(),
       hinweis: d.hinweis,
       solo: istSolo(raum),
       tempoBonus: d.tempoBonus || {},

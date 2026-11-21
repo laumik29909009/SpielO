@@ -47,6 +47,49 @@
    "name": "Alltag & Gadgets",
    "emoji": "🛒",
    "beschreibung": "Dinge, die du kennst (oder glaubst zu kennen)"
+  },
+  {
+   "id": "essen",
+   "name": "Essen & Trinken extrem",
+   "emoji": "🍾",
+   "beschreibung": "Rekord-Weine, Luxus-Thunfisch, absurde Delikatessen"
+  },
+  {
+   "id": "crime",
+   "name": "Crime & Skandale",
+   "emoji": "🚔",
+   "beschreibung": "Raubzüge, Rekordstrafen, Wirtschaftsskandale"
+  },
+  {
+   "id": "internet",
+   "name": "Internet & Social Media",
+   "emoji": "📱",
+   "beschreibung": "Domains, NFTs, YouTuber, Mega-Deals"
+  },
+  {
+   "id": "deutschland",
+   "name": "Typisch Deutschland",
+   "emoji": "🇩🇪",
+   "beschreibung": "Bußgelder, Gebühren, Alltag in Deutschland"
+  },
+  {
+   "id": "geschichte",
+   "name": "Geschichte & damals",
+   "emoji": "📜",
+   "beschreibung": "Was Dinge früher gekostet haben"
+  },
+  {
+   "id": "tiere",
+   "name": "Tiere",
+   "emoji": "🐾",
+   "beschreibung": "Rekord-Tiere und was Tiere kosten"
+  },
+  {
+   "id": "nacht",
+   "name": "Nachtleben & Zocken",
+   "emoji": "🎰",
+   "beschreibung": "Jackpots, Casinos, Promille",
+   "ue18": true
   }
  ],
  "produkte": [
@@ -1360,6 +1403,826 @@
     "lizenz": "Public domain",
     "quelle": "https://commons.wikimedia.org/wiki/File:DE_Licence_2021_Front.jpg"
    }
+  },
+  {
+   "id": "romanee",
+   "kat": "essen",
+   "emoji": "🍷",
+   "wiki": "Domaine de la Romanée-Conti",
+   "name": "Flasche Romanée-Conti von 1945",
+   "info": "Teuerste Flasche Wein, Auktion 2018",
+   "preis": 558000,
+   "w": "$",
+   "fakt": "Damals wurden nur rund 600 Flaschen abgefüllt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Vosne-Roman%C3%A9e%2C_le_Domaine_de_la_Roman%C3%A9e-Conti.jpg/960px-Vosne-Roman%C3%A9e%2C_le_Domaine_de_la_Roman%C3%A9e-Conti.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Wikipedro",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Vosne-Roman%C3%A9e,_le_Domaine_de_la_Roman%C3%A9e-Conti.jpg"
+   }
+  },
+  {
+   "id": "macallan",
+   "kat": "essen",
+   "emoji": "🥃",
+   "wiki": "The Macallan",
+   "name": "Flasche Macallan 1926 „Adami“",
+   "info": "Teuerster Whisky, Auktion 2023 in London",
+   "preis": 2100000,
+   "w": "£",
+   "fakt": "Der Whisky reifte 60 Jahre im Fass.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/The_Macallan_malt_whisky_Distillery_-_geograph.org.uk_-_112253.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "James Allan",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:The_Macallan_malt_whisky_Distillery_-_geograph.org.uk_-_112253.jpg"
+   }
+  },
+  {
+   "id": "thunfisch",
+   "kat": "essen",
+   "emoji": "🐟",
+   "wiki": "Atlantic bluefin tuna",
+   "name": "Ein Blauflossen-Thunfisch",
+   "info": "Rekord-Auktion in Tokio, 2019 (278 kg)",
+   "preis": 3100000,
+   "w": "$",
+   "fakt": "Das sind über 11.000 $ pro Kilo.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Bluefin-big.jpg/960px-Bluefin-big.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Unknown authorUnknown author",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Bluefin-big.jpg"
+   }
+  },
+  {
+   "id": "trueffelrekord",
+   "kat": "essen",
+   "emoji": "🍄",
+   "wiki": "Tuber magnatum",
+   "name": "Eine 1,5-kg-Weißtrüffel",
+   "info": "Rekord-Auktion 2007",
+   "preis": 330000,
+   "w": "$",
+   "fakt": "Gekauft vom Casino-Magnaten Stanley Ho aus Macau.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Truffle_washed_and_cut.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "MatthiasKabel",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Truffle_washed_and_cut.jpg"
+   }
+  },
+  {
+   "id": "wasser",
+   "kat": "essen",
+   "emoji": "💧",
+   "wiki": "Bottled water",
+   "name": "Flasche „Acqua di Cristallo Tributo a Modigliani“",
+   "info": "Teuerstes Wasser der Welt, 2010",
+   "preis": 60000,
+   "w": "$",
+   "fakt": "Der Preis kommt von der Flasche aus Gold, nicht vom Wasser.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Water_Bottle_%2851308317077%29.jpg/960px-Water_Bottle_%2851308317077%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Alabama Extension",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Water_Bottle_(51308317077).jpg"
+   }
+  },
+  {
+   "id": "bananeklebe",
+   "kat": "essen",
+   "emoji": "🍌",
+   "wiki": "Comedian (artwork)",
+   "name": "Die mit Klebeband an die Wand geklebte Banane",
+   "info": "Kunstwerk „Comedian“, Auktion 2024",
+   "preis": 6200000,
+   "w": "$",
+   "fakt": "Der Käufer hat die Banane danach aufgegessen."
+  },
+  {
+   "id": "gruenesgewoelbe",
+   "kat": "crime",
+   "emoji": "💎",
+   "wiki": "Grünes Gewölbe",
+   "name": "Juwelen aus dem Grünen Gewölbe in Dresden",
+   "info": "Geschätzter Wert der Beute, Einbruch 2019",
+   "preis": 113800000,
+   "w": "€",
+   "fakt": "Ein Großteil der Beute wurde später zurückgegeben.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Dresden_2012-05-22-6590.jpg/960px-Dresden_2012-05-22-6590.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Slick",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Dresden_2012-05-22-6590.jpg"
+   }
+  },
+  {
+   "id": "antwerpen",
+   "kat": "crime",
+   "emoji": "💍",
+   "wiki": "Antwerp diamond heist",
+   "name": "Beute beim Diamantenraub von Antwerpen",
+   "info": "Geschätzt, 2003",
+   "preis": 100000000,
+   "w": "$",
+   "fakt": "Gilt als einer der größten Raubzüge aller Zeiten.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Antwerpen_Hoveniersstraat.JPG/960px-Antwerpen_Hoveniersstraat.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Thorsten1997",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Antwerpen_Hoveniersstraat.JPG"
+   }
+  },
+  {
+   "id": "wirecard",
+   "kat": "crime",
+   "emoji": "💳",
+   "wiki": "Wirecard scandal",
+   "name": "Die fehlenden Milliarden bei Wirecard",
+   "info": "Bilanzskandal 2020",
+   "preis": 1900000000,
+   "w": "€",
+   "fakt": "Das Geld existierte wohl nie.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Wirecard_headquarters%2C_Aschheim_%2849556187461%29.jpg/960px-Wirecard_headquarters%2C_Aschheim_%2849556187461%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Leo Molatore",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Wirecard_headquarters,_Aschheim_(49556187461).jpg"
+   }
+  },
+  {
+   "id": "googlestrafe",
+   "kat": "crime",
+   "emoji": "⚖️",
+   "wiki": "Google",
+   "name": "EU-Strafe gegen Google (Android)",
+   "info": "Kartellstrafe 2018",
+   "preis": 4340000000,
+   "w": "€",
+   "fakt": "Eine der höchsten Kartellstrafen der EU-Geschichte.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Googleplex_HQ_%28cropped%29.jpg/960px-Googleplex_HQ_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Asoundd",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Googleplex_HQ_(cropped).jpg"
+   }
+  },
+  {
+   "id": "metastrafe",
+   "kat": "crime",
+   "emoji": "🔒",
+   "wiki": "Meta Platforms",
+   "name": "Datenschutz-Strafe gegen Meta",
+   "info": "DSGVO-Rekordstrafe 2023",
+   "preis": 1200000000,
+   "w": "€",
+   "fakt": "Es ging um Datenübertragungen in die USA.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Meta_HQ_2023.png/960px-Meta_HQ_2023.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "InvadingInvader",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Meta_HQ_2023.png"
+   }
+  },
+  {
+   "id": "dieselgate",
+   "kat": "crime",
+   "emoji": "🚗",
+   "wiki": "Volkswagen emissions scandal",
+   "name": "Kosten des Dieselskandals für VW",
+   "info": "Strafen, Rückrufe, Vergleiche (Schätzung)",
+   "preis": 32000000000,
+   "w": "€",
+   "fakt": "Aufgedeckt wurde der Skandal 2015 in den USA.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/VW_Golf_TDI_Clean_Diesel_WAS_2010_8983.JPG/960px-VW_Golf_TDI_Clean_Diesel_WAS_2010_8983.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Mariordo Mario Roberto Duran Ortiz",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:VW_Golf_TDI_Clean_Diesel_WAS_2010_8983.JPG"
+   }
+  },
+  {
+   "id": "goldmuenze",
+   "kat": "crime",
+   "emoji": "🪙",
+   "wiki": "Big Maple Leaf",
+   "name": "Die gestohlene 100-kg-Goldmünze aus Berlin",
+   "info": "„Big Maple Leaf“, Bode-Museum 2017",
+   "preis": 3750000,
+   "w": "€",
+   "fakt": "Die Diebe schoben sie mit einer Schubkarre weg."
+  },
+  {
+   "id": "lufthansaheist",
+   "kat": "crime",
+   "emoji": "✈️",
+   "wiki": "Lufthansa heist",
+   "name": "Beute beim Lufthansa-Raub am JFK-Flughafen",
+   "info": "1978, Vorlage für den Film „GoodFellas“",
+   "preis": 5875000,
+   "w": "$",
+   "fakt": "Das Geld wurde nie gefunden."
+  },
+  {
+   "id": "carinsurance",
+   "kat": "internet",
+   "emoji": "🌐",
+   "wiki": "Domain name",
+   "name": "Die Domain CarInsurance.com",
+   "info": "Teuerster öffentlich bekannter Domain-Kauf, 2010",
+   "preis": 49700000,
+   "w": "$",
+   "fakt": "Gekauft für eine Versicherungs-Vergleichsseite.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/An_annotated_example_of_a_domain_name.png/960px-An_annotated_example_of_a_domain_name.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "ComputerUserUser",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:An_annotated_example_of_a_domain_name.png"
+   }
+  },
+  {
+   "id": "ersttweet",
+   "kat": "internet",
+   "emoji": "🐦",
+   "wiki": "Jack Dorsey",
+   "name": "Der allererste Tweet als NFT",
+   "info": "Jack Dorsey, Verkauf 2021",
+   "preis": 2900000,
+   "w": "$",
+   "fakt": "Er lautete: „just setting up my twttr“.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Jack_Dorsey_in_Washington_D.C._-_2018_%2844538272181%29_%28cropped%29.jpg/960px-Jack_Dorsey_in_Washington_D.C._-_2018_%2844538272181%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Mark Warner",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Jack_Dorsey_in_Washington_D.C._-_2018_(44538272181)_(cropped).jpg"
+   }
+  },
+  {
+   "id": "beeple",
+   "kat": "internet",
+   "emoji": "🖼️",
+   "wiki": "Everydays: the First 5000 Days",
+   "name": "NFT „Everydays“ von Beeple",
+   "info": "Auktion bei Christie's, 2021",
+   "preis": 69300000,
+   "w": "$",
+   "fakt": "Ein Bild aus 5.000 digitalen Einzelbildern."
+  },
+  {
+   "id": "instagram",
+   "kat": "internet",
+   "emoji": "📸",
+   "wiki": "Instagram",
+   "name": "Kauf von Instagram durch Facebook",
+   "info": "2012",
+   "preis": 1000000000,
+   "w": "$",
+   "fakt": "Instagram hatte damals 13 Mitarbeitende.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Instagram_screenshot_for_Wikipedia_taken_27_October_2026.png/960px-Instagram_screenshot_for_Wikipedia_taken_27_October_2026.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Instagram / Wikimedia Foundation",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Instagram_screenshot_for_Wikipedia_taken_27_October_2026.png"
+   }
+  },
+  {
+   "id": "youtubekauf",
+   "kat": "internet",
+   "emoji": "▶️",
+   "wiki": "YouTube",
+   "name": "Kauf von YouTube durch Google",
+   "info": "2006",
+   "preis": 1650000000,
+   "w": "$",
+   "fakt": "YouTube war damals keine zwei Jahre alt.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Youtube_interface%2C_showing_search_results_of_Burger_Recipe.png/960px-Youtube_interface%2C_showing_search_results_of_Burger_Recipe.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Lyles BBQ, Smile and Learn - English, The Flat Top King (previous screenshot: yu",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Youtube_interface,_showing_search_results_of_Burger_Recipe.png"
+   }
+  },
+  {
+   "id": "netflixabo",
+   "kat": "internet",
+   "emoji": "🍿",
+   "wiki": "Netflix",
+   "name": "Netflix-Standard-Abo",
+   "info": "Pro Monat in Deutschland (Stand 2024)",
+   "preis": 13.99,
+   "w": "€",
+   "fakt": "2014 startete Netflix in Deutschland ab 7,99 €."
+  },
+  {
+   "id": "chatgptplus",
+   "kat": "internet",
+   "emoji": "🤖",
+   "wiki": "ChatGPT",
+   "name": "ChatGPT Plus",
+   "info": "Pro Monat",
+   "preis": 20,
+   "w": "$",
+   "fakt": "Gestartet ist der Dienst im November 2022.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/960px-OpenAI_logo_2025_%28symbol%29.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "OpenAI",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:OpenAI_logo_2025_(symbol).svg"
+   }
+  },
+  {
+   "id": "mrbeast",
+   "kat": "internet",
+   "emoji": "🎬",
+   "wiki": "MrBeast",
+   "name": "MrBeasts nachgestelltes „Squid Game“-Video",
+   "info": "Produktionsbudget, 2021",
+   "preis": 3500000,
+   "w": "$",
+   "fakt": "Der Gewinner bekam 456.000 $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/MrBeast_in_2026_%28cropped_4%29.png/960px-MrBeast_in_2026_%28cropped_4%29.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Tyren Redd",
+    "lizenz": "CC BY 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:MrBeast_in_2026_(cropped_4).png"
+   }
+  },
+  {
+   "id": "rundfunk",
+   "kat": "deutschland",
+   "emoji": "📺",
+   "wiki": "Rundfunkbeitrag (Deutschland)",
+   "name": "Rundfunkbeitrag (GEZ)",
+   "info": "Pro Monat und Wohnung, 2025",
+   "preis": 18.36,
+   "w": "€",
+   "fakt": "Das bringt rund 9 Mrd € im Jahr ein."
+  },
+  {
+   "id": "mindestlohn",
+   "kat": "deutschland",
+   "emoji": "💶",
+   "wiki": "Mindestlohn in Deutschland",
+   "name": "Mindestlohn pro Stunde",
+   "info": "Ab Januar 2026",
+   "preis": 13.9,
+   "w": "€",
+   "fakt": "Eingeführt wurde er 2015 mit 8,50 €."
+  },
+  {
+   "id": "buergergeld",
+   "kat": "deutschland",
+   "emoji": "🏛️",
+   "wiki": null,
+   "name": "Bürgergeld-Regelsatz für Alleinstehende",
+   "info": "Pro Monat, 2025",
+   "preis": 563,
+   "w": "€",
+   "fakt": "Die Miete wird zusätzlich übernommen."
+  },
+  {
+   "id": "kindergeld",
+   "kat": "deutschland",
+   "emoji": "👶",
+   "wiki": "Kindergeld (Deutschland)",
+   "name": "Kindergeld pro Kind",
+   "info": "Pro Monat, 2025",
+   "preis": 255,
+   "w": "€",
+   "fakt": "1955 gab es 25 D-Mark, aber erst ab dem dritten Kind."
+  },
+  {
+   "id": "pfand",
+   "kat": "deutschland",
+   "emoji": "🍾",
+   "wiki": "Einwegpfand",
+   "name": "Pfand für eine Einwegflasche",
+   "info": "Plastikflasche oder Dose",
+   "preis": 0.25,
+   "w": "€",
+   "fakt": "Das Einwegpfand gibt es in Deutschland seit 2003."
+  },
+  {
+   "id": "promille",
+   "kat": "deutschland",
+   "emoji": "🚓",
+   "wiki": "Blutalkoholkonzentration",
+   "name": "Bußgeld für 0,5 Promille am Steuer",
+   "info": "Erster Verstoß, plus Fahrverbot",
+   "preis": 500,
+   "w": "€",
+   "fakt": "Dazu kommen 2 Punkte in Flensburg und 1 Monat Fahrverbot."
+  },
+  {
+   "id": "handysteuer",
+   "kat": "deutschland",
+   "emoji": "📱",
+   "wiki": "Handyverbot am Steuer",
+   "name": "Bußgeld fürs Handy am Steuer",
+   "info": "Ohne Gefährdung",
+   "preis": 100,
+   "w": "€",
+   "fakt": "Mit Unfall werden es 200 € und ein Monat Fahrverbot."
+  },
+  {
+   "id": "schwarzfahren",
+   "kat": "deutschland",
+   "emoji": "🎫",
+   "wiki": "Erhöhtes Beförderungsentgelt",
+   "name": "Strafe fürs Schwarzfahren",
+   "info": "Erhöhtes Beförderungsentgelt",
+   "preis": 60,
+   "w": "€",
+   "fakt": "Wer erwischt wird, muss zusätzlich die Personalien angeben."
+  },
+  {
+   "id": "bundeshaushalt",
+   "kat": "deutschland",
+   "emoji": "🏦",
+   "wiki": "Bundeshaushalt (Deutschland)",
+   "name": "Der Bundeshaushalt",
+   "info": "Ausgaben des Bundes pro Jahr, 2025",
+   "preis": 500000000000,
+   "w": "€",
+   "fakt": "Der größte Posten sind Arbeit und Soziales."
+  },
+  {
+   "id": "hundesteuer",
+   "kat": "deutschland",
+   "emoji": "🐕",
+   "wiki": "Hundesteuer",
+   "name": "Hundesteuer in Berlin",
+   "info": "Pro Jahr für den ersten Hund",
+   "preis": 120,
+   "w": "€",
+   "fakt": "Für einen „gefährlichen Hund“ zahlt man in manchen Städten über 1.000 €."
+  },
+  {
+   "id": "alaska",
+   "kat": "geschichte",
+   "emoji": "🏔️",
+   "wiki": "Alaska Purchase",
+   "name": "Kauf von Alaska durch die USA",
+   "info": "Von Russland, 1867",
+   "preis": 7200000,
+   "w": "$",
+   "fakt": "Das sind rund 2 Cent pro Acre (etwa 0,4 Hektar).",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Alaska_Purchase_%28hi-res%29.jpg/960px-Alaska_Purchase_%28hi-res%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Edouard de Stoeckl and William H. Seward",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Alaska_Purchase_(hi-res).jpg"
+   }
+  },
+  {
+   "id": "louisiana",
+   "kat": "geschichte",
+   "emoji": "🗺️",
+   "wiki": "Louisiana Purchase",
+   "name": "Kauf von Louisiana durch die USA",
+   "info": "Von Frankreich, 1803",
+   "preis": 15000000,
+   "w": "$",
+   "fakt": "Damit verdoppelte sich die Fläche der USA.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Louisiana_Purchase.png/960px-Louisiana_Purchase.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "William Morris",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Louisiana_Purchase.png"
+   }
+  },
+  {
+   "id": "codexleicester",
+   "kat": "geschichte",
+   "emoji": "📜",
+   "wiki": "Codex Leicester",
+   "name": "Leonardo da Vincis Notizbuch „Codex Leicester“",
+   "info": "Gekauft von Bill Gates, 1994",
+   "preis": 30800000,
+   "w": "$",
+   "fakt": "Teuerstes Buch, das je verkauft wurde.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Vinci_-_Hammer_2A.jpg/960px-Vinci_-_Hammer_2A.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Leonardo da Vinci (1452-1519)",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Vinci_-_Hammer_2A.jpg"
+   }
+  },
+  {
+   "id": "titanicbau",
+   "kat": "geschichte",
+   "emoji": "🚢",
+   "wiki": "RMS Titanic",
+   "name": "Bau der Titanic",
+   "info": "Baukosten 1912",
+   "preis": 7500000,
+   "w": "$",
+   "fakt": "Ein Ticket erster Klasse kostete bis zu 4.350 $.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/RMS_Titanic_3_%28cropped_to_ship%29.jpg/960px-RMS_Titanic_3_%28cropped_to_ship%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Francis Godolphin Osbourne Stuart",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:RMS_Titanic_3_(cropped_to_ship).jpg"
+   }
+  },
+  {
+   "id": "ersteshandy",
+   "kat": "geschichte",
+   "emoji": "📞",
+   "wiki": "Motorola DynaTAC",
+   "name": "Das erste Handy: Motorola DynaTAC 8000X",
+   "info": "Verkaufspreis 1983",
+   "preis": 3995,
+   "w": "$",
+   "fakt": "Es wog fast 800 Gramm, der Akku hielt 30 Minuten.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/2007Computex_e21Forum-MartinCooper.jpg/960px-2007Computex_e21Forum-MartinCooper.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Rico Shen",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:2007Computex_e21Forum-MartinCooper.jpg"
+   }
+  },
+  {
+   "id": "apple1",
+   "kat": "geschichte",
+   "emoji": "🍏",
+   "wiki": "Apple I",
+   "name": "Der Apple I",
+   "info": "Verkaufspreis 1976",
+   "preis": 666.66,
+   "w": "$",
+   "fakt": "Heute werden Exemplare für mehrere Hunderttausend Dollar versteigert.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/CopsonApple1_2k_cropped.jpg/960px-CopsonApple1_2k_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Achim Baqué",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:CopsonApple1_2k_cropped.jpg"
+   }
+  },
+  {
+   "id": "golf1",
+   "kat": "geschichte",
+   "emoji": "🚙",
+   "wiki": "Volkswagen Golf Mk1",
+   "name": "Der erste VW Golf",
+   "info": "Neupreis 1974",
+   "preis": 7995,
+   "w": "DM",
+   "fakt": "Bis heute wurden über 37 Millionen Golf gebaut.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Volkswagen_Golf_1-2_%28cropped%29.jpg/960px-Volkswagen_Golf_1-2_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Kazuyanagae",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Volkswagen_Golf_1-2_(cropped).jpg"
+   }
+  },
+  {
+   "id": "panda",
+   "kat": "tiere",
+   "emoji": "🐼",
+   "wiki": "Giant panda",
+   "name": "Ein Pandapaar aus China ausleihen",
+   "info": "Leihgebühr pro Jahr für einen Zoo",
+   "preis": 1000000,
+   "w": "$",
+   "fakt": "Pandas gehören immer China, auch die Babys.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Grosser_Panda.JPG/960px-Grosser_Panda.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "J. Patrick Fischer",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Grosser_Panda.JPG"
+   }
+  },
+  {
+   "id": "viatina",
+   "kat": "tiere",
+   "emoji": "🐄",
+   "wiki": "Nelore",
+   "name": "Die Kuh Viatina-19",
+   "info": "Teuerste Kuh der Welt, bewertet 2023",
+   "preis": 4380000,
+   "w": "$",
+   "fakt": "Ihre Embryonen werden an Züchter verkauft.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Ocasi%C3%A3o_da_SH_e_Batuque_do_R.I..jpg/960px-Ocasi%C3%A3o_da_SH_e_Batuque_do_R.I..jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Eduardo Ferraz Pacheco de Castro e Sebastião de Oliveira",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Ocasi%C3%A3o_da_SH_e_Batuque_do_R.I..jpg"
+   }
+  },
+  {
+   "id": "taube",
+   "kat": "tiere",
+   "emoji": "🕊️",
+   "wiki": "Racing Homer",
+   "name": "Die Brieftaube „New Kim“",
+   "info": "Auktion 2020",
+   "preis": 1600000,
+   "w": "€",
+   "fakt": "Teuerste Taube der Welt.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Golebie_01_-_Flickr_-_trochej.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Damian Wojsław",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Golebie_01_-_Flickr_-_trochej.jpg"
+   }
+  },
+  {
+   "id": "koi",
+   "kat": "tiere",
+   "emoji": "🐠",
+   "wiki": "Koi",
+   "name": "Ein Koi-Karpfen namens „S Legend“",
+   "info": "Verkauf 2018",
+   "preis": 1800000,
+   "w": "$",
+   "fakt": "Ein Koi kann über 50 Jahre alt werden.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Ojiya_Nishikigoi_no_Sato_ac_%283%29.jpg/960px-Ojiya_Nishikigoi_no_Sato_ac_%283%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Asturio Cantabrio",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Ojiya_Nishikigoi_no_Sato_ac_(3).jpg"
+   }
+  },
+  {
+   "id": "eurojackpot",
+   "kat": "nacht",
+   "emoji": "🎰",
+   "wiki": null,
+   "name": "Maximaler Eurojackpot",
+   "info": "Obergrenze seit 2022",
+   "preis": 120000000,
+   "w": "€",
+   "fakt": "Die Chance auf den Hauptgewinn liegt bei rund 1 zu 140 Millionen."
+  },
+  {
+   "id": "powerball",
+   "kat": "nacht",
+   "emoji": "💵",
+   "wiki": "Powerball",
+   "name": "Größter Lotto-Jackpot aller Zeiten",
+   "info": "Powerball, USA 2022",
+   "preis": 2040000000,
+   "w": "$",
+   "fakt": "Der Gewinner kam aus Kalifornien."
+  },
+  {
+   "id": "wsop",
+   "kat": "nacht",
+   "emoji": "🃏",
+   "wiki": null,
+   "name": "Siegprämie im Main Event der Poker-WM",
+   "info": "World Series of Poker, 2023",
+   "preis": 12100000,
+   "w": "$",
+   "fakt": "Über 10.000 Spieler zahlten je 10.000 $ Startgeld."
+  },
+  {
+   "id": "watanabe",
+   "kat": "nacht",
+   "emoji": "🎲",
+   "wiki": "Terrance Watanabe",
+   "name": "Verlust eines Spielers in Las Vegas",
+   "info": "Terrance Watanabe, 2007 (in einem Jahr)",
+   "preis": 127000000,
+   "w": "$",
+   "fakt": "Einer der größten Casino-Verluste einer einzelnen Person.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Terrance_Watanabe_1_%28Crop%29.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "WagerTalk TV: Sports Picks and Betting Tips",
+    "lizenz": "CC BY 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Terrance_Watanabe_1_(Crop).png"
+   }
+  },
+  {
+   "id": "thc",
+   "kat": "nacht",
+   "emoji": "🌿",
+   "wiki": null,
+   "name": "Bußgeld für Kiffen und Autofahren",
+   "info": "Über dem THC-Grenzwert, erster Verstoß",
+   "preis": 500,
+   "w": "€",
+   "fakt": "Seit 2024 gilt ein Grenzwert von 3,5 ng THC pro ml Blut."
+  },
+  {
+   "id": "tequilaley",
+   "kat": "nacht",
+   "emoji": "🥃",
+   "wiki": "Tequila",
+   "name": "Flasche Tequila Ley .925 „Diamante“",
+   "info": "Teuerster Tequila, 2010",
+   "preis": 3500000,
+   "w": "$",
+   "fakt": "Die Flasche ist aus Platin und Weißgold.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Paisaje_agavero_de_Jose_Cuervo_en_Tequila%2C_Jalisco.jpg/960px-Paisaje_agavero_de_Jose_Cuervo_en_Tequila%2C_Jalisco.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "T2O media México",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Paisaje_agavero_de_Jose_Cuervo_en_Tequila,_Jalisco.jpg"
+   }
+  },
+  {
+   "id": "messivertrag",
+   "kat": "sport",
+   "emoji": "🐐",
+   "wiki": "Lionel Messi",
+   "name": "Messis Vertrag beim FC Barcelona",
+   "info": "Gesamtwert 2017–2021",
+   "preis": 555000000,
+   "w": "€",
+   "fakt": "Der Vertrag wurde 2021 öffentlich, Barça war fast pleite.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg/960px-Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bryan Berlin",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg"
+   }
+  },
+  {
+   "id": "mbappe",
+   "kat": "sport",
+   "emoji": "⚡",
+   "wiki": "Kylian Mbappé",
+   "name": "Mbappés Wechsel zu Paris Saint-Germain",
+   "info": "Ablöse an Monaco, 2018",
+   "preis": 180000000,
+   "w": "€",
+   "fakt": "Zweitteuerster Transfer aller Zeiten.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Kylian_Mbappe_France_v_Senegal_16_June_2026-391_%28cropped%29.jpg/960px-Kylian_Mbappe_France_v_Senegal_16_June_2026-391_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bryan Berlin",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Kylian_Mbappe_France_v_Senegal_16_June_2026-391_(cropped).jpg"
+   }
+  },
+  {
+   "id": "katar",
+   "kat": "sport",
+   "emoji": "🏟️",
+   "wiki": "2022 FIFA World Cup",
+   "name": "Kosten der Fußball-WM in Katar",
+   "info": "Stadien, Infrastruktur (Schätzung)",
+   "preis": 220000000000,
+   "w": "$",
+   "fakt": "Teuerste WM aller Zeiten, mit großem Abstand."
+  },
+  {
+   "id": "newman",
+   "kat": "luxus",
+   "emoji": "⌚",
+   "wiki": "Rolex Daytona",
+   "name": "Paul Newmans Rolex Daytona",
+   "info": "Auktion 2017",
+   "preis": 17800000,
+   "w": "$",
+   "fakt": "Ein Geschenk seiner Frau, die Uhr trug er täglich.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Daytona116509.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Sealobo at English Wikipedia",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Daytona116509.jpg"
+   }
+  },
+  {
+   "id": "grandmaster",
+   "kat": "luxus",
+   "emoji": "🕰️",
+   "wiki": "Patek Philippe Grandmaster Chime",
+   "name": "Patek Philippe Grandmaster Chime",
+   "info": "Teuerste Armbanduhr, Auktion 2019",
+   "preis": 31000000,
+   "w": "CHF",
+   "fakt": "Die Uhr hat 20 Komplikationen."
+  },
+  {
+   "id": "gto",
+   "kat": "auktion",
+   "emoji": "🏎️",
+   "wiki": "Ferrari 250 GTO",
+   "name": "Ferrari 250 GTO",
+   "info": "Privatverkauf 2018",
+   "preis": 70000000,
+   "w": "$",
+   "fakt": "Es wurden nur 36 Stück gebaut.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/1962_Ferrari_250_GTO_SP25.jpg/960px-1962_Ferrari_250_GTO_SP25.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "MrWalkr",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:1962_Ferrari_250_GTO_SP25.jpg"
+   }
+  },
+  {
+   "id": "faberge",
+   "kat": "auktion",
+   "emoji": "🥚",
+   "wiki": "Rothschild Fabergé egg",
+   "name": "Das „Rothschild“-Fabergé-Ei",
+   "info": "Auktion 2007",
+   "preis": 8980000,
+   "w": "£",
+   "fakt": "Es enthält eine Uhr und einen aufziehbaren Vogel."
   }
  ]
 }

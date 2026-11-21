@@ -70,7 +70,20 @@ socket.on("fehler", (text) => {
   toast(text);
 });
 
+// Weicher Übergang, sobald eine neue Ansicht erscheint
+function seitenWechsel() {
+  app.classList.remove("seite-rein");
+  void app.offsetWidth; // Animation neu starten
+  app.classList.add("seite-rein");
+}
+
 socket.on("zustand", (z) => {
+  const alteAnsicht = GN.ansicht;
+  verarbeiteZustand(z);
+  if (GN.ansicht !== alteAnsicht) seitenWechsel();
+});
+
+function verarbeiteZustand(z) {
   const vorher = GN.zustand;
   GN.zustand = z;
   document.body.dataset.spiel = z.spiel;
@@ -79,14 +92,14 @@ socket.on("zustand", (z) => {
   $("#stoppSpielBtn").classList.toggle("versteckt", !(GN.istHost() && z.phase !== "lobby"));
   if (z.phase === "lobby") return zeigeLobby();
   GN.spiele[z.spiel].zeige(z, vorher);
-});
+}
 
 // =============================================================
 //  Logo
 // =============================================================
 GN.logo = (klasse = "") => `
   <span class="spielo-logo ${klasse}" aria-label="${esc(SEITE.name)}">
-    ${[..."Spiel"].map((b, i) => `<span class="b" style="--i:${i}">${b}</span>`).join("")}<span class="o-chip" style="--i:5"><span class="o-ring"></span><span class="o-punkt"></span></span>
+    ${[..."Spiel"].map((b, i) => `<span class="b" style="--i:${i}">${b}</span>`).join("")}<span class="o-chip" style="--i:5"><span class="o-zeichnen"><span class="o-ring"></span></span><span class="o-punkt"></span></span>
   </span>`;
 
 // Große Spielkarte für Startseite und Lobby
@@ -116,7 +129,7 @@ function zeigeStart() {
   const codeAusLink = (new URLSearchParams(location.search).get("raum") || "").toUpperCase();
 
   const beitreten = `
-    <section class="kapitel ${codeAusLink ? "einladung" : ""}">
+    <section class="kapitel rein ${codeAusLink ? "einladung" : ""}" style="--d:1.5s">
       <h2 class="kapitel-titel">${codeAusLink ? "🎉 Du wurdest eingeladen!" : "Hast du einen Raum-Code?"}</h2>
       <div class="beitreten-zeile">
         <input id="codeInput" class="feld code-feld" maxlength="4" placeholder="ABCD" autocomplete="off" value="${esc(codeAusLink)}" aria-label="Raum-Code" />
@@ -124,21 +137,23 @@ function zeigeStart() {
       </div>
     </section>`;
 
+  let schnell = false;
+  try { schnell = sessionStorage.getItem("introGesehen") === "1"; sessionStorage.setItem("introGesehen", "1"); } catch {}
   app.innerHTML = `
-    <section class="hero-start">
+    <section class="hero-start ${schnell ? "schnell" : ""}">
       <h1 class="hero-logo">${GN.logo("riesig")}</h1>
-      <p class="hero-slogan">${esc(SEITE.slogan)}</p>
-      <div class="hero-fakten"><span>👥 1–${GN.meta.maxSpieler} Spieler</span><span>📱 Handy &amp; PC</span><span>⚡ Kein Download</span></div>
+      <p class="hero-slogan rein" style="--d:1.15s">${esc(SEITE.slogan)}</p>
+      <div class="hero-fakten rein" style="--d:1.3s"><span>👥 1–${GN.meta.maxSpieler} Spieler</span><span>📱 Handy &amp; PC</span><span>⚡ Kein Download</span></div>
     </section>
 
-    <section class="kapitel name-kapitel">
+    <section class="kapitel name-kapitel rein" style="--d:1.45s">
       <label class="kapitel-titel" for="nameInput">Wie heißt du?</label>
       <input id="nameInput" class="feld name-feld" maxlength="16" placeholder="Dein Name" autocomplete="off" value="${esc(speicher("name") || "")}" />
     </section>
 
     ${codeAusLink ? beitreten : ""}
 
-    <section class="kapitel">
+    <section class="kapitel rein" style="--d:1.6s">
       <h2 class="kapitel-titel">${codeAusLink ? "Oder starte ein eigenes Spiel" : "Wähle ein Spiel"}</h2>
       <div class="spiele-gitter">
         ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, {

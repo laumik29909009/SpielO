@@ -29,7 +29,9 @@
     const p = m.punkte;
     const namen = e.kategorien.map((k) => k.name);
     const katInfo = namen.slice(0, 4).join(", ") + (namen.length > 4 ? ` +${namen.length - 4}` : "");
-    const pruefung = m.kiVerfuegbar ? "🤖 KI (Claude) + 📚 Wortlisten" : "📚 Wortlisten + 🌐 Wikipedia";
+    const pruefung = "📚 Wortlisten + 🌐 Wikipedia";
+    const pakete = m.pakete.filter((x) => !x.ue18 || e.ue18);
+    const gruppen = m.gruppen.filter((g) => !g.ue18 || e.ue18);
 
     return [
       {
@@ -44,11 +46,11 @@
           ${host ? `
             <div class="unter-titel">Schnellauswahl</div>
             <div class="paket-reihe">
-              ${m.pakete.map((x) => `<button class="paket" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
+              ${pakete.map((x) => `<button class="paket" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
               <button class="paket" data-zufall="1">🎲 Zufall</button>
             </div>
-            ${m.gruppen.map((g) => `
-              <div class="unter-titel">${esc(g.name)}</div>
+            ${gruppen.map((g) => `
+              <div class="unter-titel">${g.ue18 ? "🔞 " : ""}${esc(g.name)} <span class="normal">(${g.kategorien.length})</span></div>
               <div class="chip-reihe">
                 ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""}" data-kat="${k.id}">${k.emoji} ${esc(k.name)}</button>`).join("")}
               </div>`).join("")}
@@ -58,7 +60,8 @@
               <label class="check"><input type="checkbox" id="eigeneFrei"> kreativ</label>
               <button class="btn zweit" type="submit">＋</button>
             </form>
-            <p class="leise klein-text">„kreativ“ heißt: Jede passende Antwort zählt, z. B. bei Sprüchen oder Ausreden.</p>` : ""}`,
+            <p class="leise klein-text">„kreativ“ heißt: Jede passende Antwort zählt, z. B. bei Sprüchen oder Ausreden.</p>
+            ${e.ue18 ? "" : '<p class="leise klein-text">🔞 Ü18-Kategorien kannst du unter „Regeln“ freischalten.</p>'}` : ""}`,
       },
       {
         id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min"} pro Runde`,
@@ -71,10 +74,11 @@
       },
       {
         id: "regeln", icon: "⚙️", titel: "Regeln",
-        info: `Stopp ${e.stopp ? "an" : "aus"} · Schwere Buchstaben ${e.schwer ? "an" : "aus"}`,
+        info: `Stopp ${e.stopp ? "an" : "aus"} · Schwere Buchstaben ${e.schwer ? "an" : "aus"} · Ü18 ${e.ue18 ? "an" : "aus"}`,
         html: `<div class="schalter-liste">
           ${schalter("stopp", e.stopp, "🛑 Stopp-Knopf", "Wer alles ausgefüllt hat, kann Stopp drücken. Dann haben alle noch 10 Sekunden. Solo endet die Runde sofort und es gibt Tempo-Bonus.", dis)}
           ${schalter("schwer", e.schwer, "🧨 Schwere Buchstaben", "C, J, Q, X und Y kommen auch vor.", dis)}
+          ${schalter("ue18", e.ue18, "🔞 Ü18-Kategorien", "Schaltet freche Kategorien frei: Trinkspiele, Red Flags, Dates und mehr.", dis)}
         </div>`,
       },
       {
@@ -92,9 +96,7 @@
             <ol>
               <li>📏 Regeln: Anfangsbuchstabe, leer, Buchstabensalat</li>
               <li>📚 Wortlisten mit Tippfehler-Toleranz</li>
-              ${m.kiVerfuegbar
-                ? "<li>🤖 KI-Schiedsrichter (Claude) prüft alles und erkennt gleiche Antworten</li>"
-                : "<li>🌐 Wikipedia: Gibt es das wirklich, und passt es zur Kategorie?</li>"}
+              <li>🌐 Wikipedia: Gibt es das wirklich, und passt es zur Kategorie? Auch englische Artikel und Tippfehler-Korrektur</li>
               <li>👍👎 Am Ende stimmt ihr ab, der Host 👑 hat das letzte Wort</li>
             </ol>
           </div>`,
@@ -217,13 +219,16 @@
     const b = z.buchstabe;
 
     app.innerHTML = `
-      <div class="runden-kopf">
-        <span class="buchstabe-badge">${b}</span>
-        <span class="runden-nr">Runde ${z.rundeNr} / ${z.rundenGesamt}</span>
-        <span class="timer-zahl" id="timerZahl"></span>
+      <div class="schreib-kopf" id="schreibKopf">
+        <div class="runden-kopf">
+          <span class="buchstabe-badge">${b}</span>
+          <span class="runden-nr">Runde ${z.rundeNr} / ${z.rundenGesamt}</span>
+          <span class="timer-zahl" id="timerZahl"></span>
+        </div>
+        <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
+        <div class="stopp-banner versteckt" id="stoppBanner" role="alert"></div>
+        ${z.solo ? "" : '<div class="live-leiste" id="fortschritt" aria-label="Fortschritt der anderen"></div>'}
       </div>
-      <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
-      <div class="stopp-banner versteckt" id="stoppBanner"></div>
       <form class="felder" id="felder" autocomplete="off" onsubmit="return false">
         ${z.kategorien.map((k, i) => `
           <label class="feld-karte" style="animation-delay:${i * 50}ms">
@@ -234,8 +239,7 @@
             </span>
           </label>`).join("")}
       </form>
-      ${z.stoppErlaubt ? `<button class="btn gross voll stopp-knopf" id="stoppBtn" disabled>🛑 STOPP!</button>` : ""}
-      <div class="fortschritt-reihe" id="fortschritt"></div>`;
+      ${z.stoppErlaubt ? `<button class="btn gross voll stopp-knopf" id="stoppBtn" disabled>🛑 STOPP!</button>` : ""}`;
 
     const felder = $$("[data-feld]");
     felder.forEach((input, i) => {
@@ -245,7 +249,7 @@
         pruefeFeld(input);
         aktualisiereStoppKnopf();
         clearTimeout(sendeTimer);
-        sendeTimer = setTimeout(() => sendeEntwurf(), 700);
+        sendeTimer = setTimeout(() => sendeEntwurf(), 350);
       });
       input.addEventListener("blur", () => sendeEntwurf());
       input.addEventListener("keydown", (ev) => {
@@ -266,29 +270,40 @@
 
   function aktualisiereSchreiben(z, vorher) {
     const gesamt = z.kategorien.length;
-    $("#fortschritt").innerHTML = z.spieler.filter((s) => s.online).map((s) => `
-      <span class="fortschritt ${s.fortschritt === gesamt ? "voll" : ""}" title="${esc(s.name)}">
-        <span class="avatar">${s.avatar}</span><span>${s.fortschritt || 0}/${gesamt}</span>
-      </span>`).join("");
+    const live = $("#fortschritt");
+    if (live) {
+      // Live: pro Mitspieler ein Balken mit einem Segment pro Kategorie
+      live.innerHTML = z.spieler.filter((s) => s.online && s.id !== GN.ich).map((s) => {
+        const felder = (s.felder || "").padEnd(gesamt, "0");
+        const fertig = [...felder].filter((f) => f === "2").length;
+        return `<span class="live-spieler ${fertig === gesamt ? "voll" : ""}" title="${esc(s.name)}: ${fertig}/${gesamt}">
+          <span class="avatar">${s.avatar}</span>
+          <span class="live-info"><span class="live-name">${esc(s.name)}</span>
+            <span class="segmente">${[...felder].map((f) => `<i class="f${f}"></i>`).join("")}</span></span>
+          <span class="live-zahl">${fertig}/${gesamt}</span>
+        </span>`;
+      }).join("") || '<span class="leise klein-text">Die anderen sind gleich da …</span>';
+    }
 
     const stoppNeu = z.phase === "stopp" && (!vorher || vorher.phase !== "stopp");
     if (z.phase === "stopp") {
       const wer = GN.spieler(z.stoppVon);
       const banner = $("#stoppBanner");
+      // Groß und deutlich, aber ohne Overlay: alle können sofort weiterschreiben
       banner.innerHTML = z.stoppVon === GN.ich
-        ? "🛑 Du hast STOPP gerufen! Die anderen haben noch ein paar Sekunden."
-        : `🛑 <b>${esc(wer.name)}</b> hat STOPP gerufen! Schnell fertig schreiben!`;
+        ? `<span class="stopp-icon">🛑</span><span class="stopp-text"><b>Du hast STOPP gerufen!</b><span>Die anderen schreiben noch kurz fertig.</span></span>`
+        : `<span class="stopp-icon">🛑</span><span class="stopp-text"><b>STOPP! ${esc(wer.name)} ist fertig</b><span>Schreib schnell weiter, die Zeit läuft!</span></span>`;
       banner.classList.remove("versteckt");
       $("#stoppBtn")?.remove();
       if (stoppNeu) {
         Ton.alarm();
-        if (z.stoppVon !== GN.ich) GN.intro({ icon: "🛑", titel: "STOPP!", text: `${esc(wer.name)} ist fertig. Noch ${Math.ceil(z.restMs / 1000)} Sekunden!`, dauer: 1300, ton: false });
-        document.body.classList.add("wackeln");
-        setTimeout(() => document.body.classList.remove("wackeln"), 500);
+        navigator.vibrate?.([120, 60, 120]);
+        banner.classList.add("neu");
+        $("#schreibKopf")?.classList.add("alarm");
       }
     }
     if (!vorher || vorher.phase !== z.phase || stoppNeu || GN.timerNeu) {
-      GN.starteTimer(z.restMs, z.phase === "stopp" ? 10000 : z.sekunden * 1000, { tickAb: z.phase === "stopp" ? 10000 : 10000 });
+      GN.starteTimer(z.restMs, z.phase === "stopp" ? 10000 : z.sekunden * 1000, { tickAb: 10000 });
     }
   }
 
@@ -331,10 +346,10 @@
     Ton.abgeben();
     app.innerHTML = `
       <div class="pruefen-buehne">
-        <div class="lupe">${z.kiAktiv ? "🤖" : "🔎"}</div>
-        <h2>${z.kiAktiv ? `Die KI prüft ${z.solo ? "deine" : "eure"} Antworten` : "Der Schiedsrichter prüft"}${GN.wartePunkte()}</h2>
+        <div class="lupe">🔎</div>
+        <h2>Der Schiedsrichter prüft${GN.wartePunkte()}</h2>
         <p class="leise">Gibt es das wirklich? Passt es zur Kategorie? Hat jemand dasselbe?</p>
-        <div class="pruef-schritte"><span>📏 Regeln</span><span>📚 Wortlisten</span><span>${z.kiAktiv ? "🤖 KI" : "🌐 Wikipedia"}</span></div>
+        <div class="pruef-schritte"><span>📏 Regeln</span><span>📚 Wortlisten</span><span>🌐 Wikipedia</span></div>
         <div class="scan"><span></span></div>
       </div>`;
   }
@@ -457,7 +472,7 @@
     titel: "Stadt Land Fluss",
     kurz: "Der Klassiker mit eigenen Kategorien und schlauem Schiedsrichter.",
     beschreibung: "Der Klassiker neu gedacht: Glücksrad, Stopp-Knopf, eigene Kategorien und ein Schiedsrichter, der Antworten wirklich prüft.",
-    tags: ["🗂️ 39 Kategorien", "✏️ Eigene Kategorien", "🌐 Auto-Prüfung"],
+    tags: ["🗂️ 92 Kategorien", "✏️ Eigene Kategorien", "🌐 Auto-Prüfung", "🔞 Ü18 optional"],
     abschnitte,
     binde,
     zeige,

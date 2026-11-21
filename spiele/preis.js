@@ -9,7 +9,7 @@ const MODI = ["klassisch", "nichtdrueber", "hoehertiefer", "sortieren"];
 const ALLE_MODI = [...MODI, "mix"];
 
 // Ungefähre Wechselkurse, nur um Preise in verschiedenen Währungen vergleichen zu können
-const IN_EURO = { "€": 1, $: 0.87, "£": 1.15, CHF: 1.07 };
+const IN_EURO = { "€": 1, $: 0.87, "£": 1.15, CHF: 1.07, DM: 0.51 };
 const euroWert = (p) => p.preis * (IN_EURO[p.w] || 1);
 
 const INTRO_MS = 1800;
@@ -156,22 +156,35 @@ function alleFertig(raum, ctx) {
 module.exports = {
   meta: () => ({ kategorien: KATEGORIEN, modi: ALLE_MODI }),
 
-  standardEinstellungen: () => ({ modus: "mix", runden: 10, sekunden: 30, kategorien: KATEGORIEN.map((k) => k.id) }),
+  standardEinstellungen: () => ({
+    modus: "mix", runden: 10, sekunden: 30, ue18: false,
+    kategorien: KATEGORIEN.filter((k) => !k.ue18).map((k) => k.id),
+  }),
 
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
+    const erlaubt = (id) => KATEGORIEN.some((x) => x.id === id && (!x.ue18 || neu.ue18));
     if (ALLE_MODI.includes(e.modus)) neu.modus = e.modus;
     if (e.runden !== undefined) neu.runden = Math.min(30, Math.max(3, parseInt(e.runden) || 10));
     if (e.sekunden !== undefined) neu.sekunden = Math.min(90, Math.max(10, parseInt(e.sekunden) || 30));
+    if (typeof e.ue18 === "boolean") {
+      neu.ue18 = e.ue18;
+      const ue18Kats = KATEGORIEN.filter((k) => k.ue18).map((k) => k.id);
+      neu.kategorien = neu.ue18 ? [...new Set([...neu.kategorien, ...ue18Kats])] : neu.kategorien.filter((k) => !ue18Kats.includes(k));
+      if (!neu.kategorien.length) neu.kategorien = KATEGORIEN.filter((k) => !k.ue18).map((k) => k.id);
+    }
     if (Array.isArray(e.kategorien)) {
-      const gueltig = e.kategorien.filter((k) => KATEGORIEN.some((x) => x.id === k));
+      const gueltig = e.kategorien.filter(erlaubt);
       if (gueltig.length) neu.kategorien = gueltig;
     }
+    if (e.alleKategorien) neu.kategorien = KATEGORIEN.filter((k) => !k.ue18 || neu.ue18).map((k) => k.id);
     return neu;
   },
 
   starten(raum, ctx) {
-    const pool = PRODUKTE.filter((p) => raum.einstellungen.preis.kategorien.includes(p.kat));
+    const e = raum.einstellungen.preis;
+    const pool = PRODUKTE.filter((p) => e.kategorien.includes(p.kat) && (e.ue18 || !KATEGORIEN.find((k) => k.id === p.kat)?.ue18));
+    if (pool.length < 4) return "Wähle mehr Kategorien aus (mindestens 4 Fragen).";
     raum.daten = { phase: "frage", pool, stapel: mischen(pool), rundeNr: 0, runde: null, naechste: null, letzterModus: null, timer: null };
     starteRunde(raum, ctx);
   },
