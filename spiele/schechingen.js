@@ -127,9 +127,59 @@ function punkte(d, id, mitGeheim = true) {
   let p = 0;
   for (const b of Object.values(d.bauten)) if (b.sp === id) p += b.typ === "gut" ? 2 : 1;
   for (const g of Object.values(d.gemein)) if (g === id) p += 2;
+  if (d.laengsterWeg === id) p += 2;
+  if (d.feldwache === id) p += 2;
   if (mitGeheim) p += d.kirchweih[id] || 0;
   return p;
 }
+// ---------- Längster Weg (wie im Grundspiel) ----------
+// Längste zusammenhängende Strecke eigener Wege; fremde Höfe unterbrechen sie.
+function wegLaenge(d, id) {
+  const meine = KARTE.kanten.filter((k) => d.wege[k.id] === id);
+  let best = 0;
+  const benutzt = new Set();
+  const lauf = (ecke, laenge) => {
+    best = Math.max(best, laenge);
+    if (laenge > 0 && d.bauten[ecke] && d.bauten[ecke].sp !== id) return; // fremder Hof: hier ist Schluss
+    for (const kid of KARTE.ecken[ecke].kanten) {
+      if (d.wege[kid] !== id || benutzt.has(kid)) continue;
+      const k = KARTE.kanten[kid];
+      benutzt.add(kid);
+      lauf(k.a === ecke ? k.b : k.a, laenge + 1);
+      benutzt.delete(kid);
+    }
+  };
+  const starts = new Set(meine.flatMap((k) => [k.a, k.b]));
+  for (const e of starts) lauf(e, 0);
+  return best;
+}
+// Nach jedem Weg oder Hof neu prüfen: Wer hat den längsten Weg (mindestens 5)?
+function laengsterWegPruefen(raum) {
+  const d = raum.daten;
+  const l = Object.fromEntries(d.reihenfolge.map((id) => [id, wegLaenge(d, id)]));
+  d.wegLaengen = l;
+  const alt = d.laengsterWeg || null;
+  const max = Math.max(...Object.values(l));
+  if (alt && l[alt] >= 5 && l[alt] === max) return;
+  const kandidaten = d.reihenfolge.filter((id) => l[id] === max && max >= 5);
+  const neu = kandidaten.length === 1 ? kandidaten[0] : null;
+  if (neu !== alt) {
+    d.laengsterWeg = neu;
+    if (neu) { log(d, `🛤️ ${name(raum, neu)} hat jetzt den Längsten Weg (${max}) und bekommt 2 Punkte!`); d.bonusEreignis = { art: "weg", sp: neu, t: Date.now() }; }
+    else log(d, "🛤️ Der Längste Weg ist gerade an niemanden vergeben.");
+  }
+}
+function feldwachePruefen(raum, id) {
+  const d = raum.daten;
+  const n = (d.wache[id] = (d.wache[id] || 0) + 1);
+  const alt = d.feldwache;
+  if (n >= 3 && id !== alt && (!alt || n > d.wache[alt])) {
+    d.feldwache = id;
+    log(d, `👮 ${name(raum, id)} hat jetzt die Stärkste Feldwache und bekommt 2 Punkte!`);
+    d.bonusEreignis = { art: "wache", sp: id, t: Date.now() };
+  }
+}
+
 function punkteSetzen(raum) {
   const d = raum.daten;
   for (const t of teilnehmer(raum)) {
@@ -288,6 +338,7 @@ function bauen(raum, ctx, id, art, ort) {
     if (!gratis && !hat(d.hand[id], KOSTEN.weg)) return "Dafür fehlen dir Rohstoffe.";
     if (!gratis) bezahlen(d.hand[id], KOSTEN.weg);
     d.wege[ort] = id;
+    laengsterWegPruefen(raum);
     if (gratis && --d.zug.gratisWege <= 0) d.zug.modus = null;
   } else if (art === "hof") {
     if (d.zug.modus) return;
@@ -295,6 +346,7 @@ function bauen(raum, ctx, id, art, ort) {
     if (!hat(d.hand[id], KOSTEN.hof)) return "Dafür fehlen dir Rohstoffe.";
     bezahlen(d.hand[id], KOSTEN.hof);
     d.bauten[ort] = { sp: id, typ: "hof" };
+    laengsterWegPruefen(raum); // ein Hof kann einen fremden Weg unterbrechen
     log(d, `🏠 ${name(raum, id)} baut einen Hof${DORFPLATZ_ECKEN.has(ort) ? " am Dorfplatz (Marktrecht!)" : ""}.`);
   } else if (art === "gut") {
     if (d.zug.modus) return;
@@ -360,11 +412,13 @@ function karteSpielen(raum, ctx, id, k, wahl) {
   } else if (k === "feldhueter") {
     d.zug.zurueck = null;
     d.zug.modus = "gewitter";
+    feldwachePruefen(raum, id);
   } else return;
   d.karten[id].splice(i, 1);
   d.zug.gespielt = true;
   log(d, `🃏 ${name(raum, id)} spielt ${KARTEN_NAME[k]}.`);
   d.letzteKarte = { k, sp: id, t: Date.now() };
+  if (pruefeSieg(raum, ctx)) return;
   if (!istBot(d, id)) senden(raum, ctx);
 }
 const KARTEN_NAME = { feldhueter: "den Feldhüter", erntedank: "Erntedank", wegebau: "Wegebau", viehmarkt: "Viehmarkt", kirchweih: "Kirchweih" };
@@ -450,7 +504,8 @@ function ende(raum, ctx, sieger) {
     const ids = w.filter(([, v]) => v === max).map(([id]) => id);
     if (ids.length < alle.length || alle.length === 1) liste.push({ icon, titel, spieler: ids, text: text(max) });
   };
-  beste((id) => wegAnzahl(d, id), 6, "🛤️", "Wegebauer", (n) => `${n} Wege gebaut`);
+  if (d.laengsterWeg) liste.push({ icon: "🛤️", titel: "Längster Weg", spieler: [d.laengsterWeg], text: `${d.wegLaengen[d.laengsterWeg]} Wege am Stück` });
+  if (d.feldwache) liste.push({ icon: "👮", titel: "Stärkste Feldwache", spieler: [d.feldwache], text: `${d.wache[d.feldwache]} Feldhüter ausgespielt` });
   beste((id) => anzahl(d, id, "gut"), 2, "🏰", "Gutsherr", (n) => `${n} Gutshöfe`);
   beste((id) => Object.values(d.gemein).filter((g) => g === id).length, 1, "⛪", "Ehrenbürger", (n) => `${n}× am Dorfplatz gebaut`);
   beste((id) => d.kirchweih[id] || 0, 1, "🎪", "Festwirt", (n) => `${n} Kirchweih-Karten`);
@@ -473,6 +528,7 @@ function aufbauSetzen(raum, ctx, id, art, ort) {
   } else if (d.aufbauSchritt === "weg" && art === "weg") {
     if (!wegOrte(d, id).includes(ort)) return "Der Weg muss an deinem neuen Hof liegen.";
     d.wege[ort] = id;
+    d.wegLaengen = Object.fromEntries(d.reihenfolge.map((x) => [x, wegLaenge(d, x)]));
     d.aufbauNr++;
     const folge = [...d.reihenfolge, ...[...d.reihenfolge].reverse()];
     if (d.aufbauNr >= folge.length) {
@@ -607,7 +663,8 @@ function botSchritt(raum, ctx) {
   if (hof.length && hat(h, KOSTEN.hof)) { bauen(raum, ctx, id, "hof", besteEcke(d, id, hof)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
   const g = Object.keys(GEMEIN).find((x) => !d.gemein[x] && amDorfplatz(d, id) && hat(h, GEMEIN[x].kosten));
   if (g) { gemeinBauen(raum, ctx, id, g); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
-  if (!hof.length && wegOrte(d, id).length && hat(h, KOSTEN.weg)) { bauen(raum, ctx, id, "weg", besterWeg(d, id, wegOrte(d, id))); senden(raum, ctx); return weiter(); }
+  const wegLohnt = !hof.length || (summe(h) >= 6 && (d.wegLengenBot = (d.wegLaengen?.[id] || 0)) >= 3 && d.laengsterWeg !== id);
+  if (wegLohnt && wegOrte(d, id).length && hat(h, KOSTEN.weg)) { bauen(raum, ctx, id, "weg", besterWeg(d, id, wegOrte(d, id))); senden(raum, ctx); return weiter(); }
   // Markt: ein Tausch pro Ziel und Zug
   if ((d.zug.botTausche || 0) < 3) {
     const ziele = [hof.length && KOSTEN.hof, gut.length && KOSTEN.gut, amDorfplatz(d, id) && Object.keys(GEMEIN).filter((x) => !d.gemein[x]).map((x) => GEMEIN[x].kosten)[0], !hof.length && KOSTEN.weg, KOSTEN.karte].filter(Boolean);
@@ -646,6 +703,7 @@ module.exports = {
       bots, reihenfolge, dran: reihenfolge[0], phase: "aufbau", aufbauNr: 0, aufbauSchritt: "hof", letzterHof: null,
       belegung: landschaftVerteilen(), gewitter: MITTE, bauten: {}, wege: {}, gemein: { brunnen: null, wirtshaus: null, kirche: null, rathaus: null },
       hand: Object.fromEntries(reihenfolge.map((id) => [id, leer()])), karten: Object.fromEntries(reihenfolge.map((id) => [id, []])), kirchweih: {},
+      laengsterWeg: null, wegLaengen: {}, feldwache: null, wache: {},
       stapel: mischen(Object.entries(KARTEN).flatMap(([k, n]) => Array(n).fill(k))),
       saison: 0, runde: 1, wurfId: 0, zug: null, abwerfen: {}, angebot: null, log: [], auszeichnungen: [],
     };
@@ -706,6 +764,7 @@ module.exports = {
       dorfkarten: Object.fromEntries(d.reihenfolge.map((x) => [x, d.karten[x].length])),
       punkteOffen: Object.fromEntries(d.reihenfolge.map((x) => [x, punkte(d, x, d.phase === "ende")])),
       kirchweihEnde: d.phase === "ende" ? d.kirchweih : null,
+      laengsterWeg: d.laengsterWeg, wegLaengen: d.wegLaengen, feldwache: d.feldwache, wache: d.wache, bonusEreignis: d.bonusEreignis || null,
       stapel: d.stapel.length, angebot: d.angebot, ziel: einst(raum).ziel,
       restMs: d.endetUm ? Math.max(0, d.endetUm - Date.now()) : 0, sekunden: einst(raum).sekunden,
       teilnehmer: teilnehmer(raum),
@@ -715,5 +774,5 @@ module.exports = {
       auszeichnungen: d.phase === "ende" ? d.auszeichnungen : null,
     };
   },
-  _intern: { KARTE, MITTE, hofOrte, wegOrte, punkte, botSchritt },
+  _intern: { wegLaenge, KARTE, MITTE, hofOrte, wegOrte, punkte, botSchritt },
 };

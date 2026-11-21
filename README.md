@@ -69,6 +69,7 @@ Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Comput
 - Jahreszeiten wechseln jede Runde (Frühling Weide doppelt, Sommer Stein, Herbst Korn, Winter Holz doppelt und Felder ruhen).
 - 7 = Gewitter: über 8 Karten die Hälfte abgeben, Gewitter blockiert ein Feld, eine Karte klauen.
 - Handel: Markt 4:1 (3:1 mit Marktrecht) und Angebote an Mitspieler. Sieg bei 8/10/12 Punkten.
+- Längster Weg (ab 5 zusammenhängenden Wegen, fremde Höfe unterbrechen) und Stärkste Feldwache (ab 3 Feldhütern): je 2 Punkte, wechseln, wenn jemand mehr hat.
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
