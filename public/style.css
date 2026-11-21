@@ -680,12 +680,11 @@ body.wackeln #app { animation: wackeln 0.45s; }
 /* Das "O" ist ein gefüllter Spielstein in der Farbe des aktuellen Spiels (ruhig, ohne Regenbogen) */
 .spielo-logo .o-ring {
   position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.55), transparent 42%), linear-gradient(145deg, var(--gold), var(--gold-2));
-  box-shadow: inset 0 -0.06em 0 rgba(0, 0, 0, 0.25), 0 0.08em 0.25em color-mix(in srgb, var(--gold-2) 45%, transparent);
+  background: linear-gradient(145deg, var(--gold), var(--gold-2));
 }
 .spielo-logo .o-punkt {
   position: absolute; width: 30%; height: 30%; left: 35%; top: 35%; border-radius: 50%;
-  background: #fff; box-shadow: inset 0 -0.03em 0 rgba(0, 0, 0, 0.15);
+  background: #fff;
 }
 @keyframes drehen { to { transform: rotate(360deg); } }
 .spielo-logo.klein { font-size: 1.45rem; }

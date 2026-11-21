@@ -23,21 +23,16 @@
   },
   "patch": {
     "datum": "21.11.2026",
-    "titel": "Neues Spiel: Farbrausch + großes Update",
+    "titel": "Farbrausch: Austeilen, SpielO-Karten, großes +2",
     "punkte": [
-      "Farbrausch: der Karten-Klassiker am 3D-Tisch, mit Hausregeln und Computer-Gegnern (2–8 Spieler)",
-      "Preis-Schätzer: Fragen ohne Foto sind jetzt animiert",
-      "Quartett: Champion-Karten, Tisch besser eingebunden, Namen englisch, sonst deutsch",
-      "Neues SpielO-Logo, schöne Link-Vorschau für Discord & Co.",
-      "Server spart mehr und zeigt beim Aufwachen „SpielO wird gestartet“",
-      "Spenden-Ecke unten auf der Startseite"
+      "Karten werden zu Rundenbeginn sichtbar ausgeteilt",
+      "Karten mit SpielO-Artwork (Vorder- und Rückseite)",
+      "+2 und +4 erscheinen riesig auf dem ganzen Bildschirm",
+      "Logo ohne Rahmen ums O",
+      "Spenden-Ecke entfernt"
     ]
   },
   "musikAus": [
     "jazz"
-  ],
-  "spende": {
-    "text": "Gefällt dir SpielO? Über eine kleine Spende freue ich mich riesig! ☕",
-    "link": "https://www.paypal.com/donate/?business=laurin.vogt01%40web.de&currency_code=EUR"
-  }
+  ]
 }

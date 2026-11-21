@@ -186,13 +186,21 @@ const QuartettTisch3D = (() => {
     x.setLineDash([]); x.font = "bold 46px Outfit, sans-serif"; x.fillStyle = "rgba(255,230,160,.22)"; x.textAlign = "center"; x.fillText("SpielO", 256, 272);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
+  // Kartenrückseite mit SpielO-Artwork: dunkler Grund, Strahlen, großer Spielstein, Schriftzug
   function rueckenTextur() {
-    const c = document.createElement("canvas"); c.width = 128; c.height = 180;
+    const c = document.createElement("canvas"); c.width = 256; c.height = 376;
     const x = c.getContext("2d");
-    const g = x.createLinearGradient(0, 0, 128, 180); g.addColorStop(0, "#ff4f6d"); g.addColorStop(1, "#6d32c9");
-    x.fillStyle = g; x.fillRect(0, 0, 128, 180);
-    x.strokeStyle = "rgba(255,255,255,.6)"; x.lineWidth = 6; x.strokeRect(8, 8, 112, 164);
-    x.font = "bold 26px sans-serif"; x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText("SpielO", 64, 98);
+    x.fillStyle = "#fff"; x.beginPath(); x.roundRect(0, 0, 256, 376, 24); x.fill();
+    const g = x.createLinearGradient(0, 0, 256, 376); g.addColorStop(0, "#2a1450"); g.addColorStop(1, "#120a24");
+    x.fillStyle = g; x.beginPath(); x.roundRect(12, 12, 232, 352, 18); x.fill();
+    x.save(); x.translate(128, 170); x.globalAlpha = 0.14;
+    for (let i = 0; i < 16; i++) { x.rotate(Math.PI / 8); x.fillStyle = i % 2 ? "#ffc928" : "#ff3b4f"; x.beginPath(); x.moveTo(0, 0); x.lineTo(-22, -260); x.lineTo(22, -260); x.fill(); }
+    x.restore();
+    const s = x.createLinearGradient(80, 120, 176, 216); s.addColorStop(0, "#ffc928"); s.addColorStop(1, "#ff3b4f");
+    x.fillStyle = "#fff"; x.beginPath(); x.arc(128, 168, 56, 0, Math.PI * 2); x.fill();
+    x.fillStyle = s; x.beginPath(); x.arc(128, 168, 48, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "#fff"; x.beginPath(); x.arc(128, 168, 15, 0, Math.PI * 2); x.fill();
+    x.font = "900 44px Outfit, system-ui, sans-serif"; x.fillStyle = "#fff"; x.textAlign = "center"; x.fillText("SpielO", 128, 284);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
 
@@ -395,7 +403,15 @@ const QuartettTisch3D = (() => {
         fr.letzteT = a.t;
         if (a.typ === "austeilen" || erstesMal) {
           fr.ablage.forEach((m) => this.szene.remove(m)); fr.ablage = [];
-          this.ablageKarte(z.oben, null, true);
+          if (a.typ === "austeilen" && !erstesMal && a.karten) {
+            // Reihum austeilen: jede Person bekommt nacheinander ihre Karten
+            const plaetze = [...this.figuren.keys(), "ich"];
+            const schritt = Math.max(0.05, ((a.dauer || 2500) / 1000 - 0.6) / (a.karten * plaetze.length));
+            let n = 0;
+            for (let k = 0; k < a.karten; k++) for (const p of plaetze) this.kartenFlug(p, n++ * schritt);
+            const t0 = n * schritt;
+            setTimeout(() => this.ablageKarte(z.oben, null, false), t0 * 1000 + 200);
+          } else this.ablageKarte(z.oben, null, true);
         } else if (a.typ === "legen") {
           this.ablageKarte(a.karte, a.spieler === ich ? "ich" : a.spieler, false);
         } else if (a.typ === "ziehen" || a.typ === "erwischt") {

@@ -111,3 +111,44 @@ body[data-spiel="farbrausch"], [data-farbe="farbrausch"] {
 @media (prefers-reduced-motion: reduce) {
   .fr-richtung, .fr-strafe, .fr-ruf, .fr-knall, .fr-ablage .fk { animation: none !important; }
 }
+
+/* =============================================================
+   SpielO-Artwork auf den Karten
+   ============================================================= */
+.fk-marke { position: absolute; z-index: 1; width: 13cqw; height: 13cqw; border-radius: 50%; background: linear-gradient(145deg, #ffc928, #ff3b4f); box-shadow: 0 0 0 1.6cqw #fff; }
+.fk-marke::after { content: ""; position: absolute; inset: 34%; border-radius: 50%; background: #fff; }
+.fk-marke.o { right: 12%; top: 8.5%; }
+.fk-marke.u { left: 12%; bottom: 8.5%; }
+.fk-schwarz .fk-marke { box-shadow: 0 0 0 1.6cqw rgba(255, 255, 255, 0.9); }
+/* Rückseite */
+.fk-ruecken { position: absolute; inset: 0; container-type: inline-size; border-radius: inherit; border: 5px solid #fff; overflow: hidden;
+  background: repeating-conic-gradient(from 0deg at 50% 45%, rgba(255, 201, 40, 0.12) 0 11.25deg, rgba(255, 59, 79, 0.12) 11.25deg 22.5deg), linear-gradient(160deg, #2a1450, #120a24);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4cqw; }
+.fk-r-stein { width: 44cqw; height: 44cqw; border-radius: 50%; background: linear-gradient(145deg, #ffc928, #ff3b4f); box-shadow: 0 0 0 4cqw #fff, 0 4cqw 10cqw rgba(0, 0, 0, 0.5); position: relative; }
+.fk-r-stein::after { content: ""; position: absolute; inset: 35%; border-radius: 50%; background: #fff; }
+.fk-ruecken b { color: #fff; font-weight: 900; font-size: 17cqw; letter-spacing: -0.03em; display: flex; align-items: center; margin-top: 3cqw; }
+.fk-ruecken b i { width: 12cqw; height: 12cqw; border-radius: 50%; background: linear-gradient(145deg, #ffc928, #ff3b4f); margin-left: 1cqw; position: relative; }
+.fk-ruecken b i::after { content: ""; position: absolute; inset: 33%; border-radius: 50%; background: #fff; }
+.fk-ruecken small { color: rgba(255, 255, 255, 0.7); font-weight: 800; font-size: 7cqw; letter-spacing: 0.2em; text-transform: uppercase; }
+.fr-ziehstapel { background: none; border: 0; box-shadow: 4px 4px 0 #ddd, 8px 8px 0 #bbb, 0 10px 24px rgba(0, 0, 0, 0.5); overflow: visible; }
+.fr-stapel-zahl { position: absolute; right: -10px; top: -10px; z-index: 2; min-width: 30px; height: 30px; padding: 0 6px; border-radius: 99px; background: #fff; color: #120a24 !important; text-shadow: none !important; display: grid; place-items: center; font-size: 0.9rem !important; }
+
+/* Austeilen: Karten fliegen nacheinander von oben in die Hand */
+.fr-hand.austeilen .fr-handkarte { animation: fr-austeilen 0.45s cubic-bezier(.2,1.1,.4,1) both; animation-delay: var(--v); }
+@keyframes fr-austeilen { from { transform: translate(0, -45vh) rotate(160deg) scale(0.5); opacity: 0; } }
+
+/* Großer +2/+4-Moment */
+.fr-gross { position: fixed; inset: 0; z-index: 58; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center;
+  background: radial-gradient(circle, rgba(255, 201, 40, 0.28), rgba(10, 6, 20, 0.55) 65%); animation: fr-gross-rein 1.5s ease forwards; }
+.fr-gross.ich { background: radial-gradient(circle, rgba(255, 59, 79, 0.45), rgba(10, 6, 20, 0.7) 65%); animation-duration: 2s; }
+.fr-gross b { font-size: clamp(9rem, 42vw, 22rem); font-weight: 900; line-height: 0.9; color: #ffc928; -webkit-text-stroke: 6px #fff;
+  text-shadow: 0 12px 0 #b3261d, 0 0 60px rgba(255, 201, 40, 0.8); animation: fr-gross-zahl 0.6s cubic-bezier(.2,1.8,.4,1) both; }
+.fr-gross.plus4 b { background: conic-gradient(#ffc928, #2f8bff, #22c46b, #ff3b4f, #ffc928); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 10px 0 #120a24) drop-shadow(0 0 40px rgba(255, 255, 255, 0.5)); }
+.fr-gross.ich b { color: #ff3b4f; text-shadow: 0 12px 0 #5c0a14, 0 0 70px rgba(255, 59, 79, 0.9); }
+.fr-gross span { margin-top: 10px; font-size: clamp(1.3rem, 5vw, 2.2rem); font-weight: 900; color: #fff; text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8); animation: hochgleiten 0.4s 0.2s both; padding: 0 16px; }
+.fr-gross-blitz { position: absolute; inset: 0; background: #fff; animation: fr-blitz 0.35s ease-out forwards; }
+@keyframes fr-gross-rein { 0% { opacity: 0; } 8%, 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fr-gross-zahl { from { transform: scale(3) rotate(-15deg); opacity: 0; } 60% { transform: scale(0.9) rotate(4deg); opacity: 1; } to { transform: scale(1) rotate(-4deg); } }
+@keyframes fr-blitz { from { opacity: 0.75; } to { opacity: 0; } }
+.fr-strafe { font-size: 1.6rem; padding: 6px 18px; box-shadow: 0 0 24px rgba(255, 59, 79, 0.7); }
+@media (prefers-reduced-motion: reduce) { .fr-gross b, .fr-hand.austeilen .fr-handkarte { animation: none; } }

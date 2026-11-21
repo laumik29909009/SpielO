@@ -7,6 +7,7 @@
   const app = GN.app;
   let hand = [];
   let letzteEffektZeit = 0;
+  let austeilenBis = 0, austeilenDauer = 0; // für die Austeil-Animation der eigenen Hand
 
   const FARBE = { rot: "#ff3b4f", gelb: "#ffc928", gruen: "#22c46b", blau: "#2f8bff", schwarz: "#1b1424" };
   const FARBNAME = { rot: "Rot", gelb: "Gelb", gruen: "Grün", blau: "Blau" };
@@ -35,9 +36,14 @@
     const ecke = schwarz ? (k.wert === "plus4" ? "+4" : "★") : zeichen;
     return `<div class="fk fk-${k.farbe} ${/^\d$/.test(k.wert) ? "zahl" : "aktion"} ${klasse}" ${attr} style="--fk:${FARBE[k.farbe]}" aria-label="${schwarz ? NAME[k.wert] : `${FARBNAME[k.farbe]} ${NAME[k.wert] || k.wert}`}">
       <span class="fk-ecke o">${ecke}</span>${mitte}<span class="fk-ecke u">${ecke}</span>
+      <span class="fk-marke o" aria-hidden="true"></span><span class="fk-marke u" aria-hidden="true"></span>
       ${k.gewaehlt ? `<span class="fk-gewaehlt" style="--g:${FARBE[k.gewaehlt]}"></span>` : ""}
     </div>`;
   }
+
+  // Rückseite mit SpielO-Artwork
+  const rueckseite = () => `<span class="fk-ruecken" aria-hidden="true"><span class="fk-r-stein"></span><b>Spiel<i></i></b><small>Farbrausch</small></span>`;
+  GN.farbrauschRueckseite = rueckseite;
 
   // Dieselbe Karte als Bild für den 3D-Tisch
   function karteBild(k) {
@@ -62,6 +68,13 @@
     x.fillStyle = "#fff"; x.font = "900 40px Outfit, system-ui, sans-serif";
     const e = k.farbe === "schwarz" ? (k.wert === "plus4" ? "+4" : "★") : z;
     x.fillText(e, 40, 46);
+    // SpielO-Stein oben rechts und unten links
+    for (const [mx, my] of [[214, 44], [42, 332]]) {
+      const g = x.createLinearGradient(mx - 16, my - 16, mx + 16, my + 16); g.addColorStop(0, "#ffc928"); g.addColorStop(1, "#ff3b4f");
+      x.fillStyle = "#fff"; x.beginPath(); x.arc(mx, my, 19, 0, Math.PI * 2); x.fill();
+      x.fillStyle = g; x.beginPath(); x.arc(mx, my, 15, 0, Math.PI * 2); x.fill();
+      x.fillStyle = "#fff"; x.beginPath(); x.arc(mx, my, 5, 0, Math.PI * 2); x.fill();
+    }
     if (k.gewaehlt) { x.fillStyle = FARBE[k.gewaehlt]; x.beginPath(); x.arc(212, 334, 22, 0, Math.PI * 2); x.fill(); x.strokeStyle = "#fff"; x.lineWidth = 5; x.stroke(); }
     return c;
   }
@@ -215,7 +228,7 @@
     const ichDran = z.dran === GN.ich && z.phase === "spielen";
     box.innerHTML = `
       ${mitKarten ? `<div class="fr-stapel-reihe">
-        <button class="fr-ziehstapel" id="frStapel" ${ichDran ? "" : "disabled"} aria-label="Karte ziehen"><span>${z.stapelAnzahl}</span></button>
+        <button class="fr-ziehstapel" id="frStapel" ${ichDran ? "" : "disabled"} aria-label="Karte ziehen">${rueckseite()}<span class="fr-stapel-zahl">${z.stapelAnzahl}</span></button>
         <div class="fr-ablage">${karte(z.oben, { klasse: "gross" })}</div>
       </div>` : ""}
       <div class="fr-status">
@@ -251,11 +264,13 @@
     const abstand = n > 1 ? Math.min(kartenBreite * 0.62, (breite - kartenBreite) / (n - 1)) : 0;
     const winkelProKarte = Math.min(6, 60 / Math.max(1, n));
     box.style.setProperty("--kb", kartenBreite + "px");
+    const austeilen = Date.now() < austeilenBis;
+    box.classList.toggle("austeilen", austeilen);
     box.innerHTML = karten.map((k, i) => {
       const m = i - (n - 1) / 2;
       const ok = z.phase === "spielen" && passt(z, k);
       return `<button class="fr-handkarte ${ok ? "spielbar" : ""}" data-karte="${k.id}" ${ok ? "" : 'aria-disabled="true"'}
-        style="--x:${m * abstand}px;--r:${m * winkelProKarte}deg;--y:${Math.abs(m) * Math.abs(m) * 0.9}px;--z:${i}">${karte(k)}</button>`;
+        style="--x:${m * abstand}px;--r:${m * winkelProKarte}deg;--y:${Math.abs(m) * Math.abs(m) * 0.9}px;--z:${i};--v:${austeilen ? Math.round(((austeilenBis - Date.now()) * 0.85 * i) / Math.max(1, n)) : 0}ms">${karte(k)}</button>`;
     }).join("");
     $$(".fr-handkarte", box).forEach((b) => (b.onclick = () => legen(b.dataset.karte)));
     // Aktionsknöpfe
@@ -330,7 +345,16 @@
       box.appendChild(el);
       setTimeout(() => el.remove(), dauer);
     };
-    if (a.typ === "austeilen") { zeige(`<b>🃏 Karten werden verteilt</b>`, "info"); Ton.wusch(); return; }
+    if (a.typ === "austeilen") {
+      austeilenDauer = z.austeilenMs || a.dauer || 2500;
+      austeilenBis = Date.now() + austeilenDauer;
+      zeige(`<b>🃏 Karten werden verteilt …</b>`, "info", Math.min(2400, austeilenDauer));
+      // Kartengeräusche im Takt des Austeilens
+      const n = Math.min(24, (a.karten || 7) * leute(z).length);
+      for (let i = 0; i < n; i++) setTimeout(() => Ton.klick(), (i * austeilenDauer * 0.85) / n);
+      zeichneHand(z);
+      return;
+    }
     if (a.typ === "legen") {
       Ton.wusch();
       const k = a.karte;
@@ -339,9 +363,11 @@
       if (e?.typ === "aussetzen") { zeige(`<b class="riesig">⦸</b><span>${esc(nameVon(z, e.ziel))} ${e.ziel === GN.ich ? "setzt" : "setzt"} aus!</span>`, "stempel"); Ton.falsch(); }
       if (e?.typ === "richtung") { zeige(`<b class="riesig dreh">⇄</b><span>Richtungswechsel!</span>`, "dreh"); Ton.rundeStart(); }
       if (e?.typ === "plus2" || e?.typ === "plus4") {
-        zeige(`<b class="riesig">+${e.summe || (e.typ === "plus4" ? 4 : 2)}</b><span>${esc(nameVon(z, e.ziel))}${z.regeln.stapeln ? "" : " zieht und setzt aus"}</span>`, e.typ === "plus4" ? "plus4" : "plus2");
+        grossMoment(e.typ, e.summe || (e.typ === "plus4" ? 4 : 2), e.ziel === GN.ich
+          ? (z.regeln.stapeln ? "Du musst ziehen, außer du legst nach!" : "Du ziehst und setzt aus!")
+          : `${esc(nameVon(z, e.ziel))} ${z.regeln.stapeln ? "muss ziehen" : "zieht und setzt aus"}`, e.ziel === GN.ich);
         Ton.alarm();
-        if (e.ziel === GN.ich) navigator.vibrate?.([80, 50, 80]);
+        if (e.ziel === GN.ich) navigator.vibrate?.([120, 60, 120, 60, 200]);
       }
       if (e?.typ === "tausch") zeige(`<b>🔄 Handtausch!</b><span>${esc(nameVon(z, a.spieler))} ↔ ${esc(nameVon(z, e.ziel))}</span>`, "gold");
       if (e?.typ === "weitergeben") zeige(`<b>🔄 Alle Hände wandern weiter!</b>`, "gold");
@@ -355,6 +381,16 @@
     if (a.typ === "ziehen" && a.anzahl === 1) Ton.klick();
     if (a.typ === "ruf") { zeige(`<b>📣 Letzte Karte!</b><span>${esc(nameVon(z, a.spieler))}</span>`, "ruf"); Ton.volltreffer(); }
     if (a.typ === "erwischt") { zeige(`<b>👀 Erwischt!</b><span>${esc(nameVon(z, a.ziel))} zieht 2 Strafkarten</span>`, "plus2"); Ton.falsch(); }
+  }
+
+  // Großer Vollbild-Moment bei +2/+4: riesige Zahl, Blitz, Wackeln
+  function grossMoment(typ, summe, text, ichBinZiel) {
+    const el = document.createElement("div");
+    el.className = `fr-gross ${typ} ${ichBinZiel ? "ich" : ""}`;
+    el.innerHTML = `<div class="fr-gross-blitz"></div><b>+${summe}</b><span>${text}</span>`;
+    document.body.appendChild(el);
+    $(".fr-buehne")?.animate([{ transform: "translate(0,0)" }, { transform: "translate(-10px,6px)" }, { transform: "translate(9px,-6px)" }, { transform: "translate(-6px,3px)" }, { transform: "translate(0,0)" }], { duration: 420 });
+    setTimeout(() => el.remove(), ichBinZiel ? 2000 : 1500);
   }
 
   function rundenEnde(z) {

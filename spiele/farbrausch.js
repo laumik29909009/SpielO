@@ -98,7 +98,7 @@ function handSenden(raum, ctx) {
 }
 
 // ---------- Zugablauf ----------
-function zugStarten(raum, ctx) {
+function zugStarten(raum, ctx, extra = 0) {
   const d = raum.daten;
   clearTimeout(d.timer);
   d.zug++;
@@ -110,6 +110,7 @@ function zugStarten(raum, ctx) {
   else if (!t.online) warten = 6000;
   else if (t.afk) warten = 2500;
   else if (sek) warten = sek * 1000;
+  if (warten) warten += extra;
   d.endetUm = warten && t && !t.bot ? Date.now() + warten : null;
   if (warten) d.timer = setTimeout(() => automatisch(raum, ctx), warten);
   handSenden(raum, ctx);
@@ -330,8 +331,11 @@ function neueRunde(raum, ctx) {
   // Wer die letzte Runde gewonnen hat, beginnt; sonst zufällig
   d.dran = d.rundenSieger[d.rundenSieger.length - 1] || d.reihenfolge[Math.floor(Math.random() * d.reihenfolge.length)];
   if (!d.reihenfolge.includes(d.dran)) d.dran = d.reihenfolge[0];
-  d.letzteAktion = { typ: "austeilen", t: Date.now() };
-  zugStarten(raum, ctx);
+  // Austeilen dauert einen Moment (Animation), erst danach beginnt der erste Zug
+  const dauer = Math.min(4200, 700 + d.reihenfolge.length * einst(raum).startKarten * 75);
+  d.austeilenBis = Date.now() + dauer;
+  d.letzteAktion = { typ: "austeilen", t: Date.now(), dauer, karten: einst(raum).startKarten };
+  zugStarten(raum, ctx, dauer);
 }
 
 function auszeichnungen(raum) {
@@ -398,6 +402,7 @@ module.exports = {
   aktion(raum, { spielerId }, typ, daten, ctx) {
     const d = raum.daten;
     if (d.phase !== "spielen" || !d.haende[spielerId]) return;
+    if (d.austeilenBis && Date.now() < d.austeilenBis) return "Moment, es wird noch ausgeteilt.";
     if (typ === "legen") {
       const f = legen(raum, ctx, spielerId, String(daten?.karte), daten?.farbe);
       return f || undefined;
@@ -472,6 +477,7 @@ module.exports = {
       strafe: d.strafe,
       sekunden: e.sekunden,
       restMs: d.endetUm ? Math.max(0, d.endetUm - Date.now()) : 0,
+      austeilenMs: d.austeilenBis ? Math.max(0, d.austeilenBis - Date.now()) : 0,
       gezogenDiesenZug: d.gezogenDiesenZug,
       erwischbar: d.erwischbar && Date.now() < d.erwischbar.bis ? { spieler: d.erwischbar.spieler, restMs: d.erwischbar.bis - Date.now() } : null,
       gerufen: Object.keys(d.gerufen).filter((id) => d.gerufen[id]),

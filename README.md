@@ -79,7 +79,7 @@ Browser trennen die Verbindung, wenn niemand aktiv ist (Startseite 2 Min., Lobby
 
 ## Musik & Spenden
 - `config.json` → `"musikAus": ["jazz"]` blendet Musikrichtungen vorübergehend aus (Dateien bleiben). Mit `[]` ist Jazz wieder da.
-- `config.json` → `"spende"`: Text und PayPal-Link für die Spenden-Ecke (QR unter `/qr/spende.svg`, Weiterleitung `/spenden`).
+- `config.json` → `"spende"` (optional): Text und Link für eine Spenden-Ecke auf der Startseite. Ohne Eintrag wird nichts angezeigt.
 
 ## Wartungsmodus
 In `config.json` `"wartung": true` setzen und hochladen. Dann sehen alle nur eine Wartungsseite. Zum Beenden wieder auf `false`.
