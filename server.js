@@ -60,7 +60,8 @@ function leseMusik() {
           .sort((a, b) => a.localeCompare(b, "de", { numeric: true }))
           .map((f) => ({
             datei: `/musik/${encodeURIComponent(d.name)}/${encodeURIComponent(f)}`,
-            name: f.replace(AUDIO, "").replace(/^\d+[\s._-]*/, "").replace(/_+/g, " ").trim() || f,
+            name: f.replace(AUDIO, "").replace(/^\d+[\s._-]*/, "").replace(/_+/g, " ")
+              .replace(/\s*[([](official|offizielles|lyrics?|audio|video|hd|hq|remaster)[^)\]]*[)\]]/gi, "").trim() || f,
           })),
       }))
       .filter((k) => k.titel.length);
