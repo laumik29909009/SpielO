@@ -18,6 +18,7 @@ const SPIELE = {
   skat: require("./spiele/skat"),
   wuerfel: require("./spiele/wuerfel"),
   arena: require("./spiele/arena"),
+  schechingen: require("./spiele/schechingen"),
 };
 const MAX_SPIELER = 10;
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];

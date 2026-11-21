@@ -61,6 +61,15 @@ Tages-Quiz mit freien Antworten (Vorschau: `/?vorschau=1`). Jede Aufgabe ist ein
 - Die Tages-Rangliste liegt im Server-Speicher. Nach einem Neustart melden Spieler ihr heutiges Ergebnis beim nächsten Besuch automatisch neu.
 - Aufgaben: `daten/arena.js` und `daten/arena-2.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
 
+## Schechingen – Hof & Handel 🚧
+Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner). Vorschau: `/?vorschau=1`.
+- Rohstoffe: 🪵 Holz (Wald), 🪨 Stein (Steinbruch), 🌾 Korn (Feld), 🥛 Milch (Weide). Gewürfelte Landschaften liefern an angrenzende Höfe (Gutshof doppelt).
+- Bauen: Weg, Hof (1 Punkt), Gutshof (2), Dorfkarten (Feldhüter, Erntedank, Wegebau, Viehmarkt, Kirchweih = geheimer Punkt).
+- Dorfplatz in der Mitte: Brunnen, Wirtshaus, Kirche, Rathaus (je 2 Punkte, nur mit Hof/Weg am Dorfplatz). Hof direkt am Dorfplatz = Marktrecht 3:1.
+- Jahreszeiten wechseln jede Runde (Frühling Weide doppelt, Sommer Stein, Herbst Korn, Winter Holz doppelt und Felder ruhen).
+- 7 = Gewitter: über 8 Karten die Hälfte abgeben, Gewitter blockiert ein Feld, eine Karte klauen.
+- Handel: Markt 4:1 (3:1 mit Marktrecht) und Angebote an Mitspieler. Sieg bei 8/10/12 Punkten.
+
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
 |---|---|

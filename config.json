@@ -2,7 +2,8 @@
   "wartung": false,
   "imAufbau": [
     "wuerfel",
-    "arena"
+    "arena",
+    "schechingen"
   ],
   "wartungInfo": {
     "punkte": [
