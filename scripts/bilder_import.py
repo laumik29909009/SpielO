@@ -10,8 +10,10 @@ So geht's:
 3. Das Skript findet die passende Karte, schneidet das Bild auf 4:3 zu
    (Motiv eher oben, damit Köpfe nicht abgeschnitten werden), verkleinert auf 800 × 600
    und speichert es als WebP in  public/quartett/bilder/<deck>/<Karten-ID>.webp
+   Bilder mit weißem Hintergrund werden freigestellt (<Karten-ID>.frei.webp, mit Transparenz).
 Nicht zugeordnete Dateien werden aufgelistet.
 """
+import difflib
 import json
 import re
 import subprocess
@@ -73,15 +75,78 @@ def zuordnen(deck_id, karten, dateiname):
         return namen[s]
     # Teiltreffer (z. B. "po_kungfu_panda" → Po), längster Name zuerst
     for name in sorted(namen, key=len, reverse=True):
-        if len(name) >= 3 and name in s:
+        if len(name) >= 5 and name in s:
             return namen[name]
-    return None
+    # Gekürzter Name (z. B. "Lung" → Tai Lung, "snow" → Snow Wraith), nur wenn eindeutig
+    teil = {namen[n] for n in namen if len(s) >= 4 and s in n}
+    if len(teil) == 1:
+        return teil.pop()
+    # Tippfehler (z. B. "Fenghunag", "Tafumerang", "ogway")
+    nah = difflib.get_close_matches(s, list(namen), n=1, cutoff=0.75)
+    return namen[nah[0]] if nah else None
+
+
+def heller_rand(bild):
+    """Ist der Hintergrund (Bildrand) fast weiß? Dann wird die Figur freigestellt."""
+    w, h = bild.size
+    px = bild.load()
+    punkte = [(x, 0) for x in range(0, w, max(1, w // 60))] + [(x, h - 1) for x in range(0, w, max(1, w // 60))]
+    punkte += [(0, y) for y in range(0, h, max(1, h // 60))] + [(w - 1, y) for y in range(0, h, max(1, h // 60))]
+    hell = sum(1 for p in punkte if min(px[p]) > 232)
+    return hell / len(punkte) > 0.8
+
+
+def freistellen(bild):
+    """Weißen Hintergrund vom Rand aus entfernen (Flutfüllung), Kanten weich machen."""
+    from PIL import ImageDraw, ImageFilter
+    markiert = bild.copy()
+    MARKE = (1, 254, 3)
+    w, h = markiert.size
+    for x in range(0, w, max(1, w // 40)):
+        for y in (0, h - 1):
+            if min(markiert.getpixel((x, y))) > 225:
+                ImageDraw.floodfill(markiert, (x, y), MARKE, thresh=38)
+    for y in range(0, h, max(1, h // 40)):
+        for x in (0, w - 1):
+            if min(markiert.getpixel((x, y))) > 225:
+                ImageDraw.floodfill(markiert, (x, y), MARKE, thresh=38)
+    maske = Image.new("L", (w, h), 255)
+    mp, bp = maske.load(), markiert.load()
+    for y in range(h):
+        for x in range(w):
+            if bp[x, y] == MARKE:
+                mp[x, y] = 0
+    maske = maske.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(1.2))
+    frei = bild.convert("RGBA")
+    frei.putalpha(maske)
+    box = maske.point(lambda v: 255 if v > 20 else 0).getbbox()
+    return frei.crop(box) if box else frei
 
 
 def zuschneiden(pfad):
+    """Gibt (Bild, freigestellt?) zurück. Freigestellt: ganze Figur, unten mittig im 4:3-Feld."""
     bild = ImageOps.exif_transpose(Image.open(pfad)).convert("RGB")
-    # 4:3, Ausschnitt eher oben (Köpfe), seitlich mittig
-    return ImageOps.fit(bild, (BREITE, HOEHE), Image.LANCZOS, centering=(0.5, 0.3))
+    if max(bild.size) > 1400:
+        bild.thumbnail((1400, 1400), Image.LANCZOS)
+    if heller_rand(bild):
+        frei = freistellen(bild)
+        flaeche = Image.new("RGBA", (BREITE, HOEHE), (0, 0, 0, 0))
+        rand = 0.05
+        maxw, maxh = int(BREITE * (1 - 2 * rand)), int(HOEHE * (1 - rand))
+        frei.thumbnail((maxw, maxh), Image.LANCZOS)
+        flaeche.alpha_composite(frei, ((BREITE - frei.width) // 2, HOEHE - frei.height))
+        return flaeche, True
+    # Foto mit eigenem Hintergrund: 4:3, Ausschnitt eher oben (Köpfe), seitlich mittig
+    return ImageOps.fit(bild, (BREITE, HOEHE), Image.LANCZOS, centering=(0.5, 0.25)), False
+
+
+def speichern(datei, deck_id, kid):
+    for alt in (ZIEL / deck_id).glob(f"{kid}.*"):
+        alt.unlink()  # altes Bild derselben Karte ersetzen
+    bild, frei = zuschneiden(datei)
+    ziel = ZIEL / deck_id / (f"{kid}.frei.webp" if frei else f"{kid}.webp")
+    bild.save(ziel, "WEBP", quality=82, method=6)
+    return ziel, frei
 
 
 def main():
@@ -102,12 +167,9 @@ def main():
             if not kid:
                 fehlend.append(f"{deck_id}/{datei.name}")
                 continue
-            for alt in (ZIEL / deck_id).glob(f"{kid}.*"):
-                alt.unlink()  # altes Bild derselben Karte ersetzen
-            ziel = ZIEL / deck_id / f"{kid}.webp"
-            zuschneiden(datei).save(ziel, "WEBP", quality=80, method=6)
+            ziel, frei = speichern(datei, deck_id, kid)
             name = next(k["name"] for k in karten if k["id"] == kid)
-            print(f"✓ {deck_id}/{datei.name} → {kid} ({name}), {ziel.stat().st_size // 1024} KB")
+            print(f"✓ {deck_id}/{datei.name} → {kid} ({name}){' freigestellt' if frei else ''}, {ziel.stat().st_size // 1024} KB")
     # Bilder direkt in bilder-eingang/ (ohne Unterordner): Deck anhand des Namens erkennen
     for datei in sorted(EINGANG.iterdir()):
         if not datei.is_file() or datei.suffix.lower() not in ENDUNGEN:
@@ -119,12 +181,9 @@ def main():
             continue
         deck_id, kid = treffer[0]
         (ZIEL / deck_id).mkdir(parents=True, exist_ok=True)
-        for alt in (ZIEL / deck_id).glob(f"{kid}.*"):
-            alt.unlink()
-        ziel = ZIEL / deck_id / f"{kid}.webp"
-        zuschneiden(datei).save(ziel, "WEBP", quality=80, method=6)
+        ziel, frei = speichern(datei, deck_id, kid)
         name = next(k["name"] for k in alle[deck_id] if k["id"] == kid)
-        print(f"✓ {datei.name} → {deck_id} {kid} ({name}), {ziel.stat().st_size // 1024} KB")
+        print(f"✓ {datei.name} → {deck_id} {kid} ({name}){' freigestellt' if frei else ''}, {ziel.stat().st_size // 1024} KB")
     if fehlend:
         print("\nNicht zugeordnet (bitte umbenennen, z. B. in den Kartennamen oder die ID wie 'B1.jpg'):")
         for f in fehlend:

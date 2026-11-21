@@ -19,8 +19,9 @@ function fotosLesen(deckId) {
   const fotos = {};
   try {
     for (const datei of fs.readdirSync(ordner)) {
-      const m = datei.match(/^([A-H][1-4])\.(jpe?g|png|webp|avif)$/i);
-      if (m) fotos[m[1].toUpperCase()] = `/quartett/bilder/${deckId}/${encodeURIComponent(datei)}`;
+      // A1.webp = Foto mit Hintergrund, A1.frei.webp = freigestellte Figur (Transparenz)
+      const m = datei.match(/^([A-H][1-4])(\.frei)?\.(jpe?g|png|webp|avif)$/i);
+      if (m) fotos[m[1].toUpperCase()] = { url: `/quartett/bilder/${deckId}/${encodeURIComponent(datei)}`, frei: !!m[2] };
     }
   } catch {}
   return fotos;

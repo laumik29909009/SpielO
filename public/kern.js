@@ -216,7 +216,8 @@ function zeigeStart() {
         ${Object.entries(GN.spiele).map(([id, s]) => imAufbau(id) ? aufbauKarte({ ...s, id }, true) : spielKarte(id, s)).join("")}
         ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
-    </section>`;
+    </section>
+    ${patchBlock()}`;
 
   const name = () => {
     const n = $("#nameInput").value.trim();
@@ -246,6 +247,17 @@ function zeigeStart() {
     if (codeAusLink) $("#beitretenBtn").click();
     else $("#erstellenBtn").click();
   });
+}
+
+// Kleiner Block mit dem letzten Update (Inhalt aus config.json → "patch")
+function patchBlock() {
+  const p = GN.meta.patch;
+  if (!p || !p.punkte?.length) return "";
+  return `
+    <details class="patch-notiz rein" style="--d:1.75s">
+      <summary><span class="patch-neu">🆕 Neu</span><span class="patch-titel">${esc(p.titel || "Letztes Update")}</span><span class="patch-datum">${esc(p.datum || "")}</span></summary>
+      <ul>${p.punkte.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+    </details>`;
 }
 
 // =============================================================

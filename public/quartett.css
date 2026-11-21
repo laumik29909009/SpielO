@@ -414,3 +414,9 @@ dialog.q-galerie .fenster-inhalt { max-height: calc(min(86vh, 900px) - 64px); }
 /* Die 3D-Fläche braucht eine feste Breite (automatische Ränder würden sie im Raster auf 0 schrumpfen) */
 .q-szene.drei { width: 100%; }
 @media (min-width: 1000px) { .q-buehne > .q-szene { width: 100%; margin: 8px 0 0; } }
+
+/* Freigestellte Figur vor der Szene ihrer Gruppe */
+.qk-bild.frei { position: relative; }
+.qk-bild.frei > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.qk-bild.frei > img { position: relative; object-fit: contain; object-position: 50% 100%; filter: drop-shadow(0 1.2cqw 1.4cqw rgba(0, 0, 0, 0.55)); }
+.qkarte.stufe-legendaer .qk-bild.frei > img { height: 62%; width: 100%; margin-top: 8%; }

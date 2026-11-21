@@ -1,7 +1,8 @@
 // =============================================================
 //  Quartett-Decks: Kung Fu Panda und Dragons – Die Reiter von Berk
 //  Figuren © DreamWorks Animation, Nutzung mit Erlaubnis.
-//  Jedes Deck: 8 Gruppen (A–H) × 4 Karten = 32 Karten, 5 Werte.
+//  Jedes Deck: 8 Gruppen (A–H), bis zu 4 Karten pro Gruppe, 5 Werte.
+//  Karten ohne passendes Bild wurden entfernt (Kung Fu Panda: Dim, Sum; Dragons: Thornado).
 //  Höherer Wert gewinnt immer. Seltene Karten (selten: true) glänzen holografisch.
 //  Werte sind eine eigene Einschätzung anhand der Filme und Serien (keine offiziellen Zahlen):
 //  Jede Karte hat 1–2 Stärken und mindestens eine Schwäche.
@@ -80,8 +81,6 @@ const KUNGFUPANDA = {
 
     { id: "G1", name: "Lei Lei", tier: "1f43c", stil: "Panda-Kind", text: "Die Kleinste im Dorf. Kuschelt sich an jeden ran.", w: [20, 58, 30, 70, 50] },
     { id: "G2", name: "Oma Panda", tier: "1f43c", stil: "Weise Großmutter", text: "Kennt alle alten Geschichten. Und alle Rezepte.", w: [35, 22, 48, 85, 66] },
-    { id: "G3", name: "Dim", tier: "1f43c", stil: "Kugel-Panda", text: "Rollt lieber, als zu laufen.", w: [72, 46, 40, 55, 82] },
-    { id: "G4", name: "Sum", tier: "1f43c", stil: "Kugel-Panda", text: "Wo Dim ist, ist Sum nicht weit.", w: [70, 50, 42, 56, 80] },
 
     { id: "H1", name: "Fenghuang", tier: "1f989", stil: "Schattenflügel", text: "Eine gefährliche Eule, die nach Macht über die Fünf strebt.", w: [64, 90, 88, 84, 68], selten: true },
     { id: "H2", name: "Temutai", tier: "1f403", stil: "Yak-Kriegsherr", text: "Stur, laut und Anführer einer ganzen Horde.", w: [93, 50, 66, 52, 90] },
@@ -135,7 +134,6 @@ const DRAGONS = {
     { id: "E4", name: "Windscherer", tier: "1f409", stil: "Klingenflügel", text: "Ihre Flügel und ihr Schwanz sind scharf wie Messer.", w: [66, 230, 86, 16, 72] },
 
     { id: "F1", name: "Grump", tier: "1f409", stil: "Hotburple", text: "Grobians Drache. Schläft am liebsten und glüht dabei vor sich hin.", w: [80, 50, 88, 9, 30] },
-    { id: "F2", name: "Thornado", tier: "1f409", stil: "Donnertrommler", text: "Haudraufs Drache. Ein einziges Brüllen fegt alles weg.", w: [82, 175, 70, 16, 62] },
     { id: "F3", name: "Torch", tier: "1f409", stil: "Junger Taifumerang", text: "Ein verspielter Feuerdrache, der überall Brandspuren hinterlässt.", w: [84, 165, 58, 22, 50] },
     { id: "F4", name: "Feuerwurm-Königin", tier: "1f409", stil: "Feuerwurm", text: "Ihr ganzer Körper brennt. Herrscht über tausende Feuerwürmer.", w: [96, 140, 50, 12, 70], selten: true },
 
@@ -166,7 +164,7 @@ const ANGRIFFE = {
     D1: ["werfen", "Nudelsuppen-Wurf", "#ffe0a3", "🍜"], D2: ["beben", "Panda-Stampfer", "#c9a77c"], D3: ["peitsche", "Seidenband-Tanz", "#ff6fb5"], D4: ["werfen", "Taschendieb-Trick", "#ffd23f", "🪙"],
     E1: ["peitsche", "Schwanzschlag", "#4f9a3a"], E2: ["sprung", "Hörnerstoß", "#a0522d"], E3: ["beben", "Donnerhammer", "#9aa5b1"], E4: ["regen", "Pfeilhagel", "#d9d2c3", "➶"],
     F1: ["stacheln", "Wolfsrudel-Pfeile", "#b8b8c8"], F2: ["wirbel", "Blick in die Zukunft", "#c58bff"], F3: ["werfen", "Eilbotschaft", "#f5e6c8", "📜"], F4: ["wirbel", "Kugelroller", "#c08a4a"],
-    G1: ["werfen", "Kuschelattacke", "#ffb7d5", "💕"], G2: ["werfen", "Teigtaschen-Hagel", "#f5e6c8", "🥟"], G3: ["sprung", "Kugel-Rumms", "#e6ffd1"], G4: ["beben", "Doppelrolle", "#a5d67a"],
+    G1: ["werfen", "Kuschelattacke", "#ffb7d5", "💕"], G2: ["werfen", "Teigtaschen-Hagel", "#f5e6c8", "🥟"],
     H1: ["nebel", "Schattenschwinge", "#b07cff"], H2: ["beben", "Hordenansturm", "#8a5a3a"], H3: ["werfen", "Erfindung", "#c9c9d6", "⚙️"], H4: ["regen", "Jade-Hagel", "#3ee08f"],
   },
   dragons: {
@@ -175,7 +173,7 @@ const ANGRIFFE = {
     C1: ["strahl", "Inferno", "#ff2d1a"], C2: ["eis", "Eisatem", "#bff3ff"], C3: ["welle", "Todesschrei", "#ffffff"], C4: ["wirbel", "Feuertornado", "#ff6a2a"],
     D1: ["blitz", "Blitzschlag", "#ffe14d"], D2: ["beben", "Tunnelangriff", "#8a6a4a"], D3: ["stacheln", "Giftstachel", "#b07cff"], D4: ["welle", "Donnerschall", "#38a8ff"],
     E1: ["feuerball", "Mini-Feuerstoß", "#ffb23d"], E2: ["regen", "Funkenregen", "#7fe3ff"], E3: ["nebel", "Säurespritzer", "#c3f73a"], E4: ["stacheln", "Klingenwurf", "#d6dde6"],
-    F1: ["feuerball", "Glutklumpen", "#ff7a1a"], F2: ["welle", "Donnerbrüllen", "#7fc8ff"], F3: ["wirbel", "Funkenwirbel", "#ffb23d"], F4: ["strahl", "Glutkörper", "#ffd23f"],
+    F1: ["feuerball", "Glutklumpen", "#ff7a1a"], F3: ["wirbel", "Funkenwirbel", "#ffb23d"], F4: ["strahl", "Glutkörper", "#ffd23f"],
     G1: ["beben", "Lavafresser", "#ff6a2a"], G2: ["chi", "Bernstein-Gesang", "#ffb347", "🎵"], G3: ["beben", "Meteor-Aufprall", "#a88a63"], G4: ["blitz", "Stromstrahl", "#7fe3ff"],
     H1: ["eis", "Frostblitz", "#e3f8ff"], H2: ["regen", "Schwarmangriff", "#9aa5b1", "🦇"], H3: ["stacheln", "Lähmstachel", "#c3f73a"], H4: ["nebel", "Rauchwand", "#8d8da3"],
   },

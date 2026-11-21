@@ -11,8 +11,25 @@
       "Großer Bug-Test und Aufräumen"
     ],
     "zahlen": [
-      { "wert": "2", "text": "Kartendecks" },
-      { "wert": "4", "text": "Spieler pro Duell" }
+      {
+        "wert": "2",
+        "text": "Kartendecks"
+      },
+      {
+        "wert": "4",
+        "text": "Spieler pro Duell"
+      }
+    ]
+  },
+  "patch": {
+    "datum": "21.11.2026",
+    "titel": "Quartett mit echten Bildern",
+    "punkte": [
+      "Alle Karten mit echten Bildern, Figuren freigestellt vor ihrer Szene",
+      "Karten ohne Bild entfernt (Dim, Sum, Thornado)",
+      "3D-Spieltisch mit animierten Figuren",
+      "Kartenrahmen nach Seltenheit: Gewöhnlich, Selten, Episch, Legendär",
+      "Handkarten im Fächer wie in echt"
     ]
   }
 }

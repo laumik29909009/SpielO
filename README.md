@@ -5,7 +5,7 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 | Spiel | Worum es geht |
 |---|---|
 | 💰 **Preis-Schätzer** | Was kostet ein Windrad? 137 Fragen in 15 Themen, 4 Modi (Klassisch, Nicht drüber!, Teurer oder billiger?, Sortieren) und Mix |
-| 🃏 **Quartett** | Karten-Duelle mit Kung Fu Panda und Dragons – Die Reiter von Berk, je 32 Karten mit 5 Werten und eigenem Spezialangriff, Spieltisch, 1–4 Spieler (auch gegen den Computer) |
+| 🃏 **Quartett** | Karten-Duelle mit Kung Fu Panda und Dragons – Die Reiter von Berk, 30 bzw. 31 Karten mit echten Bildern, 5 Werten und eigenem Spezialangriff, Spieltisch, 1–4 Spieler (auch gegen den Computer) |
 | 🌍 **Stadt Land Fluss** | 92 Kategorien in 7 Gruppen, eigene Kategorien, Stopp-Knopf, Live-Fortschritt, Abstimmung und automatischer Schiedsrichter |
 
 Ü18-Kategorien (Nachtleben, Dates, Trinkspiele …) sind mit 🔞 gekennzeichnet und standardmäßig nicht ausgewählt.
@@ -21,7 +21,7 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 ## Quartett
 > 🚧 **Im Aufbau:** In `config.json` steht `"imAufbau": ["quartett"]`. Dann ist Quartett für alle ausgegraut. Testen kannst du es über den Vorschau-Link **`/?vorschau=1`** (Raum darüber erstellen). Zum Freigeben `"imAufbau": []` setzen.
 
-- **Decks:** Kung Fu Panda und Dragons – Die Reiter von Berk, je 32 Karten (8 Quartette A–H). Figuren © DreamWorks Animation, Nutzung mit Erlaubnis.
+- **Decks:** Kung Fu Panda (30 Karten) und Dragons – Die Reiter von Berk (31 Karten), Gruppen A–H. Figuren © DreamWorks Animation, Nutzung mit Erlaubnis.
 - **Offizielle Bilder** kommen in `public/quartett/bilder/<deck>/<Karten-ID>.jpg`, Liste der IDs in `public/quartett/bilder/LIES_MICH.md`. Fehlt ein Bild, zeigt die Karte einen Platzhalter.
 - **Handkarten (1–3):** Wer dran ist, wählt eine Handkarte und sagt einen Wert an. Danach legt jeder andere die Karte, mit der er kontern will. Mit 1 Handkarte spielt es sich klassisch.
 - **3D-Spieltisch** (`public/spiele/quartett-3d.js`, Three.js in `public/vendor/`, wird nur bei Bedarf geladen): runder Holztisch, Licht und Schatten, jede Person sitzt als eigene Toon-Figur passend zu ihrem Avatar. Figuren atmen, denken, jubeln oder sind traurig, gelegte Karten fliegen auf den Tisch. Knopf „2D/3D“ schaltet um; ohne WebGL gibt es automatisch die 2,5D-Ansicht.
@@ -62,6 +62,9 @@ Oben rechts gibt es einen 🎵-Knopf mit Musikrichtungen, Wiedergabe-Steuerung u
 
 Jeder Ordner in `public/musik/` ist eine Musikrichtung (z. B. `public/musik/jazz/`). Lieder (MP3, M4A, OGG …) einfach dort hineinlegen.
 Bitte nur Musik verwenden, die ihr öffentlich abspielen dürft (eigene Aufnahmen oder lizenzfreie Musik), denn das Repository und die Seite sind öffentlich.
+
+## Patch-Hinweis
+Auf der Startseite steht unten ein kleiner aufklappbarer Block „🆕 Neu“ mit dem letzten Update. Der Inhalt kommt aus `config.json` → `"patch"` (`datum`, `titel`, `punkte`).
 
 ## Wartungsmodus
 In `config.json` `"wartung": true` setzen und hochladen. Dann sehen alle nur eine Wartungsseite. Zum Beenden wieder auf `false`.

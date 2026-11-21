@@ -23,7 +23,7 @@ const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
 // Was auf der Wartungsseite steht, kommt aus config.json ("wartungInfo")
-const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [] } = require("./config.json");
+const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [], patch: PATCH = null } = require("./config.json");
 // Spiele "im Aufbau" sind nur über den Vorschau-Link wählbar: /?vorschau=1
 const waehlbar = (raum, spiel) => !!SPIELE[spiel] && (!IM_AUFBAU.includes(spiel) || raum.vorschau);
 if (WARTUNG) {
@@ -224,6 +224,7 @@ io.on("connection", (socket) => {
     spiele: Object.fromEntries(Object.entries(SPIELE).map(([id, m]) => [id, m.meta ? m.meta() : {}])),
     maxSpieler: MAX_SPIELER,
     imAufbau: IM_AUFBAU,
+    patch: PATCH,
   });
 
   // Spam-Schutz: höchstens 40 Nachrichten pro Sekunde (kurze Bursts sind erlaubt)

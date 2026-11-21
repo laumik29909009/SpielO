@@ -55,8 +55,8 @@
         ${stufe === "legendaer" ? '<div class="qk-aura" aria-hidden="true"></div>' : ""}
         <div class="qk-innen">
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
-          <div class="qk-bild">${deck.fotos?.[k.id]
-            ? `<img src="${deck.fotos[k.id]}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
+          <div class="qk-bild ${deck.fotos?.[k.id]?.frei ? "frei" : ""}">${deck.fotos?.[k.id]
+            ? `${deck.fotos[k.id].frei ? QuartettBilder.bild(deck, k, { nurSzene: true }) : ""}<img src="${deck.fotos[k.id].url}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
             : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
           <div class="qk-unter">${esc(g.name)}${k.stil ? ` · ${esc(k.stil)}` : ""}</div>
           <div class="qk-werte">
@@ -575,7 +575,7 @@
     titel: "Quartett",
     kurz: "Karten-Duelle mit Kung Fu Panda und Dragons.",
     beschreibung: "Das Karten-Duell: Wähle den stärksten Wert und schnapp dir die Karten der anderen. Mit animierten Kämpfen und Holo-Karten.",
-    tags: ["🃏 2 Decks · 64 Karten", "⚔️ Kampf-Animationen", "🤖 Auch gegen Computer", "👥 1–4 Spieler"],
+    tags: ["🃏 2 Decks · 61 Karten", "⚔️ Kampf-Animationen", "🤖 Auch gegen Computer", "👥 1–4 Spieler"],
     abschnitte,
     binde,
     zeige,

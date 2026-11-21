@@ -85,7 +85,7 @@ const QuartettBilder = (() => {
   }
 
   // ---------- Platzhalter-Bild ----------
-  function meister(k, gruppe) {
+  function meister(k, gruppe, { nurSzene = false } = {}) {
     const id = "qk" + k.id + (++zaehler);
     const r = zufall(k.id);
     return `<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
@@ -100,15 +100,15 @@ const QuartettBilder = (() => {
       <circle cx="100" cy="76" r="42" fill="${gruppe.farbe}" opacity=".18"/>
       <path d="M28 64 q16 -6 30 0 M30 76 q12 -4 24 0 M142 64 q16 -6 30 0 M146 76 q12 -4 24 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".45"/>
       <ellipse cx="100" cy="130" rx="40" ry="6" fill="#000" opacity=".45"/>
-      <image href="/quartett/tiere/${k.tier}.svg" x="52" y="30" width="96" height="96"/>
+      ${nurSzene ? "" : `<image href="/quartett/tiere/${k.tier}.svg" x="52" y="30" width="96" height="96"/>`}
     </svg>`;
   }
 
   return {
-    bild(deck, k) {
+    bild(deck, k, opt = {}) {
       const gruppe = deck.gruppen.find((g) => g.id === k.gruppe);
       // Neutrales Symbol als Platzhalter, bis echte Bilder im Ordner liegen
-      return meister(k, gruppe);
+      return meister(k, gruppe, opt);
     },
   };
 })();

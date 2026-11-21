@@ -18,7 +18,7 @@ C1 Tai Lung · C2 Lord Shen · C3 General Kai · C4 Das Chamäleon
 D1 Mr. Ping · D2 Li Shan · D3 Mei Mei · D4 Zhen
 E1 Meister Croc · E2 Meister Storming Ox · E3 Meister Thundering Rhino · E4 Kommandant Vachir
 F1 Boss Wolf · F2 Die Wahrsagerin · F3 Zeng · F4 Han
-G1 Lei Lei · G2 Oma Panda · G3 Dim · G4 Sum
+G1 Lei Lei · G2 Oma Panda
 H1 Fenghuang · H2 Temutai · H3 Taotie · H4 Meister Bär
 
 ## Dragons – Die Reiter von Berk
@@ -27,7 +27,7 @@ B1 Kotz und Würg · B2 Tagschatten · B3 Wolkenspringer · B4 Schädelbrecher
 C1 Der Rote Tod · C2 Der Alpha · C3 Schreiender Tod · C4 Taifumerang
 D1 Skrill · D2 Flüsternder Tod · D3 Todesgreifer · D4 Donnertrommler
 E1 Schrecklicher Schrecken · E2 Die Nachtlichter · E3 Wechselflügler · E4 Windscherer
-F1 Grump · F2 Thornado · F3 Torch · F4 Feuerwurm-Königin
+F1 Grump · F3 Torch · F4 Feuerwurm-Königin
 G1 Eruptodon · G2 Death Song · G3 Catastrophic Quaken · G4 Shockjaw
 H1 Snow Wraith · H2 Night Terror · H3 Speed Stinger · H4 Smothering Smokebreath
 
