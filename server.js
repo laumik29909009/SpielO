@@ -51,7 +51,11 @@ function leseMusik() {
   try {
     return fs.readdirSync(MUSIK_ORDNER, { withFileTypes: true })
       .filter((d) => d.isDirectory())
-      .map((d) => ({
+      .map((d) => {
+        // Optional: titel.json im Ordner mit schönen Namen { "datei.mp3": "Künstler – Titel" }
+        let namen = {};
+        try { namen = JSON.parse(fs.readFileSync(path.join(MUSIK_ORDNER, d.name, "titel.json"), "utf8")); } catch {}
+        return {
         id: d.name,
         name: d.name.charAt(0).toUpperCase() + d.name.slice(1),
         symbol: SYMBOLE[d.name.toLowerCase()] || "🎵",
@@ -60,10 +64,11 @@ function leseMusik() {
           .sort((a, b) => a.localeCompare(b, "de", { numeric: true }))
           .map((f) => ({
             datei: `/musik/${encodeURIComponent(d.name)}/${encodeURIComponent(f)}`,
-            name: f.replace(AUDIO, "").replace(/^\d+[\s._-]*/, "").replace(/_+/g, " ")
+            name: namen[f] || f.replace(AUDIO, "").replace(/^\d+[\s._-]*/, "").replace(/_+/g, " ")
               .replace(/\s*[([](official|offizielles|lyrics?|audio|video|hd|hq|remaster)[^)\]]*[)\]]/gi, "").trim() || f,
           })),
-      }))
+        };
+      })
       .filter((k) => k.titel.length);
   } catch { return []; }
 }
