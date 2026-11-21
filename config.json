@@ -1,23 +1,23 @@
 {
-  "wartung": false,
+  "wartung": true,
   "imAufbau": [],
   "wartungInfo": {
     "punkte": [
-      "Neues Spiel: Quartett ⚔️",
-      "Zwei Decks: Kung Fu Panda & Dragons – Die Reiter von Berk",
-      "Jede Karte mit eigenem Bild und 5 Werten",
-      "Kampf-Animationen wie bei Sammelkarten",
-      "Für 1–4 Spieler, solo gegen den Computer",
-      "Großer Bug-Test und Aufräumen"
+      "Neues Spiel: Farbrausch – der Karten-Klassiker am 3D-Tisch",
+      "Preis-Schätzer: Bilder und Animationen für jede Frage",
+      "Quartett: Bessere Artworks, Kategorie-Champions, schönerer Tisch",
+      "Neues, cleaneres SpielO-Logo",
+      "Schnellerer Start und sparsamerer Server",
+      "Spenden-Ecke und bessere Link-Vorschau für Discord"
     ],
     "zahlen": [
       {
-        "wert": "2",
-        "text": "Kartendecks"
+        "wert": "4",
+        "text": "Spiele"
       },
       {
-        "wert": "4",
-        "text": "Spieler pro Duell"
+        "wert": "3D",
+        "text": "Spieltische"
       }
     ]
   },
