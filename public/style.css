@@ -105,7 +105,7 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
 }
 .btn:hover { filter: brightness(1.06); }
 .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--btn-schatten); }
-.btn:disabled { filter: grayscale(0.8) brightness(0.7); cursor: default; transform: none; }
+.btn:disabled { filter: saturate(0.35) brightness(0.8); opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
 .btn.voll { width: 100%; }
 .btn.gross { font-size: 1.2rem; padding: 18px 22px; }
 .btn.zweit {
@@ -542,7 +542,7 @@ button.avatar:hover { border-color: var(--gold); }
 /* =============================================================
    Stadt Land Fluss: Glücksrad
    ============================================================= */
-.rad-buehne { display: grid; justify-items: center; gap: 34px; padding-top: 10px; }
+.rad-buehne { display: grid; justify-items: center; gap: 34px; padding-top: 10px; overflow-x: hidden; overflow-x: clip; }
 .rad-rahmen { position: relative; width: 300px; height: 300px; }
 .rad {
   position: absolute; inset: 0; border-radius: 50%;
@@ -572,8 +572,9 @@ button.avatar:hover { border-color: var(--gold); }
   width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 2rem; font-weight: 900;
   background: var(--gold); color: var(--gold-text); box-shadow: 0 6px 0 var(--btn-schatten);
 }
-.felder { display: grid; gap: 10px; }
-@media (min-width: 760px) { .felder { grid-template-columns: 1fr 1fr; } }
+.felder { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .felder { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.feld-zeile input { width: 100%; }
 .feld-karte {
   display: block; background: var(--flaeche); border: 2px solid var(--rand); border-radius: 16px; padding: 10px 14px 12px;
   transition: border-color 0.15s; animation: reinfliegen 0.35s both;
@@ -847,3 +848,115 @@ button.spiel-gross { cursor: pointer; }
 @keyframes stopp-rein { from { transform: scale(0.85); opacity: 0; } }
 @keyframes stopp-puls { to { box-shadow: 0 10px 40px rgba(215, 38, 61, 0.7); } }
 .schreib-kopf.alarm .timer-zahl { font-size: 1.6rem; }
+
+/* =============================================================
+   Handy-Modus (greift automatisch auf schmalen Bildschirmen)
+   ============================================================= */
+button, a, input, summary, label { touch-action: manipulation; }
+.topbar { padding-top: max(14px, env(safe-area-inset-top)); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+.stopp-knopf { position: sticky; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 15; }
+.stopp-knopf:disabled { position: static; }
+
+@media (max-width: 700px) {
+  body { font-size: 15px; }
+  #app { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); }
+  .topbar { padding-bottom: 8px; }
+  .icon-btn { width: 38px; height: 38px; }
+  .raum-chip { padding: 6px 11px; letter-spacing: 0.14em; }
+
+  /* Feste Leiste unten statt mitscrollender Kasten: verdeckt keinen Inhalt mehr */
+  .start-leiste {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; margin: 0; gap: 6px;
+    padding: 10px max(14px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    border-radius: 22px 22px 0 0; border-width: 1px 0 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+  }
+  #app:has(.start-leiste) { padding-bottom: 150px; }
+  .seiten-fuss { padding-bottom: 24px; }
+  body:has(.start-leiste) .seiten-fuss { padding-bottom: 150px; }
+  .start-leiste .btn.gross { padding: 14px 16px; font-size: 1.1rem; }
+  .start-leiste .btn.link { padding: 2px; font-size: 0.85rem; }
+  .start-leiste > .leise.klein-text, .start-leiste .bereit-reihe { display: none; }
+  .start-leiste .warte { padding: 6px; }
+
+  /* Startseite */
+  .hero-start { padding-top: 14px; }
+  .kapitel { margin-top: 26px; }
+  .kapitel-titel { margin-bottom: 10px; }
+  .spiel-bild { height: 110px; }
+  .spiel-icon { font-size: 3.4rem; }
+  .spiel-text { padding: 14px 16px 16px; }
+  .spiel-titel { font-size: 1.25rem; }
+
+  /* Lobby: Spielkarten kompakt nebeneinander statt riesig untereinander */
+  .raum-kopf { padding: 14px; gap: 12px; }
+  .raum-code-block .code-gross { font-size: 2rem; }
+  .spiele-gitter.zwei { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .spiele-gitter.zwei .spiel-gross { border-radius: 18px; }
+  .spiele-gitter.zwei .spiel-bild { height: 70px; }
+  .spiele-gitter.zwei .spiel-icon { font-size: 2.4rem; }
+  .spiele-gitter.zwei .spiel-text { padding: 10px 12px 12px; gap: 4px; }
+  .spiele-gitter.zwei .spiel-titel { font-size: 1rem; line-height: 1.15; }
+  .spiele-gitter.zwei .spiel-beschreibung, .spiele-gitter.zwei .spiel-tags { display: none; }
+  .spiele-gitter.zwei .gewaehlt-marke { top: 6px; right: 6px; font-size: 0.68rem; padding: 3px 7px; }
+  .abschnitt summary { padding: 12px 14px; gap: 12px; }
+  .abschnitt-icon { width: 38px; height: 38px; font-size: 1.15rem; }
+  .abschnitt-inhalt { padding: 2px 14px 16px; }
+  .modus-gitter { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .modus-karte { padding: 12px; }
+  .modus-karte .text { font-size: 0.8rem; }
+  .kat-gitter { grid-template-columns: 1fr; }
+  .kat-chip .z { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .eigene-zeile { grid-template-columns: 1fr auto; }
+  .eigene-zeile .check { grid-row: 2; }
+  .einstellungs-zeile { gap: 4px 18px; }
+
+  /* Preis-Schätzer: Bild flacher, damit die Eingabe ohne Scrollen sichtbar ist */
+  .runden-kopf { margin-bottom: 8px; }
+  .timer { margin-bottom: 12px; }
+  .frage-layout { gap: 12px; }
+  .bild-box { aspect-ratio: 16 / 8; }
+  .produkt-text { padding: 12px 14px 14px; }
+  .produkt-name { font-size: 1.2rem; }
+  .eingabe-karte { padding: 14px; gap: 10px; }
+  .regel { font-size: 0.85rem; padding: 8px 10px; }
+  .betrag input { font-size: 2rem; padding: 10px 70px 10px 12px; }
+  .einheiten button { padding: 9px 0; }
+  .vorschau { margin: 8px 0 !important; }
+  .preis-gross { font-size: 2.3rem; }
+  .sortier-karte .t { font-size: 0.82rem; padding: 8px; }
+  .sortier-karte .t .i { display: none; }
+  .duell-knoepfe .btn { padding: 16px 8px; }
+
+  /* Stadt Land Fluss */
+  .schreib-kopf { margin: 0 -14px 12px; padding: 8px 14px 10px; }
+  .buchstabe-badge { width: 46px; height: 46px; font-size: 1.7rem; border-radius: 14px; }
+  .felder { gap: 8px; }
+  .feld-karte { padding: 8px 12px 10px; }
+  .feld-zeile input { font-size: 1.15rem; }
+  .rad-rahmen { width: 270px; height: 270px; --rad-r: 104px; }
+  .hinweis-box { font-size: 0.82rem; padding: 9px 12px; }
+  .eintrag { gap: 10px; padding: 10px 12px; }
+  .eintrag-text { font-size: 1.02rem; }
+  .abstimm-reihe { gap: 5px; }
+  .mini-btn { padding: 4px 8px; min-height: 34px; }
+  .eintrag-punkte { min-width: 46px; }
+  .stopp-text b { font-size: 1.02rem; }
+
+  /* Podest */
+  .podest { gap: 6px; }
+  .podest-platz .name { font-size: 0.9rem; }
+}
+
+/* Sehr kleine Handys (z. B. iPhone SE) */
+@media (max-width: 380px) {
+  .modus-gitter { grid-template-columns: 1fr; }
+  .einheiten { gap: 4px; }
+  .einheiten button { font-size: 0.85rem; }
+  .spielo-logo.riesig { font-size: 3.6rem; }
+  .hero-fakten span { font-size: 0.8rem; padding: 5px 10px; }
+  .live-name { max-width: 60px; }
+  .rad-rahmen { width: 240px; height: 240px; --rad-r: 92px; }
+  .rad-mitte { width: 100px; height: 100px; margin: -50px 0 0 -50px; font-size: 3.2rem; }
+}

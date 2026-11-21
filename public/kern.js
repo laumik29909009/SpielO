@@ -70,6 +70,14 @@ socket.on("fehler", (text) => {
   toast(text);
 });
 
+// Handy: Statusleiste in der Farbe des aktuellen Spiels
+function farbeStatusleiste() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const farbe = getComputedStyle(document.body).getPropertyValue("--bg").trim();
+  if (meta && farbe) meta.setAttribute("content", farbe);
+}
+new MutationObserver(farbeStatusleiste).observe(document.body, { attributes: true, attributeFilter: ["data-spiel"] });
+
 // Weicher Übergang, sobald eine neue Ansicht erscheint
 function seitenWechsel() {
   app.classList.remove("seite-rein");

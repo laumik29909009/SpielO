@@ -186,7 +186,7 @@
         <div class="rad-rahmen">
           <div class="rad-zeiger">▼</div>
           <div class="rad" id="rad">
-            ${ALPHABET.map((b, i) => `<span class="rad-buchstabe" style="transform:rotate(${i * schritt}deg) translateY(-118px)">${b}</span>`).join("")}
+            ${ALPHABET.map((b, i) => `<span class="rad-buchstabe" style="transform:rotate(${i * schritt}deg) translateY(calc(var(--rad-r, 118px) * -1))">${b}</span>`).join("")}
           </div>
           <div class="rad-mitte" id="radMitte">?</div>
         </div>
@@ -381,8 +381,8 @@
       </div>
       <div class="hinweis-box">
         <span>${z.solo
-          ? "Solo: Jede gültige Antwort gibt 10 Punkte. Der Schiedsrichter lag falsch? Mit 👑✓ / 👑✗ korrigierst du ihn."
-          : `👍 👎 Stimmt ab, wenn ihr eine Entscheidung anders seht. Die Mehrheit gewinnt. ⭐ gibt +${meta().punkte.stern} für besonders kreative Antworten.${host ? " Als Host 👑 kannst du jede Antwort endgültig entscheiden." : ""}`}</span>
+          ? "Solo: Jede gültige Antwort gibt 10 Punkte. Der Schiedsrichter lag falsch? Tipp auf 👑, um ihn zu korrigieren."
+          : `👍👎 Anders gesehen? Abstimmen, die Mehrheit gewinnt · ⭐ +${meta().punkte.stern} für Kreatives${host ? " · 👑 Host entscheidet endgültig" : ""}`}</span>
       </div>
       ${z.hinweis ? `<div class="hinweis-box warnung">⚠️ ${esc(z.hinweis)}</div>` : ""}
       ${z.tempoBonus?.[GN.ich] ? `<div class="hinweis-box bonus">⚡ Tempo-Bonus: <b>+${z.tempoBonus[GN.ich]}</b> Punkte, weil du früh fertig warst!</div>` : ""}
@@ -455,8 +455,8 @@
               <button class="mini-btn ${ichGegen ? "an" : ""}" data-abstimmen="stimme|${id}|${ichGegen ? "" : "gegen"}" title="Zählt nicht">👎 ${e.gegen.length || ""}</button>
               <button class="mini-btn stern ${ichStern ? "an" : ""}" data-abstimmen="stern|${id}" title="Kreativ! +${meta().punkte.stern}">⭐ ${e.sterne.length || ""}</button>`}
             ${host ? `
-              <button class="mini-btn host ${e.host === "ok" ? "an" : ""}" data-abstimmen="host|${id}|${e.host === "ok" ? "" : "ok"}" title="Host: zählt">👑✓</button>
-              <button class="mini-btn host ${e.host === "falsch" ? "an" : ""}" data-abstimmen="host|${id}|${e.host === "falsch" ? "" : "falsch"}" title="Host: zählt nicht">👑✗</button>` : ""}
+              <button class="mini-btn host ${e.host ? "an" : ""}" data-abstimmen="host|${id}|${e.host === null ? "ok" : e.host === "ok" ? "falsch" : ""}"
+                title="Host-Entscheid: tippen wechselt zwischen zählt, zählt nicht und offen">${e.host === "ok" ? "👑 ✓" : e.host === "falsch" ? "👑 ✗" : "👑"}</button>` : ""}
           </div>` : ""}
         </div>
         <div class="eintrag-punkte">
