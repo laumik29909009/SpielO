@@ -6,6 +6,7 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 |---|---|
 | 💰 **Preis-Schätzer** | Was kostet ein Windrad? 137 Fragen in 15 Themen, 4 Modi (Klassisch, Nicht drüber!, Teurer oder billiger?, Sortieren) und Mix |
 | 🃏 **Quartett** | Karten-Duelle mit Kung Fu Panda und Dragons – Die Reiter von Berk, 30 bzw. 31 Karten mit echten Bildern, 5 Werten und eigenem Spezialangriff, Spieltisch, 1–4 Spieler (auch gegen den Computer) |
+| 🌈 **Farbrausch** | Der Karten-Klassiker (Farbe oder Zahl bedienen) am 3D-Tisch: 108 Karten, Aktionskarten, „Letzte Karte!“, Hausregeln, 2–8 Spieler, Computer-Gegner |
 | 🌍 **Stadt Land Fluss** | 92 Kategorien in 7 Gruppen, eigene Kategorien, Stopp-Knopf, Live-Fortschritt, Abstimmung und automatischer Schiedsrichter |
 
 Ü18-Kategorien (Nachtleben, Dates, Trinkspiele …) sind mit 🔞 gekennzeichnet und standardmäßig nicht ausgewählt.
@@ -32,6 +33,13 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 - **Decks** stehen in `daten/quartett.js`: 8 Gruppen (A–H) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.
 - **Platzhalter:** Solange kein offizielles Bild im Ordner liegt, zeigt die Karte ein neutrales Symbol (Twemoji, CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
 - **Computer-Gegner** füllen freie Plätze auf und wählen meist ihren stärksten Wert. Solo spielt man immer gegen den Computer.
+
+## Farbrausch
+- **Grundregeln:** Farbe, Zahl oder Symbol bedienen; ⦸ Aussetzen, ⇄ Richtungswechsel, +2, Farbwahl, Farbwahl +4. Wer nicht kann, zieht eine Karte und darf sie legen, wenn sie passt.
+- **Letzte Karte!** Bei 2 Karten erscheint der Knopf. Wer seine vorletzte Karte legt, ohne zu rufen, kann 4 Sekunden lang erwischt werden (+2).
+- **Punkte:** Der Rundensieger bekommt die Kartenwerte der anderen (Zahl = Augen, Aktion = 20, Farbwahl = 50). Spielziel: 1 Runde, 200 oder 500 Punkte.
+- **Hausregeln:** Stapeln (+2/+4 weiterreichen), Ziehen bis es passt, 7 tauscht / 0 gibt weiter, Einwerfen.
+- Eigenes Kartendesign (Raute in der Mitte), Logik in `spiele/farbrausch.js`, Oberfläche in `public/spiele/farbrausch.js` und `public/farbrausch.css`. Der 3D-Tisch ist derselbe wie beim Quartett (`public/spiele/quartett-3d.js`).
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
@@ -65,6 +73,13 @@ Bitte nur Musik verwenden, die ihr öffentlich abspielen dürft (eigene Aufnahme
 
 ## Patch-Hinweis
 Auf der Startseite steht unten ein kleiner aufklappbarer Block „🆕 Neu“ mit dem letzten Update. Der Inhalt kommt aus `config.json` → `"patch"` (`datum`, `titel`, `punkte`).
+
+## Sparmodus & Start
+Browser trennen die Verbindung, wenn niemand aktiv ist (Startseite 2 Min., Lobby/Endstand 10 Min., Tab im Hintergrund 2 Min.). Dann kann Render nach 15 Minuten ohne Verbindung schlafen. Beim Aufwachen zeigt die Seite „SpielO wird gestartet …“. Ein Service Worker (`public/sw.js`) zeigt wiederkehrenden Besuchern die Seite sofort, auch während der Server noch aufwacht.
+
+## Musik & Spenden
+- `config.json` → `"musikAus": ["jazz"]` blendet Musikrichtungen vorübergehend aus (Dateien bleiben). Mit `[]` ist Jazz wieder da.
+- `config.json` → `"spende"`: Text und PayPal-Link für die Spenden-Ecke (QR unter `/qr/spende.svg`, Weiterleitung `/spenden`).
 
 ## Wartungsmodus
 In `config.json` `"wartung": true` setzen und hochladen. Dann sehen alle nur eine Wartungsseite. Zum Beenden wieder auf `false`.

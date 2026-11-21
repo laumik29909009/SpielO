@@ -1,5 +1,5 @@
 {
-  "wartung": true,
+  "wartung": false,
   "imAufbau": [],
   "wartungInfo": {
     "punkte": [
@@ -23,12 +23,14 @@
   },
   "patch": {
     "datum": "21.11.2026",
-    "titel": "Quartett: neuer Tisch & englische Karten",
+    "titel": "Neues Spiel: Farbrausch + großes Update",
     "punkte": [
-      "Spieltisch mittig, deine Hand als Fächer darunter",
-      "Gewählte Karte groß in der Mitte, die anderen schräg dahinter",
-      "Alle Karten einheitlich auf Englisch (Namen, Werte, Texte, Angriffe)",
-      "Seltenheit: Common, Rare, Epic, Legendary"
+      "Farbrausch: der Karten-Klassiker am 3D-Tisch, mit Hausregeln und Computer-Gegnern (2–8 Spieler)",
+      "Preis-Schätzer: Fragen ohne Foto sind jetzt animiert",
+      "Quartett: Champion-Karten, Tisch besser eingebunden, Namen englisch, sonst deutsch",
+      "Neues SpielO-Logo, schöne Link-Vorschau für Discord & Co.",
+      "Server spart mehr und zeigt beim Aufwachen „SpielO wird gestartet“",
+      "Spenden-Ecke unten auf der Startseite"
     ]
   },
   "musikAus": [

@@ -263,7 +263,8 @@ const QuartettTisch3D = (() => {
 
     platz(i, n) {
       // Gegner sitzen auf der gegenüberliegenden Tischhälfte, du selbst unten (nicht sichtbar)
-      const winkel = n === 1 ? [0] : n === 2 ? [-0.5, 0.5] : [-0.85, 0, 0.85];
+      const winkel = n === 1 ? [0] : n === 2 ? [-0.5, 0.5] : n === 3 ? [-0.85, 0, 0.85]
+        : Array.from({ length: n }, (_, k) => -1.45 + (2.9 * k) / (n - 1));
       const w = winkel[i] ?? 0;
       return { w, x: Math.sin(w) * 3.75, z: -Math.cos(w) * 3.75 };
     }
@@ -271,6 +272,7 @@ const QuartettTisch3D = (() => {
     // Zustand übernehmen: wer sitzt wo, wer ist dran, wer hat gelegt
     aktualisieren(z, ich) {
       const andere = (z.teilnehmer || []).filter((t) => t.id !== ich);
+      const fr = z.spiel === "farbrausch";
       const ids = new Set(andere.map((t) => t.id));
       for (const [id, f] of this.figuren) if (!ids.has(id)) { this.szene.remove(f.g); f.schild.remove(); this.figuren.delete(id); }
       andere.forEach((t, i) => {
@@ -292,16 +294,20 @@ const QuartettTisch3D = (() => {
         f.g.scale.setScalar(1.25);
         f.g.lookAt(0, 0, 0.8);
         f.platz = p;
-        const dran = (z.phase === "waehlen" && z.waehler === t.id) || (z.phase === "kontern" && !z.gelegt?.includes(t.id) && t.karten > 0);
-        f.dran = dran; f.denkt = z.phase === "waehlen" && z.waehler === t.id; f.raus = !t.karten;
+        const fr = z.spiel === "farbrausch";
+        const dran = fr ? z.phase === "spielen" && z.dran === t.id : (z.phase === "waehlen" && z.waehler === t.id) || (z.phase === "kontern" && !z.gelegt?.includes(t.id) && t.karten > 0);
+        f.dran = dran; f.denkt = fr ? dran : z.phase === "waehlen" && z.waehler === t.id; f.raus = fr ? false : !t.karten;
+        f.karten = t.karten;
         const ansage = z.phase === "kontern" && z.angesagt?.spieler === t.id;
         f.schild.dataset.teilnehmer = t.id;
         f.schild.classList.toggle("dran", dran);
         f.schild.classList.toggle("raus", !t.karten);
         f.schild.innerHTML = `${ansage ? `<span class="q-blase">${z.ansageText || ""}</span>` : ""}
           ${z.phase === "kontern" && z.gelegt?.includes(t.id) && !ansage ? '<span class="q-haken">✓</span>' : ""}
-          <span class="q-schild"><b>${t.name.replace(/[<>&]/g, "")}</b><span>${t.karten ? `🃏 ${t.karten}` : "raus"}${t.bot ? " · 🤖" : ""}${t.afk ? " · 💤" : ""}</span></span>`;
+          ${fr && z.gerufen?.includes(t.id) && t.karten === 1 ? '<span class="q-blase">Letzte Karte!</span>' : ""}
+          <span class="q-schild"><b>${t.name.replace(/[<>&]/g, "")}</b><span>${t.karten || fr ? `🃏 ${t.karten}` : "raus"}${fr && z.ziel ? ` · ${t.punkte} P.` : ""}${t.bot ? " · 🤖" : ""}${t.afk ? " · 💤" : ""}</span></span>`;
       });
+      if (fr) return this.farbrausch(z, ich);
       // Gelegte Karten (verdeckt) auf den Tisch
       const gelegt = new Set(z.phase === "kontern" ? z.gelegt : []);
       for (const [id, m] of this.karten) if (!gelegt.has(id)) { this.szene.remove(m); this.karten.delete(id); }
@@ -325,6 +331,109 @@ const QuartettTisch3D = (() => {
         m.rotation.y = Math.random() * Math.PI; m.castShadow = true;
         this.szene.add(m); this.topf.push(m);
       }
+    }
+
+    // ---------- Farbrausch: Ablage, Stapel, Handfächer, Richtung, Farbe ----------
+    farbrausch(z, ich) {
+      const THREE_ = THREE;
+      if (!this.fr) {
+        this.fr = { ablage: [], handFaecher: new Map(), letzteT: 0, karteGeo: new THREE_.BoxGeometry(0.5, 0.012, 0.74) };
+        // Ziehstapel
+        this.fr.stapel = new THREE_.Group();
+        this.fr.stapel.position.set(-0.85, 0.92, 0.05);
+        this.szene.add(this.fr.stapel);
+        // Richtungsring aus Pfeilen auf dem Filz
+        const ring = new THREE_.Group();
+        for (let i = 0; i < 6; i++) {
+          const pf = new THREE_.Mesh(new THREE_.ConeGeometry(0.09, 0.22, 3), new THREE_.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 }));
+          const w = (i / 6) * Math.PI * 2;
+          pf.position.set(Math.cos(w) * 1.75, 0.93, Math.sin(w) * 1.75);
+          pf.rotation.set(Math.PI / 2, 0, -w);
+          ring.add(pf);
+        }
+        this.fr.ring = ring; this.szene.add(ring);
+        // Farbschein auf dem Filz (aktuelle Farbe)
+        this.fr.schein = new THREE_.Mesh(new THREE_.RingGeometry(2.0, 2.7, 64), new THREE_.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.0, side: THREE_.DoubleSide }));
+        this.fr.schein.rotation.x = -Math.PI / 2; this.fr.schein.position.y = 0.925; this.szene.add(this.fr.schein);
+      }
+      const fr = this.fr;
+      fr.richtung = z.richtung || 1;
+      const FARBE = { rot: 0xff3b4f, gelb: 0xffc928, gruen: 0x2ecc71, blau: 0x2f8bff };
+      fr.schein.material.color.setHex(FARBE[z.farbe] || 0xffffff);
+      fr.zielOpacity = 0.32;
+      // Ziehstapel-Höhe
+      const n = Math.min(14, Math.ceil((z.stapelAnzahl || 0) / 6));
+      while (fr.stapel.children.length > n) fr.stapel.remove(fr.stapel.children[fr.stapel.children.length - 1]);
+      while (fr.stapel.children.length < n) {
+        const m = new THREE_.Mesh(fr.karteGeo, this.kartenMat);
+        m.position.y = fr.stapel.children.length * 0.014; m.rotation.y = (Math.random() - 0.5) * 0.08; m.castShadow = true;
+        fr.stapel.add(m);
+      }
+      // Handfächer vor jeder Figur (verdeckt)
+      for (const [id, f] of this.figuren) {
+        let fach = fr.handFaecher.get(id);
+        if (!fach) { fach = new THREE_.Group(); this.szene.add(fach); fr.handFaecher.set(id, fach); }
+        const anzahl = Math.min(9, f.karten || 0);
+        if (fach.userData.n !== anzahl) {
+          fach.clear();
+          for (let i = 0; i < anzahl; i++) {
+            const m = new THREE_.Mesh(new THREE_.BoxGeometry(0.26, 0.38, 0.008), [0, 0, 0, 0, this.kartenMat[2], this.kartenMat[2]].map((x) => x || this.kartenMat[0]));
+            const w = (i - (anzahl - 1) / 2) * 0.16;
+            m.position.set(Math.sin(w) * 0.5, 1.25 + Math.cos(w) * 0.12, 0.35);
+            m.rotation.set(-0.25, 0, -w);
+            fach.add(m);
+          }
+          fach.userData.n = anzahl;
+        }
+        fach.position.copy(f.g.position);
+        fach.rotation.y = Math.atan2(-f.g.position.x, 0.8 - f.g.position.z);
+      }
+      // Neue Aktion: Karte fliegt auf die Ablage bzw. Karten fliegen vom Stapel
+      const a = z.letzteAktion;
+      if (a && a.t !== fr.letzteT) {
+        const erstesMal = !fr.letzteT;
+        fr.letzteT = a.t;
+        if (a.typ === "austeilen" || erstesMal) {
+          fr.ablage.forEach((m) => this.szene.remove(m)); fr.ablage = [];
+          this.ablageKarte(z.oben, null, true);
+        } else if (a.typ === "legen") {
+          this.ablageKarte(a.karte, a.spieler === ich ? "ich" : a.spieler, false);
+        } else if (a.typ === "ziehen" || a.typ === "erwischt") {
+          const ziel = a.typ === "erwischt" ? a.ziel : a.spieler;
+          for (let i = 0; i < Math.min(6, a.anzahl || 2); i++) this.kartenFlug(ziel === ich ? "ich" : ziel, i * 0.09);
+        }
+      }
+    }
+
+    // Eine Karte (mit Vorderseite) landet auf dem Ablagestapel
+    ablageKarte(karte, von, sofort) {
+      const fr = this.fr;
+      if (!karte || !this.karteBild) return;
+      const tex = new THREE.CanvasTexture(this.karteBild(karte)); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+      const vorne = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.45 });
+      const m = new THREE.Mesh(fr.karteGeo, [this.kartenMat[0], this.kartenMat[0], vorne, this.kartenMat[2], this.kartenMat[0], this.kartenMat[0]]);
+      m.castShadow = true;
+      const ziel = new THREE.Vector3((Math.random() - 0.5) * 0.12 + 0.25, 0.925 + fr.ablage.length * 0.013, (Math.random() - 0.5) * 0.12);
+      const f = von && von !== "ich" ? this.figuren.get(von) : null;
+      const start = sofort ? ziel.clone() : f ? new THREE.Vector3(f.g.position.x, 1.8, f.g.position.z) : new THREE.Vector3(0, 2.4, 4.6);
+      m.position.copy(start);
+      m.userData = { flug: { start, ziel, t0: this.uhr.getElapsedTime(), dauer: sofort ? 0.01 : 0.55, drehEnde: (Math.random() - 0.5) * 0.9, drehStart: (Math.random() - 0.5) * 4 } };
+      this.szene.add(m);
+      fr.ablage.push(m);
+      if (fr.ablage.length > 8) this.szene.remove(fr.ablage.shift());
+    }
+
+    // Verdeckte Karte fliegt vom Stapel zu einer Person
+    kartenFlug(nach, verzoegerung = 0) {
+      const fr = this.fr;
+      const m = new THREE.Mesh(fr.karteGeo, this.kartenMat);
+      const f = nach !== "ich" ? this.figuren.get(nach) : null;
+      const start = fr.stapel.position.clone().add(new THREE.Vector3(0, 0.25, 0));
+      const ziel = f ? new THREE.Vector3(f.g.position.x, 1.6, f.g.position.z) : new THREE.Vector3(0, 2.2, 4.8);
+      m.position.copy(start);
+      m.userData = { flug: { start, ziel, t0: this.uhr.getElapsedTime() + verzoegerung, dauer: 0.5, drehEnde: 0, drehStart: 3, weg: true } };
+      this.szene.add(m);
+      (fr.fluege ||= []).push(m);
     }
 
     reaktion(id, art) {
@@ -368,6 +477,23 @@ const QuartettTisch3D = (() => {
         m.position.lerpVectors(u.start, u.ziel, e);
         m.position.y += Math.sin(p * Math.PI) * 0.6;
         m.rotation.set(0, u.dreh + (1 - e) * 3, 0);
+      }
+      if (this.fr) {
+        const fr = this.fr;
+        fr.ring.rotation.y -= 0.004 * fr.richtung;
+        fr.schein.material.opacity += ((fr.zielOpacity || 0) + Math.sin(t * 2) * 0.06 - fr.schein.material.opacity) * 0.1;
+        const fliegt = (m) => {
+          const u = m.userData.flug;
+          if (!u) return false;
+          const p = Math.max(0, Math.min(1, (t - u.t0) / u.dauer)), e = 1 - Math.pow(1 - p, 3);
+          m.position.lerpVectors(u.start, u.ziel, e);
+          m.position.y += Math.sin(p * Math.PI) * 0.7;
+          m.rotation.set(0, u.drehEnde + (1 - e) * u.drehStart, 0);
+          if (p >= 1) { if (u.weg) { this.szene.remove(m); return true; } m.userData.flug = null; }
+          return false;
+        };
+        fr.ablage.forEach(fliegt);
+        if (fr.fluege) fr.fluege = fr.fluege.filter((m) => !fliegt(m));
       }
       this.lampe.intensity = 16 + Math.sin(t * 1.3) * 1.5;
       this.renderer.render(this.szene, this.kamera);
