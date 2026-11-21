@@ -2,15 +2,15 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#120b26" />
   <title>SpielO · Wartungsarbeiten</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>" />
   <style>
     * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; }
+    html, body { margin: 0; min-height: 100%; }
     body {
-      display: grid; place-items: center; padding: 16px; color: #f7f3ff;
+      display: grid; place-items: center; padding: 24px 16px; color: #f7f3ff;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background:
         radial-gradient(60vw 60vw at 85% -10%, rgba(197, 139, 255, 0.30), transparent 60%),
@@ -18,7 +18,7 @@
         #120b26;
     }
     .karte {
-      width: min(460px, 100%); text-align: center; padding: 36px 28px 30px; border-radius: 28px;
+      width: min(520px, 100%); text-align: center; padding: 32px 24px 26px; border-radius: 28px;
       background: rgba(29, 20, 64, 0.85); border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); animation: rein 0.7s cubic-bezier(.2, 1.2, .4, 1) both;
     }
@@ -33,27 +33,66 @@
     }
     .punkt { position: absolute; width: 22%; height: 22%; left: 39%; top: 39%; border-radius: 50%; background: #fff; }
     @keyframes drehen { to { transform: rotate(360deg); } }
-    .werkzeug { font-size: 3rem; margin: 14px auto 4px; display: block; width: fit-content; animation: wackeln 2.4s ease-in-out infinite; }
+    .werkzeug { font-size: 2.6rem; margin: 10px auto 2px; display: block; width: fit-content; animation: wackeln 2.4s ease-in-out infinite; }
     @keyframes wackeln { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
-    h1 { font-size: 1.6rem; margin: 6px 0 10px; }
+    h1 { font-size: 1.5rem; margin: 4px 0 8px; }
     p { color: #b3a6dc; line-height: 1.5; margin: 0 0 8px; }
-    .balken { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin: 22px 0 10px; }
+    .zahlen { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 18px 0 14px; }
+    .zahl { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 16px; padding: 12px 8px; }
+    .zahl b { display: block; font-size: 1.6rem; background: linear-gradient(135deg, #c58bff, #ff5fa8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .zahl span { font-size: 0.78rem; color: #b3a6dc; }
+    .liste { text-align: left; margin: 0 0 16px; padding: 14px 16px; border-radius: 16px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .liste b { display: block; margin-bottom: 6px; }
+    .liste ul { margin: 0; padding-left: 18px; color: #d9d0ff; display: grid; gap: 4px; font-size: 0.92rem; }
+    .balken { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin: 18px 0 14px; }
     .balken span { display: block; width: 40%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #c58bff, #ff5fa8); animation: laufen 1.6s ease-in-out infinite alternate; }
     @keyframes laufen { from { transform: translateX(-20%); } to { transform: translateX(170%); } }
-    .klein { font-size: 0.8rem; opacity: 0.7; }
+    button {
+      font: inherit; font-weight: 800; border: 0; border-radius: 14px; padding: 12px 20px; cursor: pointer;
+      background: linear-gradient(135deg, #c58bff, #ff5fa8); color: #22002f;
+    }
+    .klein { font-size: 0.78rem; opacity: 0.7; margin-top: 10px; }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
   </style>
 </head>
 <body>
   <main class="karte" role="status">
     <div class="logo">Spiel<span class="chip"><span class="ring"></span><span class="punkt"></span></span></div>
-    <div class="werkzeug" aria-hidden="true">🛠️</div>
+    <span class="werkzeug" aria-hidden="true">🛠️</span>
     <h1>Wartungsarbeiten</h1>
-    <p>SpielO wird gerade umgebaut: neue Kategorien, neue Animationen und ein schlauerer Schiedsrichter.</p>
-    <p>Schau bald wieder vorbei!</p>
+    <p>SpielO wird gerade verbessert. Gleich geht's weiter!</p>
+
+    <div class="zahlen">
+      <div class="zahl"><b>92</b><span>Kategorien in Stadt Land Fluss</span></div>
+      <div class="zahl"><b>137</b><span>Fragen im Preis-Schätzer</span></div>
+      <div class="zahl"><b>5.700</b><span>Begriffe für den Schiedsrichter</span></div>
+      <div class="zahl"><b>3</b><span>Spiele (Quartett im Aufbau)</span></div>
+    </div>
+
+    <div class="liste">
+      <b>Was besser wird</b>
+      <ul>
+        <li>Neue, aufgeräumte Startseite</li>
+        <li>Ü18-Kategorien direkt wählbar, ohne Schalter</li>
+        <li>Schiedsrichter prüft immer automatisch im Hintergrund</li>
+        <li>Updates kommen sofort bei allen an (kein veralteter Stand mehr)</li>
+        <li>Sparmodus: Der Server schläft, wenn niemand spielt</li>
+        <li>Neues Spiel in Vorbereitung: Quartett</li>
+      </ul>
+    </div>
+
     <div class="balken" aria-hidden="true"><span></span></div>
-    <p class="klein">Die Seite lädt sich automatisch neu, sobald es weitergeht.</p>
+    <button onclick="location.reload()">↻ Nochmal versuchen</button>
+    <p class="klein">Die Seite prüft beim Zurückkehren in diesen Tab automatisch, ob es weitergeht.</p>
   </main>
-  <script>setTimeout(() => location.reload(), 60000);</script>
+  <script>
+    // Kein Dauer-Neuladen (das würde den Server ständig wecken).
+    // Nur wenn man nach mindestens 2 Minuten in den Tab zurückkehrt, wird einmal neu geladen.
+    let weg = 0;
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) weg = Date.now();
+      else if (weg && Date.now() - weg > 120000) location.reload();
+    });
+  </script>
 </body>
 </html>
