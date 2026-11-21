@@ -7,7 +7,7 @@
 //  - Jeder weitere Fünfling bringt 50 Bonuspunkte
 // =============================================================
 const MAX_TEILNEHMER = 8;
-const BOT_PAUSE = [1500, 2200]; // Zeit zwischen den Würfen der Computer (Animation sichtbar)
+const BOT_PAUSE = [3000, 3600]; // Zeit zwischen den Würfen der Computer: die Wurf-Animation dauert gut 2,5 s
 const BOTS = [
   { name: "Robo-Rudi", avatar: "🤖" }, { name: "Kara Kartenhai", avatar: "🦈" }, { name: "Professor Pixel", avatar: "👾" },
   { name: "Lotti Luchs", avatar: "🦊" }, { name: "Bruno Bär", avatar: "🐼" }, { name: "Fritzi Frosch", avatar: "🐸" }, { name: "Theo Tiger", avatar: "🐯" },
@@ -183,7 +183,7 @@ function botZug(raum, ctx) {
   if (d.gehalten.every(Boolean)) return eintragen(raum, ctx, id, besteFeld(blatt, w));
   d.letzteAktion = { typ: "halten", spieler: id, t: Date.now() };
   ctx.sende(raum);
-  d.timer = setTimeout(() => { wuerfeln(raum, ctx, id); d.timer = setTimeout(() => botZug(raum, ctx), BOT_PAUSE[0] + Math.random() * (BOT_PAUSE[1] - BOT_PAUSE[0])); }, 700);
+  d.timer = setTimeout(() => { wuerfeln(raum, ctx, id); d.timer = setTimeout(() => botZug(raum, ctx), BOT_PAUSE[0] + Math.random() * (BOT_PAUSE[1] - BOT_PAUSE[0])); }, 1000);
 }
 
 function ende(raum, ctx) {

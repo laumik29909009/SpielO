@@ -8,52 +8,87 @@ body[data-spiel="wuerfel"], [data-farbe="wuerfel"] {
   --konfetti: #ffb84d, #ff6b6b, #5b8dff, #ffffff, #3ee08f;
 }
 .w-buehne { max-width: 980px; margin: 0 auto; }
-.w-oben { display: flex; justify-content: center; margin: 10px 0 14px; }
-.w-tisch { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.w-oben { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; margin: 10px 0 14px; }
+.w-tisch { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .w-wer { font-size: 1.05rem; text-align: center; min-height: 1.6em; }
 .w-wer b { color: var(--gold); }
 
 /* Halteleiste */
-.w-halte { position: relative; display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 78px; width: 100%; padding: 8px; border-radius: 18px;
+.w-halte { position: relative; display: flex; gap: 12px; justify-content: center; align-items: center; min-height: 86px; width: 100%; padding: 10px; border-radius: 18px;
   border: 2px dashed color-mix(in srgb, var(--gold) 45%, transparent); background: rgba(255, 184, 77, 0.05); }
 .w-halte-text { position: absolute; left: 14px; top: -11px; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg); padding: 0 8px; color: var(--gold); }
 
 /* Würfelteller mit Filz */
-.w-teller { position: relative; width: 100%; min-height: 190px; border-radius: 28px; display: flex; align-items: center; justify-content: center; padding: 26px 16px 26px 96px;
-  background: radial-gradient(ellipse at 50% 40%, #2b7a55, #154a33 70%, #0e3423);
-  box-shadow: inset 0 0 0 10px #5a3a22, inset 0 0 0 13px #3a2414, inset 0 18px 40px rgba(0, 0, 0, 0.45), 0 16px 40px rgba(0, 0, 0, 0.45); perspective: 900px; }
-.w-teller::before { content: ""; position: absolute; inset: 22px; border-radius: 18px; border: 2px dashed rgba(255, 236, 180, 0.18); pointer-events: none; }
-.w-reihe { display: flex; gap: clamp(8px, 2.5vw, 18px); justify-content: center; flex-wrap: wrap; perspective: 900px; }
+.w-teller { position: relative; width: 100%; min-height: 220px; border-radius: 28px; display: flex; align-items: center; justify-content: center; padding: 30px 18px 30px 120px;
+  background: radial-gradient(ellipse at 55% 40%, #2f8a5f, #18533a 70%, #0e3423);
+  box-shadow: inset 0 0 0 10px #5a3a22, inset 0 0 0 13px #3a2414, inset 0 18px 40px rgba(0, 0, 0, 0.45), 0 16px 40px rgba(0, 0, 0, 0.45); }
+.w-teller::before { content: ""; position: absolute; inset: 22px; border-radius: 18px; border: 2px dashed rgba(255, 236, 180, 0.16); pointer-events: none; }
+.w-reihe { display: flex; gap: clamp(10px, 2.6vw, 20px); justify-content: center; flex-wrap: wrap; }
 
-/* Becher */
-.w-becher { position: absolute; left: 18px; top: 50%; width: 64px; height: 78px; transform: translateY(-50%) rotate(-12deg); transform-origin: 50% 80%; }
-.w-becher span { position: absolute; inset: 0; border-radius: 10px 10px 26px 26px / 10px 10px 16px 16px;
-  background: linear-gradient(90deg, #4a2a16, #8a5530 35%, #b8743f 50%, #6b3f22 80%, #3a1f10);
-  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.25), 0 10px 16px rgba(0, 0, 0, 0.45); }
-.w-becher span::before { content: ""; position: absolute; left: -4px; right: -4px; top: -6px; height: 14px; border-radius: 50%; background: radial-gradient(ellipse, #1a0f08 55%, #c98a52 58%, #7a4a26 100%); }
-.w-becher.schuetteln { animation: becher 0.38s ease-in-out; }
-@keyframes becher { 0%, 100% { transform: translateY(-50%) rotate(-12deg); } 20% { transform: translateY(-58%) rotate(-30deg); } 40% { transform: translateY(-44%) rotate(6deg); } 60% { transform: translateY(-56%) rotate(-26deg); } 80% { transform: translateY(-48%) rotate(-50deg); } }
+/* Becher: Leder mit Rand, wird geschüttelt und ausgekippt */
+.w-becher { position: absolute; left: 20px; top: 50%; width: 82px; height: 100px; transform: translateY(-50%) rotate(-10deg); transform-origin: 50% 85%; z-index: 3; }
+.w-becher-koerper { position: absolute; inset: 8px 0 0; border-radius: 6px 6px 30px 30px / 6px 6px 18px 18px;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 3px, transparent 3px 9px), linear-gradient(90deg, #3f2212, #8a5530 30%, #c58550 48%, #8e5733 70%, #3a1f10);
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.25), inset 0 6px 0 rgba(0, 0, 0, 0.2), 0 14px 20px rgba(0, 0, 0, 0.5); }
+.w-becher-koerper::after { content: ""; position: absolute; left: 0; right: 0; bottom: 18px; height: 6px; background: linear-gradient(90deg, #6b4a12, #e0b04a 50%, #6b4a12); opacity: 0.85; }
+.w-becher-rand { position: absolute; left: -5px; right: -5px; top: 0; height: 18px; border-radius: 50%; background: radial-gradient(ellipse, #140a05 52%, #d29558 56%, #7a4a26 100%); }
+.w-becher.schuetteln { animation: becher 0.9s ease-in-out; }
+.w-becher.kippen { animation: kippen 1.1s cubic-bezier(.3, .7, .3, 1); }
+@keyframes becher {
+  0%, 100% { transform: translateY(-50%) rotate(-10deg); }
+  10% { transform: translate(6px, -64%) rotate(-28deg); } 22% { transform: translate(-4px, -40%) rotate(8deg); }
+  34% { transform: translate(8px, -66%) rotate(-32deg); } 46% { transform: translate(-6px, -38%) rotate(10deg); }
+  58% { transform: translate(6px, -64%) rotate(-30deg); } 70% { transform: translate(-4px, -42%) rotate(6deg); }
+  84% { transform: translate(4px, -60%) rotate(-24deg); }
+}
+@keyframes kippen { 0% { transform: translateY(-50%) rotate(-10deg); } 25% { transform: translate(18px, -75%) rotate(100deg); } 60% { transform: translate(18px, -75%) rotate(95deg); } 100% { transform: translateY(-50%) rotate(-10deg); } }
 
-/* Würfel (CSS 3D): Elfenbein mit runden Kanten und dunklen Augen */
-.w-wuerfel { --g: clamp(48px, 11vw, 66px); all: unset; box-sizing: border-box; width: var(--g); height: var(--g); position: relative; cursor: default; transform-style: preserve-3d; }
+/* Würfel (CSS 3D): jeder Würfel hat seine eigene Perspektive, dadurch keine schiefen Seitenwände in Ruhe */
+.w-wuerfel { --g: clamp(50px, 10vw, 68px); all: unset; box-sizing: border-box; width: var(--g); height: var(--g); position: relative; cursor: default; transform-style: preserve-3d; perspective: 520px; transition: translate 0.15s; }
 .w-wuerfel:not(:disabled) { cursor: pointer; }
-.w-kubus { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.4s ease; }
-.w-seite { position: absolute; inset: 0; border-radius: 18%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 14%;
-  background: radial-gradient(circle at 30% 25%, #ffffff, #f4efe4 60%, #e2d9c6); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), inset -3px -4px 8px rgba(0, 0, 0, 0.12); backface-visibility: hidden; }
-.w-seite i { width: 66%; height: 66%; margin: auto; border-radius: 50%; }
-.w-seite i.an { background: radial-gradient(circle at 35% 30%, #4a4a5a, #12121a 70%); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25); }
-.w-seite.s1 i.an { background: radial-gradient(circle at 35% 30%, #ff7b7b, #b3131f 70%); width: 80%; height: 80%; }
+.w-wuerfel:not(:disabled):hover { translate: 0 -4px; }
+.w-kubus { position: absolute; inset: 0; transform-style: preserve-3d; }
+.w-seite { position: absolute; inset: 0; border-radius: 20%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 14%;
+  background: radial-gradient(circle at 30% 25%, #ffffff, #f6f1e6 55%, #e4dbc8); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), inset -3px -4px 8px rgba(0, 0, 0, 0.1), inset 2px 3px 5px rgba(255, 255, 255, 0.9); backface-visibility: hidden; }
+/* Innenkern füllt die runden Kanten, damit beim Rollen nie ein Loch zu sehen ist */
+.w-kern { position: absolute; inset: 4%; background: #e9e1cf; border-radius: 8%; }
+.w-kern.k2 { transform: rotateY(90deg); }
+.w-kern.k3 { transform: rotateX(90deg); }
+.w-seite i { width: 68%; height: 68%; margin: auto; border-radius: 50%; }
+.w-seite i.an { background: radial-gradient(circle at 35% 30%, #4a4a5a, #12121a 70%); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 1px 0 rgba(255, 255, 255, 0.6); }
+.w-seite.s1 i.an { background: radial-gradient(circle at 35% 30%, #ff7b7b, #b3131f 70%); width: 82%; height: 82%; }
 .w-seite.s1 { transform: translateZ(calc(var(--g) / 2)); }
 .w-seite.s6 { transform: rotateY(180deg) translateZ(calc(var(--g) / 2)); }
 .w-seite.s2 { transform: rotateY(90deg) translateZ(calc(var(--g) / 2)); }
 .w-seite.s5 { transform: rotateY(-90deg) translateZ(calc(var(--g) / 2)); }
 .w-seite.s3 { transform: rotateX(90deg) translateZ(calc(var(--g) / 2)); }
 .w-seite.s4 { transform: rotateX(-90deg) translateZ(calc(var(--g) / 2)); }
-.w-wuerfel::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: -12%; height: 16%; border-radius: 50%; background: rgba(0, 0, 0, 0.35); filter: blur(4px); transform: translateZ(-1px); }
+.w-wuerfel::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -14%; height: 16%; border-radius: 50%; background: rgba(0, 0, 0, 0.4); filter: blur(4px); pointer-events: none; }
 .w-wuerfel.leer { opacity: 0.35; }
-.w-wuerfel:not(:disabled):hover .w-kubus { filter: brightness(1.06); }
 .w-wuerfel.gehalten .w-seite { box-shadow: inset 0 0 0 3px var(--gold), inset -3px -4px 8px rgba(0, 0, 0, 0.12); }
-.w-wuerfel.gehalten::before { content: "📌"; position: absolute; top: -14px; right: -8px; font-size: 1rem; z-index: 2; transform: translateZ(40px); }
+.w-wuerfel.gehalten::before { content: "📌"; position: absolute; top: -14px; right: -8px; font-size: 1rem; z-index: 2; pointer-events: none; }
+.w-wuerfel.tipp:not(.gehalten) { animation: w-tipp 1.4s ease-in-out infinite; border-radius: 22%; }
+@keyframes w-tipp { 0%, 100% { box-shadow: 0 0 0 0 rgba(120, 200, 255, 0); } 50% { box-shadow: 0 0 0 5px rgba(120, 200, 255, 0.75), 0 0 22px rgba(120, 200, 255, 0.6); } }
+
+/* Würfel-Eule */
+.w-eule { position: sticky; top: 12px; padding: 14px; border-radius: 20px; background: linear-gradient(180deg, #232c4f, #182039); border: 1px solid rgba(120, 200, 255, 0.35); box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4); display: grid; gap: 10px; min-height: 120px; }
+.w-eule-kopf { display: flex; gap: 10px; align-items: center; }
+.w-eule-ava { font-size: 2rem; animation: w-eule 3s ease-in-out infinite; }
+@keyframes w-eule { 0%, 100% { transform: rotate(0); } 10% { transform: rotate(-8deg); } 20% { transform: rotate(6deg); } 30% { transform: rotate(0); } }
+.w-eule-kopf b { display: block; }
+.w-eule-kopf small { color: var(--leise); font-size: 0.78rem; }
+.w-eule-text { margin: 0; font-size: 0.9rem; color: var(--leise); }
+.w-eule-tipp { padding: 10px 12px; border-radius: 14px; background: rgba(120, 200, 255, 0.12); border: 1px solid rgba(120, 200, 255, 0.4); font-size: 0.92rem; line-height: 1.35; }
+.w-eule-tipp b { color: #9fd6ff; }
+.w-eule-titel { font-size: 0.7rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); }
+.w-eule-liste { display: grid; gap: 4px; }
+.w-eule-liste div { display: flex; justify-content: space-between; font-size: 0.88rem; padding: 4px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); }
+.w-eule-liste b { color: #3ee08f; }
+.w-eule-chancen { display: grid; gap: 5px; }
+.w-eule-chancen div { display: grid; grid-template-columns: 96px 1fr 40px; gap: 8px; align-items: center; font-size: 0.82rem; }
+.w-eule-chancen i { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.w-eule-chancen i b { display: block; height: 100%; background: linear-gradient(90deg, #5b8dff, #9fd6ff); border-radius: 4px; transition: width 0.5s; }
+.w-eule-chancen em { font-style: normal; text-align: right; font-weight: 800; }
 
 .w-knoepfe { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 58px; }
 .w-wurf { min-width: min(320px, 86vw); }
@@ -85,11 +120,15 @@ thead .w-feldname { background: #2b2140; }
 .w-summe.gesamt td { font-size: 1.1rem; background: #2b2140; color: #ffd166; }
 .w-summe.gesamt .w-feldname { background: #2b2140; color: #fff; }
 
-@media (max-width: 700px) {
-  .w-teller { padding: 22px 10px 22px 70px; min-height: 160px; }
-  .w-becher { width: 48px; height: 60px; left: 12px; }
+@media (max-width: 900px) {
+  .w-oben { grid-template-columns: 1fr; }
+  .w-eule { position: static; }
 }
-@media (prefers-reduced-motion: reduce) { .w-becher.schuetteln, .w-block td.neu { animation: none; } }
+@media (max-width: 700px) {
+  .w-teller { padding: 22px 10px 22px 74px; min-height: 170px; }
+  .w-becher { width: 54px; height: 68px; left: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .w-becher.schuetteln, .w-becher.kippen, .w-block td.neu, .w-wuerfel.tipp { animation: none; } }
 
 /* Handy: Punkteblock kompakt, damit alle Spalten passen */
 @media (max-width: 700px) {
