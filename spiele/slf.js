@@ -41,7 +41,7 @@ function einstellungenSetzen(alt, e) {
   const neu = { ...alt, kategorien: [...alt.kategorien] };
   if (typeof e.umschalten === "string") {
     const i = neu.kategorien.findIndex((k) => k.id === e.umschalten);
-    if (i >= 0) neu.kategorien.splice(i, 1);
+    if (i >= 0 && neu.kategorien.length > 1) neu.kategorien.splice(i, 1); // mindestens eine bleibt
     else if (NACH_ID[e.umschalten] && neu.kategorien.length < MAX_KATEGORIEN) {
       neu.kategorien.push(kategorieAusId(e.umschalten));
     }

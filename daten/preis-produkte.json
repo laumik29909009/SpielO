@@ -1075,7 +1075,7 @@
    "id": "friends",
    "kat": "film",
    "emoji": "🛋️",
-   "wiki": "Friends Reunion",
+   "wiki": "Central Perk",
    "name": "Gage pro Friends-Folge (pro Hauptdarsteller)",
    "info": "Staffeln 9 und 10",
    "preis": 1000000,
@@ -1335,12 +1335,18 @@
    "id": "thermomix",
    "kat": "alltag",
    "emoji": "🍲",
-   "wiki": null,
+   "wiki": "Food processor",
    "name": "Thermomix TM7",
    "info": "Startpreis, 2025",
    "preis": 1549,
    "w": "€",
-   "fakt": "Er wird nicht im Laden verkauft, sondern nur über Vorführungen."
+   "fakt": "Er wird nicht im Laden verkauft, sondern nur über Vorführungen.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Food_Processor_2.jpg/960px-Food_Processor_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Donovan Govan",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Food_Processor_2.jpg"
+   }
   },
   {
    "id": "lego",
@@ -1606,7 +1612,7 @@
    "id": "goldmuenze",
    "kat": "crime",
    "emoji": "🪙",
-   "wiki": "Big Maple Leaf",
+   "wiki": "Canadian Gold Maple Leaf",
    "name": "Die gestohlene 100-kg-Goldmünze aus Berlin",
    "info": "„Big Maple Leaf“, Bode-Museum 2017",
    "preis": 3750000,
@@ -1617,12 +1623,18 @@
    "id": "lufthansaheist",
    "kat": "crime",
    "emoji": "✈️",
-   "wiki": "Lufthansa heist",
+   "wiki": "John F. Kennedy International Airport",
    "name": "Beute beim Lufthansa-Raub am JFK-Flughafen",
    "info": "1978, Vorlage für den Film „GoodFellas“",
    "preis": 5875000,
    "w": "$",
-   "fakt": "Das Geld wurde nie gefunden."
+   "fakt": "Das Geld wurde nie gefunden.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/JFK_Aerial_Nov_14_2018.jpg/960px-JFK_Aerial_Nov_14_2018.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "User:KenzieAbraham",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:JFK_Aerial_Nov_14_2018.jpg"
+   }
   },
   {
    "id": "carinsurance",
@@ -1752,7 +1764,7 @@
    "id": "rundfunk",
    "kat": "deutschland",
    "emoji": "📺",
-   "wiki": "Rundfunkbeitrag (Deutschland)",
+   "wiki": "Television licence",
    "name": "Rundfunkbeitrag (GEZ)",
    "info": "Pro Monat und Wohnung, 2025",
    "preis": 18.36,
@@ -1763,18 +1775,24 @@
    "id": "mindestlohn",
    "kat": "deutschland",
    "emoji": "💶",
-   "wiki": "Mindestlohn in Deutschland",
+   "wiki": "Euro banknotes",
    "name": "Mindestlohn pro Stunde",
    "info": "Ab Januar 2026",
    "preis": 13.9,
    "w": "€",
-   "fakt": "Eingeführt wurde er 2015 mit 8,50 €."
+   "fakt": "Eingeführt wurde er 2015 mit 8,50 €.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Euro_banknotes%2C_Europa_series.png/960px-Euro_banknotes%2C_Europa_series.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Bericht",
+    "lizenz": "CC0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Euro_banknotes,_Europa_series.png"
+   }
   },
   {
    "id": "buergergeld",
    "kat": "deutschland",
    "emoji": "🏛️",
-   "wiki": null,
+   "wiki": "Jobcenter",
    "name": "Bürgergeld-Regelsatz für Alleinstehende",
    "info": "Pro Monat, 2025",
    "preis": 563,
@@ -1785,7 +1803,7 @@
    "id": "kindergeld",
    "kat": "deutschland",
    "emoji": "👶",
-   "wiki": "Kindergeld (Deutschland)",
+   "wiki": null,
    "name": "Kindergeld pro Kind",
    "info": "Pro Monat, 2025",
    "preis": 255,
@@ -1796,67 +1814,103 @@
    "id": "pfand",
    "kat": "deutschland",
    "emoji": "🍾",
-   "wiki": "Einwegpfand",
+   "wiki": "Reverse vending machine",
    "name": "Pfand für eine Einwegflasche",
    "info": "Plastikflasche oder Dose",
    "preis": 0.25,
    "w": "€",
-   "fakt": "Das Einwegpfand gibt es in Deutschland seit 2003."
+   "fakt": "Das Einwegpfand gibt es in Deutschland seit 2003.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Aldi-Pfandr%C3%BCckgabeautomat.JPG/960px-Aldi-Pfandr%C3%BCckgabeautomat.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "User:Mattes",
+    "lizenz": "Public domain",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Aldi-Pfandr%C3%BCckgabeautomat.JPG"
+   }
   },
   {
    "id": "promille",
    "kat": "deutschland",
    "emoji": "🚓",
-   "wiki": "Blutalkoholkonzentration",
+   "wiki": "Breathalyzer",
    "name": "Bußgeld für 0,5 Promille am Steuer",
    "info": "Erster Verstoß, plus Fahrverbot",
    "preis": 500,
    "w": "€",
-   "fakt": "Dazu kommen 2 Punkte in Flensburg und 1 Monat Fahrverbot."
+   "fakt": "Dazu kommen 2 Punkte in Flensburg und 1 Monat Fahrverbot.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Bafometro.JPG/960px-Bafometro.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Foto: Elza Fiúza/ABr",
+    "lizenz": "CC BY 3.0 br",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Bafometro.JPG"
+   }
   },
   {
    "id": "handysteuer",
    "kat": "deutschland",
    "emoji": "📱",
-   "wiki": "Handyverbot am Steuer",
+   "wiki": "Mobile phones and driving safety",
    "name": "Bußgeld fürs Handy am Steuer",
    "info": "Ohne Gefährdung",
    "preis": 100,
    "w": "€",
-   "fakt": "Mit Unfall werden es 200 € und ein Monat Fahrverbot."
+   "fakt": "Mit Unfall werden es 200 € und ein Monat Fahrverbot.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Hand_held_phone_in_car.JPG/960px-Hand_held_phone_in_car.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Ed Poor at English Wikipedia",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Hand_held_phone_in_car.JPG"
+   }
   },
   {
    "id": "schwarzfahren",
    "kat": "deutschland",
    "emoji": "🎫",
-   "wiki": "Erhöhtes Beförderungsentgelt",
+   "wiki": "Fare evasion",
    "name": "Strafe fürs Schwarzfahren",
    "info": "Erhöhtes Beförderungsentgelt",
    "preis": 60,
    "w": "€",
-   "fakt": "Wer erwischt wird, muss zusätzlich die Personalien angeben."
+   "fakt": "Wer erwischt wird, muss zusätzlich die Personalien angeben.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/02/Turnstile_jumping_in_Moscow_Metro_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Mos.ru",
+    "lizenz": "CC BY 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Turnstile_jumping_in_Moscow_Metro_(1).jpg"
+   }
   },
   {
    "id": "bundeshaushalt",
    "kat": "deutschland",
    "emoji": "🏦",
-   "wiki": "Bundeshaushalt (Deutschland)",
+   "wiki": "Detlev-Rohwedder-Haus",
    "name": "Der Bundeshaushalt",
    "info": "Ausgaben des Bundes pro Jahr, 2025",
    "preis": 500000000000,
    "w": "€",
-   "fakt": "Der größte Posten sind Arbeit und Soziales."
+   "fakt": "Der größte Posten sind Arbeit und Soziales.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Berlin_Finanzministerium_Wilhelmstr_asv2019-07.jpg/960px-Berlin_Finanzministerium_Wilhelmstr_asv2019-07.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "A.Savin",
+    "lizenz": "FAL",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Berlin_Finanzministerium_Wilhelmstr_asv2019-07.jpg"
+   }
   },
   {
    "id": "hundesteuer",
    "kat": "deutschland",
    "emoji": "🐕",
-   "wiki": "Hundesteuer",
+   "wiki": "Dog",
    "name": "Hundesteuer in Berlin",
    "info": "Pro Jahr für den ersten Hund",
    "preis": 120,
    "w": "€",
-   "fakt": "Für einen „gefährlichen Hund“ zahlt man in manchen Städten über 1.000 €."
+   "fakt": "Für einen „gefährlichen Hund“ zahlt man in manchen Städten über 1.000 €.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Huskiesatrest.jpg/960px-Huskiesatrest.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "M. Rehemtulla",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Huskiesatrest.jpg"
+   }
   },
   {
    "id": "alaska",
@@ -2049,34 +2103,52 @@
    "id": "eurojackpot",
    "kat": "nacht",
    "emoji": "🎰",
-   "wiki": null,
+   "wiki": "Lottery",
    "name": "Maximaler Eurojackpot",
    "info": "Obergrenze seit 2022",
    "preis": 120000000,
    "w": "€",
-   "fakt": "Die Chance auf den Hauptgewinn liegt bei rund 1 zu 140 Millionen."
+   "fakt": "Die Chance auf den Hauptgewinn liegt bei rund 1 zu 140 Millionen.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Texas_Lottery_drawing.jpg/960px-Texas_Lottery_drawing.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Matt May",
+    "lizenz": "CC BY 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Texas_Lottery_drawing.jpg"
+   }
   },
   {
    "id": "powerball",
    "kat": "nacht",
    "emoji": "💵",
-   "wiki": "Powerball",
+   "wiki": "Lottery machine",
    "name": "Größter Lotto-Jackpot aller Zeiten",
    "info": "Powerball, USA 2022",
    "preis": 2040000000,
    "w": "$",
-   "fakt": "Der Gewinner kam aus Kalifornien."
+   "fakt": "Der Gewinner kam aus Kalifornien.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Revolving_lottery_machine%2Ckaitenshiki-cyusenki%2Cjapan.JPG/960px-Revolving_lottery_machine%2Ckaitenshiki-cyusenki%2Cjapan.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "katorisi",
+    "lizenz": "CC BY 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Revolving_lottery_machine,kaitenshiki-cyusenki,japan.JPG"
+   }
   },
   {
    "id": "wsop",
    "kat": "nacht",
    "emoji": "🃏",
-   "wiki": null,
+   "wiki": "Poker",
    "name": "Siegprämie im Main Event der Poker-WM",
    "info": "World Series of Poker, 2023",
    "preis": 12100000,
    "w": "$",
-   "fakt": "Über 10.000 Spieler zahlten je 10.000 $ Startgeld."
+   "fakt": "Über 10.000 Spieler zahlten je 10.000 $ Startgeld.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Poker-Texas-Holdem-multiplayer.jpg/960px-Poker-Texas-Holdem-multiplayer.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Nyks at German Wikipedia",
+    "lizenz": "CC BY-SA 3.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Poker-Texas-Holdem-multiplayer.jpg"
+   }
   },
   {
    "id": "watanabe",
@@ -2099,12 +2171,18 @@
    "id": "thc",
    "kat": "nacht",
    "emoji": "🌿",
-   "wiki": null,
+   "wiki": "Cannabis sativa",
    "name": "Bußgeld für Kiffen und Autofahren",
    "info": "Über dem THC-Grenzwert, erster Verstoß",
    "preis": 500,
    "w": "€",
-   "fakt": "Seit 2024 gilt ein Grenzwert von 3,5 ng THC pro ml Blut."
+   "fakt": "Seit 2024 gilt ein Grenzwert von 3,5 ng THC pro ml Blut.",
+   "bild": {
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Cannabis_sativa_2.jpg/960px-Cannabis_sativa_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "autor": "Thayne Tuason",
+    "lizenz": "CC BY-SA 4.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Cannabis_sativa_2.jpg"
+   }
   },
   {
    "id": "tequilaley",
@@ -2161,7 +2239,7 @@
    "id": "katar",
    "kat": "sport",
    "emoji": "🏟️",
-   "wiki": "2022 FIFA World Cup",
+   "wiki": "Lusail Stadium",
    "name": "Kosten der Fußball-WM in Katar",
    "info": "Stadien, Infrastruktur (Schätzung)",
    "preis": 220000000000,
@@ -2189,7 +2267,7 @@
    "id": "grandmaster",
    "kat": "luxus",
    "emoji": "🕰️",
-   "wiki": "Patek Philippe Grandmaster Chime",
+   "wiki": "Patek Philippe Museum",
    "name": "Patek Philippe Grandmaster Chime",
    "info": "Teuerste Armbanduhr, Auktion 2019",
    "preis": 31000000,
@@ -2217,12 +2295,18 @@
    "id": "faberge",
    "kat": "auktion",
    "emoji": "🥚",
-   "wiki": "Rothschild Fabergé egg",
+   "wiki": "Fabergé egg",
    "name": "Das „Rothschild“-Fabergé-Ei",
    "info": "Auktion 2007",
    "preis": 8980000,
    "w": "£",
-   "fakt": "Es enthält eine Uhr und einen aufziehbaren Vogel."
+   "fakt": "Es enthält eine Uhr und einen aufziehbaren Vogel.",
+   "bild": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Fifteenth_Anniversary_%28Faberg%C3%A9_egg%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "autor": "Guy Fawkes",
+    "lizenz": "CC BY-SA 2.0",
+    "quelle": "https://commons.wikimedia.org/wiki/File:Fifteenth_Anniversary_(Faberg%C3%A9_egg).jpg"
+   }
   }
  ]
 }

@@ -33,6 +33,7 @@ Welche Wörter in der Wikipedia-Beschreibung zu welcher Kategorie passen, steht 
 
 ## Wartungsmodus
 In `config.json` `"wartung": true` setzen und hochladen. Dann sehen alle nur eine Wartungsseite. Zum Beenden wieder auf `false`.
+Was auf der Wartungsseite steht, kommt aus `"wartungInfo"`: `"punkte"` (kurze Stichpunkte, was gemacht wird) und optional `"zahlen"` (große Kennzahlen).
 
 ## Lokal starten
 ```bash

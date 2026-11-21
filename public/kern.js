@@ -183,21 +183,19 @@ function zeigeStart() {
     <section class="kapitel name-kapitel rein" style="--d:1.45s">
       <label class="kapitel-titel" for="nameInput">Wie heißt du?</label>
       <input id="nameInput" class="feld name-feld" maxlength="16" placeholder="Dein Name" autocomplete="off" value="${esc(speicher("name") || "")}" />
+      ${codeAusLink ? "" : `<button class="btn gross voll" id="erstellenBtn">🎉 Raum erstellen</button>
+      <p class="leise klein-text">Das Spiel wählst du danach in der Lobby, und du kannst jederzeit wechseln.</p>`}
     </section>
 
-    ${codeAusLink ? beitreten : ""}
+    ${beitreten}
 
     <section class="kapitel rein" style="--d:1.6s">
-      <h2 class="kapitel-titel">${codeAusLink ? "Oder starte ein eigenes Spiel" : "Wähle ein Spiel"}</h2>
+      <h2 class="kapitel-titel">Unsere Spiele</h2>
       <div class="spiele-gitter">
-        ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s, {
-          knopf: `<button class="btn voll" data-erstellen="${id}">▶ Raum erstellen</button>`,
-        })).join("")}
-        ${GN.imAufbau.map((s) => aufbauKarte(s)).join("")}
+        ${Object.entries(GN.spiele).map(([id, s]) => spielKarte(id, s)).join("")}
+        ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
-    </section>
-
-    ${codeAusLink ? "" : beitreten}`;
+    </section>`;
 
   const name = () => {
     const n = $("#nameInput").value.trim();
@@ -211,11 +209,11 @@ function zeigeStart() {
     }
     return n;
   };
-  $$("[data-erstellen]").forEach((b) => (b.onclick = () => {
+  $("#erstellenBtn")?.addEventListener("click", () => {
     Ton.entsperren();
     const n = name();
-    if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel: b.dataset.erstellen });
-  }));
+    if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel: speicher("letztesSpiel") || "preis" });
+  });
   $("#beitretenBtn").onclick = () => {
     Ton.entsperren();
     const n = name();
@@ -225,7 +223,7 @@ function zeigeStart() {
   $("#nameInput").addEventListener("keydown", (e) => {
     if (e.key !== "Enter") return;
     if (codeAusLink) $("#beitretenBtn").click();
-    else $("#nameInput").blur();
+    else $("#erstellenBtn").click();
   });
 }
 
@@ -246,7 +244,10 @@ function zeigeLobby() {
   const fokusWert = document.activeElement?.value;
   const scroll = scrollY;
   const abschnitte = spiel.abschnitte(z, host);
-  const offen = (id) => speicher(`offen-${z.spiel}-${id}`) === "1";
+  const wichtig = abschnitte.filter((a) => a.wichtig);
+  const extras = abschnitte.filter((a) => !a.wichtig);
+  const offenesFenster = $("dialog[open]")?.dataset.fenster; // bleibt nach Änderungen offen
+  if (z.spiel !== speicher("letztesSpiel") && host) speicher("letztesSpiel", z.spiel);
 
   app.innerHTML = `
     <section class="raum-kopf karte">
@@ -277,19 +278,25 @@ function zeigeLobby() {
       </div>
     </section>
 
-    <section class="kapitel">
-      <h2 class="kapitel-titel">Einstellungen</h2>
-      <div class="abschnitte" id="spielEinstellungen">
-        ${abschnitte.map((a) => `
-          <details class="abschnitt" data-abschnitt="${a.id}" ${offen(a.id) ? "open" : ""}>
-            <summary>
-              <span class="abschnitt-icon">${a.icon}</span>
-              <span class="abschnitt-kopf"><b>${a.titel}</b><span>${a.info}</span></span>
-              <span class="pfeil" aria-hidden="true">⌄</span>
-            </summary>
-            <div class="abschnitt-inhalt">${a.html}</div>
-          </details>`).join("")}
+    <section class="kapitel" id="spielEinstellungen">
+      <div class="einstellungen-kopf">
+        <h2 class="kapitel-titel">Einstellungen</h2>
+        <div class="extra-knoepfe">
+          ${extras.map((a) => `<button class="extra-knopf" data-oeffne="${a.id}" title="${esc(a.info.replace(/<[^>]*>/g, ""))}">${a.icon} ${a.titel}</button>`).join("")}
+        </div>
       </div>
+      <div class="einstellungs-bloecke">
+        ${wichtig.map((a) => `
+          <div class="einstellung-block" data-block="${a.id}">
+            <div class="block-kopf"><span class="block-icon">${a.icon}</span><b>${a.titel}</b><span class="block-info">${a.info}</span></div>
+            ${a.html}
+          </div>`).join("")}
+      </div>
+      ${extras.map((a) => `
+        <dialog class="fenster" data-fenster="${a.id}" aria-label="${esc(a.titel)}">
+          <div class="fenster-kopf"><b>${a.icon} ${a.titel}</b><button class="icon-btn" data-schliessen aria-label="Schließen">✕</button></div>
+          <div class="fenster-inhalt">${a.html}</div>
+        </dialog>`).join("")}
     </section>
 
     <div class="start-leiste">
@@ -301,7 +308,14 @@ function zeigeLobby() {
     </div>`;
 
   if (host) spiel.binde?.($("#spielEinstellungen"), z);
-  $$(".abschnitt").forEach((d) => d.addEventListener("toggle", () => speicher(`offen-${z.spiel}-${d.dataset.abschnitt}`, d.open ? "1" : "0")));
+  // Fenster für Regeln & Punkte
+  $$("[data-oeffne]").forEach((b) => (b.onclick = () => { Ton.klick(); $(`dialog[data-fenster="${b.dataset.oeffne}"]`).showModal(); }));
+  $$("dialog.fenster").forEach((d) => {
+    d.querySelector("[data-schliessen]").onclick = () => d.close();
+    d.addEventListener("click", (ev) => { if (ev.target === d) d.close(); }); // Klick neben das Fenster schließt
+  });
+  if (offenesFenster) $(`dialog[data-fenster="${offenesFenster}"]`)?.classList.add("ohne-animation");
+  if (offenesFenster) $(`dialog[data-fenster="${offenesFenster}"]`)?.showModal();
   $("#teilenBtn").onclick = teilen;
   $("#avatarBtn")?.addEventListener("click", () => { Ton.klick(); socket.emit("avatarWechseln"); });
   $("#verlassenBtn").onclick = verlassen;

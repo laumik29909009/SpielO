@@ -8,6 +8,7 @@
   const meta = () => GN.meta.spiele.slf || { gruppen: [], pakete: [], punkte: {} };
 
   let entwurf = {};
+  let katSuchtext = "";
   let sendeTimer = null;
   let letzterGesendet = "";
 
@@ -28,33 +29,35 @@
     const dis = host ? "" : "disabled";
     const aktiv = new Set(e.kategorien.map((k) => k.id));
     const p = m.punkte;
-    const namen = e.kategorien.map((k) => k.name);
-    const katInfo = namen.slice(0, 4).join(", ") + (namen.length > 4 ? ` +${namen.length - 4}` : "");
     const pruefung = "📚 Wortlisten + 🌐 Wikipedia";
     const pakete = m.pakete;
     const gruppen = m.gruppen;
 
     return [
       {
-        id: "kategorien", icon: "🗂️", titel: `Kategorien (${e.kategorien.length})`, info: esc(katInfo),
+        id: "kategorien", wichtig: true, icon: "🗂️", titel: `Kategorien (${e.kategorien.length})`, info: "3 bis 8 sind ideal",
         html: `
           <div class="gewaehlt-liste">
             ${e.kategorien.map((k) => `
               <span class="gewaehlt-chip">${k.emoji} ${esc(k.name)}${k.frei ? ' <span class="mini-tag">kreativ</span>' : ""}
                 ${host ? `<button data-weg="${k.id}" aria-label="${esc(k.name)} entfernen">✕</button>` : ""}</span>`).join("")}
           </div>
-          <p class="leise klein-text">3 bis 8 Kategorien sind ideal, maximal ${m.maxKategorien}.</p>
           ${host ? `
             <div class="unter-titel">Schnellauswahl</div>
             <div class="paket-reihe">
               ${pakete.map((x) => `<button class="paket ${x.ue18 ? "ue18" : ""}" data-paket="${x.id}">${x.emoji} ${esc(x.name)}</button>`).join("")}
               <button class="paket" data-zufall="1">🎲 Zufall</button>
             </div>
-            ${gruppen.map((g) => `
-              <div class="unter-titel">${g.ue18 ? "🔞 " : ""}${esc(g.name)} <span class="normal">(${g.kategorien.length})</span></div>
-              <div class="chip-reihe">
-                ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""} ${k.ue18 ? "ue18" : ""}" data-kat="${k.id}">${k.emoji} ${esc(k.name)}</button>`).join("")}
+            <div class="unter-titel">Alle Kategorien</div>
+            <input class="feld kat-suche" id="katSuche" placeholder="🔎 Kategorie suchen …" autocomplete="off" />
+            <div class="kat-tabs" role="tablist">
+              ${gruppen.map((g, i) => `<button class="kat-tab" role="tab" data-tab="${i}">${g.ue18 ? "🔞 " : ""}${esc(g.name)}</button>`).join("")}
+            </div>
+            ${gruppen.map((g, i) => `
+              <div class="chip-reihe kat-panel" data-panel="${i}">
+                ${g.kategorien.map((k) => `<button class="auswahl-chip ${aktiv.has(k.id) ? "aktiv" : ""} ${k.ue18 ? "ue18" : ""}" data-kat="${k.id}" data-suchtext="${esc(k.name.toLowerCase())}">${k.emoji} ${esc(k.name)}</button>`).join("")}
               </div>`).join("")}
+            <p class="leise klein-text kein-treffer versteckt">Nichts gefunden. Leg sie unten als eigene Kategorie an!</p>
             <div class="unter-titel">Eigene Kategorie</div>
             <form class="eigene-zeile" id="eigeneForm" autocomplete="off">
               <input class="feld" id="eigeneInput" maxlength="32" placeholder="z. B. „Etwas Rundes“" />
@@ -65,7 +68,7 @@
             <p class="leise klein-text">🔞 Ü18-Kategorien sind gekennzeichnet. „Zufall“ wählt sie nie aus.</p>` : ""}`,
       },
       {
-        id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min"} pro Runde`,
+        id: "runden", wichtig: true, icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden < 120 ? e.sekunden + " s" : e.sekunden / 60 + " min"} pro Runde`,
         html: `<div class="einstellungs-zeile">
           <div><div class="unter-titel">Runden</div>
             <div class="segment">${[3, 5, 8, 10].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
@@ -82,7 +85,7 @@
         </div>`,
       },
       {
-        id: "punkte", icon: "🏆", titel: "Punkte & Prüfung", info: `20 · 10 · 5 · ⭐ +${p.stern} · ${pruefung}`,
+        id: "punkte", icon: "🏆", titel: "Punkte", info: `20 · 10 · 5 · ⭐ +${p.stern} · ${pruefung}`,
         html: `
           <div class="punkte-info">
             <div><b>${p.allein}</b><span>Nur du hast eine gültige Antwort</span></div>
@@ -109,6 +112,31 @@
     const m = meta();
     const aktiv = new Set(e.kategorien.map((k) => k.id));
     $$("[data-weg]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ umschalten: b.dataset.weg })));
+    // Reiter: welche Gruppe gezeigt wird, merkt sich der Browser
+    const zeigeGruppe = (i) => {
+      GN.speicher("slfGruppe", String(i));
+      $$(".kat-tab", el).forEach((t) => t.classList.toggle("aktiv", t.dataset.tab === String(i)));
+      $$(".kat-panel", el).forEach((p) => p.classList.toggle("versteckt", p.dataset.panel !== String(i)));
+    };
+    $$(".kat-tab", el).forEach((t) => (t.onclick = () => { Ton.klick(); zeigeGruppe(t.dataset.tab); }));
+    zeigeGruppe(GN.speicher("slfGruppe") || "0");
+    // Suche über alle Gruppen
+    const suche = $("#katSuche", el);
+    if (suche) {
+      const filtern = () => {
+        const q = suche.value.trim().toLowerCase();
+        katSuchtext = suche.value;
+        if (!q) { $(".kat-tabs", el).classList.remove("versteckt"); $(".kein-treffer", el).classList.add("versteckt"); $$(".auswahl-chip", el).forEach((c) => c.classList.remove("versteckt")); return zeigeGruppe(GN.speicher("slfGruppe") || "0"); }
+        $(".kat-tabs", el).classList.add("versteckt");
+        let treffer = 0;
+        $$(".kat-panel", el).forEach((p) => p.classList.remove("versteckt"));
+        $$(".auswahl-chip", el).forEach((c) => { const ok = c.dataset.suchtext.includes(q); c.classList.toggle("versteckt", !ok); treffer += ok; });
+        $(".kein-treffer", el).classList.toggle("versteckt", treffer > 0);
+      };
+      suche.value = katSuchtext;
+      suche.addEventListener("input", filtern);
+      if (katSuchtext) filtern();
+    }
     $$("[data-kat]", el).forEach((b) => (b.onclick = () => {
       if (!aktiv.has(b.dataset.kat) && e.kategorien.length >= m.maxKategorien) return GN.toast(`Maximal ${m.maxKategorien} Kategorien.`);
       GN.einstellungen({ umschalten: b.dataset.kat });

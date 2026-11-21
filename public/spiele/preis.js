@@ -32,7 +32,7 @@
     const m = MODI[e.modus];
     return [
       {
-        id: "modus", icon: "🎮", titel: "Spielmodus", info: `${m.icon} ${m.titel}`,
+        id: "modus", wichtig: true, icon: "🎮", titel: "Spielmodus", info: `${m.icon} ${m.titel}`,
         html: `<div class="modus-gitter">
           ${Object.entries(MODI).map(([id, x]) => `
             <button class="modus-karte ${e.modus === id ? "aktiv" : ""}" data-modus="${id}" ${dis}>
@@ -41,20 +41,20 @@
         </div>`,
       },
       {
-        id: "kategorien", icon: "🗂️", titel: "Kategorien",
+        id: "kategorien", wichtig: true, icon: "🗂️", titel: "Kategorien",
         info: `${e.kategorien.length} von ${kats.length} · ${anzahl} Fragen`,
         html: `
           ${host ? `<div class="paket-reihe" style="margin:4px 0 12px"><button class="paket" data-alle="1">✅ Alle auswählen (ohne Ü18)</button></div>` : ""}
           <div class="kat-gitter">
           ${kats.map((k) => `
             <button class="kat-chip ${e.kategorien.includes(k.id) ? "aktiv" : ""}" data-kat="${k.id}" title="${esc(k.beschreibung)}" ${dis}>
-              <span class="e">${k.emoji}</span><span><div class="n">${k.ue18 ? "🔞 " : ""}${esc(k.name)}</div><div class="z">${k.anzahl} Fragen · ${esc(k.beschreibung)}</div></span>
+              <span class="e">${k.emoji}</span><span><div class="n">${k.ue18 ? "🔞 " : ""}${esc(k.name)}</div><div class="z">${k.anzahl} Fragen</div></span>
             </button>`).join("")}
           </div>
           <p class="leise klein-text" style="margin-top:10px">🔞 Ü18-Kategorien sind gekennzeichnet und standardmäßig nicht ausgewählt.</p>`,
       },
       {
-        id: "runden", icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden} s pro Frage`,
+        id: "runden", wichtig: true, icon: "⏱️", titel: "Runden & Zeit", info: `${e.runden} Runden · ${e.sekunden} s pro Frage`,
         html: `<div class="einstellungs-zeile">
           <div><div class="unter-titel">Runden</div>
             <div class="segment">${[5, 10, 15, 20].map((n) => `<button data-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
@@ -433,9 +433,42 @@
   // =============================================================
   //  Bausteine
   // =============================================================
+  // ---------- Gezeichnete Illustrationen für Fragen ohne freies Foto ----------
+  // Jede Kategorie hat ein eigenes Motiv im Hintergrund, das Symbol steht groß in der Mitte.
+  const MOTIVE = {
+    film: `<g opacity=".5"><rect x="0" y="18" width="400" height="30" fill="#000"/><rect x="0" y="202" width="400" height="30" fill="#000"/>
+      ${Array.from({ length: 14 }, (_, i) => `<rect x="${i * 30 + 6}" y="25" width="16" height="16" rx="3" fill="#fff" opacity=".7"/><rect x="${i * 30 + 6}" y="209" width="16" height="16" rx="3" fill="#fff" opacity=".7"/>`).join("")}</g>
+      <path d="M200 -20 L120 250 L280 250 Z" fill="#fff" opacity=".07"/>`,
+    auktion: `<rect x="110" y="40" width="180" height="170" rx="6" fill="none" stroke="#d9a74a" stroke-width="12" opacity=".8"/>
+      <rect x="126" y="56" width="148" height="138" fill="#000" opacity=".25"/><path d="M200 -10 L130 60 L270 60 Z" fill="#fff" opacity=".1"/>`,
+    crime: `<g transform="rotate(-12 200 125)" opacity=".85"><rect x="-40" y="185" width="480" height="34" fill="#ffd23f"/>
+      ${Array.from({ length: 9 }, (_, i) => `<text x="${i * 60 - 30}" y="208" font-family="Arial Black,Arial" font-weight="900" font-size="16" fill="#111">POLICE</text>`).join("")}</g>
+      <circle cx="40" cy="30" r="60" fill="#3a6bff" opacity=".25"/><circle cx="360" cy="30" r="60" fill="#ff3b3b" opacity=".25"/>`,
+    nacht: `${Array.from({ length: 22 }, (_, i) => `<circle cx="${(i * 37) % 400}" cy="${20 + ((i * 53) % 210)}" r="${2 + (i % 3)}" fill="${["#ff5fa8", "#ffcb47", "#5cc8ff"][i % 3]}" opacity=".8"/>`).join("")}
+      <rect x="90" y="30" width="220" height="190" rx="24" fill="none" stroke="#ff5fa8" stroke-width="4" opacity=".7"/>`,
+    internet: `${Array.from({ length: 40 }, (_, i) => `<rect x="${(i % 10) * 42 + 4}" y="${Math.floor(i / 10) * 64 + 8}" width="32" height="32" rx="9" fill="#fff" opacity="${0.04 + (i % 4) * 0.03}"/>`).join("")}`,
+    deutschland: `<g transform="rotate(-20 200 125)" opacity=".45"><rect x="-80" y="40" width="560" height="40" fill="#000"/><rect x="-80" y="80" width="560" height="40" fill="#dd0000"/><rect x="-80" y="120" width="560" height="40" fill="#ffce00"/></g>`,
+    geschichte: `<rect x="70" y="30" width="260" height="190" rx="10" fill="#e8d3a2" opacity=".25"/>
+      ${Array.from({ length: 6 }, (_, i) => `<rect x="95" y="${55 + i * 26}" width="${150 + ((i * 37) % 60)}" height="5" rx="2" fill="#e8d3a2" opacity=".35"/>`).join("")}`,
+    tiere: `${Array.from({ length: 8 }, (_, i) => `<g transform="translate(${30 + i * 48} ${i % 2 ? 190 : 40}) rotate(${i * 25})" fill="#fff" opacity=".12"><circle r="9"/><circle cx="-10" cy="-12" r="4"/><circle cx="0" cy="-16" r="4"/><circle cx="10" cy="-12" r="4"/></g>`).join("")}`,
+    luxus: `${Array.from({ length: 14 }, (_, i) => `<path d="M0 -8 L2 -2 L8 0 L2 2 L0 8 L-2 2 L-8 0 L-2 -2 Z" transform="translate(${(i * 71) % 400} ${(i * 47) % 240}) scale(${1 + (i % 3)})" fill="#ffe8a3" opacity=".6"/>`).join("")}`,
+    sport: `<circle cx="200" cy="125" r="150" fill="none" stroke="#fff" stroke-width="3" opacity=".12"/><circle cx="200" cy="125" r="60" fill="none" stroke="#fff" stroke-width="3" opacity=".12"/><line x1="200" y1="0" x2="200" y2="250" stroke="#fff" stroke-width="3" opacity=".12"/>`,
+    essen: `<circle cx="200" cy="125" r="96" fill="#fff" opacity=".1"/><circle cx="200" cy="125" r="76" fill="#fff" opacity=".08"/>
+      <rect x="70" y="60" width="8" height="130" rx="4" fill="#fff" opacity=".25"/><rect x="322" y="60" width="8" height="130" rx="4" fill="#fff" opacity=".25"/>`,
+  };
+  function zeichnung(p) {
+    const motiv = MOTIVE[p.kat] || `${Array.from({ length: 12 }, (_, i) => `<path d="M200 125 L${200 + 300 * Math.cos(i * 0.5236)} ${125 + 300 * Math.sin(i * 0.5236)} L${200 + 300 * Math.cos(i * 0.5236 + 0.26)} ${125 + 300 * Math.sin(i * 0.5236 + 0.26)} Z" fill="#fff" opacity=".05"/>`).join("")}`;
+    return `<svg class="zeichnung" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs><radialGradient id="zg-${p.id}" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="var(--gold)" stop-opacity=".45"/><stop offset="1" stop-color="var(--flaeche-2)" stop-opacity="0"/></radialGradient></defs>
+      <rect width="400" height="250" fill="var(--flaeche-2)"/>${motiv}<rect width="400" height="250" fill="url(#zg-${p.id})"/>
+      <circle cx="200" cy="125" r="62" fill="var(--bg)" opacity=".55"/><circle cx="200" cy="125" r="62" fill="none" stroke="var(--gold)" stroke-width="3" opacity=".8"/>
+    </svg>`;
+  }
+
   function bildBox(p, mitCredit = true) {
     const kat = meta().kategorien.find((k) => k.id === p.kat);
-    return `<div class="bild-box">
+    return `<div class="bild-box ${p.bild ? "" : "gezeichnet"}">
+      ${p.bild ? "" : zeichnung(p)}
       <div class="emoji-gross">${p.emoji}</div>
       ${p.bild ? `<img src="${esc(p.bild.url)}" alt="${esc(p.name)}" decoding="async" referrerpolicy="no-referrer">` : ""}
       ${kat && mitCredit ? `<span class="kat-badge">${kat.emoji} ${esc(kat.name)}</span>` : ""}

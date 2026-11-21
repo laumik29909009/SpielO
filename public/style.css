@@ -998,3 +998,63 @@ button, a, input, summary, label { touch-action: manipulation; }
 .spar-karte b { font-size: 1.3rem; }
 .spar-karte span { color: var(--leise); }
 .spar-karte .btn { margin-top: 8px; color: var(--gold-text); }
+
+/* =============================================================
+   Lobby: wichtige Einstellungen offen, Regeln & Punkte als Fenster
+   ============================================================= */
+.einstellungen-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.einstellungen-kopf .kapitel-titel { margin: 0; }
+.extra-knoepfe { display: flex; gap: 8px; flex-wrap: wrap; }
+.extra-knopf {
+  border: 1px solid var(--rand-stark); background: var(--flaeche); color: var(--text); border-radius: 999px;
+  padding: 8px 14px; font-weight: 700; cursor: pointer; transition: border-color 0.15s, transform 0.15s;
+}
+.extra-knopf:hover { border-color: var(--gold); transform: translateY(-1px); }
+.einstellungs-bloecke { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.einstellung-block { min-width: 0; }
+.einstellung-block { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 20px; padding: 14px 16px 16px; }
+.block-kopf { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.block-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--flaeche-2); font-size: 1.05rem; }
+.block-kopf b { font-size: 1.05rem; }
+.block-info { color: var(--leise); font-size: 0.85rem; }
+.einstellung-block .unter-titel:first-child { margin-top: 0; }
+.einstellung-block .einstellungs-zeile .unter-titel { margin-top: 0; }
+
+.kat-suche { margin-bottom: 10px; font-size: 1rem !important; padding: 11px 14px !important; }
+.kat-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; padding-bottom: 2px; }
+.kat-tabs::-webkit-scrollbar { display: none; }
+.kat-tab {
+  flex: none; border: 0; background: var(--flaeche-2); color: var(--leise); font-weight: 700; padding: 8px 12px; border-radius: 12px; cursor: pointer;
+}
+.kat-tab.aktiv { background: var(--gold); color: var(--gold-text); }
+.kat-panel { min-height: 40px; }
+
+dialog.fenster {
+  width: min(560px, calc(100% - 24px)); max-height: min(80vh, 720px); padding: 0; border: 1px solid var(--rand-stark); border-radius: 24px;
+  background: var(--flaeche); color: var(--text); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); overflow: hidden;
+  animation: fenster-rein 0.3s cubic-bezier(.16, 1, .3, 1);
+}
+dialog.fenster.ohne-animation { animation: none; }
+dialog.fenster::backdrop { background: rgba(8, 6, 20, 0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+@keyframes fenster-rein { from { opacity: 0; transform: translateY(20px) scale(0.97); } }
+.fenster-kopf { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--rand); font-size: 1.1rem; }
+.fenster-inhalt { padding: 16px; overflow-y: auto; max-height: calc(min(80vh, 720px) - 64px); }
+.fenster-inhalt .punkte-info { margin-top: 0; }
+
+/* Startseite: ein Knopf unter dem Namen */
+.name-kapitel #erstellenBtn { margin-top: 12px; }
+.name-kapitel .klein-text { margin: 8px 0 0; }
+.spiele-gitter .spiel-gross:not(button) { cursor: default; }
+
+@media (max-width: 700px) {
+  /* Auf dem Handy öffnen sich Regeln & Punkte als Blatt von unten */
+  dialog.fenster { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 24px 24px 0 0; max-height: 85vh; padding-bottom: env(safe-area-inset-bottom); }
+  @keyframes fenster-rein { from { transform: translateY(100%); } }
+  .einstellung-block { padding: 12px 12px 14px; }
+  .extra-knopf { padding: 7px 12px; font-size: 0.9rem; }
+}
+
+/* Gezeichnete Illustration, wenn es kein freies Foto gibt */
+.bild-box .zeichnung { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bild-box.gezeichnet .emoji-gross { background: none; z-index: 1; filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)); }
+.bild-box.gezeichnet .kat-badge { z-index: 2; }
