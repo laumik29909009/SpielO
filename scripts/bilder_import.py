@@ -108,6 +108,23 @@ def main():
             zuschneiden(datei).save(ziel, "WEBP", quality=80, method=6)
             name = next(k["name"] for k in karten if k["id"] == kid)
             print(f"✓ {deck_id}/{datei.name} → {kid} ({name}), {ziel.stat().st_size // 1024} KB")
+    # Bilder direkt in bilder-eingang/ (ohne Unterordner): Deck anhand des Namens erkennen
+    for datei in sorted(EINGANG.iterdir()):
+        if not datei.is_file() or datei.suffix.lower() not in ENDUNGEN:
+            continue
+        treffer = [(d, zuordnen(d, k, datei.name)) for d, k in alle.items()]
+        treffer = [(d, kid) for d, kid in treffer if kid and not re.fullmatch(r"[A-H][1-4]", Path(datei.name).stem.upper())]
+        if len(treffer) != 1:
+            fehlend.append(f"{datei.name}" + (" (passt zu mehreren Decks, bitte in den Unterordner legen)" if len(treffer) > 1 else ""))
+            continue
+        deck_id, kid = treffer[0]
+        (ZIEL / deck_id).mkdir(parents=True, exist_ok=True)
+        for alt in (ZIEL / deck_id).glob(f"{kid}.*"):
+            alt.unlink()
+        ziel = ZIEL / deck_id / f"{kid}.webp"
+        zuschneiden(datei).save(ziel, "WEBP", quality=80, method=6)
+        name = next(k["name"] for k in alle[deck_id] if k["id"] == kid)
+        print(f"✓ {datei.name} → {deck_id} {kid} ({name}), {ziel.stat().st_size // 1024} KB")
     if fehlend:
         print("\nNicht zugeordnet (bitte umbenennen, z. B. in den Kartennamen oder die ID wie 'B1.jpg'):")
         for f in fehlend:
