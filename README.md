@@ -48,6 +48,11 @@ Drei Klassiker in einem Spiel, Auswahl in der Lobby (Logik: `spiele/skat.js`, Ob
 - **Durak:** 36 Karten, Trumpf, angreifen, nachlegen, verteidigen oder aufnehmen. Der Letzte mit Karten ist der Durak.
 Edles Kartendesign (Elfenbein, Goldrahmen, Serifenschrift, eigene Goldornamente für König, Dame und Bube).
 
+## Würfelglück 🚧
+Würfelklassiker mit 5 Würfeln: bis zu 3 Würfe, Würfel festhalten, 13 Felder (Einser–Sechser mit Bonus 35 ab 63, Dreier-/Viererpasch, Full House 25, Kleine Straße 30, Große Straße 40, Fünfling 50, Chance), jeder weitere Fünfling +50.
+3D-Würfel in CSS (`public/wuerfel.css`), Würfelbecher, Halteleiste, Punkteblock. Logik: `spiele/wuerfel.js`, Oberfläche: `public/spiele/wuerfel.js`. 1–8 Spieler, Computer-Gegner.
+Noch „im Aufbau“ (`config.json` → `"imAufbau": ["wuerfel"]`), testen über `/?vorschau=1`.
+
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
 |---|---|

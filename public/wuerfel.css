@@ -1,0 +1,104 @@
+/* =============================================================
+   Würfelglück: Farbwelt, 3D-Würfel, Teller, Becher, Punkteblock
+   ============================================================= */
+body[data-spiel="wuerfel"], [data-farbe="wuerfel"] {
+  --bg: #0f1424; --flaeche: #182039; --flaeche-2: #212b4d; --leise: #a9b6dd; --text: #f3f6ff;
+  --gold: #ffb84d; --gold-2: #ff6b6b; --gold-text: #2a1200; --btn-schatten: #b84a2a;
+  --glow-1: rgba(255, 184, 77, 0.16); --glow-2: rgba(91, 141, 255, 0.18); --glow-3: rgba(255, 107, 107, 0.12);
+  --konfetti: #ffb84d, #ff6b6b, #5b8dff, #ffffff, #3ee08f;
+}
+.w-buehne { max-width: 980px; margin: 0 auto; }
+.w-oben { display: flex; justify-content: center; margin: 10px 0 14px; }
+.w-tisch { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.w-wer { font-size: 1.05rem; text-align: center; min-height: 1.6em; }
+.w-wer b { color: var(--gold); }
+
+/* Halteleiste */
+.w-halte { position: relative; display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 78px; width: 100%; padding: 8px; border-radius: 18px;
+  border: 2px dashed color-mix(in srgb, var(--gold) 45%, transparent); background: rgba(255, 184, 77, 0.05); }
+.w-halte-text { position: absolute; left: 14px; top: -11px; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg); padding: 0 8px; color: var(--gold); }
+
+/* Würfelteller mit Filz */
+.w-teller { position: relative; width: 100%; min-height: 190px; border-radius: 28px; display: flex; align-items: center; justify-content: center; padding: 26px 16px 26px 96px;
+  background: radial-gradient(ellipse at 50% 40%, #2b7a55, #154a33 70%, #0e3423);
+  box-shadow: inset 0 0 0 10px #5a3a22, inset 0 0 0 13px #3a2414, inset 0 18px 40px rgba(0, 0, 0, 0.45), 0 16px 40px rgba(0, 0, 0, 0.45); perspective: 900px; }
+.w-teller::before { content: ""; position: absolute; inset: 22px; border-radius: 18px; border: 2px dashed rgba(255, 236, 180, 0.18); pointer-events: none; }
+.w-reihe { display: flex; gap: clamp(8px, 2.5vw, 18px); justify-content: center; flex-wrap: wrap; perspective: 900px; }
+
+/* Becher */
+.w-becher { position: absolute; left: 18px; top: 50%; width: 64px; height: 78px; transform: translateY(-50%) rotate(-12deg); transform-origin: 50% 80%; }
+.w-becher span { position: absolute; inset: 0; border-radius: 10px 10px 26px 26px / 10px 10px 16px 16px;
+  background: linear-gradient(90deg, #4a2a16, #8a5530 35%, #b8743f 50%, #6b3f22 80%, #3a1f10);
+  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.25), 0 10px 16px rgba(0, 0, 0, 0.45); }
+.w-becher span::before { content: ""; position: absolute; left: -4px; right: -4px; top: -6px; height: 14px; border-radius: 50%; background: radial-gradient(ellipse, #1a0f08 55%, #c98a52 58%, #7a4a26 100%); }
+.w-becher.schuetteln { animation: becher 0.38s ease-in-out; }
+@keyframes becher { 0%, 100% { transform: translateY(-50%) rotate(-12deg); } 20% { transform: translateY(-58%) rotate(-30deg); } 40% { transform: translateY(-44%) rotate(6deg); } 60% { transform: translateY(-56%) rotate(-26deg); } 80% { transform: translateY(-48%) rotate(-50deg); } }
+
+/* Würfel (CSS 3D): Elfenbein mit runden Kanten und dunklen Augen */
+.w-wuerfel { --g: clamp(48px, 11vw, 66px); all: unset; box-sizing: border-box; width: var(--g); height: var(--g); position: relative; cursor: default; transform-style: preserve-3d; }
+.w-wuerfel:not(:disabled) { cursor: pointer; }
+.w-kubus { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.4s ease; }
+.w-seite { position: absolute; inset: 0; border-radius: 18%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 14%;
+  background: radial-gradient(circle at 30% 25%, #ffffff, #f4efe4 60%, #e2d9c6); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), inset -3px -4px 8px rgba(0, 0, 0, 0.12); backface-visibility: hidden; }
+.w-seite i { width: 66%; height: 66%; margin: auto; border-radius: 50%; }
+.w-seite i.an { background: radial-gradient(circle at 35% 30%, #4a4a5a, #12121a 70%); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25); }
+.w-seite.s1 i.an { background: radial-gradient(circle at 35% 30%, #ff7b7b, #b3131f 70%); width: 80%; height: 80%; }
+.w-seite.s1 { transform: translateZ(calc(var(--g) / 2)); }
+.w-seite.s6 { transform: rotateY(180deg) translateZ(calc(var(--g) / 2)); }
+.w-seite.s2 { transform: rotateY(90deg) translateZ(calc(var(--g) / 2)); }
+.w-seite.s5 { transform: rotateY(-90deg) translateZ(calc(var(--g) / 2)); }
+.w-seite.s3 { transform: rotateX(90deg) translateZ(calc(var(--g) / 2)); }
+.w-seite.s4 { transform: rotateX(-90deg) translateZ(calc(var(--g) / 2)); }
+.w-wuerfel::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: -12%; height: 16%; border-radius: 50%; background: rgba(0, 0, 0, 0.35); filter: blur(4px); transform: translateZ(-1px); }
+.w-wuerfel.leer { opacity: 0.35; }
+.w-wuerfel:not(:disabled):hover .w-kubus { filter: brightness(1.06); }
+.w-wuerfel.gehalten .w-seite { box-shadow: inset 0 0 0 3px var(--gold), inset -3px -4px 8px rgba(0, 0, 0, 0.12); }
+.w-wuerfel.gehalten::before { content: "📌"; position: absolute; top: -14px; right: -8px; font-size: 1rem; z-index: 2; transform: translateZ(40px); }
+
+.w-knoepfe { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 58px; }
+.w-wurf { min-width: min(320px, 86vw); }
+.w-hinweis { font-weight: 800; color: var(--gold); padding: 10px 18px; border-radius: 14px; background: var(--flaeche); border: 1px solid var(--gold); }
+
+/* Punkteblock */
+.w-block-huelle { overflow-x: auto; border-radius: 18px; border: 1px solid var(--rand); background: linear-gradient(180deg, #fffdf5, #f4ecd9); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4); margin-bottom: 30px; }
+.w-block { width: 100%; border-collapse: collapse; color: #1d1d2a; font-size: 0.9rem; min-width: 420px; }
+.w-block th, .w-block td { padding: 6px 8px; text-align: center; border-bottom: 1px solid rgba(60, 50, 20, 0.12); border-left: 1px solid rgba(60, 50, 20, 0.08); }
+.w-block thead th { background: #2b2140; color: #fff; position: sticky; top: 0; }
+.w-block thead th small { display: block; font-size: 0.72rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0 auto; }
+.w-block thead th.dran { background: linear-gradient(180deg, #ff9f43, #e2622b); }
+.w-ava { font-size: 1.3rem; }
+.w-feldname { text-align: left !important; position: sticky; left: 0; background: #fbf6ea; z-index: 1; min-width: 130px; }
+thead .w-feldname { background: #2b2140; }
+.w-feldname b { display: block; }
+.w-feldname small { color: #7a6f58; font-size: 0.72rem; }
+.w-block td.voll { font-weight: 900; font-variant-numeric: tabular-nums; }
+.w-block td.null { color: #b0a58c; }
+.w-block td.neu { animation: w-neu 1.2s ease; }
+@keyframes w-neu { 0% { background: #ffd166; transform: scale(1.3); } 100% { background: transparent; } }
+.w-eintragen { all: unset; cursor: pointer; min-width: 38px; padding: 4px 8px; border-radius: 10px; font-weight: 900; background: #e7f9ee; color: #12753d; box-shadow: inset 0 0 0 2px #3ee08f; transition: transform 0.15s; }
+.w-eintragen:hover, .w-eintragen:focus-visible { transform: scale(1.12); outline: none; background: #3ee08f; color: #062a15; }
+.w-eintragen.streichen { background: #fbeaea; color: #b3261d; box-shadow: inset 0 0 0 2px #f1a9a9; }
+.w-geist { color: #b9ad90; font-style: italic; }
+.w-summe td { font-weight: 800; background: rgba(43, 33, 64, 0.06); }
+.w-summe .w-feldname { background: #f0e8d4; }
+.w-summe.bonus td { color: #12753d; }
+.w-summe.gesamt td { font-size: 1.1rem; background: #2b2140; color: #ffd166; }
+.w-summe.gesamt .w-feldname { background: #2b2140; color: #fff; }
+
+@media (max-width: 700px) {
+  .w-teller { padding: 22px 10px 22px 70px; min-height: 160px; }
+  .w-becher { width: 48px; height: 60px; left: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .w-becher.schuetteln, .w-block td.neu { animation: none; } }
+
+/* Handy: Punkteblock kompakt, damit alle Spalten passen */
+@media (max-width: 700px) {
+  .w-block { font-size: 0.8rem; min-width: 0; }
+  .w-block th, .w-block td { padding: 5px 4px; }
+  .w-feldname { min-width: 86px; max-width: 96px; }
+  .w-feldname small { display: none; }
+  .w-feldname b { font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .w-block thead th small { max-width: 52px; font-size: 0.66rem; }
+  .w-ava { font-size: 1.05rem; }
+  .w-eintragen { min-width: 30px; padding: 3px 5px; }
+}
