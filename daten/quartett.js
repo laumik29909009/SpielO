@@ -243,8 +243,52 @@ const DRAGONS = {
 };
 
 const DECKS = { kungfupanda: KUNGFUPANDA, dragons: DRAGONS, kungfu: KUNGFU, drachen: DRACHEN };
-// Gruppe aus der Karten-ID (A1 → A) ableiten
+
+// =============================================================
+//  Spezialangriffe: Jede Karte hat ihren eigenen Angriff
+//  [Art, Name, Farbe, Objekt]. Arten: strahl, feuerball, stacheln, blitz, welle,
+//  wirbel, krallen, sprung, regen, eis, nebel, schlag, beben, peitsche, werfen, chi
+// =============================================================
+const ANGRIFFE = {
+  kungfupanda: {
+    A1: ["krallen", "Tigerkralle", "#ff7a1a"], A2: ["schlag", "Stabwirbel", "#c98a4b"], A3: ["stacheln", "Druckpunkt-Salve", "#7ddc5a"], A4: ["peitsche", "Schlangenpeitsche", "#52c46a"],
+    B1: ["sprung", "Drachenkrieger-Wumms", "#ffd23f"], B2: ["wirbel", "Flügelsturm", "#f5f0e6"], B3: ["schlag", "Meisterhand", "#ff9f1c"], B4: ["chi", "Blütenblatt-Chi", "#ffb7d5", "🌸"],
+    C1: ["welle", "Nervenschlag", "#b07cff"], C2: ["feuerball", "Kanonenfeuer", "#ff6a2a"], C3: ["regen", "Jade-Klingen", "#3ee08f"], C4: ["nebel", "Gestaltwandel", "#9be15d"],
+    D1: ["werfen", "Nudelsuppen-Wurf", "#ffe0a3", "🍜"], D2: ["beben", "Panda-Stampfer", "#c9a77c"], D3: ["peitsche", "Seidenband-Tanz", "#ff6fb5"], D4: ["werfen", "Taschendieb-Trick", "#ffd23f", "🪙"],
+    E1: ["peitsche", "Schwanzschlag", "#4f9a3a"], E2: ["sprung", "Hörnerstoß", "#a0522d"], E3: ["beben", "Donnerhammer", "#9aa5b1"], E4: ["regen", "Pfeilhagel", "#d9d2c3", "➶"],
+    F1: ["stacheln", "Wolfsrudel-Pfeile", "#b8b8c8"], F2: ["wirbel", "Blick in die Zukunft", "#c58bff"], F3: ["werfen", "Eilbotschaft", "#f5e6c8", "📜"], F4: ["wirbel", "Kugelroller", "#c08a4a"],
+  },
+  dragons: {
+    A1: ["feuerball", "Plasmastoß", "#7c6bff"], A2: ["stacheln", "Stachelsalve", "#38c6ff"], A3: ["feuerball", "Lavaklumpen", "#ff7a1a"], A4: ["strahl", "Flammenhaut", "#ff4d2e"],
+    B1: ["nebel", "Gas und Funke", "#9be15d"], B2: ["strahl", "Tarnfeuer", "#bfe9ff"], B3: ["wirbel", "Feuerwirbel", "#ff9f1c"], B4: ["sprung", "Rammstoß", "#a88a63"],
+    C1: ["strahl", "Inferno", "#ff2d1a"], C2: ["eis", "Eisatem", "#bff3ff"], C3: ["welle", "Todesschrei", "#ffffff"], C4: ["wirbel", "Feuertornado", "#ff6a2a"],
+    D1: ["blitz", "Blitzschlag", "#ffe14d"], D2: ["beben", "Tunnelangriff", "#8a6a4a"], D3: ["stacheln", "Giftstachel", "#b07cff"], D4: ["welle", "Donnerschall", "#38a8ff"],
+    E1: ["feuerball", "Mini-Feuerstoß", "#ffb23d"], E2: ["regen", "Funkenregen", "#7fe3ff"], E3: ["nebel", "Säurespritzer", "#c3f73a"], E4: ["stacheln", "Klingenwurf", "#d6dde6"],
+  },
+  kungfu: {
+    A1: ["krallen", "Glühende Kralle", "#ff7a1a"], A2: ["schlag", "Tanzende Flamme", "#ffb23d"], A3: ["welle", "Brüllende Faust", "#ff5a36"], A4: ["strahl", "Drachenfeuer", "#ff4d2e"],
+    B1: ["peitsche", "Wasserpeitsche", "#5ec8f2"], B2: ["sprung", "Bauchrutscher", "#bff3ff"], B3: ["regen", "Seerosen-Regen", "#7fe3ff", "💧"], B4: ["schlag", "Acht-Arme-Wirbel", "#ff7d8e"],
+    C1: ["sprung", "Sturzflug", "#f5f0e6"], C2: ["welle", "Stiller Flügel", "#c7d2ff"], C3: ["wirbel", "Tausend Sprünge", "#b6f5d8"], C4: ["strahl", "Regenbogen-Wind", "#ff9df2"],
+    D1: ["beben", "Felsenfaust", "#a88a63"], D2: ["sprung", "Stampfende Herde", "#8a5a3a"], D3: ["krallen", "Tunnelkralle", "#c9a77c"], D4: ["eis", "Gletscher-Stand", "#e3f8ff"],
+    E1: ["welle", "Mondheulen", "#d1b8ff"], E2: ["werfen", "Diebische Hand", "#ffd23f", "👛"], E3: ["schlag", "Lautlose Pfote", "#b07cff"], E4: ["welle", "Echo-Schlag", "#7c4dff"],
+    F1: ["wirbel", "Weißer Flügel", "#ffffff"], F2: ["chi", "Mondgeweih", "#fff1a8"], F3: ["werfen", "Schlummer-Angriff", "#c7d2ff", "💤"], F4: ["beben", "Ewiger Berg", "#f5b700"],
+  },
+  drachen: {
+    A1: ["strahl", "Schmelzatem", "#ff4d2e"], A2: ["feuerball", "Funkenkugel", "#ffb23d"], A3: ["feuerball", "Lavabrocken", "#ff6a2a"], A4: ["strahl", "Vulkanausbruch", "#ff2d1a"],
+    B1: ["eis", "Frostbiss", "#bff3ff"], B2: ["regen", "Schneegestöber", "#ffffff", "❄️"], B3: ["stacheln", "Eiszapfen-Salve", "#9bd8f5"], B4: ["eis", "Ewiger Winter", "#e3f8ff"],
+    C1: ["blitz", "Donnerschlag", "#ffe14d"], C2: ["blitz", "Kettenblitz", "#fff6b0"], C3: ["wirbel", "Doppel-Zyklon", "#c7d2ff"], C4: ["blitz", "Gewittersturm", "#ffe14d"],
+    D1: ["beben", "Felsbiss", "#7d6b5a"], D2: ["werfen", "Kieselwurf", "#a89276", "🪨"], D3: ["beben", "Bergsturz", "#5e5a55"], D4: ["stacheln", "Granitsplitter", "#c4b293"],
+    E1: ["welle", "Tiefenleuchten", "#7ff0d8"], E2: ["stacheln", "Korallenschuss", "#ff7d8e"], E3: ["welle", "Tsunami", "#17a2b8"], E4: ["strahl", "Meeresstrahl", "#5fe3c0"],
+    F1: ["krallen", "Dämmerkralle", "#ff5fa8"], F2: ["nebel", "Rauchschleier", "#8d8da3"], F3: ["nebel", "Geisternebel", "#e2dbff"], F4: ["strahl", "Sonnenfinsternis", "#ff3d7f"],
+  },
+};
+
+// Gruppe aus der Karten-ID (A1 → A) ableiten, Angriff zuordnen
 for (const deck of Object.values(DECKS)) {
-  for (const k of deck.karten) k.gruppe = k.id[0];
+  for (const k of deck.karten) {
+    k.gruppe = k.id[0];
+    const [art, name, farbe, objekt] = ANGRIFFE[deck.id]?.[k.id] || ["strahl", "Angriff"];
+    k.angriff = { art, name, farbe: farbe || null, objekt: objekt || null };
+  }
 }
 module.exports = { DECKS };

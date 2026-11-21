@@ -5,7 +5,7 @@
 (() => {
   const { $, $$, esc } = GN;
   const app = GN.app;
-  let hand = { karte: null, anzahl: 0, runde: 0 }; // eigene oberste Karte (kommt privat vom Server)
+  let hand = { karten: [], anzahl: 0, runde: 0 }; // eigene Handkarten (kommen privat vom Server)
   let galerieDeck = null;
 
   const meta = () => GN.meta.spiele.quartett || { decks: [] };
@@ -23,7 +23,7 @@
   GN.socket.on("quartett:hand", (h) => {
     hand = h;
     const z = GN.zustand;
-    if (z?.spiel === "quartett" && z.phase === "waehlen") zeigeMeineKarte(z);
+    if (z?.spiel === "quartett" && (z.phase === "waehlen" || z.phase === "kontern")) zeigeHand(z);
   });
 
   // =============================================================
@@ -110,9 +110,11 @@
             : "Quartett wird zu zweit bis zu viert gespielt. Computer-Gegner füllen freie Plätze auf. Solo spielst du immer gegen den Computer."}</p>`,
       },
       {
-        id: "runden", wichtig: true, icon: "⏱️", titel: "Spielende & Zeit",
-        info: `${e.runden ? `${e.runden} Runden` : "Bis einer alle Karten hat"} · ${e.sekunden ? `${e.sekunden} s zum Wählen` : "Wählen ohne Zeitlimit"}`,
+        id: "runden", wichtig: true, icon: "⏱️", titel: "Hand, Spielende & Zeit",
+        info: `${e.hand > 1 ? `${e.hand} Handkarten` : "Klassisch"} · ${e.runden ? `${e.runden} Runden` : "Bis einer alle Karten hat"} · ${e.sekunden ? `${e.sekunden} s zum Wählen` : "Wählen ohne Zeitlimit"}`,
         html: `<div class="einstellungs-zeile">
+          <div><div class="unter-titel">Karten auf der Hand</div>
+            <div class="segment">${[1, 2, 3].map((n) => `<button data-qhand="${n}" class="${(e.hand || 1) === n ? "aktiv" : ""}" ${dis}>${n === 1 ? "1 (klassisch)" : n}</button>`).join("")}</div></div>
           <div><div class="unter-titel">Spielende</div>
             <div class="segment">${[15, 25, 40, 0].map((n) => `<button data-qrunden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n ? n + " Runden" : "Alle Karten"}</button>`).join("")}</div></div>
           <div><div class="unter-titel">Zeit zum Wählen</div>
@@ -122,8 +124,9 @@
       {
         id: "regeln", icon: "📖", titel: "So geht's", info: "Höchster Wert gewinnt",
         html: `<ol class="q-regeln">
-          <li>Alle Karten werden gemischt und verteilt. Du siehst nur deine oberste Karte.</li>
-          <li>Wer dran ist, wählt einen Wert, z. B. <b>Tempo</b>.</li>
+          <li>Alle Karten werden gemischt und verteilt. Du siehst nur deine Handkarten (1–3, je nach Einstellung).</li>
+          <li>Wer dran ist, wählt eine seiner Handkarten und sagt einen Wert an, z. B. <b>Tempo</b>.</li>
+          <li><b>Kontern:</b> Mit mehreren Handkarten sucht sich danach jeder aus, welche Karte er dagegen legt.</li>
           <li>Alle decken auf: <b>Der höchste Wert gewinnt</b> alle Karten der Runde und ist als Nächstes dran.</li>
           <li><b>Gleichstand?</b> Die Karten kommen in den Topf. Wer die nächste Runde gewinnt, bekommt ihn dazu.</li>
           <li>Wer keine Karten mehr hat, ist raus. Gewonnen hat, wer alle Karten hat oder nach dem Rundenlimit die meisten.</li>
@@ -137,6 +140,7 @@
     $$("[data-deck]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ deck: b.dataset.deck })));
     $$("[data-bots]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ bots: +b.dataset.bots })));
     $$("[data-qrunden]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ runden: +b.dataset.qrunden })));
+    $$("[data-qhand]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ hand: +b.dataset.qhand })));
     $$("[data-qsek]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ sekunden: +b.dataset.qsek })));
   }
   // Die Galerie darf jeder öffnen (nicht nur der Host)
@@ -168,8 +172,11 @@
   }
 
   // =============================================================
-  //  Spielansicht
+  //  Spielansicht: Spieltisch mit Figuren, eigene Hand unten
   // =============================================================
+  let auswahl = null; // ausgewählte Handkarte
+  let letzterKampf = null; // für die Reaktionen der Figuren nach dem Kampf
+
   function zeige(z, vorher) {
     if (z.phase === "ende") {
       if (!GN.ansicht.startsWith("quartett-podest")) {
@@ -183,15 +190,20 @@
       if (GN.ansicht !== key) kampf(key, z);
       return;
     }
-    // Wählen
-    const key = "quartett-wahl-" + z.runde;
+    // Wählen oder Kontern: Tisch
+    const key = "quartett-tisch-" + z.runde;
     if (GN.ansicht !== key || !$(".q-buehne")) aufbauen(key, z);
-    else { zeichneGegner(z); zeigeArena(z); zeigeMeineKarte(z); }
-    if (GN.timerNeu || !vorher || vorher.phase !== z.phase || vorher.runde !== z.runde || vorher.waehler !== z.waehler) {
+    else { zeichneSitze(z); zeichneTischMitte(z); zeigeHand(z); }
+    const phaseNeu = !vorher || vorher.phase !== z.phase || vorher.runde !== z.runde || vorher.waehler !== z.waehler;
+    if (GN.timerNeu || phaseNeu) {
       GN.timerNeu = false;
-      if (z.restMs > 0) { $("#timer")?.classList.remove("unendlich"); GN.starteTimer(z.restMs, (z.sekunden || 8) * 1000, { tickAb: 5000, tonAus: () => z.waehler !== GN.ich }); }
-      else GN.ohneZeitlimit();
+      const ichBetroffen = z.phase === "waehlen" ? z.waehler === GN.ich : !z.gelegt.includes(GN.ich);
+      if (z.restMs > 0) {
+        $("#timer")?.classList.remove("unendlich");
+        GN.starteTimer(z.restMs, z.restMs, { tickAb: 5000, tonAus: () => !ichBetroffen });
+      } else GN.ohneZeitlimit();
     }
+    if (phaseNeu && z.phase === "kontern" && z.angesagt.spieler !== GN.ich) { Ton.alarm(); navigator.vibrate?.([60, 40, 60]); }
   }
 
   function aufbauen(key, z) {
@@ -206,89 +218,134 @@
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
         <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
-        <div class="q-gegner" id="qGegner"></div>
-        <div class="q-arena" id="qArena"></div>
-        <div class="q-meins" id="qMeins"></div>
+        <div class="q-szene">
+          <div class="q-sitze" id="qSitze"></div>
+          <div class="q-tisch"><div class="q-platte"><div class="q-platte-muster"></div><div class="q-gelegt" id="qGelegt"></div></div></div>
+          <div class="q-tisch-mitte" id="qMitte"></div>
+        </div>
+        <div class="q-ich" id="qIch"></div>
       </div>`;
-    zeichneGegner(z);
-    zeigeArena(z);
-    zeigeMeineKarte(z);
+    zeichneSitze(z);
+    zeichneTischMitte(z);
+    zeigeHand(z);
+    // Reaktionen nach dem letzten Kampf: Gewinner jubelt, Verlierer lassen den Kopf hängen
+    if (letzterKampf?.runde === z.runde - 1) {
+      const k = letzterKampf.kampf;
+      k.gespielt.forEach((g) => $(`.q-sitz[data-teilnehmer="${g.spieler}"]`)?.classList.add(g.spieler === k.sieger ? "jubelt" : k.gleichstand ? "staunt" : "traurig"));
+      setTimeout(() => $$(".q-sitz").forEach((s) => s.classList.remove("jubelt", "traurig", "staunt")), 1800);
+    }
   }
 
-  function zeichneGegner(z) {
-    const box = $("#qGegner");
+  // Sitzplätze: alle anderen gegenüber, mit großer Figur
+  function zeichneSitze(z) {
+    const box = $("#qSitze");
     if (!box) return;
-    box.innerHTML = leute(z).filter((t) => t.id !== GN.ich).map((t) => `
-      <div class="q-spieler ${t.karten ? "" : "raus"} ${z.waehler === t.id && z.phase === "waehlen" ? "dran" : ""} ${t.online ? "" : "offline"}" data-teilnehmer="${t.id}">
-        <span class="avatar">${t.avatar}</span>
-        <span class="q-sp-text"><b>${esc(t.name)}</b><span>${t.karten ? `${t.karten} ${t.karten === 1 ? "Karte" : "Karten"}` : "raus"}${t.bot ? " · 🤖" : ""}${t.afk ? " · 💤" : ""}</span></span>
-        <span class="q-stapel" aria-hidden="true">${"<i></i>".repeat(Math.min(5, Math.ceil(t.karten / 3)))}</span>
-      </div>`).join("");
+    const andere = leute(z).filter((t) => t.id !== GN.ich);
+    box.className = `q-sitze anzahl-${andere.length}`;
+    box.innerHTML = andere.map((t, i) => {
+      const dran = (z.phase === "waehlen" && z.waehler === t.id) || (z.phase === "kontern" && !z.gelegt.includes(t.id) && t.karten);
+      const fertig = z.phase === "kontern" && z.gelegt.includes(t.id) && z.angesagt.spieler !== t.id;
+      return `
+      <div class="q-sitz ${t.karten ? "" : "raus"} ${dran ? "dran" : ""} ${t.online ? "" : "offline"}" data-teilnehmer="${t.id}" style="--i:${i}">
+        <div class="q-figur"><span class="q-figur-schatten"></span><span class="q-figur-koerper">${t.avatar}</span>
+          ${z.phase === "kontern" && z.angesagt.spieler === t.id ? `<span class="q-blase">${deckVon(z.deck).werte[z.angesagt.wert].icon} ${esc(deckVon(z.deck).werte[z.angesagt.wert].name)}!</span>` : ""}
+          ${fertig ? '<span class="q-haken">✓</span>' : ""}
+          ${z.phase === "waehlen" && z.waehler === t.id ? `<span class="q-denkt">${GN.wartePunkte()}</span>` : ""}
+        </div>
+        <div class="q-schild"><b>${esc(t.name)}</b><span>${t.karten ? `🃏 ${t.karten}` : "raus"}${t.bot ? " · 🤖" : ""}${t.afk ? " · 💤" : ""}</span></div>
+      </div>`;
+    }).join("");
   }
 
-  function zeigeArena(z) {
-    const box = $("#qArena");
-    if (!box) return;
+  // Tischmitte: Ansage, Topf und verdeckt gelegte Karten
+  function zeichneTischMitte(z) {
+    const deck = deckVon(z.deck);
+    const mitte = $("#qMitte"), gelegt = $("#qGelegt");
+    if (!mitte) return;
     const ichDran = z.waehler === GN.ich;
-    const w = person(z, z.waehler);
-    box.innerHTML = `
-      <div class="q-ansage ${ichDran ? "ich" : ""}">
-        ${ichDran ? "<b>Du bist dran!</b><span>Tippe auf deinen stärksten Wert.</span>"
-          : `<b>${w.avatar} ${esc(w.name)} wählt</b><span>einen Wert${GN.wartePunkte()}</span>`}
-      </div>
-      ${z.topf ? `<div class="q-topf" title="Gewinnt die nächste Runde dazu">🪙 Im Topf: <b>${z.topf}</b> ${z.topf === 1 ? "Karte" : "Karten"}</div>` : ""}`;
+    let text = "";
+    if (z.phase === "waehlen") {
+      text = ichDran ? `<b class="gross">Du bist dran!</b><span>${z.hand > 1 ? "Wähle eine Karte und dann einen Wert." : "Tippe auf deinen stärksten Wert."}</span>`
+        : `<b>${person(z, z.waehler).avatar} ${esc(person(z, z.waehler).name)} wählt …</b>`;
+    } else if (z.phase === "kontern") {
+      const w = deck.werte[z.angesagt.wert];
+      const ansager = z.angesagt.spieler === GN.ich ? "Du sagst" : `${esc(person(z, z.angesagt.spieler).name)} sagt`;
+      text = `<span>${ansager} an:</span><b class="q-ansage-wert">${w.icon} ${esc(w.name)}</b>`;
+    }
+    mitte.innerHTML = `<div class="q-ansage">${text}</div>${z.topf ? `<div class="q-topf" title="Gewinnt die nächste Runde dazu">🪙 Topf: <b>${z.topf}</b></div>` : ""}`;
+    // Verdeckte Karten auf dem Tisch für alle, die schon gelegt haben
+    const alle = leute(z);
+    gelegt.innerHTML = z.gelegt.map((id) => {
+      const pos = id === GN.ich ? alle.length : alle.filter((t) => t.id !== GN.ich).findIndex((t) => t.id === id);
+      return `<div class="q-tischkarte" data-von="${id}" style="--p:${pos};--n:${alle.length - 1}">${rueckseite(deck, "mini")}</div>`;
+    }).join("");
   }
 
-  function zeigeMeineKarte(z) {
-    const box = $("#qMeins");
+  // Eigene Hand: kleine Karten zum Auswählen, die gewählte groß mit Werten
+  function zeigeHand(z) {
+    const box = $("#qIch");
     if (!box) return;
     const deck = deckVon(z.deck);
     const ich = leute(z).find((t) => t.id === GN.ich);
-    if (!ich) {
-      box.innerHTML = `<div class="q-hinweis">👀 Du schaust diese Partie zu. Bei der nächsten bist du dabei!</div>`;
-      return;
-    }
-    if (!ich.karten) {
-      box.innerHTML = `<div class="q-hinweis">😵 Du hast keine Karten mehr. Schau zu, wer gewinnt!</div>`;
-      return;
-    }
-    const k = hand.karte && karteVon(deck, hand.karte);
-    if (!k) return;
-    const dran = z.waehler === GN.ich && z.phase === "waehlen";
-    // Nicht neu zeichnen, wenn sich nichts geändert hat (sonst flackert die Karte)
-    const sig = `${k.id}|${dran}|${ich.karten}`;
+    if (!ich) { box.innerHTML = `<div class="q-hinweis">👀 Du schaust diese Partie zu. Bei der nächsten bist du dabei!</div>`; return; }
+    if (!ich.karten) { box.innerHTML = `<div class="q-hinweis">😵 Du hast keine Karten mehr. Schau zu, wer gewinnt!</div>`; return; }
+    const karten = (hand.karten || []).map((id) => karteVon(deck, id)).filter(Boolean);
+    if (!karten.length) return;
+    if (!karten.some((k) => k.id === auswahl)) auswahl = karten[0].id;
+    const ansage = z.phase === "kontern" ? z.angesagt.wert : null;
+    const binIchAnsager = z.phase === "kontern" && z.angesagt.spieler === GN.ich;
+    const gelegt = z.phase === "kontern" && z.gelegt.includes(GN.ich);
+    const darfWaehlen = z.phase === "waehlen" && z.waehler === GN.ich;
+    const darfKontern = z.phase === "kontern" && !gelegt;
+    const sig = [karten.map((k) => k.id).join(), auswahl, z.phase, darfWaehlen, darfKontern, gelegt, ich.karten].join("|");
     if (box.dataset.sig === sig) return;
     box.dataset.sig = sig;
+    const k = karteVon(deck, auswahl);
+    let hinweis = "";
+    if (darfKontern) hinweis = `<div class="q-konter-hinweis">Welche Karte legst du gegen <b>${deck.werte[ansage].icon} ${esc(deck.werte[ansage].name)}</b>?</div>`;
+    else if (gelegt && !binIchAnsager) hinweis = `<div class="q-konter-hinweis fertig">✓ Gelegt! Warte auf die anderen${GN.wartePunkte()}</div>`;
+    else if (binIchAnsager) hinweis = `<div class="q-konter-hinweis fertig">Die anderen suchen ihre Konter-Karte${GN.wartePunkte()}</div>`;
     box.innerHTML = `
-      <div class="q-meine-karte ${dran ? "dran" : ""}">${karte(deck, k, { klickbar: dran, klasse: "gross neu" })}</div>
-      <div class="q-mein-stapel">🃏 Du hast <b>${ich.karten}</b> ${ich.karten === 1 ? "Karte" : "Karten"}</div>`;
-    const el = $(".qkarte", box);
+      ${hinweis}
+      ${karten.length > 1 ? `<div class="q-hand" role="listbox" aria-label="Deine Handkarten">
+        ${karten.map((x, i) => `<button class="q-handkarte ${x.id === auswahl ? "gewaehlt" : ""}" data-hand="${x.id}" role="option" aria-selected="${x.id === auswahl}" style="--i:${i};--n:${karten.length}" ${gelegt || binIchAnsager ? "disabled" : ""}>
+          ${karte(deck, x, { klasse: "mini" })}
+          ${ansage !== null ? `<span class="q-hand-wert">${deck.werte[ansage].icon} ${x.w[ansage].toLocaleString("de-DE")}</span>` : ""}
+        </button>`).join("")}
+      </div>` : ""}
+      <div class="q-meine-karte ${darfWaehlen ? "dran" : ""} ${darfKontern ? "kontern" : ""}">${karte(deck, k, { klickbar: darfWaehlen, klasse: "gross neu" })}</div>
+      ${darfKontern ? `<button class="btn gross voll q-legen" id="legenBtn">🃏 Diese Karte legen</button>` : ""}
+      <div class="q-mein-stapel">🃏 Du hast <b>${ich.karten}</b> ${ich.karten === 1 ? "Karte" : "Karten"}${z.hand > 1 ? ` · ${karten.length} auf der Hand` : ""}</div>`;
+    const el = $(".q-meine-karte .qkarte", box);
     kippen(el);
-    if (dran) {
+    if (ansage !== null) $(`.qk-wert[data-wert="${ansage}"]`, el)?.classList.add("angesagt");
+    $$("[data-hand]", box).forEach((b) => (b.onclick = () => { Ton.klick(); auswahl = b.dataset.hand; box.dataset.sig = ""; zeigeHand(GN.zustand); }));
+    if (darfWaehlen) {
       $$(".qk-wert", el).forEach((b) => (b.onclick = () => {
         if (el.classList.contains("gewaehlt")) return;
         el.classList.add("gewaehlt");
         b.classList.add("gewaehlt");
         Ton.abgeben();
         navigator.vibrate?.(30);
-        GN.aktion("waehlen", +b.dataset.wert);
+        GN.aktion("waehlen", { karte: auswahl, wert: +b.dataset.wert });
       }));
     }
+    $("#legenBtn")?.addEventListener("click", () => {
+      Ton.abgeben();
+      navigator.vibrate?.(30);
+      $("#legenBtn").disabled = true;
+      GN.aktion("kontern", auswahl);
+    });
   }
 
   // =============================================================
-  //  Kampf-Animation
+  //  Kampf-Animation (beide Seiten greifen an)
   //  0,0 s  Karten fliegen verdeckt rein   0,5 s aufdecken
-  //  1,1 s  gewählter Wert leuchtet        1,3 s Zahlen zählen hoch
-  //  2,5 s  Angriff: Drachen speien, Meister springen zu
-  //  3,4 s  Ergebnis-Banner                4,3 s Karten fliegen zum Gewinner
+  //  1,1 s  angesagter Wert leuchtet       1,3 s Zahlen zählen hoch
+  //  2,5 s  ALLE Karten feuern ihren Spezialangriff zur Mitte
+  //  3,3 s  Zusammenprall: der stärkere Angriff bricht durch und trifft
+  //  4,4 s  Ergebnis                       5,2 s Karten fliegen zum Gewinner
   // =============================================================
-  const ELEMENT_FARBEN = {
-    feuer: ["#ffef9a", "#ffb23d", "#ff5a36"], eis: ["#ffffff", "#bff3ff", "#5ec8f2"], blitz: ["#fffbe0", "#ffe14d", "#a35cff"],
-    stein: ["#e2cfa6", "#a88a63", "#6b5440"], wasser: ["#e0fffa", "#7ff0d8", "#1fa6ff"], schatten: ["#ffd1ec", "#b07cff", "#3b1f6b"],
-    wind: ["#ffffff", "#b6f5d8", "#20c997"], licht: ["#fffbe0", "#ffe58a", "#f5b700"],
-  };
-
   function kampf(key, z) {
     GN.ansicht = key;
     GN.stoppeTimer();
@@ -296,19 +353,19 @@
     const deck = deckVon(z.deck);
     const k = z.kampf;
     const w = deck.werte[k.wert];
-    const waehler = person(z, k.waehler);
-    if (!$(".q-buehne")) aufbauen(key, z); // z. B. nach Neuladen mitten im Kampf
+    letzterKampf = { runde: z.runde, kampf: k };
+    if (!$(".q-buehne")) aufbauen(key, z);
     GN.ansicht = key;
-    $("#qMeins").dataset.sig = "";
+    if ($("#qIch")) $("#qIch").dataset.sig = "";
     const schnell = ruhig();
     const gespielt = k.gespielt.map((g) => ({ ...g, k: karteVon(deck, g.karte) }));
-    // Meine Karte zuerst (unten), dann die anderen
     gespielt.sort((a, b) => (b.spieler === GN.ich) - (a.spieler === GN.ich));
+    const maxWert = Math.max(...gespielt.map((g) => g.k.w[k.wert]));
 
     const ov = document.createElement("div");
     ov.className = `q-kampf anzahl-${gespielt.length} ${schnell ? "schnell" : ""}`;
     ov.innerHTML = `
-      <div class="q-kampf-titel"><span class="q-kampf-wer">${waehler.avatar} ${esc(nameVon(z, k.waehler))} ${k.waehler === GN.ich ? "wählst" : "wählt"}</span>
+      <div class="q-kampf-titel"><span class="q-kampf-wer">${person(z, k.waehler).avatar} ${esc(nameVon(z, k.waehler))} ${k.waehler === GN.ich ? "sagst" : "sagt"} an</span>
         <span class="q-kampf-wert">${w.icon} ${esc(w.name)}!</span></div>
       <div class="q-kampf-feld">
         ${gespielt.map((g, i) => {
@@ -319,6 +376,7 @@
               <div class="q-vorne">${karte(deck, g.k, { klasse: "kampf" })}</div>
               <div class="q-hinten">${rueckseite(deck)}</div>
             </div>
+            <div class="q-angriff-name" style="--farbe:${g.k.angriff.farbe || gruppeVon(deck, g.k).farbe2}">${esc(g.k.angriff.name)}!</div>
           </div>`;
         }).join("")}
         <div class="q-vs" aria-hidden="true">VS</div>
@@ -328,39 +386,65 @@
     const zeitplan = [];
     const spaeter = (ms, fn) => zeitplan.push(setTimeout(() => { if (ov.isConnected) fn(); }, schnell ? Math.min(ms, 400) : ms));
     const weg = () => { zeitplan.forEach(clearTimeout); ov.classList.add("raus"); setTimeout(() => ov.remove(), 400); };
-    // Neue Ansicht (nächste Runde, Lobby, ...) → Overlay sauber entfernen
     const beobachter = setInterval(() => { if (GN.ansicht !== key && !GN.ansicht.startsWith("quartett-podest")) { clearInterval(beobachter); weg(); } }, 200);
+    const el = (id) => $(`.q-kaempfer[data-spieler="${id}"]`, ov);
+    const kartenMitte = (e) => mitte($(".qkarte", e) || e);
+    const feldMitte = () => mitte($(".q-kampf-feld", ov));
 
     requestAnimationFrame(() => ov.classList.add("rein"));
     if (!schnell) Ton.wusch();
-    spaeter(500, () => { $$(".q-kaempfer", ov).forEach((el) => el.classList.add("offen")); Ton.klick(); });
+    spaeter(500, () => { $$(".q-kaempfer", ov).forEach((e) => e.classList.add("offen")); Ton.klick(); });
     spaeter(1100, () => {
       ov.classList.add("wert-zeigen");
-      $$(`.q-kaempfer .qk-wert[data-wert="${k.wert}"]`, ov).forEach((el) => el.classList.add("aktiv"));
-      $$(`.q-kaempfer .qk-wert:not([data-wert="${k.wert}"])`, ov).forEach((el) => el.classList.add("leise"));
+      $$(`.q-kaempfer .qk-wert[data-wert="${k.wert}"]`, ov).forEach((e) => e.classList.add("aktiv"));
+      $$(`.q-kaempfer .qk-wert:not([data-wert="${k.wert}"])`, ov).forEach((e) => e.classList.add("leise"));
     });
     spaeter(1300, () => {
-      $$(`.q-kaempfer .qk-wert[data-wert="${k.wert}"] .qk-w-zahl`, ov).forEach((el) => hochzaehlen(el, w, schnell ? 0 : 1000));
+      $$(`.q-kaempfer .qk-wert[data-wert="${k.wert}"] .qk-w-zahl`, ov).forEach((e) => hochzaehlen(e, w, schnell ? 0 : 1000));
       if (!schnell) for (let i = 0; i < 8; i++) setTimeout(() => ov.isConnected && Ton.tick(), i * 120);
     });
-
-    const siegerEl = () => $(`.q-kaempfer[data-spieler="${k.sieger}"]`, ov);
-    const verliererEls = () => $$(".q-kaempfer", ov).filter((el) => el.dataset.spieler !== k.sieger);
+    // Beide (alle) Seiten greifen gleichzeitig zur Mitte an
     spaeter(2500, () => {
+      const ziel = feldMitte();
+      gespielt.forEach((g) => {
+        const e = el(g.spieler);
+        e.classList.add("greift-an");
+        const [x, y] = kartenMitte(e);
+        // Nahkampf-Arten springen sichtbar nach vorn
+        if (["sprung", "krallen", "schlag", "beben", "peitsche"].includes(g.k.angriff.art)) {
+          $(".q-dreh", e).animate([{ transform: "none" }, { transform: `translate(${(ziel[0] - x) * 0.25}px, ${(ziel[1] - y) * 0.25 - 16}px) scale(1.05)` }, { transform: "none" }], { duration: 700, easing: "cubic-bezier(.3,.7,.3,1)" });
+        }
+        QuartettAngriffe.spiele(ov, g.k.angriff.art, { von: [x, y], nach: ziel, farbe: g.k.angriff.farbe || gruppeVon(deck, g.k).farbe2, objekt: g.k.angriff.objekt, kraft: 0.55 + 0.45 * (g.k.w[k.wert] / maxWert) });
+      });
+      angriffsTon(gespielt.map((g) => g.k.angriff.art));
+    });
+    // Zusammenprall in der Mitte
+    spaeter(3300, () => {
+      const m = feldMitte();
+      const knall = document.createElement("i");
+      knall.className = "q-knall";
+      knall.style.cssText = `left:${m[0]}px;top:${m[1]}px`;
+      ov.appendChild(knall);
+      setTimeout(() => knall.remove(), 700);
       if (k.gleichstand) {
         ov.classList.add("stechen");
-        $$(".q-kaempfer", ov).filter((el) => k.gleich.includes(el.dataset.spieler)).forEach((el) => el.classList.add("prall"));
-        Ton.klirr();
-        funken(ov, ov.querySelector(".q-vs"), "#ffe14d");
+        Ton.klirr(); Ton.treffer();
+        funkenAn(ov, m, "#ffe14d", 24);
         return;
       }
-      const s = siegerEl();
+      Ton.treffer();
+      const s = el(k.sieger);
       const g = gespielt.find((x) => x.spieler === k.sieger);
-      const element = gruppeVon(deck, g.k).element;
       s.classList.add("sieger");
-      verliererEls().forEach((v, i) => setTimeout(() => angriff(ov, s, v, element, deck.id === "drachen"), i * 260));
+      // Der stärkere Angriff bricht durch und trifft alle anderen
+      gespielt.filter((x) => x.spieler !== k.sieger).forEach((v, i) => setTimeout(() => {
+        if (!ov.isConnected) return;
+        const ve = el(v.spieler);
+        QuartettAngriffe.spiele(ov, g.k.angriff.art, { von: m, nach: kartenMitte(ve), farbe: g.k.angriff.farbe || gruppeVon(deck, g.k).farbe2, objekt: g.k.angriff.objekt, kraft: 0.9 });
+        setTimeout(() => ov.isConnected && treffer(ov, ve, g.k.angriff.farbe || "#ff4f6d"), 420);
+      }, i * 200));
     });
-    spaeter(3400, () => {
+    spaeter(4400, () => {
       const box = $(".q-ergebnis", ov);
       const n = k.gespielt.length + (k.topfGewonnen || 0);
       if (k.gleichstand) box.innerHTML = `<b>⚔️ STECHEN!</b><span>Gleichstand: Die Karten kommen in den Topf.</span>`;
@@ -370,29 +454,35 @@
       if (k.sieger === GN.ich) { Ton.richtig(); if (k.topfGewonnen) GN.konfetti(80); }
       else if (k.gespielt.some((x) => x.spieler === GN.ich) && !k.gleichstand) Ton.falsch();
     });
-    spaeter(4300, () => {
-      // Karten fliegen zum Gewinner (oder in den Topf in der Mitte)
+    spaeter(5200, () => {
       let ziel = null;
-      if (!k.gleichstand) ziel = k.sieger === GN.ich ? $("#qMeins") : $(`[data-teilnehmer="${k.sieger}"]`);
+      if (!k.gleichstand) ziel = k.sieger === GN.ich ? $("#qIch") : $(`.q-sitz[data-teilnehmer="${k.sieger}"]`);
       const zr = ziel?.getBoundingClientRect();
-      $$(".q-kaempfer", ov).forEach((el, i) => {
-        const r = el.getBoundingClientRect();
+      $$(".q-kaempfer", ov).forEach((e, i) => {
+        const r = e.getBoundingClientRect();
         const dx = zr ? zr.left + zr.width / 2 - (r.left + r.width / 2) : 0;
-        const dy = zr ? zr.top + zr.height / 2 - (r.top + r.height / 2) : 0;
-        el.animate([{ transform: "none", opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(.15) rotate(${(i % 2 ? 1 : -1) * 25}deg)`, opacity: 0 }],
+        const dy = zr ? zr.top + Math.min(zr.height, 200) / 2 - (r.top + r.height / 2) : 0;
+        e.animate([{ transform: "none", opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(.15) rotate(${(i % 2 ? 1 : -1) * 25}deg)`, opacity: 0 }],
           { duration: 650, delay: i * 70, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" });
       });
       $(".q-ergebnis", ov).classList.add("weg");
       if (!schnell) Ton.wusch();
     });
-    spaeter(5200, () => {
+    spaeter(6000, () => {
       clearInterval(beobachter);
       weg();
-      // Spiel vorbei? Dann zur Siegerehrung (die Nachricht kann kurz vor oder nach diesem Moment kommen)
       setTimeout(() => {
         if (GN.zustand?.phase === "ende" && GN.ansicht === key) GN.podest("quartett-podest-" + GN.zustand.runde, { einheit: "Karten" });
       }, 450);
     });
+  }
+
+  function angriffsTon(arten) {
+    if (arten.includes("blitz")) Ton.feuerstoss("blitz");
+    else if (arten.includes("eis")) Ton.feuerstoss("eis");
+    if (arten.some((a) => ["strahl", "feuerball", "nebel", "wirbel"].includes(a))) Ton.feuerstoss("feuer");
+    if (arten.some((a) => ["sprung", "krallen", "schlag", "peitsche", "werfen"].includes(a))) Ton.wusch();
+    if (arten.includes("beben")) Ton.treffer();
   }
 
   function hochzaehlen(el, w, dauer) {
@@ -409,90 +499,29 @@
 
   const mitte = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 
-  // Angriff: Drachen speien ihr Element, Kung-Fu-Meister springen und schlagen zu
-  function angriff(ov, von, nach, element, drache) {
-    const [x1, y1] = mitte(von), [x2, y2] = mitte(nach);
-    const dx = x2 - x1, dy = y2 - y1;
-    const farben = ELEMENT_FARBEN[element] || ELEMENT_FARBEN.feuer;
-    if (drache) {
-      Ton.feuerstoss(element);
-      const n = element === "blitz" ? 10 : 28;
-      for (let i = 0; i < n; i++) {
-        const p = document.createElement("i");
-        p.className = `q-partikel ${element}`;
-        const gr = 10 + Math.random() * 18;
-        p.style.cssText = `left:${x1}px;top:${y1}px;width:${gr}px;height:${gr}px;background:${farben[i % 3]}`;
-        ov.appendChild(p);
-        const streu = (Math.random() - 0.5) * 60;
-        p.animate([
-          { transform: "translate(-50%,-50%) scale(.3)", opacity: 1 },
-          { transform: `translate(calc(-50% + ${dx * 0.5 + streu}px), calc(-50% + ${dy * 0.5 - streu / 2}px)) scale(1.2)`, opacity: 1, offset: 0.5 },
-          { transform: `translate(calc(-50% + ${dx + streu / 2}px), calc(-50% + ${dy + streu / 3}px)) scale(${element === "eis" ? 0.6 : 1.8})`, opacity: 0 },
-        ], { duration: 520, delay: i * 18, easing: "ease-out" }).onfinish = () => p.remove();
-      }
-      if (element === "blitz") blitzstrahl(ov, x1, y1, x2, y2);
-      setTimeout(() => treffer(ov, nach, farben), 380);
-    } else {
-      // Sprung zum Gegner und zurück
-      von.animate([
-        { transform: "none" },
-        { transform: `translate(${dx * 0.08}px, ${dy * 0.08 - 20}px) scale(1.06) rotate(-4deg)`, offset: 0.35 },
-        { transform: `translate(${dx * 0.42}px, ${dy * 0.42}px) scale(1.1) rotate(6deg)`, offset: 0.55 },
-        { transform: "none" },
-      ], { duration: 720, easing: "cubic-bezier(.3,.7,.3,1)" });
-      Ton.wusch();
-      setTimeout(() => {
-        treffer(ov, nach, farben);
-        const wort = document.createElement("span");
-        wort.className = "q-kampfschrei";
-        wort.textContent = ["HIYAA!", "WUSCH!", "KRACH!", "ZACK!"][Math.floor(Math.random() * 4)];
-        wort.style.cssText = `left:${x2}px;top:${y2 - 30}px;--farbe:${farben[1]}`;
-        ov.appendChild(wort);
-        setTimeout(() => wort.remove(), 1100);
-      }, 380);
-    }
-  }
-
-  function treffer(ov, el, farben) {
+  function treffer(ov, el, farbe) {
     el.classList.add("getroffen");
     Ton.treffer();
     navigator.vibrate?.(60);
-    funken(ov, el, farben[1]);
+    const m = mitte($(".qkarte", el) || el);
+    funkenAn(ov, m, farbe, 14);
     const ring = document.createElement("i");
     ring.className = "q-ring";
-    const [x, y] = mitte(el);
-    ring.style.cssText = `left:${x}px;top:${y}px;border-color:${farben[1]}`;
+    ring.style.cssText = `left:${m[0]}px;top:${m[1]}px;border-color:${farbe}`;
     ov.appendChild(ring);
     setTimeout(() => ring.remove(), 700);
   }
 
-  function funken(ov, el, farbe) {
-    if (!el) return;
-    const [x, y] = mitte(el);
-    for (let i = 0; i < 14; i++) {
+  function funkenAn(ov, [x, y], farbe, n) {
+    for (let i = 0; i < n; i++) {
       const p = document.createElement("i");
       p.className = "q-funke";
       p.style.cssText = `left:${x}px;top:${y}px;background:${farbe}`;
       ov.appendChild(p);
-      const a = (i / 14) * Math.PI * 2, d = 50 + Math.random() * 70;
+      const a = (i / n) * Math.PI * 2, d = 50 + Math.random() * 80;
       p.animate([{ transform: "translate(-50%,-50%)", opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.2)`, opacity: 0 }],
         { duration: 550 + Math.random() * 250, easing: "cubic-bezier(.1,.8,.3,1)" }).onfinish = () => p.remove();
     }
-  }
-
-  function blitzstrahl(ov, x1, y1, x2, y2) {
-    const punkte = [[x1, y1]];
-    for (let i = 1; i < 7; i++) {
-      const t = i / 7;
-      punkte.push([x1 + (x2 - x1) * t + (Math.random() - 0.5) * 40, y1 + (y2 - y1) * t + (Math.random() - 0.5) * 40]);
-    }
-    punkte.push([x2, y2]);
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("class", "q-blitz");
-    svg.innerHTML = `<polyline points="${punkte.map((p) => p.join(",")).join(" ")}" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
-      <polyline points="${punkte.map((p) => p.join(",")).join(" ")}" fill="none" stroke="#ffe14d" stroke-width="10" stroke-linejoin="round" opacity=".45"/>`;
-    ov.appendChild(svg);
-    svg.animate([{ opacity: 1 }, { opacity: 0.2 }, { opacity: 1 }, { opacity: 0 }], { duration: 500 }).onfinish = () => svg.remove();
   }
 
   GN.spiele.quartett = {

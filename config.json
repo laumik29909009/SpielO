@@ -1,6 +1,6 @@
 {
   "wartung": false,
-  "imAufbau": [],
+  "imAufbau": ["quartett"],
   "wartungInfo": {
     "punkte": [
       "Neues Spiel: Quartett ⚔️",

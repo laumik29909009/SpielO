@@ -23,6 +23,9 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 
 - **Decks:** Kung Fu Panda (24 Karten) und Dragons – Die Reiter von Berk (20 Karten), Figuren © DreamWorks Animation, Nutzung mit Erlaubnis. Dazu zwei eigene Decks (Kung-Fu-Meister, Drachen).
 - **Offizielle Bilder** kommen in `public/quartett/bilder/<deck>/<Karten-ID>.jpg`, Liste der IDs in `public/quartett/bilder/LIES_MICH.md`. Fehlt ein Bild, zeigt die Karte einen Platzhalter.
+- **Handkarten (1–3):** Wer dran ist, wählt eine Handkarte und sagt einen Wert an. Danach legt jeder andere die Karte, mit der er kontern will. Mit 1 Handkarte spielt es sich klassisch.
+- **Spieltisch:** Alle sitzen als Figuren (ihr Avatar) um einen Tisch, gelegte Karten liegen verdeckt in der Mitte.
+- **Spezialangriffe:** Jede Karte hat einen eigenen Angriff mit Namen (`ANGRIFFE` in `daten/quartett.js`, Effekte in `public/spiele/quartett-angriffe.js`). Im Kampf greifen alle gleichzeitig an, in der Mitte prallen die Angriffe aufeinander und der stärkere bricht durch.
 - **Regeln:** Wer dran ist, wählt einen Wert seiner obersten Karte. Der höchste Wert gewinnt alle Karten der Runde. Gleichstand → Karten in den Topf. Wer alle Karten hat (oder nach dem Rundenlimit die meisten), gewinnt.
 - **Decks** stehen in `daten/quartett.js`: 6 Gruppen (A–F) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.
 - **Bilder:** Drachen werden im Browser aus Bauteilen gezeichnet (`public/spiele/quartett-bilder.js`, Feld `d` pro Karte). Die Kung-Fu-Meister nutzen Twemoji-Tiere (CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
