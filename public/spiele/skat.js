@@ -30,16 +30,24 @@
   // =============================================================
   //  Karte: französisches Blatt im SpielO-Stil
   // =============================================================
+  // Goldene Ornamente für die Bildkarten (eigene, schlichte Linienzeichnungen)
+  const ORNAMENT = {
+    K: `<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M6 32 L10 10 L22 22 L30 4 L38 22 L50 10 L54 32 Z" fill="url(#skGold)" stroke="#7a5a12" stroke-width="1.4" stroke-linejoin="round"/><rect x="6" y="32" width="48" height="5" rx="1.5" fill="url(#skGold)" stroke="#7a5a12" stroke-width="1.2"/><circle cx="30" cy="4" r="2.6" fill="#fff8e1" stroke="#7a5a12"/><circle cx="10" cy="10" r="2.2" fill="#fff8e1" stroke="#7a5a12"/><circle cx="50" cy="10" r="2.2" fill="#fff8e1" stroke="#7a5a12"/></svg>`,
+    D: `<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M6 34 Q30 18 54 34 Q30 26 6 34 Z" fill="url(#skGold)" stroke="#7a5a12" stroke-width="1.2"/><path d="M14 28 Q18 14 24 22 Q30 6 36 22 Q42 14 46 28" fill="none" stroke="url(#skGold)" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="10" r="3.4" fill="#fff8e1" stroke="#7a5a12"/><circle cx="19" cy="18" r="2" fill="#fff8e1" stroke="#7a5a12"/><circle cx="41" cy="18" r="2" fill="#fff8e1" stroke="#7a5a12"/></svg>`,
+    B: `<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M30 3 L48 9 L46 24 Q42 33 30 38 Q18 33 14 24 L12 9 Z" fill="url(#skGold)" stroke="#7a5a12" stroke-width="1.4" stroke-linejoin="round"/><path d="M30 9 L41 13 L40 23 Q37 29 30 32 Q23 29 20 23 L19 13 Z" fill="none" stroke="#fff8e1" stroke-width="1.4"/></svg>`,
+  };
   function karte(k, { klasse = "", attr = "" } = {}) {
     const s = SYM[k.farbe];
     const bild = BILD[k.wert];
-    const mitte = k.wert === "A" ? `<span class="sk-ass"><span>${s}</span></span>`
-      : bild ? `<span class="sk-bild"><b>${k.wert}</b><i>${bild}</i><span>${s}</span></span>`
+    const mitte = k.wert === "A" ? `<span class="sk-ass"><i class="sk-ass-ring"></i><span>${s}</span></span>`
+      : bild ? `<span class="sk-bild"><span class="sk-orn">${ORNAMENT[k.wert]}</span><b>${k.wert}</b><span class="sk-bild-sym">${s}</span></span>`
       : `<span class="sk-zahl"><b>${k.wert}</b><span>${s}</span></span>`;
     return `<div class="sk ${ROT[k.farbe] ? "rot" : "schwarz"} ${klasse}" ${attr} aria-label="${({ kreuz: "Kreuz", pik: "Pik", herz: "Herz", karo: "Karo" })[k.farbe]} ${({ B: "Bube", D: "Dame", K: "König", A: "Ass" })[k.wert] || k.wert}">
-      <span class="sk-ecke o"><b>${k.wert}</b>${s}</span>${mitte}<span class="sk-ecke u"><b>${k.wert}</b>${s}</span></div>`;
+      <span class="sk-rahmen" aria-hidden="true"></span><span class="sk-ecke o"><b>${k.wert}</b>${s}</span>${mitte}<span class="sk-ecke u"><b>${k.wert}</b>${s}</span></div>`;
   }
-  const rueckseite = (klasse = "") => `<div class="sk sk-ruecken ${klasse}"><span class="sk-r-stein"></span></div>`;
+  const rueckseite = (klasse = "") => `<div class="sk sk-ruecken ${klasse}"><span class="sk-r-muster"></span><span class="sk-r-stein"></span></div>`;
+  // Goldverlauf für alle Ornamente (einmal pro Seite)
+  if (!document.getElementById("skGoldDefs")) document.body.insertAdjacentHTML("beforeend", `<svg id="skGoldDefs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="skGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".35" stop-color="#e2b13c"/><stop offset=".65" stop-color="#b8860b"/><stop offset="1" stop-color="#f6d77a"/></linearGradient></defs></svg>`);
 
   // =============================================================
   //  Lobby

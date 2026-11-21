@@ -1,8 +1,6 @@
 {
   "wartung": false,
-  "imAufbau": [
-    "skat"
-  ],
+  "imAufbau": [],
   "wartungInfo": {
     "punkte": [
       "Neues Spiel: Farbrausch – der Karten-Klassiker am 3D-Tisch",
@@ -25,13 +23,12 @@
   },
   "patch": {
     "datum": "21.11.2026",
-    "titel": "Farbrausch: Austeilen, SpielO-Karten, großes +2",
+    "titel": "Neu: Kartenrunde mit Schwimmen, Arschloch & Durak",
     "punkte": [
-      "Karten werden zu Rundenbeginn sichtbar ausgeteilt",
-      "Karten mit SpielO-Artwork (Vorder- und Rückseite)",
-      "+2 und +4 erscheinen riesig auf dem ganzen Bildschirm",
-      "Logo ohne Rahmen ums O",
-      "Spenden-Ecke entfernt"
+      "Drei Kartenklassiker mit dem Skat-Blatt am 3D-Tisch",
+      "Edles Kartendesign: Elfenbein, Goldrahmen, Ornamente",
+      "Computer-Gegner, Hausregeln wie Leben und Runden einstellbar",
+      "Farbrausch: Austeilen, SpielO-Karten, großes +2"
     ]
   },
   "musikAus": [

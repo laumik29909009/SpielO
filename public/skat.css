@@ -89,3 +89,36 @@ body[data-spiel="skat"], [data-farbe="skat"] {
 .sk-szene.drei .sk-mitte { bottom: 22%; }
 .sk-szene.drei ~ .sk-ich { margin-top: -24px; }
 .sk-mitte .fr-ansage { background: rgba(6, 18, 13, 0.72); padding: 4px 14px; border-radius: 99px; }
+
+/* =============================================================
+   Edles Skat-Blatt: Elfenbein, Goldrahmen, Serifenschrift
+   ============================================================= */
+.sk { background: radial-gradient(circle at 30% 20%, #fffdf6, #f5ecd8 70%, #ecdfc2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38), inset 0 0 0 1px rgba(120, 90, 20, 0.35); color: #15151c; font-family: "Playfair Display", Georgia, serif; }
+.sk.rot { color: #a3122a; }
+.sk-rahmen { position: absolute; inset: 4.5%; border-radius: 6% / 4.2%; border: 0.9cqw solid #c9a24a; box-shadow: inset 0 0 0 1.4cqw rgba(201, 162, 74, 0.12), inset 0 0 0 2.2cqw transparent, inset 0 0 0 2.6cqw rgba(201, 162, 74, 0.55); pointer-events: none; }
+.sk-ecke { font-weight: 800; font-size: 12cqw; left: 9%; top: 7%; z-index: 1; }
+.sk-ecke b { font-size: 15cqw; font-weight: 800; }
+.sk-ecke.o { left: 9%; top: 7%; }
+.sk-ecke.u { right: 9%; bottom: 7%; left: auto; top: auto; }
+.sk-zahl b { font-weight: 800; font-size: 32cqw; letter-spacing: -0.02em; }
+.sk-zahl span { font-size: 28cqw; filter: drop-shadow(0 1cqw 0.8cqw rgba(0, 0, 0, 0.15)); }
+/* Bildkarten: Goldornament, großer Buchstabe in Kursiv, Farbzeichen */
+.sk-bild { inset: 16% 15%; border-radius: 6cqw; background: linear-gradient(170deg, #fffaf0, #f1e4c6);
+  border: 1cqw solid #c9a24a; box-shadow: inset 0 0 0 1.6cqw #fffaf0, inset 0 0 0 2.2cqw rgba(201, 162, 74, 0.6), 0 1cqw 3cqw rgba(90, 60, 10, 0.18); }
+.sk-orn { width: 52cqw; display: block; filter: drop-shadow(0 1cqw 1cqw rgba(90, 60, 10, 0.3)); }
+.sk-orn svg { display: block; width: 100%; height: auto; }
+.sk-bild b { font-size: 34cqw; font-style: italic; font-weight: 600; line-height: 0.95; margin-top: 1cqw; }
+.sk-bild-sym { font-size: 18cqw; line-height: 1; }
+/* Ass: großes Farbzeichen im goldenen Ring */
+.sk-ass span { font-size: 56cqw; position: relative; z-index: 1; filter: drop-shadow(0 1.5cqw 1.5cqw rgba(0, 0, 0, 0.22)); }
+.sk-ass::before { width: 72cqw; height: 72cqw; border: 1.2cqw solid #c9a24a; box-shadow: inset 0 0 0 2cqw rgba(255, 250, 240, 0.9), inset 0 0 0 2.6cqw rgba(201, 162, 74, 0.5); background: radial-gradient(circle, rgba(255, 241, 184, 0.6), transparent 70%); border-style: solid; }
+.sk-ass-ring { position: absolute; width: 84cqw; height: 84cqw; border-radius: 50%; border: 0.6cqw dashed rgba(201, 162, 74, 0.7); animation: drehen 40s linear infinite; }
+/* Rückseite: tiefes Grün, goldenes Guilloché-Muster, goldener SpielO-Stein */
+.sk-ruecken { background: radial-gradient(circle at 50% 45%, #1f5a44, #0b2a1f 75%); border: 0; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 0 0 3cqw #f5ecd8, inset 0 0 0 4cqw #c9a24a; }
+.sk-r-muster { position: absolute; inset: 9%; border-radius: 5% / 3.5%; border: 0.8cqw solid rgba(201, 162, 74, 0.8);
+  background: repeating-radial-gradient(circle at 50% 50%, rgba(201, 162, 74, 0.22) 0 1cqw, transparent 1cqw 4cqw),
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(201, 162, 74, 0.12) 0 6deg, transparent 6deg 12deg); }
+.sk-r-stein { width: 40cqw; height: 40cqw; background: linear-gradient(145deg, #fff1b8, #c9a24a 50%, #8a6514); box-shadow: 0 0 0 2.5cqw #0b2a1f, 0 0 0 3.6cqw #c9a24a, 0 3cqw 8cqw rgba(0, 0, 0, 0.5); z-index: 1; }
+.sk-r-stein::after { background: #0b2a1f; inset: 36%; }
+@media (prefers-reduced-motion: reduce) { .sk-ass-ring { animation: none; } }

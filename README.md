@@ -41,12 +41,12 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 - **Hausregeln:** Stapeln (+2/+4 weiterreichen), Ziehen bis es passt, 7 tauscht / 0 gibt weiter, Einwerfen.
 - Eigenes Kartendesign (Raute in der Mitte), Logik in `spiele/farbrausch.js`, Oberfläche in `public/spiele/farbrausch.js` und `public/farbrausch.css`. Der 3D-Tisch ist derselbe wie beim Quartett (`public/spiele/quartett-3d.js`).
 
-## Kartenrunde (Skat-Blatt) 🚧
+## Kartenrunde (Skat-Blatt)
 Drei Klassiker in einem Spiel, Auswahl in der Lobby (Logik: `spiele/skat.js`, Oberfläche: `public/spiele/skat.js`, `public/skat.css`):
 - **Schwimmen (31):** 3 Karten, tauschen mit der Mitte, schieben, klopfen. 31 und Feuer (3 Asse) beenden sofort. Leben einstellbar, wer keine mehr hat, schwimmt.
 - **Arschloch:** alle Karten verteilt, gleiche Werte höher stechen, König bis Arschloch, Kartentausch ab Runde 2.
 - **Durak:** 36 Karten, Trumpf, angreifen, nachlegen, verteidigen oder aufnehmen. Der Letzte mit Karten ist der Durak.
-Noch „im Aufbau“ (`config.json` → `"imAufbau": ["skat"]`), testen über `/?vorschau=1`.
+Edles Kartendesign (Elfenbein, Goldrahmen, Serifenschrift, eigene Goldornamente für König, Dame und Bube).
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
