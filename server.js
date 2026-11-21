@@ -21,9 +21,16 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
-const { wartung: WARTUNG } = require("./config.json");
+// Was auf der Wartungsseite steht, kommt aus config.json ("wartungInfo")
+const { wartung: WARTUNG, wartungInfo: INFO = {} } = require("./config.json");
 if (WARTUNG) {
-  app.use((req, res) => res.status(503).set({ "Retry-After": "600", "Cache-Control": "no-store" }).sendFile(path.join(__dirname, "wartung.html")));
+  const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const seite = require("fs").readFileSync(path.join(__dirname, "wartung.html"), "utf8")
+    .replace("<!--PUNKTE-->", (INFO.punkte || []).map((p) => `        <li>${escHtml(p)}</li>`).join("\n"))
+    .replace("<!--ZAHLEN-->", INFO.zahlen?.length
+      ? `<div class="zahlen">${INFO.zahlen.map((z) => `<div class="zahl"><b>${escHtml(z.wert)}</b><span>${escHtml(z.text)}</span></div>`).join("")}</div>`
+      : "");
+  app.use((req, res) => res.status(503).set({ "Retry-After": "600", "Cache-Control": "no-store" }).type("html").send(seite));
   io.use((_socket, next) => next(new Error("wartung")));
 }
 

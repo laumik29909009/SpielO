@@ -1,3 +1,15 @@
 {
-  "wartung": false
+  "wartung": true,
+  "wartungInfo": {
+    "punkte": [
+      "Lobby: Kategorien und Zeit direkt wählbar, ohne Aufklappen",
+      "Nur noch ein „Raum erstellen“, das Spiel wählt ihr danach",
+      "Mehr Bilder im Preis-Schätzer",
+      "Kleine Verbesserungen für mehr Spielspaß"
+    ],
+    "zahlen": [
+      { "wert": "92", "text": "Kategorien in Stadt Land Fluss" },
+      { "wert": "137", "text": "Fragen im Preis-Schätzer" }
+    ]
+  }
 }
