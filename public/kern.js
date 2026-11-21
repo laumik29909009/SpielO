@@ -231,6 +231,8 @@ function zeigeStart() {
 
     ${beitreten}
 
+    <div id="startExtra"></div>
+
     <section class="kapitel rein" style="--d:1.6s">
       <h2 class="kapitel-titel">Unsere Spiele</h2>
       <div class="spiele-gitter">
@@ -257,6 +259,14 @@ function zeigeStart() {
     const n = name();
     if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel: speicher("letztesSpiel") || "preis", vorschau: vorschauModus() });
   });
+  // Spiele dürfen eigene Blöcke auf der Startseite zeigen (z. B. die Tagesarena)
+  GN.raumMitSpiel = (spiel) => {
+    Ton.entsperren();
+    const n = name();
+    if (n) socket.emit("raumErstellen", { name: n, spielerId, spiel, vorschau: vorschauModus() });
+    return !!n;
+  };
+  for (const [id, s] of Object.entries(GN.spiele)) if (s.startseite && (!imAufbau(id) || vorschauModus())) s.startseite($("#startExtra"));
   $("#beitretenBtn").onclick = () => {
     Ton.entsperren();
     const n = name();
@@ -379,6 +389,7 @@ function zeigeLobby() {
     </div>`;
 
   if (host) spiel.binde?.($("#spielEinstellungen"), z);
+  spiel.lobbyFertig?.(z, host);
   // Fenster für Regeln & Punkte
   $$("[data-oeffne]").forEach((b) => (b.onclick = () => { Ton.klick(); $(`dialog[data-fenster="${b.dataset.oeffne}"]`).showModal(); }));
   $$("dialog.fenster[data-fenster]").forEach((d) => {

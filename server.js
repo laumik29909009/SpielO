@@ -17,6 +17,7 @@ const SPIELE = {
   farbrausch: require("./spiele/farbrausch"),
   skat: require("./spiele/skat"),
   wuerfel: require("./spiele/wuerfel"),
+  arena: require("./spiele/arena"),
 };
 const MAX_SPIELER = 10;
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];
@@ -299,6 +300,14 @@ io.on("connection", (socket) => {
     if (raum.phase === "spiel") modul(raum).spielerZurueck?.(raum, spielerId, ctx);
     sendeZustand(raum);
   }
+
+  // Arena: Tages-Rangliste abfragen und (nach einem Server-Neustart) eigenes Ergebnis erneut melden
+  auf("arenaTag", (d) => {
+    const { geraet, ergebnis } = daten(d);
+    const id = saubereId(geraet);
+    if (ergebnis && typeof ergebnis === "object") SPIELE.arena.ergebnisMelden({ ...ergebnis, geraet: id });
+    socket.emit("arenaTag", SPIELE.arena.tagesStand(id));
+  });
 
   auf("raumErstellen", (d) => {
     let { name, spielerId, spiel, vorschau } = daten(d);

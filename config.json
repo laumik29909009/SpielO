@@ -1,7 +1,8 @@
 {
   "wartung": false,
   "imAufbau": [
-    "wuerfel"
+    "wuerfel",
+    "arena"
   ],
   "wartungInfo": {
     "punkte": [

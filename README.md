@@ -53,6 +53,14 @@ Würfelklassiker mit 5 Würfeln: bis zu 3 Würfe, Würfel festhalten, 13 Felder 
 3D-Würfel in CSS (`public/wuerfel.css`), Würfelbecher, Halteleiste, Punkteblock. Logik: `spiele/wuerfel.js`, Oberfläche: `public/spiele/wuerfel.js`. 1–8 Spieler, Computer-Gegner.
 Noch „im Aufbau“ (`config.json` → `"imAufbau": ["wuerfel"]`), testen über `/?vorschau=1`.
 
+## Arena 🚧
+Tages-Quiz mit freien Antworten (Vorschau: `/?vorschau=1`). Jede Aufgabe ist eine Kategorie („Nenne eine Nudelsorte“), jeder tippt **eine** Antwort. Je seltener die richtige Antwort, desto mehr **Ruhm**: Fußvolk 10 · Krieger 30 · Champion 60 · Legende 85 · **Goldener Lorbeer 100** (eine besondere Antwort pro Aufgabe). Ruhm × 100 = Zuschauer im Kolosseum.
+- **Tagesarena:** 7 Aufgaben pro Tag (Wechsel um Mitternacht, deutsche Zeit), für alle gleich. Start direkt über den Block auf der Startseite. Das erste Ergebnis des Tages zählt für die Tages-Rangliste; Wiederholungen sind Übung.
+- **Freies Spiel:** 5–15 zufällige Aufgaben (ohne die von heute), mit Freunden und bis zu 3 Computern.
+- **Statistik:** auf dem Gerät gespeichert (Serie, Rekord, Schnitt, Verlauf, Stufen, Lorbeer-Sammlung, Archiv). „Sichern“ erzeugt einen Code zum Umziehen auf ein anderes Gerät.
+- Die Tages-Rangliste liegt im Server-Speicher. Nach einem Neustart melden Spieler ihr heutiges Ergebnis beim nächsten Besuch automatisch neu.
+- Aufgaben: `daten/arena.js` und `daten/arena-2.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
+
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |
 |---|---|
