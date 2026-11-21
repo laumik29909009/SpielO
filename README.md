@@ -5,7 +5,7 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 | Spiel | Worum es geht |
 |---|---|
 | 💰 **Preis-Schätzer** | Was kostet ein Windrad? 137 Fragen in 15 Themen, 4 Modi (Klassisch, Nicht drüber!, Teurer oder billiger?, Sortieren) und Mix |
-| 🃏 **Quartett** | Karten-Duelle mit 2 eigenen Decks (Drachen, Kung-Fu-Meister), je 24 Karten mit Bild und 5 Werten, animierte Kämpfe, 1–4 Spieler (auch gegen den Computer) |
+| 🃏 **Quartett** | Karten-Duelle mit Kung Fu Panda und Dragons – Die Reiter von Berk, je 32 Karten mit 5 Werten und eigenem Spezialangriff, Spieltisch, 1–4 Spieler (auch gegen den Computer) |
 | 🌍 **Stadt Land Fluss** | 92 Kategorien in 7 Gruppen, eigene Kategorien, Stopp-Knopf, Live-Fortschritt, Abstimmung und automatischer Schiedsrichter |
 
 Ü18-Kategorien (Nachtleben, Dates, Trinkspiele …) sind mit 🔞 gekennzeichnet und standardmäßig nicht ausgewählt.
@@ -21,14 +21,14 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 ## Quartett
 > 🚧 **Im Aufbau:** In `config.json` steht `"imAufbau": ["quartett"]`. Dann ist Quartett für alle ausgegraut. Testen kannst du es über den Vorschau-Link **`/?vorschau=1`** (Raum darüber erstellen). Zum Freigeben `"imAufbau": []` setzen.
 
-- **Decks:** Kung Fu Panda (24 Karten) und Dragons – Die Reiter von Berk (20 Karten), Figuren © DreamWorks Animation, Nutzung mit Erlaubnis. Dazu zwei eigene Decks (Kung-Fu-Meister, Drachen).
+- **Decks:** Kung Fu Panda und Dragons – Die Reiter von Berk, je 32 Karten (8 Quartette A–H). Figuren © DreamWorks Animation, Nutzung mit Erlaubnis.
 - **Offizielle Bilder** kommen in `public/quartett/bilder/<deck>/<Karten-ID>.jpg`, Liste der IDs in `public/quartett/bilder/LIES_MICH.md`. Fehlt ein Bild, zeigt die Karte einen Platzhalter.
 - **Handkarten (1–3):** Wer dran ist, wählt eine Handkarte und sagt einen Wert an. Danach legt jeder andere die Karte, mit der er kontern will. Mit 1 Handkarte spielt es sich klassisch.
 - **Spieltisch:** Alle sitzen als Figuren (ihr Avatar) um einen Tisch, gelegte Karten liegen verdeckt in der Mitte.
 - **Spezialangriffe:** Jede Karte hat einen eigenen Angriff mit Namen (`ANGRIFFE` in `daten/quartett.js`, Effekte in `public/spiele/quartett-angriffe.js`). Im Kampf greifen alle gleichzeitig an, in der Mitte prallen die Angriffe aufeinander und der stärkere bricht durch.
 - **Regeln:** Wer dran ist, wählt einen Wert seiner obersten Karte. Der höchste Wert gewinnt alle Karten der Runde. Gleichstand → Karten in den Topf. Wer alle Karten hat (oder nach dem Rundenlimit die meisten), gewinnt.
-- **Decks** stehen in `daten/quartett.js`: 6 Gruppen (A–F) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.
-- **Bilder:** Drachen werden im Browser aus Bauteilen gezeichnet (`public/spiele/quartett-bilder.js`, Feld `d` pro Karte). Die Kung-Fu-Meister nutzen Twemoji-Tiere (CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
+- **Decks** stehen in `daten/quartett.js`: 8 Gruppen (A–H) × 4 Karten, 5 Werte, seltene Karten ★ glänzen holografisch.
+- **Platzhalter:** Solange kein offizielles Bild im Ordner liegt, zeigt die Karte ein neutrales Symbol (Twemoji, CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
 - **Computer-Gegner** füllen freie Plätze auf und wählen meist ihren stärksten Wert. Solo spielt man immer gegen den Computer.
 
 ## Stadt Land Fluss: Punkte

@@ -19,7 +19,7 @@ function fotosLesen(deckId) {
   const fotos = {};
   try {
     for (const datei of fs.readdirSync(ordner)) {
-      const m = datei.match(/^([A-F][1-4])\.(jpe?g|png|webp|avif)$/i);
+      const m = datei.match(/^([A-H][1-4])\.(jpe?g|png|webp|avif)$/i);
       if (m) fotos[m[1].toUpperCase()] = `/quartett/bilder/${deckId}/${encodeURIComponent(datei)}`;
     }
   } catch {}

@@ -527,9 +527,9 @@
   GN.spiele.quartett = {
     icon: "🃏",
     titel: "Quartett",
-    kurz: "Karten-Duelle mit Drachen und Kung-Fu-Meistern.",
+    kurz: "Karten-Duelle mit Kung Fu Panda und Dragons.",
     beschreibung: "Das Karten-Duell: Wähle den stärksten Wert und schnapp dir die Karten der anderen. Mit animierten Kämpfen und Holo-Karten.",
-    tags: ["🃏 2 Decks · 48 Karten", "⚔️ Kampf-Animationen", "🤖 Auch gegen Computer", "👥 1–4 Spieler"],
+    tags: ["🃏 2 Decks · 64 Karten", "⚔️ Kampf-Animationen", "🤖 Auch gegen Computer", "👥 1–4 Spieler"],
     abschnitte,
     binde,
     zeige,
