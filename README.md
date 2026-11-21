@@ -48,21 +48,20 @@ Drei Klassiker in einem Spiel, Auswahl in der Lobby (Logik: `spiele/skat.js`, Ob
 - **Durak:** 36 Karten, Trumpf, angreifen, nachlegen, verteidigen oder aufnehmen. Der Letzte mit Karten ist der Durak.
 Edles Kartendesign (Elfenbein, Goldrahmen, Serifenschrift, eigene Goldornamente für König, Dame und Bube).
 
-## Würfelglück 🚧
+## Würfelglück
 Würfelklassiker mit 5 Würfeln: bis zu 3 Würfe, Würfel festhalten, 13 Felder (Einser–Sechser mit Bonus 35 ab 63, Dreier-/Viererpasch, Full House 25, Kleine Straße 30, Große Straße 40, Fünfling 50, Chance), jeder weitere Fünfling +50.
 3D-Würfel in CSS (`public/wuerfel.css`), Würfelbecher, Halteleiste, Punkteblock. Logik: `spiele/wuerfel.js`, Oberfläche: `public/spiele/wuerfel.js`. 1–8 Spieler, Computer-Gegner.
-Noch „im Aufbau“ (`config.json` → `"imAufbau": ["wuerfel"]`), testen über `/?vorschau=1`.
 
-## Arena 🚧
-Tages-Quiz mit freien Antworten (Vorschau: `/?vorschau=1`). Jede Aufgabe ist eine Kategorie („Nenne eine Nudelsorte“), jeder tippt **eine** Antwort. Je seltener die richtige Antwort, desto mehr **Ruhm**: Fußvolk 10 · Krieger 30 · Champion 60 · Legende 85 · **Goldener Lorbeer 100** (eine besondere Antwort pro Aufgabe). Ruhm × 100 = Zuschauer im Kolosseum.
+## Arena
+Tages-Quiz mit freien Antworten. Jede Aufgabe ist eine Kategorie („Nenne eine Nudelsorte“), jeder tippt **eine** Antwort. Je seltener die richtige Antwort, desto mehr **Ruhm**: Fußvolk 10 · Krieger 30 · Champion 60 · Legende 85 · **Goldener Lorbeer 100** (eine besondere Antwort pro Aufgabe). Ruhm × 100 = Zuschauer im Kolosseum.
 - **Tagesarena:** 7 Aufgaben pro Tag (Wechsel um Mitternacht, deutsche Zeit), für alle gleich. Start direkt über den Block auf der Startseite. Das erste Ergebnis des Tages zählt für die Tages-Rangliste; Wiederholungen sind Übung.
 - **Freies Spiel:** 5–15 zufällige Aufgaben (ohne die von heute), mit Freunden und bis zu 3 Computern.
 - **Statistik:** auf dem Gerät gespeichert (Serie, Rekord, Schnitt, Verlauf, Stufen, Lorbeer-Sammlung, Archiv). „Sichern“ erzeugt einen Code zum Umziehen auf ein anderes Gerät.
 - Die Tages-Rangliste liegt im Server-Speicher. Nach einem Neustart melden Spieler ihr heutiges Ergebnis beim nächsten Besuch automatisch neu.
 - Aufgaben: `daten/arena.js` und `daten/arena-2.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
 
-## Schechingen – Hof & Handel 🚧
-Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner). Vorschau: `/?vorschau=1`.
+## Schechingen – Hof & Handel
+Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner).
 - Rohstoffe: 🪵 Holz (Wald), 🪨 Stein (Steinbruch), 🌾 Korn (Feld), 🥛 Milch (Weide). Gewürfelte Landschaften liefern an angrenzende Höfe (Gutshof doppelt).
 - Bauen: Weg, Hof (1 Punkt), Gutshof (2), Dorfkarten (Feldhüter, Erntedank, Wegebau, Viehmarkt, Kirchweih = geheimer Punkt).
 - Dorfplatz in der Mitte: Brunnen, Wirtshaus, Kirche, Rathaus (je 2 Punkte, nur mit Hof/Weg am Dorfplatz). Hof direkt am Dorfplatz = Marktrecht 3:1.
