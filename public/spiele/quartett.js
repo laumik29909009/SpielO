@@ -17,7 +17,7 @@
   // Seltenheit: aus der Summe aller (auf das Deck normierten) Werte
   //   legendär = stärkste Hälfte der ★-Karten, episch = übrige ★-Karten,
   //   selten = stärkstes Drittel der übrigen, sonst gewöhnlich
-  const STUFEN = { gewoehnlich: { name: "Gewöhnlich", zeichen: "●" }, selten: { name: "Selten", zeichen: "◆" }, episch: { name: "Episch", zeichen: "★★" }, legendaer: { name: "Legendär", zeichen: "★★★" } };
+  const STUFEN = { gewoehnlich: { name: "Common", zeichen: "●" }, selten: { name: "Rare", zeichen: "◆" }, episch: { name: "Epic", zeichen: "★★" }, legendaer: { name: "Legendary", zeichen: "★★★" } };
   const stufenCache = {};
   function stufeVon(deck, k) {
     if (!stufenCache[deck.id]) {
@@ -57,7 +57,7 @@
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
           <div class="qk-bild ${deck.fotos?.[k.id]?.frei ? "frei" : ""}">${deck.fotos?.[k.id]
             ? `${deck.fotos[k.id].frei ? QuartettBilder.bild(deck, k, { nurSzene: true }) : ""}<img src="${deck.fotos[k.id].url}" alt="${esc(k.name)}" loading="lazy" draggable="false">`
-            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Bild folgt</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
+            : QuartettBilder.bild(deck, k)}${deck.platzhalter && !deck.fotos?.[k.id] ? '<span class="qk-platzhalter">Image coming soon</span>' : ""}${stufe === "legendaer" ? '<span class="qk-funkeln" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ""}</div>
           <div class="qk-unter">${esc(g.name)}${k.stil ? ` · ${esc(k.stil)}` : ""}</div>
           <div class="qk-werte">
             ${deck.werte.map((w, i) => `
@@ -181,7 +181,7 @@
     d.innerHTML = `
       <div class="fenster-kopf"><b>${deck.icon} ${esc(deck.name)} · ${deck.karten.length} Karten</b><button class="icon-btn" data-schliessen aria-label="Schließen">✕</button></div>
       <div class="fenster-inhalt">
-        ${deck.lizenz ? `<p class="leise klein-text" style="margin-top:0">${esc(deck.lizenz)} · Werte sind eine Fan-Einschätzung.</p>` : ""}
+        ${deck.lizenz ? `<p class="leise klein-text" style="margin-top:0">${esc(deck.lizenz)} · Stats are a fan estimate.</p>` : ""}
         ${deck.gruppen.map((g) => `
           <div class="q-gal-gruppe" style="--typ:${g.farbe}"><b>${g.icon} ${g.id} · ${esc(g.name)}</b></div>
           <div class="q-gal-reihe">${deck.karten.filter((k) => k.gruppe === g.id).map((k) => karte(deck, k, { klasse: "gal" })).join("")}</div>`).join("")}
@@ -351,21 +351,39 @@
     if (darfKontern) hinweis = `<div class="q-konter-hinweis">Welche Karte legst du gegen <b>${deck.werte[ansage].icon} ${esc(deck.werte[ansage].name)}</b>?</div>`;
     else if (gelegt && !binIchAnsager) hinweis = `<div class="q-konter-hinweis fertig">✓ Gelegt! Warte auf die anderen${GN.wartePunkte()}</div>`;
     else if (binIchAnsager) hinweis = `<div class="q-konter-hinweis fertig">Die anderen suchen ihre Konter-Karte${GN.wartePunkte()}</div>`;
+    // Fächer: gewählte Karte groß in der Mitte, die anderen schräg dahinter (links/rechts)
+    const sel = karten.findIndex((x) => x.id === auswahl);
+    const lage = (i) => {
+      if (i === sel) return { x: 0, r: 0, z: 10 };
+      const seite = i < sel ? -1 : 1, abstand = Math.abs(i - sel);
+      return { x: seite * (0.5 + (abstand - 1) * 0.2), r: seite * (12 + (abstand - 1) * 7), z: 6 - abstand };
+    };
     box.innerHTML = `
       ${hinweis}
-      ${karten.length > 1 ? `<div class="q-hand" role="listbox" aria-label="Deine Handkarten">
-        ${karten.map((x, i) => `<button class="q-handkarte ${x.id === auswahl ? "gewaehlt" : ""}" data-hand="${x.id}" role="option" aria-selected="${x.id === auswahl}" style="--i:${i};--n:${karten.length};--m:${(karten.length - 1) / 2}" ${gelegt || binIchAnsager ? "disabled" : ""}>
-          ${karte(deck, x, { klasse: "mini" })}
-          ${ansage !== null ? `<span class="q-hand-wert">${deck.werte[ansage].icon} ${x.w[ansage].toLocaleString("de-DE")}</span>` : ""}
-        </button>`).join("")}
-      </div>` : ""}
-      <div class="q-meine-karte ${darfWaehlen ? "dran" : ""} ${darfKontern ? "kontern" : ""}">${karte(deck, k, { klickbar: darfWaehlen, klasse: "gross neu" })}</div>
+      <div class="q-hand anzahl-${karten.length}" role="listbox" aria-label="Deine Handkarten">
+        ${karten.map((x, i) => {
+          const l = lage(i);
+          const gew = x.id === auswahl;
+          return `<div class="q-handkarte ${gew ? "gewaehlt" : ""}" data-hand="${x.id}" role="option" tabindex="${gew ? -1 : 0}" aria-selected="${gew}" aria-label="${esc(x.name)}"
+              style="--x:${l.x};--r:${l.r}deg;--z:${l.z}">
+            ${karte(deck, x, { klickbar: gew && darfWaehlen, klasse: gew ? "gross neu" : "" })}
+            ${ansage !== null && !gew ? `<span class="q-hand-wert">${deck.werte[ansage].icon} ${x.w[ansage].toLocaleString("de-DE")}</span>` : ""}
+          </div>`;
+        }).join("")}
+      </div>
       ${darfKontern ? `<button class="btn gross voll q-legen" id="legenBtn">🃏 Diese Karte legen</button>` : ""}
       <div class="q-mein-stapel">🃏 Du hast <b>${ich.karten}</b> ${ich.karten === 1 ? "Karte" : "Karten"}${z.hand > 1 ? ` · ${karten.length} auf der Hand` : ""}</div>`;
-    const el = $(".q-meine-karte .qkarte", box);
+    const el = $(".q-handkarte.gewaehlt .qkarte", box);
+    $(".q-handkarte.gewaehlt", box)?.classList.toggle("dran", darfWaehlen);
+    $(".q-handkarte.gewaehlt", box)?.classList.toggle("kontern", darfKontern);
     kippen(el);
     if (ansage !== null) $(`.qk-wert[data-wert="${ansage}"]`, el)?.classList.add("angesagt");
-    $$("[data-hand]", box).forEach((b) => (b.onclick = () => { Ton.klick(); auswahl = b.dataset.hand; box.dataset.sig = ""; zeigeHand(GN.zustand); }));
+    // Andere Handkarte nach vorn holen (Tippen oder Enter)
+    const holen = (id) => { if (id === auswahl || gelegt || binIchAnsager) return; Ton.klick(); auswahl = id; box.dataset.sig = ""; zeigeHand(GN.zustand); };
+    $$(".q-handkarte:not(.gewaehlt)", box).forEach((b) => {
+      b.onclick = () => holen(b.dataset.hand);
+      b.onkeydown = (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); holen(b.dataset.hand); } };
+    });
     if (darfWaehlen) {
       $$(".qk-wert", el).forEach((b) => (b.onclick = () => {
         if (el.classList.contains("gewaehlt")) return;

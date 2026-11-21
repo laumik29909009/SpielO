@@ -420,3 +420,39 @@ dialog.q-galerie .fenster-inhalt { max-height: calc(min(86vh, 900px) - 64px); }
 .qk-bild.frei > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .qk-bild.frei > img { position: relative; object-fit: contain; object-position: 50% 100%; filter: drop-shadow(0 1.2cqw 1.4cqw rgba(0, 0, 0, 0.55)); }
 .qkarte.stufe-legendaer .qk-bild.frei > img { height: 62%; width: 100%; margin-top: 8%; }
+
+/* =============================================================
+   Neue Anordnung: Tisch mittig oben, Hand als Fächer unten
+   (überschreibt die ältere Zwei-Spalten-Anordnung)
+   ============================================================= */
+.q-buehne { max-width: 880px; margin: 0 auto; }
+@media (min-width: 1000px) {
+  .q-buehne { display: block; max-width: 900px; }
+  .q-buehne > .q-szene { position: relative; top: auto; margin: 8px auto 0; }
+  .q-szene.drei { height: min(430px, 50vh); }
+  .q-buehne > .q-ich { display: flex; }
+  .q-ich .q-hand { width: 100%; }
+}
+.q-szene, .q-szene.drei { margin-left: auto; margin-right: auto; }
+.q-ich { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 14px; }
+
+.q-hand { --B: min(290px, 60vw); position: relative; width: 100%; height: calc(var(--B) * 1.397 + 24px); margin: 0 auto; }
+.q-handkarte {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  position: absolute; left: 50%; bottom: 0; width: var(--B); margin-left: calc(var(--B) / -2);
+  transform-origin: 50% 100%;
+  transform: translateX(calc(var(--x) * var(--B))) rotate(var(--r)) scale(0.7);
+  z-index: var(--z); filter: brightness(0.72) saturate(0.9);
+  transition: transform 0.35s cubic-bezier(.2,1.2,.4,1), filter 0.25s;
+}
+.q-handkarte:not(.gewaehlt):hover, .q-handkarte:not(.gewaehlt):focus-visible { filter: brightness(0.95); transform: translateX(calc(var(--x) * var(--B))) rotate(var(--r)) scale(0.7) translateY(-14px); outline: none; }
+.q-handkarte.gewaehlt { transform: none; filter: none; cursor: default; }
+.q-handkarte.gewaehlt .qkarte.neu { animation: karte-ziehen 0.45s cubic-bezier(.2,1.2,.4,1); }
+.q-handkarte.gewaehlt.dran .qkarte { box-shadow: 0 0 0 3px var(--gold), 0 0 40px color-mix(in srgb, var(--gold) 50%, transparent), 0 10px 30px rgba(0, 0, 0, 0.5); }
+.q-handkarte.gewaehlt.kontern .qkarte { box-shadow: 0 0 0 3px #fff, 0 0 30px color-mix(in srgb, var(--gold) 50%, transparent); }
+.q-handkarte .q-hand-wert { position: absolute; top: -14px; bottom: auto; left: 50%; transform: translateX(-50%); font-size: 1.15rem; padding: 4px 12px; z-index: 2; }
+.q-hand.anzahl-1 { height: calc(var(--B) * 1.397 + 10px); }
+.q-ich .q-legen { max-width: min(290px, 80vw); }
+@media (max-width: 700px) {
+  .q-hand { --B: min(270px, 62vw); }
+}

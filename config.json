@@ -23,13 +23,12 @@
   },
   "patch": {
     "datum": "21.11.2026",
-    "titel": "Quartett mit echten Bildern",
+    "titel": "Quartett: neuer Tisch & englische Karten",
     "punkte": [
-      "Alle Karten mit echten Bildern, Figuren freigestellt vor ihrer Szene",
-      "Karten ohne Bild entfernt (Dim, Sum, Thornado)",
-      "3D-Spieltisch mit animierten Figuren",
-      "Kartenrahmen nach Seltenheit: Gewöhnlich, Selten, Episch, Legendär",
-      "Handkarten im Fächer wie in echt"
+      "Spieltisch mittig, deine Hand als Fächer darunter",
+      "Gewählte Karte groß in der Mitte, die anderen schräg dahinter",
+      "Alle Karten einheitlich auf Englisch (Namen, Werte, Texte, Angriffe)",
+      "Seltenheit: Common, Rare, Epic, Legendary"
     ]
   }
 }
