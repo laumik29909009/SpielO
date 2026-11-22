@@ -12,7 +12,8 @@ body[data-spiel="ludo"], [data-farbe="ludo"] {
 .lu-brett-huelle { position: relative; }
 .lu-brett { display: block; width: 100%; max-width: 720px; margin: 0 auto; aspect-ratio: 1;
   filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.55)); overflow: visible; }
-.lu-start-pfeil { font-size: 0.32px; fill: #fff; text-anchor: middle; opacity: 0.85; }
+.lu-start-pfeil { font-size: 0.36px; font-weight: 900; fill: #fff; text-anchor: middle; opacity: 0.9; }
+.lu-ziel-nr { font-size: 0.26px; font-weight: 900; fill: #fff; text-anchor: middle; opacity: 0.75; }
 .lu-mitte { font-size: 1.2px; text-anchor: middle; }
 
 /* Figuren: gleiten von Feld zu Feld, hüpfen bei jedem Schritt */
@@ -82,3 +83,23 @@ body[data-spiel="ludo"], [data-farbe="ludo"] {
   .lu-p-ziel { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .lu-figur.kann .lu-hut, .lu-hut.hops, .lu-w.rollt { animation: none !important; } }
+
+/* Wer dran ist: Haus leuchtet */
+.lu-haus-licht { opacity: 0; transition: opacity 0.4s; }
+.lu-haus-licht.an { opacity: 1; animation: lu-haus 1.6s ease-in-out infinite; }
+@keyframes lu-haus { 50% { opacity: 0.45; } }
+/* Weg beim Drüberfahren */
+.lu-weg { fill: #fff; stroke: #7a5230; stroke-width: 0.03; opacity: 0; animation: lu-weg 0.25s ease-out forwards; }
+@keyframes lu-weg { from { opacity: 0; r: 0; } to { opacity: 0.9; } }
+/* Ring, wenn eine Figur rauskommt */
+.lu-ring { fill: none; stroke: var(--f); stroke-width: 0.1; transform-box: fill-box; transform-origin: center; animation: lu-ring 0.7s ease-out forwards; }
+@keyframes lu-ring { from { transform: scale(0.6); opacity: 1; } to { transform: scale(2.4); opacity: 0; } }
+@media (max-width: 900px) {
+  .lu-aktion { min-height: 0 !important; gap: 8px; }
+  .lu-ansage { flex: 1 1 140px; font-size: 0.9rem; }
+  .lu-wurf:disabled { display: none; }
+  .lu-p-text { min-width: 0; }
+  .lu-p-text b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; }
+  .lu-p-text small { font-size: 0.68rem; white-space: nowrap; }
+  .lu-p-ava { font-size: 1.1rem; }
+}

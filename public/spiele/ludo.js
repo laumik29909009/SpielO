@@ -103,24 +103,53 @@
   // Brett: Holz, Laufbahn, Startfelder, Häuser und Zielreihen in den Farben der Plätze
   function brettSvg(z) {
     const belegt = new Set(Object.values(z.slot));
-    const kreis = ([c, r], fuell, rand = "#3b2a1a", extra = "") => `<circle cx="${c + 0.5}" cy="${r + 0.5}" r="0.4" fill="${fuell}" stroke="${rand}" stroke-width="0.06" ${extra}/>`;
+    // Eingelassene Mulden: dunkler Rand oben, Licht unten
+    const kreis = ([c, r], fuell, rand = "#3b2a1a", extra = "") => `<g ${extra}><circle cx="${c + 0.5}" cy="${r + 0.5}" r="0.41" fill="${fuell}" stroke="${rand}" stroke-width="0.055"/><circle cx="${c + 0.5}" cy="${r + 0.5}" r="0.38" fill="url(#luMulde)"/></g>`;
     let h = `<defs>
-      <radialGradient id="luHolz" cx="50%" cy="45%" r="75%"><stop offset="0" stop-color="#f3d9a6"/><stop offset="1" stop-color="#d1a865"/></radialGradient>
+      <radialGradient id="luHolz" cx="50%" cy="42%" r="78%"><stop offset="0" stop-color="#f6dfaf"/><stop offset=".7" stop-color="#e1b877"/><stop offset="1" stop-color="#c99a58"/></radialGradient>
+      <linearGradient id="luRahmen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a86f38"/><stop offset=".5" stop-color="#7a4a22"/><stop offset="1" stop-color="#5c3517"/></linearGradient>
+      <radialGradient id="luMulde" cx="50%" cy="38%" r="60%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>
+      <pattern id="luMaserung" width="3" height="0.6" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+        <path d="M0 0.3 Q0.75 0.18 1.5 0.3 T3 0.3" fill="none" stroke="#9a6a35" stroke-width="0.025" opacity=".18"/>
+        <path d="M0 0.52 Q1 0.44 2 0.54 T3 0.5" fill="none" stroke="#9a6a35" stroke-width="0.015" opacity=".12"/>
+      </pattern>
       <filter id="luSchatten" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0.06" stdDeviation="0.05" flood-opacity="0.45"/></filter>
+      <filter id="luGluehen" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.12"/></filter>
       ${FARBEN.map((f) => `<radialGradient id="luF_${f}" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".25" stop-color="${FARBE[f][0]}"/><stop offset="1" stop-color="${FARBE[f][1]}"/></radialGradient>`).join("")}
     </defs>
-    <rect x="-0.3" y="-0.3" width="11.6" height="11.6" rx="0.6" fill="url(#luHolz)" stroke="#8a5a2b" stroke-width="0.12"/>`;
-    // Ecken mit Hausfarbe
+    <rect x="-0.32" y="-0.32" width="11.64" height="11.64" rx="0.62" fill="url(#luRahmen)"/>
+    <rect x="-0.16" y="-0.16" width="11.32" height="11.32" rx="0.5" fill="url(#luHolz)"/>
+    <rect x="-0.16" y="-0.16" width="11.32" height="11.32" rx="0.5" fill="url(#luMaserung)"/>
+    <rect x="-0.16" y="-0.16" width="11.32" height="11.32" rx="0.5" fill="none" stroke="#fff6e0" stroke-opacity=".35" stroke-width="0.04"/>`;
+    // Ecken mit Hausfarbe; wer dran ist, dessen Haus leuchtet (Klasse wird live gesetzt)
     HAUS.forEach((felder, slot) => {
       const [c, r] = felder[0];
-      h += `<rect x="${c - 0.1}" y="${r - 0.1}" width="2.2" height="2.2" rx="0.5" fill="${FARBE[FARBEN[slot]][0]}" opacity="${belegt.has(slot) ? 0.35 : 0.12}"/>`;
+      h += `<rect class="lu-haus-licht" data-slot="${slot}" x="${c - 0.16}" y="${r - 0.16}" width="2.32" height="2.32" rx="0.55" fill="none" stroke="${FARBE[FARBEN[slot]][0]}" stroke-width="0.12" filter="url(#luGluehen)"/>`;
+      h += `<rect x="${c - 0.1}" y="${r - 0.1}" width="2.2" height="2.2" rx="0.5" fill="${FARBE[FARBEN[slot]][0]}" opacity="${belegt.has(slot) ? 0.38 : 0.12}"/>`;
     });
-    // Verbindungslinien der Laufbahn
-    h += `<polygon points="${BAHN.map((f) => mitte(f).join(",")).join(" ")}" fill="none" stroke="#7a5230" stroke-width="0.09" opacity=".5"/>`;
-    BAHN.forEach((f, i) => { const slot = i % 10 === 0 ? i / 10 : -1; h += kreis(f, slot >= 0 ? FARBE[FARBEN[slot]][0] : "#fffaf0"); if (slot >= 0) h += `<text x="${f[0] + 0.5}" y="${f[1] + 0.66}" class="lu-start-pfeil">▶</text>`; });
-    ZIEL.forEach((felder, slot) => felder.forEach((f) => (h += kreis(f, FARBE[FARBEN[slot]][0], "#3b2a1a", 'opacity=".9"'))));
+    // Verbindungslinien der Laufbahn (eingefräst)
+    const linie = BAHN.map((f) => mitte(f).join(",")).join(" ");
+    h += `<polygon points="${linie}" fill="none" stroke="#fff3d6" stroke-width="0.13" opacity=".5" transform="translate(0 0.025)"/>`;
+    h += `<polygon points="${linie}" fill="none" stroke="#7a5230" stroke-width="0.1" opacity=".55"/>`;
+    // Laufrichtung: kleine Pfeile zwischen ausgewählten Feldern
+    BAHN.forEach((f, i) => {
+      if (i % 10 !== 5) return;
+      const [x1, y1] = mitte(f), [x2, y2] = mitte(BAHN[(i + 1) % 40]);
+      const w = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      h += `<path d="M-0.1 -0.1 L0.06 0 L-0.1 0.1" fill="none" stroke="#7a5230" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round" opacity=".7" transform="translate(${(x1 + x2) / 2} ${(y1 + y2) / 2}) rotate(${w})"/>`;
+    });
+    BAHN.forEach((f, i) => {
+      const slot = i % 10 === 0 ? i / 10 : -1;
+      h += kreis(f, slot >= 0 ? FARBE[FARBEN[slot]][0] : "#fffaf0", slot >= 0 ? FARBE[FARBEN[slot]][1] : "#3b2a1a", `class="lu-bahn" data-i="${i}"`);
+      if (slot >= 0) h += `<text x="${f[0] + 0.5}" y="${f[1] + 0.63}" class="lu-start-pfeil">A</text>`;
+    });
+    ZIEL.forEach((felder, slot) => felder.forEach((f, k) => (h += kreis(f, FARBE[FARBEN[slot]][0], FARBE[FARBEN[slot]][1], `opacity=".95"`) + `<text x="${f[0] + 0.5}" y="${f[1] + 0.62}" class="lu-ziel-nr">${String.fromCharCode(97 + k)}</text>`)));
     HAUS.forEach((felder, slot) => felder.forEach((f) => (h += kreis(f, "#fffaf0", FARBE[FARBEN[slot]][1]))));
-    h += `<text x="5.5" y="5.78" class="lu-mitte">🎯</text>`;
+    // Mitte: vier Farbdreiecke treffen sich, darauf ein Medaillon
+    const M = 5.5, D = 0.5;
+    const ecken = [[[M - D, M - D], [M - D, M + D]], [[M - D, M - D], [M + D, M - D]], [[M + D, M - D], [M + D, M + D]], [[M - D, M + D], [M + D, M + D]]];
+    ecken.forEach(([a, b], slot) => (h += `<polygon points="${a.join(",")} ${b.join(",")} ${M},${M}" fill="url(#luF_${FARBEN[slot]})" stroke="#3b2a1a" stroke-width="0.04" opacity="${belegt.has(slot) ? 1 : 0.4}"/>`));
+    h += `<circle cx="${M}" cy="${M}" r="0.27" fill="#fffaf0" stroke="#3b2a1a" stroke-width="0.04"/><path d="M${M} ${M - 0.16} L${M + 0.05} ${M - 0.05} L${M + 0.16} ${M - 0.05} L${M + 0.07} ${M + 0.03} L${M + 0.1} ${M + 0.15} L${M} ${M + 0.08} L${M - 0.1} ${M + 0.15} L${M - 0.07} ${M + 0.03} L${M - 0.16} ${M - 0.05} L${M - 0.05} ${M - 0.05}Z" fill="#ffcf3f" stroke="#a8621e" stroke-width="0.02"/>`;
     return h;
   }
 
@@ -150,6 +179,7 @@
     effekte(z);
     figurenZeichnen(z);
     leuteZeichnen(z);
+    $$(".lu-haus-licht").forEach((el) => el.classList.toggle("an", +el.dataset.slot === z.slot[z.dran]));
     // Ansage und Würfeln-Knopf
     let ansage = "";
     if (z.schritt === "wuerfeln") ansage = ich ? (z.versuche > 1 ? `<b>Würfle eine 6!</b> Noch ${z.versuche} Versuche` : z.wurf === 6 ? "<b>Eine 6!</b> Nochmal würfeln" : "<b>Du bist dran!</b>") : `${t.avatar} ${esc(t.name)} würfelt${GN.wartePunkte()}`;
@@ -236,7 +266,9 @@
     const m = z.moeglich.find((x) => x.k === k);
     if (!m) { box.innerHTML = ""; return; }
     const [x, y] = mitte(feldVon(z.slot[id], m.nach, k));
-    box.innerHTML = `<circle cx="${x}" cy="${y}" r="0.46" class="lu-zielgeist ${m.schlaegt ? "schlag" : ""}"/>${m.schlaegt ? `<text x="${x}" y="${y + 0.2}" class="lu-zielgeist-text">💥</text>` : ""}`;
+    const von = z.figuren[id][k];
+    const weg = von < 0 ? [] : Array.from({ length: m.nach - von - 1 }, (_, i) => mitte(feldVon(z.slot[id], von + i + 1, k)));
+    box.innerHTML = weg.map(([wx, wy], i) => `<circle cx="${wx}" cy="${wy}" r="0.1" class="lu-weg" style="animation-delay:${i * 50}ms"/>`).join("") + `<circle cx="${x}" cy="${y}" r="0.46" class="lu-zielgeist ${m.schlaegt ? "schlag" : ""}"/>${m.schlaegt ? `<text x="${x}" y="${y + 0.2}" class="lu-zielgeist-text">💥</text>` : ""}`;
   }
 
   // ---------- Züge animieren: Feld für Feld hüpfen ----------
@@ -262,7 +294,12 @@
       if (i === pfad.length - 1) setTimeout(() => {
         el.classList.remove("hebt");
         laeuft--;
-        if (a.nach >= 40 && a.von < 40) { Ton.richtig(); GN.fx?.funken(el.getBoundingClientRect ? el : null, { anzahl: 12 }); }
+        if (a.nach >= 40 && a.von < 40) {
+          Ton.richtig(); GN.fx?.funken(el, { anzahl: 16 });
+          const fertig = (GN.zustand.figuren[a.spieler] || []).filter((x) => x >= 40).length;
+          knall(`${fertig === 4 ? "🏆" : "🎉"} ${esc(nameVon(z, a.spieler))} ${fertig === 4 ? "ist komplett im Ziel!" : `hat ${fertig}/4 im Ziel`}`, FARBE[farbeVon(z, a.spieler)][0]);
+        }
+        if (a.von === -1) { GN.fx?.pop(el, 1.2); Ton.wusch?.(); ring(el, farbeVon(z, a.spieler)); }
         if (a.geschlagen) rauswurf(z, a);
         figurenZeichnen(GN.zustand);
       }, 170);
@@ -281,11 +318,23 @@
     setzen(el, z.slot[g.id], -1, g.k);
     setTimeout(() => el.classList.remove("fliegt"), 700);
   }
-  function knall(text) {
+  // Farbiger Ring breitet sich vom Feld aus (Figur kommt raus)
+  function ring(el, farbe) {
+    const box = $("#luZiele");
+    const m = /translate\(([\d.]+)px, ([\d.]+)px\)/.exec(el.style.transform);
+    if (!box || !m) return;
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", m[1]); c.setAttribute("cy", m[2]); c.setAttribute("r", "0.45");
+    c.setAttribute("class", "lu-ring"); c.style.setProperty("--f", FARBE[farbe][0]);
+    box.appendChild(c);
+    setTimeout(() => c.remove(), 700);
+  }
+  function knall(text, farbe) {
     const box = $("#luKnall");
     if (!box) return;
     const el = document.createElement("div");
     el.className = "lu-knall-text"; el.innerHTML = text;
+    if (farbe) el.style.borderColor = farbe;
     box.appendChild(el);
     setTimeout(() => el.remove(), 1800);
   }
