@@ -1,5 +1,5 @@
 // =============================================================
-//  Würfelglück – Browser-Teil
+//  Kiffel – Browser-Teil
 //  3D-Würfel (CSS 3D), Becher mit Einsammeln/Schütteln/Ausschütten,
 //  Halteleiste, Punkteblock und die Würfel-Eule als Live-Helfer
 // =============================================================
