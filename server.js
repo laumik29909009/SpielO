@@ -28,7 +28,19 @@ const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
 // Was auf der Wartungsseite steht, kommt aus config.json ("wartungInfo")
-const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [], patch: PATCH = null, musikAus: MUSIK_AUS = [], spende: SPENDE = null } = require("./config.json");
+const { wartung: WARTUNG, wartungInfo: INFO = {}, imAufbau: IM_AUFBAU = [], patch: PATCH = null, musikAus: MUSIK_AUS = [], spende: SPENDE = null, demnaechst: DEMNAECHST = null } = require("./config.json");
+
+// Beliebtheit: Wie oft wurde jedes Spiel gestartet? (für die Reihenfolge auf der Startseite)
+// Gespeichert in einer Datei; auf dem kostenlosen Render-Server geht sie bei einem Neustart verloren.
+const BELIEBT_DATEI = process.env.BELIEBT_DATEI || require("path").join(require("os").tmpdir(), "spielo-beliebt.json");
+let GESPIELT = {};
+try { GESPIELT = JSON.parse(require("fs").readFileSync(BELIEBT_DATEI, "utf8")) || {}; } catch {}
+let beliebtTimer = null;
+function gespielt(spiel) {
+  GESPIELT[spiel] = (GESPIELT[spiel] || 0) + 1;
+  clearTimeout(beliebtTimer);
+  beliebtTimer = setTimeout(() => require("fs").writeFile(BELIEBT_DATEI, JSON.stringify(GESPIELT), () => {}), 2000);
+}
 // Spiele "im Aufbau" sind nur über den Vorschau-Link wählbar: /?vorschau=1
 const waehlbar = (raum, spiel) => !!SPIELE[spiel] && (!IM_AUFBAU.includes(spiel) || raum.vorschau);
 if (WARTUNG) {
@@ -247,6 +259,8 @@ io.on("connection", (socket) => {
     version: VERSION,
     imAufbau: IM_AUFBAU,
     patch: PATCH,
+    demnaechst: DEMNAECHST,
+    beliebt: GESPIELT,
     spende: SPENDE ? { text: SPENDE.text } : null,
   });
 
@@ -383,6 +397,7 @@ io.on("connection", (socket) => {
       raum.phase = "lobby";
       return socket.emit("fehler", fehler);
     }
+    gespielt(raum.spiel);
     sendeZustand(raum);
   });
 

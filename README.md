@@ -107,6 +107,10 @@ Oben rechts gibt es einen 🎵-Knopf mit Musikrichtungen, Wiedergabe-Steuerung u
 Jeder Ordner in `public/musik/` ist eine Musikrichtung (z. B. `public/musik/jazz/`). Lieder (MP3, M4A, OGG …) einfach dort hineinlegen.
 Bitte nur Musik verwenden, die ihr öffentlich abspielen dürft (eigene Aufnahmen oder lizenzfreie Musik), denn das Repository und die Seite sind öffentlich.
 
+## Demnächst & Beliebtheit
+- `config.json` → `demnaechst`: Kasten „Demnächst auf SpielO“ auf der Startseite (Liste aus [Icon, Titel, Text]). Zum Ausblenden einfach löschen.
+- Die Spiele sind nach Beliebtheit sortiert: Jeder Spielstart zählt (Datei im Temp-Ordner des Servers). Das meistgespielte Spiel steht oben mit „🔥 Am meisten gespielt“, Spiele im Aufbau stehen am Ende. Auf dem kostenlosen Render-Server beginnt die Zählung nach einem Neustart wieder bei null.
+
 ## Patch-Hinweis
 Auf der Startseite steht unten ein kleiner aufklappbarer Block „🆕 Neu“ mit dem letzten Update. Der Inhalt kommt aus `config.json` → `"patch"` (`datum`, `titel`, `punkte`).
 

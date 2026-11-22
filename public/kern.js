@@ -236,11 +236,11 @@ function zeigeStart() {
     <section class="kapitel rein" style="--d:1.6s">
       <h2 class="kapitel-titel">Unsere Spiele</h2>
       <div class="spiele-gitter">
-        ${Object.entries(GN.spiele).map(([id, s]) => imAufbau(id) ? aufbauKarte({ ...s, id }, true) : spielKarte(id, s)).join("")}
+        ${nachBeliebtheit().map(([id, s], i) => imAufbau(id) ? aufbauKarte({ ...s, id }, true) : spielKarte(id, i === 0 && beliebtheit(id) > 0 ? { ...s, tags: ["🔥 Am meisten gespielt", ...s.tags] } : s)).join("")}
         ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}
       </div>
     </section>
-    <div class="fuss-bloecke">${patchBlock()}${spendenBlock()}</div>`;
+    <div class="fuss-bloecke">${demnaechstBlock()}${patchBlock()}${spendenBlock()}</div>`;
 
   const name = () => {
     const n = $("#nameInput").value.trim();
@@ -295,6 +295,24 @@ function spendenBlock() {
 }
 
 // Kleiner Block mit dem letzten Update (Inhalt aus config.json → "patch")
+// Reihenfolge der Spiele: am meisten gespielt zuerst, Spiele im Aufbau ans Ende
+const beliebtheit = (id) => GN.meta.beliebt?.[id] || 0;
+function nachBeliebtheit() {
+  const reihe = Object.keys(GN.spiele);
+  return Object.entries(GN.spiele).sort(([a], [b]) => (imAufbau(a) - imAufbau(b)) || (beliebtheit(b) - beliebtheit(a)) || (reihe.indexOf(a) - reihe.indexOf(b)));
+}
+
+// Kasten "Demnächst" (Inhalt aus config.json → "demnaechst")
+function demnaechstBlock() {
+  const d = GN.meta.demnaechst;
+  if (!d || !d.punkte?.length) return "";
+  return `
+    <div class="demnaechst rein" style="--d:1.7s">
+      <div class="demnaechst-kopf"><span class="demnaechst-marke">⏳ Bald</span><b>${esc(d.titel || "Demnächst")}</b></div>
+      <ul>${d.punkte.map(([icon, titel, text]) => `<li><span class="dn-icon">${icon}</span><span><b>${esc(titel)}</b>${text ? `<small>${esc(text)}</small>` : ""}</span></li>`).join("")}</ul>
+    </div>`;
+}
+
 function patchBlock() {
   const p = GN.meta.patch;
   if (!p || !p.punkte?.length) return "";
@@ -352,7 +370,7 @@ function zeigeLobby() {
     <section class="kapitel">
       <h2 class="kapitel-titel">${host ? "Wähle ein Spiel" : "Gewähltes Spiel"}</h2>
       <div class="spiele-gitter zwei">
-        ${Object.entries(GN.spiele).map(([id, s]) => imAufbau(id) && !z.vorschau
+        ${nachBeliebtheit().map(([id, s]) => imAufbau(id) && !z.vorschau
           ? aufbauKarte({ ...s, id }, true)
           : spielKarte(id, imAufbau(id) ? { ...s, tags: ["🚧 Vorschau", ...s.tags] } : s, { aktiv: z.spiel === id, deaktiviert: !host, alsKnopf: true })).join("")}
         ${GN.imAufbau.map((s) => aufbauKarte(s, true)).join("")}

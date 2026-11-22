@@ -37,5 +37,30 @@
   },
   "musikAus": [
     "jazz"
-  ]
+  ],
+  "demnaechst": {
+    "titel": "Demnächst auf SpielO",
+    "punkte": [
+      [
+        "✨",
+        "Großes Qualitäts-Update",
+        "Mehr Animationen, Effekte und Sounds in allen Spielen"
+      ],
+      [
+        "🎵",
+        "Neue Hintergrundmusik",
+        "Neue Stücke und mehr Auswahl"
+      ],
+      [
+        "🎮",
+        "Neue Spiele",
+        "Es ist schon etwas in Arbeit …"
+      ],
+      [
+        "🛠️",
+        "Fehlerbehebungen",
+        "Unter anderem bei den Knaben von Schechingen"
+      ]
+    ]
+  }
 }

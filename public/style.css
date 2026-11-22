@@ -1222,3 +1222,15 @@ dialog.fenster::backdrop { background: rgba(8, 6, 20, 0.6); backdrop-filter: blu
 .eule-schalter { all: unset; cursor: pointer; font-size: 0.8rem; font-weight: 800; padding: 5px 11px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--rand); color: var(--leise); white-space: nowrap; }
 .eule-schalter.an { background: rgba(120, 200, 255, 0.14); border-color: rgba(120, 200, 255, 0.55); color: #bfe6ff; }
 .eule-schalter:hover { filter: brightness(1.2); }
+
+/* Kasten "Demnächst" auf der Startseite */
+.demnaechst { border-radius: 16px; padding: 12px 14px; background: linear-gradient(135deg, rgba(155, 89, 255, 0.16), rgba(255, 106, 160, 0.1)); border: 1px solid rgba(190, 140, 255, 0.45); font-size: 0.9rem; }
+.demnaechst-kopf { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.demnaechst-marke { font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 9px; border-radius: 999px; background: rgba(190, 140, 255, 0.3); color: #f0e2ff; animation: dn-puls 2.4s ease-in-out infinite; }
+.demnaechst ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.demnaechst li { display: flex; gap: 10px; align-items: flex-start; }
+.dn-icon { font-size: 1.2rem; line-height: 1.2; }
+.demnaechst li b { display: block; }
+.demnaechst li small { color: var(--leise); }
+@keyframes dn-puls { 50% { box-shadow: 0 0 0 4px rgba(190, 140, 255, 0.18); } }
+@media (prefers-reduced-motion: reduce) { .demnaechst-marke { animation: none; } }
