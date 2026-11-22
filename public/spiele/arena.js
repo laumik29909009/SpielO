@@ -233,7 +233,7 @@
             <button data-a-modus="frei" class="${e.modus === "frei" ? "aktiv" : ""}" ${dis}>🎲 Freies Spiel</button></div></div>
           ${e.modus === "frei" ? `<div><div class="unter-titel">Aufgaben</div><div class="segment">${[5, 7, 10, 15].map((n) => `<button data-a-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>` : ""}
           <div><div class="unter-titel">Zeit pro Aufgabe</div><div class="segment">${[15, 25, 40].map((n) => `<button data-a-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n}s</button>`).join("")}</div></div>
-          <div><div class="unter-titel">Computer</div><div class="segment">${[0, 1, 2, 3].map((n) => `<button data-a-bots="${n}" class="${e.bots === n ? "aktiv" : ""}" ${dis}>${n || "Keine"}</button>`).join("")}</div></div>
+          ${e.modus === "frei" ? `<div><div class="unter-titel">Computer</div><div class="segment">${[0, 1, 2, 3].map((n) => `<button data-a-bots="${n}" class="${e.bots === n ? "aktiv" : ""}" ${dis}>${n || "Keine"}</button>`).join("")}</div></div>` : ""}
         </div>
         <p class="leise klein-text" style="margin-top:8px">${e.modus === "tag"
           ? (a.heute ? `Du hast die Tagesarena heute schon gespielt (${a.heute.punkte} Ruhm). Eine weitere Runde ist nur Übung.` : "Dein erstes Ergebnis von heute kommt in die Tages-Rangliste und deine Statistik.")
@@ -298,15 +298,31 @@
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
         <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
-        <div class="a-kopf" id="aKopf"></div>
+        <div class="a-kopf" id="aKopf"><div class="a-3d-huelle" id="a3d"><div class="a-3d-info" id="a3dInfo"></div></div><div id="aSchilde"></div></div>
         <div id="aInhalt"></div>
         <div class="a-leute" id="aLeute"></div>
       </div>`;
   }
 
-  function kopf(z, stufen) {
+  function kopf(z, stufen, opt = {}) {
     const p = stufen.reduce((a, b) => a + b, 0);
-    $("#aKopf").innerHTML = `${ruhmAnzeige(p, z.gesamt * 100, { klein: true })}${schilde(stufen, z.gesamt)}`;
+    const max = z.gesamt * 100;
+    $("#aSchilde").innerHTML = schilde(stufen, z.gesamt);
+    buehne($("#a3d"), p, max, opt);
+  }
+  // 3D-Kolosseum mit Gladiator (Rückfall: Halbkreis-Anzeige ohne WebGL)
+  function buehne(huelle, punkte, max, opt = {}) {
+    if (!huelle) return;
+    const t = titelFuer(punkte, max);
+    const info = huelle.querySelector(".a-3d-info");
+    const text = `<b class="a-ruhm-zahl">${fmt(punkte)}</b><span>/ ${fmt(max)} Ruhm</span><em>${t.icon} ${t.name} · ${zuschauer(punkte)} Zuschauer</em>`;
+    if (!window.ArenaBuehne3D?.moeglich()) {
+      huelle.classList.add("ohne3d");
+      huelle.innerHTML = ruhmAnzeige(punkte, max, { klein: !huelle.classList.contains("gross") });
+      return;
+    }
+    if (info) info.innerHTML = text;
+    ArenaBuehne3D.einhaengen(huelle).then((b) => b.setzen(punkte, max, opt)).catch(() => { huelle.classList.add("ohne3d"); huelle.innerHTML = ruhmAnzeige(punkte, max); });
   }
 
   function timerStarten(z) {
@@ -316,7 +332,7 @@
 
   function frageZeigen(z) {
     $("#aNr").textContent = `Aufgabe ${z.nr} / ${z.gesamt}`;
-    kopf(z, meinVerlauf(z).slice(0, z.nr - 1));
+    kopf(z, meinVerlauf(z).slice(0, z.nr - 1), { sofort: z.nr === 1 });
     const schon = z.beantwortet.includes(GN.ich);
     $("#aInhalt").innerHTML = `
       <div class="a-karte rein-a">
@@ -371,7 +387,7 @@
       gesehenAufloesung = schluessel;
       const med = $(".a-medaille");
       med?.classList.add("knall");
-      setTimeout(() => kopf(z, stufen), 650);
+      setTimeout(() => kopf(z, stufen, { stufe: s }), 650);
       if (s === 100) { Ton.fanfare(); GN.konfetti(220); navigator.vibrate?.([60, 40, 120]); }
       else if (s >= 85) { Ton.volltreffer(); GN.konfetti(90); navigator.vibrate?.(60); }
       else if (s >= 30) Ton.richtig();
@@ -419,6 +435,7 @@
     const v = z.verlauf[GN.ich] || [];
     const stufen = v.map((x) => x.stufe);
     const punkte = stufen.reduce((a, b) => a + b, 0);
+    const serieVorher = auswerten().serie;
     const { neu } = ergebnisSpeichern(z);
     const stat = auswerten();
     const tag = z.modus === "tag";
@@ -427,7 +444,7 @@
     app.innerHTML = `
       <div class="max-breite a-ende">
         <div class="a-ende-titel">${tag ? `🏛️ Tagesarena #${z.tagNr} geschlagen!` : "🎲 Freies Spiel beendet"}</div>
-        ${ruhmAnzeige(punkte, z.gesamt * 100)}
+        <div class="a-3d-huelle gross" id="a3dEnde"><div class="a-3d-info"></div></div>
         ${schilde(stufen, z.gesamt)}
         <div class="a-ende-info">${tag ? (gezaehlt ? `✓ Zählt für die Tages-Rangliste${stat.serie > 1 ? ` · 🔥 ${stat.serie} Tage in Folge!` : ""}` : "Übungsrunde: Dein erstes Ergebnis von heute zählt.") : ""}</div>
         <div class="a-ende-knoepfe">
@@ -445,14 +462,49 @@
     $("#aStatEnde").onclick = zeigeStatistik;
     $("#aPodest")?.addEventListener("click", () => GN.podest("arena-podest", { einheit: "Ruhm" }));
     endeKnoepfe(z);
-    // Ruhm zählt hoch
-    const zahl = $(".a-ende .a-ruhm-zahl");
-    const start = performance.now();
-    const lauf = (t) => { const k = Math.min(1, (t - start) / 1400); zahl.textContent = fmt(punkte * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(lauf); };
-    requestAnimationFrame(lauf);
-    Ton.trommel(1.1);
-    setTimeout(() => { Ton.fanfare(); GN.konfetti(punkte >= z.gesamt * 40 ? 200 : 90); }, 1300);
+    // Gladiator startet am Anfang und läuft bis zu seinem Ergebnis, der Ruhm zählt mit
+    const huelle = $("#a3dEnde");
+    buehne(huelle, 0, z.gesamt * 100, { sofort: true });
+    const dauer = 1200 + (punkte / (z.gesamt * 100)) * 4200;
+    setTimeout(() => {
+      buehne(huelle, punkte, z.gesamt * 100, { stufe: punkte >= z.gesamt * 40 ? 100 : 30 });
+      const zahl = huelle.querySelector(".a-ruhm-zahl");
+      const start = performance.now();
+      const lauf = (t) => { const k = Math.min(1, (t - start) / dauer); if (zahl) zahl.textContent = fmt(punkte * k); if (k < 1) requestAnimationFrame(lauf); };
+      requestAnimationFrame(lauf);
+      Ton.trommel(Math.min(3, dauer / 1000));
+    }, 500);
+    setTimeout(() => {
+      if (GN.ansicht !== "arena-ende") return;
+      Ton.fanfare(); GN.konfetti(punkte >= z.gesamt * 40 ? 200 : 90);
+      if (tag && neu) setTimeout(() => GN.ansicht === "arena-ende" && serieZeigen(serieVorher, stat), 1800);
+    }, 600 + dauer);
   }
+  // Große Serien-Animation: Flamme, Zahl springt hoch, Woche füllt sich
+  function serieZeigen(alt, stat) {
+    const d = laden();
+    const heute = heuteLokal();
+    const tage = Array.from({ length: 7 }, (_, i) => tagPlus(heute, i - 6));
+    const kurz = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+    const el = document.createElement("div");
+    el.className = "a-serie-overlay";
+    el.innerHTML = `<div class="a-serie-karte">
+      <div class="a-flamme">🔥</div>
+      <div class="a-serie-zahl"><span class="alt">${alt}</span><span class="neu">${stat.serie}</span></div>
+      <div class="a-serie-text">${stat.serie === 1 ? "Tag in Folge!" : "Tage in Folge!"}</div>
+      <div class="a-woche">${tage.map((t, i) => `<div class="${d.tage[t] ? "ja" : ""} ${t === heute ? "heute" : ""}" style="--i:${i}"><span>${d.tage[t] ? "✓" : ""}</span><small>${kurz[new Date(t + "T12:00:00").getDay()]}</small></div>`).join("")}</div>
+      <p class="leise">${stat.serie >= stat.besteSerie && stat.serie > 1 ? "🏆 Deine beste Serie bisher!" : `Beste Serie: ${stat.besteSerie}`} · Komm morgen wieder für Tag ${stat.serie + 1}.</p>
+      <button class="btn gross voll" id="aSerieWeiter">Weiter</button>
+    </div>`;
+    document.body.appendChild(el);
+    Ton.aufsteigen(0.7, 1.2);
+    setTimeout(() => { Ton.fanfare(); GN.konfetti(120); navigator.vibrate?.([40, 30, 80]); }, 900);
+    const zu = () => { el.classList.add("weg"); setTimeout(() => el.remove(), 300); };
+    el.querySelector("#aSerieWeiter").onclick = zu;
+    el.onclick = (ev) => { if (ev.target === el) zu(); };
+  }
+  GN.arenaSerie = serieZeigen;
+
   function endeKnoepfe(z) {
     const box = $("#aEndeLeiste");
     if (!box) return;

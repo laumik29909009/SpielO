@@ -170,3 +170,39 @@ body[data-spiel="arena"], [data-farbe="arena"] {
   .a-schild { width: 30px; height: 34px; font-size: 0.9rem; }
 }
 @media (prefers-reduced-motion: reduce) { .a-medaille, .a-schild, .rein-a { animation: none !important; } }
+
+/* 3D-Kolosseum mit Gladiator */
+.a-3d-huelle { position: relative; height: clamp(180px, 24vw, 250px); border-radius: 22px; overflow: hidden; margin-bottom: 6px;
+  background: radial-gradient(120% 100% at 50% 100%, #4a2c3e, #1d1226 70%); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 210, 150, 0.15); }
+.a-3d-huelle.gross { height: clamp(250px, 42vw, 400px); }
+.a-3d-huelle.ohne3d { height: auto; background: none; box-shadow: none; overflow: visible; }
+.a3d { position: absolute; inset: 0; }
+.a3d canvas { width: 100% !important; height: 100% !important; display: block; }
+.a-3d-info { position: absolute; left: 16px; top: 12px; z-index: 2; display: flex; flex-direction: column; line-height: 1.1; pointer-events: none; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7); }
+.a-3d-info .a-ruhm-zahl { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.a-3d-huelle.gross .a-3d-info .a-ruhm-zahl { font-size: clamp(2.2rem, 6vw, 3.4rem); }
+.a-3d-info span { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--leise); }
+.a-3d-info em { font-style: normal; font-size: 0.82rem; margin-top: 4px; color: #ffe7b0; }
+
+/* Serie nach der Tagesarena */
+.a-serie-overlay { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(10, 5, 16, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: a-rein 0.35s ease; }
+.a-serie-overlay.weg { opacity: 0; transition: opacity 0.3s; }
+.a-serie-karte { width: min(420px, 100%); text-align: center; padding: 26px 22px 20px; border-radius: 28px; background: radial-gradient(120% 90% at 50% 0%, #4a2516, #241730 70%); border: 1px solid rgba(255, 150, 60, 0.45); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 80px rgba(255, 120, 40, 0.25); }
+.a-flamme { font-size: 5.5rem; line-height: 1; animation: a-flamme-rein 0.8s cubic-bezier(.2, 1.6, .4, 1), a-flackern 1.2s ease-in-out 0.8s infinite; filter: drop-shadow(0 0 24px rgba(255, 140, 40, 0.8)); }
+.a-serie-zahl { position: relative; height: 4.6rem; overflow: hidden; font-size: 4rem; font-weight: 900; color: #ffb04a; text-shadow: 0 4px 24px rgba(255, 120, 40, 0.6); }
+.a-serie-zahl span { position: absolute; left: 0; right: 0; top: 0; }
+.a-serie-zahl .alt { animation: a-zahl-raus 0.5s ease-in 0.8s forwards; }
+.a-serie-zahl .neu { transform: translateY(100%); animation: a-zahl-rein 0.6s cubic-bezier(.2, 1.5, .4, 1) 0.95s forwards; }
+.a-serie-text { font-size: 1.3rem; font-weight: 900; margin-bottom: 14px; }
+.a-woche { display: flex; justify-content: center; gap: 8px; margin: 6px 0 14px; }
+.a-woche div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.a-woche span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.12); }
+.a-woche .ja span { background: linear-gradient(180deg, #ffb04a, #ff6a2a); border-color: #ffcf8a; color: #2a1000; }
+.a-woche .heute span { animation: a-heute 0.6s cubic-bezier(.2, 1.8, .4, 1) 1.4s backwards; box-shadow: 0 0 0 4px rgba(255, 176, 74, 0.35); }
+.a-woche small { font-size: 0.7rem; color: var(--leise); }
+@keyframes a-flamme-rein { from { transform: scale(0) rotate(-20deg); } }
+@keyframes a-flackern { 0%, 100% { transform: scale(1) rotate(0); } 30% { transform: scale(1.06, 0.96) rotate(-3deg); } 60% { transform: scale(0.97, 1.05) rotate(2deg); } }
+@keyframes a-zahl-raus { to { transform: translateY(-100%); opacity: 0; } }
+@keyframes a-zahl-rein { to { transform: translateY(0); } }
+@keyframes a-heute { from { transform: scale(0); } }
+@media (prefers-reduced-motion: reduce) { .a-flamme, .a-serie-zahl span, .a-woche .heute span { animation: none !important; transform: none !important; } .a-serie-zahl .alt { display: none; } }

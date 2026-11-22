@@ -10,6 +10,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { AUFGABEN } = require("../daten/arena");
+const EXTRA = require("../daten/arena-extra");
 
 const MAX_TEILNEHMER = 10;
 const PRO_TAG = 7;
@@ -57,6 +58,16 @@ function liste(a) {
       l.push({ stufe: s, anzeige: formen[0], formen: formen.map(norm) });
     }
   }
+  // Zusätzliche Antworten (daten/arena-extra.js); schon vorhandene werden übersprungen
+  const bekannt = new Set(l.flatMap((e) => e.formen));
+  for (const [s, text] of Object.entries(EXTRA[a.id] || {})) {
+    for (const e of text.split(",")) {
+      const formen = e.split("|").map((x) => x.trim()).filter(Boolean);
+      if (!formen.length || formen.some((f) => bekannt.has(norm(f)))) continue;
+      formen.forEach((f) => bekannt.add(norm(f)));
+      l.push({ stufe: +s, anzeige: formen[0], formen: formen.map(norm) });
+    }
+  }
   LISTEN.set(a.id, l);
   return l;
 }
@@ -75,7 +86,16 @@ function bewerten(aufgabe, text) {
     const d = abstand(n, f, grenze);
     if (d < bestA) { bestA = d; bester = e; }
   }
-  return bester;
+  if (bester) return bester;
+  // Zusammengesetzte Wörter: "Erdbeereis" → Erdbeere, "Feldhase" → Hase, "FC Bayern München" → Bayern München
+  let teil = null, teilL = 0;
+  for (const e of l) for (const f of e.formen) {
+    if (f.length < 4 || f.length <= teilL) continue;
+    const hinten = n.endsWith(f) && f.length >= n.length * 0.4;
+    const vorn = n.startsWith(f) && n.length - f.length <= 5;
+    if (hinten || vorn) { teil = e; teilL = f.length; }
+  }
+  return teil;
 }
 
 // ---------- Tagesarena ----------
@@ -287,7 +307,8 @@ module.exports = {
       const heutige = new Set(tagesAufgaben(datum).map((a) => a.id)); // keine Spoiler für die Tagesarena
       aufgaben = mischen(AUFGABEN.filter((a) => !heutige.has(a.id))).slice(0, e.runden);
     }
-    const bots = mischen(BOTS).slice(0, Math.min(e.bots, MAX_TEILNEHMER - online.length)).map((b, i) => ({ ...b, id: "bot" + (i + 1), punkte: 0 }));
+    // In der Tagesarena gibt es keine Computer: es zählt nur dein eigenes Ergebnis
+    const bots = mischen(BOTS).slice(0, e.modus === "tag" ? 0 : Math.min(e.bots, MAX_TEILNEHMER - online.length)).map((b, i) => ({ ...b, id: "bot" + (i + 1), punkte: 0 }));
     const reihenfolge = [...online.map((s) => s.id), ...bots.map((b) => b.id)];
     raum.daten = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), modus: e.modus, datum, tagNr: tagNr(datum), aufgaben, bots, reihenfolge, nr: 0, phase: "frage",
