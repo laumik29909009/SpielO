@@ -210,6 +210,7 @@ function sendeZustand(raum) {
       online: s.online,
       zuschauer: !!s.zuschauer,
       afk: !!s.afk,
+      wunsch: s.wunsch || null,
       ...(imSpiel && m.spielerInfo ? m.spielerInfo(raum, s) : {}),
     })),
     ...(imSpiel ? m.ansicht(raum) : {}),
@@ -373,6 +374,15 @@ io.on("connection", (socket) => {
     if (!meinRaum || !meinRaum.spieler[meineId]) return;
     const s = meinRaum.spieler[meineId];
     s.avatar = freierAvatar(meinRaum, s.avatar);
+    sendeZustand(meinRaum);
+  });
+
+  // Persönliche Wünsche für ein Spiel (z. B. Lieblingsfigur in Baulöwe), jeder für sich
+  auf("wunsch", (w) => {
+    if (!meinRaum || !meinRaum.spieler[meineId] || !w || typeof w !== "object") return;
+    const s = meinRaum.spieler[meineId];
+    s.wunsch = { ...(s.wunsch || {}) };
+    for (const [k, v] of Object.entries(w).slice(0, 5)) if (/^\w{1,20}$/.test(k) && (typeof v === "string" ? v.length <= 12 : typeof v === "number" || typeof v === "boolean")) s.wunsch[k] = v;
     sendeZustand(meinRaum);
   });
 

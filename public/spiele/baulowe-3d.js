@@ -112,6 +112,21 @@ window.BauloweBrett3D = (() => {
       return new THREE.MeshStandardMaterial({ map: t, roughness: 0.35 });
     });
   }
+  // Tempowürfel: rot, Seiten 1–3 mit weißen Augen, 4/5 Mr. Monopoly, 6 Bus
+  function tempoMaterial() {
+    const PUNKTE = { 1: [[.5, .5]], 2: [[.27, .27], [.73, .73]], 3: [[.25, .25], [.5, .5], [.75, .75]] };
+    const BILD = { 4: "🎩", 5: "🎩", 6: "🚌" };
+    return [3, 4, 1, 6, 2, 5].map((n) => {
+      const c = document.createElement("canvas"); c.width = c.height = 128;
+      const g = c.getContext("2d");
+      g.fillStyle = "#d32f2f"; g.fillRect(0, 0, 128, 128);
+      g.strokeStyle = "rgba(0,0,0,.18)"; g.lineWidth = 6; g.strokeRect(3, 3, 122, 122);
+      if (BILD[n]) { g.font = "76px system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(BILD[n], 64, 70); }
+      else for (const [x, y] of PUNKTE[n]) { g.beginPath(); g.arc(x * 128, y * 128, 12, 0, Math.PI * 2); g.fillStyle = "#fff"; g.fill(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+      return new THREE.MeshStandardMaterial({ map: t, roughness: 0.35 });
+    });
+  }
   // Drehung, bei der die Augenzahl nach oben zeigt
   function obenDrehung(n) {
     const q = new THREE.Quaternion();
@@ -245,6 +260,9 @@ window.BauloweBrett3D = (() => {
       // Würfel
       const wm = wuerfelMaterial();
       this.wuerfel = [0, 1].map((i) => { const w = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.55), wm); w.castShadow = true; w.position.set(-0.5 + i, 0.275, 0.9); s.add(w); return w; });
+      const tw = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.55), tempoMaterial());
+      tw.castShadow = true; tw.position.set(0.6, 0.275, 1.6); tw.visible = false; s.add(tw);
+      this.wuerfel.push(tw);
       this.wurf = null;
       this.figuren = new Map();
       this.zustandDaten = null;
@@ -270,7 +288,13 @@ window.BauloweBrett3D = (() => {
         const i = this.feldAn(t.point.x, t.point.z);
         if (i >= 0) this.aufFeld?.(i);
       });
-      const schleife = () => { requestAnimationFrame(schleife); if (!document.hidden && this.host.isConnected) this.bild(); };
+      // Ist das Brett nicht mehr auf der Seite (Spielende, Umschalten auf 2D), wird alles freigegeben
+      const schleife = () => {
+        if (this.aus) return;
+        if (!this.host.isConnected) { if ((this.weg = (this.weg || 0) + 1) > 30) return this.entsorgen(); } else this.weg = 0;
+        requestAnimationFrame(schleife);
+        if (!document.hidden && this.host.isConnected) this.bild();
+      };
       schleife();
     }
     feldAn(x, z) { for (let i = 0; i < 40; i++) { const r = rechteck(i); if (x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1) return i; } return -1; }
@@ -358,17 +382,24 @@ window.BauloweBrett3D = (() => {
     // Würfel fallen auf das Brett; das Versprechen erfüllt sich, wenn sie liegen
     wuerfeln(werte) {
       return new Promise((ok) => {
-        if (ruhig()) { this.wuerfel.forEach((w, i) => { w.quaternion.copy(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 6).multiply(obenDrehung(werte[i]))); w.position.y = 0.275; }); return ok(); }
-        const ziel = this.wuerfel.map((_, i) => new THREE.Vector3(-0.55 + i * 1.1 + (Math.random() - 0.5) * 0.4, 0.275, 0.6 + (Math.random() - 0.5) * 0.6));
+        this.wuerfel[2].visible = werte.length > 2;
+        const aktiv = this.wuerfel.slice(0, werte.length);
+        if (ruhig()) { aktiv.forEach((w, i) => { w.quaternion.copy(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 6).multiply(obenDrehung(werte[i]))); w.position.y = 0.275; }); return ok(); }
+        const ziel = aktiv.map((_, i) => (i < 2 ? new THREE.Vector3(-0.55 + i * 1.1 + (Math.random() - 0.5) * 0.4, 0.275, 0.6 + (Math.random() - 0.5) * 0.6) : new THREE.Vector3(0.1 + (Math.random() - 0.5) * 0.4, 0.275, 1.55)));
         this.wurf = {
           t: 0, dauer: 1.35, ok,
-          w: this.wuerfel.map((w, i) => ({
+          w: aktiv.map((w, i) => ({
             start: new THREE.Vector3(-1.8 + i * 1.2, 3.2, 4.4), ziel: ziel[i],
             ende: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * Math.PI * 2).multiply(obenDrehung(werte[i])),
             achse: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(), dreh: Math.PI * (7 + Math.random() * 3),
           })),
         };
       });
+    }
+    entsorgen() {
+      if (this.aus) return;
+      this.aus = true;
+      try { this.renderer.dispose(); this.renderer.forceContextLoss(); } catch {}
     }
     fokus(feld) { const m = mitteVon(feld); this.fokusPunkt.set(m.x * 0.12, 0, m.z * 0.12 + 0.9); }
     // Kamera-Schwenk auf das Feld, auf dem gerade etwas passiert (feste Perspektive, kein freies Drehen)

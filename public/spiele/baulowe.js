@@ -55,6 +55,23 @@
         <p class="leise klein-text" style="margin-top:8px">Nach der letzten Runde gewinnt, wer das größte Vermögen hat (Geld + Besitz + Häuser). Mit Topf: Steuern und Strafen landen auf dem Dorfplatz.</p>`,
       },
       {
+        id: "figur", wichtig: true, icon: "♟️", titel: "Deine Spielfigur", info: meinWunsch(z) || "Zufall",
+        html: `<div class="bl-figurwahl">${(M().figuren || []).map((f) => {
+          const von = z.spieler.find((s) => s.id !== GN.ich && s.wunsch?.figur === f);
+          return `<button data-bl-figur="${f}" class="${meinWunsch(z) === f ? "aktiv" : ""}" ${von ? `title="${esc(von.name)} will diese Figur"` : ""}><span>${f}</span>${von ? `<em>${von.avatar}</em>` : ""}</button>`;
+        }).join("")}<button data-bl-figur="" class="${!meinWunsch(z) ? "aktiv" : ""}"><span>🎲</span><small>Zufall</small></button></div>
+          <p class="leise klein-text" style="margin-top:6px">Jeder wählt selbst. Wollen zwei dieselbe Figur, bekommt sie der Erste in der Zugreihenfolge.</p>`,
+      },
+      {
+        id: "hausregeln", icon: "⚙️", titel: "Hausregeln", info: `${(e.startGeld || 1500).toLocaleString("de-DE")} € Start${e.tempo ? " · Tempowürfel" : ""}${e.losDoppelt ? " · Los ×2" : ""}`,
+        html: `<div class="einstellungs-zeile">
+          <div><div class="unter-titel">Startgeld</div><div class="segment">${[1000, 1500, 2000].map((n) => `<button data-bl-start="${n}" class="${(e.startGeld || 1500) === n ? "aktiv" : ""}" ${dis}>${n.toLocaleString("de-DE")} €</button>`).join("")}</div></div>
+          <div><div class="unter-titel">🎲 Tempowürfel (3. Würfel)</div><div class="segment"><button data-bl-tempo="1" class="${e.tempo ? "aktiv" : ""}" ${dis}>An</button><button data-bl-tempo="0" class="${!e.tempo ? "aktiv" : ""}" ${dis}>Aus</button></div></div>
+          <div><div class="unter-titel">Genau auf Los = 400 €</div><div class="segment"><button data-bl-los="1" class="${e.losDoppelt ? "aktiv" : ""}" ${dis}>An</button><button data-bl-los="0" class="${!e.losDoppelt ? "aktiv" : ""}" ${dis}>Aus</button></div></div>
+        </div>
+        <p class="leise klein-text" style="margin-top:8px"><b>Tempowürfel:</b> 1–3 Augen zählen dazu. 🎩 <b>Mr. Monopoly</b>: Nach deinem Zug fährst du weiter zum nächsten freien Grundstück (gibt es keins mehr, zum nächsten fremden und zahlst Miete). 🚌 <b>Bus</b>: Du wählst, ob du einen Würfel oder die Summe läufst. Dreimal dieselbe Zahl: Spring auf ein beliebiges Feld!</p>`,
+      },
+      {
         id: "regeln", icon: "📖", titel: "Regeln", info: "Kaufen, bauen, kassieren",
         html: `<ol class="q-regeln">
           <li>Würfle mit zwei Würfeln und lauf los. Über <b>Los</b> gibt es 200 €.</li>
@@ -68,11 +85,23 @@
       },
     ];
   }
+  const meinWunsch = (z) => z.spieler.find((s) => s.id === GN.ich)?.wunsch?.figur || "";
+  // Gespeicherte Lieblingsfigur beim Betreten der Lobby wieder anmelden
+  GN.socket.on("zustand", (z) => {
+    if (z.spiel !== "baulowe" || z.phase !== "lobby") return;
+    const lieblings = GN.speicher("blFigur");
+    const ich = z.spieler.find((s) => s.id === GN.ich);
+    if (lieblings && ich && !ich.wunsch?.figur && !GN.speicher.blGemeldet) { GN.speicher.blGemeldet = true; GN.socket.emit("wunsch", { figur: lieblings }); }
+  });
   function binde(el) {
     $$("[data-bl-bots]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ bots: +b.dataset.blBots })));
     $$("[data-bl-runden]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ runden: +b.dataset.blRunden })));
     $$("[data-bl-sek]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ sekunden: +b.dataset.blSek })));
     $$("[data-bl-topf]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ topf: b.dataset.blTopf === "1" })));
+    $$("[data-bl-start]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ startGeld: +b.dataset.blStart })));
+    $$("[data-bl-tempo]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ tempo: b.dataset.blTempo === "1" })));
+    $$("[data-bl-los]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ losDoppelt: b.dataset.blLos === "1" })));
+    $$("[data-bl-figur]", el).forEach((b) => (b.onclick = () => { Ton.klick(); GN.speicher("blFigur", b.dataset.blFigur || null); GN.socket.emit("wunsch", { figur: b.dataset.blFigur }); }));
   }
 
   // =============================================================
@@ -98,7 +127,7 @@
     laufNr = z.bewegung?.nr || 0;
     letzteAktion = z.letzteAktion?.nr || 0;
     letzterWurf = z.wurfNr;
-    mit3d = !!window.BauloweBrett3D?.moeglich();
+    mit3d = !!window.BauloweBrett3D?.moeglich() && GN.speicher("blAnsicht") !== "2d";
     brett3d = null;
     app.innerHTML = `
       <div class="bl-buehne">
@@ -120,12 +149,19 @@
             <div class="bl-konto" id="blKonto"></div>
             <div class="bl-leute" id="blLeute"></div>
             <div class="bl-reihe"><button class="btn zweit klein" id="blUebersicht">📋 Alle Felder</button><button class="btn zweit klein" id="blHandelBtn">🤝 Tauschen</button></div>
+            ${window.BauloweBrett3D?.moeglich() ? `<button class="btn zweit klein bl-ansicht-knopf" id="blAnsicht">${mit3d ? "🗺️ Flaches Brett (2D)" : "🧊 3D-Brett"}</button>` : ""}
             <details class="bl-log-box" open><summary>📜 Verlauf</summary><div class="bl-log" id="blLog"></div></details>
           </div>
         </div>
       </div>`;
     $("#blUebersicht").onclick = () => { Ton.klick(); uebersicht(); };
     $("#blHandelBtn").onclick = () => { Ton.klick(); handelOeffnen(GN.zustand); };
+    $("#blAnsicht")?.addEventListener("click", () => {
+      Ton.klick();
+      GN.speicher("blAnsicht", mit3d ? "2d" : "3d");
+      brett3d?.entsorgen?.();
+      aufbauen(GN.zustand); aktualisieren(GN.zustand, null);
+    });
     if (mit3d) {
       BauloweBrett3D.einhaengen($("#bl3d"), F(), G()).then((b) => {
         if (!$("#bl3d")) return;
@@ -140,7 +176,7 @@
   function brett2dHtml() {
     return `<div class="bl-brett" id="blBrett">
       ${F().map((f, i) => feldHtml(f, i)).join("")}
-      <div class="bl-mitte"><div class="bl-logo">Bau<span>löwe</span></div><div class="bl-wuerfel-reihe" id="blWuerfel">${wuerfelHtml(1)}${wuerfelHtml(2)}</div></div>
+      <div class="bl-mitte"><div class="bl-logo">Bau<span>löwe</span></div><div class="bl-wuerfel-reihe" id="blWuerfel">${wuerfelHtml(1)}${wuerfelHtml(2)}${GN.zustand?.mitTempo ? wuerfelHtml(1, true) : ""}</div></div>
       <div class="bl-figuren" id="blFiguren"></div>
     </div>`;
   }
@@ -160,11 +196,15 @@
     </button>`;
   }
   const PUNKTE = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
-  const wuerfelHtml = (n) => `<div class="bl-w" data-w="${n}"><div class="bl-w-kubus">${[1, 2, 3, 4, 5, 6].map((s) => `<span class="bl-w-seite s${s}">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => `<i class="${PUNKTE[s].includes(k) ? "an" : ""}"></i>`).join("")}</span>`).join("")}</div></div>`;
+  // Tempowürfel: Seiten 1–3 mit Augen, 4 und 5 Mr. Monopoly, 6 Bus
+  const TEMPO_BILD = { 4: "🎩", 5: "🎩", 6: "🚌" };
+  const tempoSeite = (t) => (typeof t === "number" ? t : t === "bus" ? 6 : 4);
+  const wuerfelHtml = (n, tempo = false) => `<div class="bl-w ${tempo ? "tempo" : ""}" data-w="${n}"><div class="bl-w-kubus">${[1, 2, 3, 4, 5, 6].map((s) => `<span class="bl-w-seite s${s}">${tempo && TEMPO_BILD[s] ? `<b>${TEMPO_BILD[s]}</b>` : [1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => `<i class="${PUNKTE[s].includes(k) ? "an" : ""}"></i>`).join("")}</span>`).join("")}</div></div>`;
   const DREH = { 1: [0, 0], 2: [0, -90], 3: [-90, 0], 4: [90, 0], 5: [0, 90], 6: [0, 180] };
   function wuerfelSetzen(w, sofort) {
     $$(".bl-w", $("#blWuerfel")).forEach((el, i) => {
       const k = $(".bl-w-kubus", el);
+      if (w[i] === undefined) return;
       const [x, y] = DREH[w[i]];
       const extra = sofort ? 0 : 720 + 360 * i;
       k.style.transition = sofort ? "none" : "transform 1s cubic-bezier(.2,.8,.25,1)";
@@ -181,8 +221,15 @@
       letzterWurf = z.wurfNr;
       Ton.wusch(); wuerfelLaeuft = true;
       const pasch = z.wuerfel[0] === z.wuerfel[1];
-      if (mit3d && brett3d) brett3d.wuerfeln(z.wuerfel).then(() => { wuerfelLaeuft = false; Ton.klopf?.(); if (pasch) GN.fx?.knall("🎲 Pasch!", 1); });
-      else { wuerfelSetzen(z.wuerfel, false); setTimeout(() => { wuerfelLaeuft = false; Ton.klick(); }, 1000); if (pasch) setTimeout(() => GN.fx?.funken($("#blWuerfel"), { anzahl: 14 }), 950); }
+      const werte = z.tempo != null ? [...z.wuerfel, tempoSeite(z.tempo)] : z.wuerfel;
+      const tempoKnall = () => {
+        if (z.tempo === "mr") GN.fx?.knall("🎩 Mr. Monopoly!", 1, "Nach dem Zug geht's weiter zum nächsten freien Grundstück");
+        else if (z.tempo === "bus") GN.fx?.knall("🚌 Bus!", 1, "Wähle: ein Würfel oder die Summe");
+        else if (z.tempo === z.wuerfel[0] && pasch) GN.fx?.knall("🎯 Dreierpasch!", 2, "Spring auf ein beliebiges Feld");
+        else if (pasch) GN.fx?.knall("🎲 Pasch!", 1);
+      };
+      if (mit3d && brett3d) brett3d.wuerfeln(werte).then(() => { wuerfelLaeuft = false; Ton.klopf?.(); tempoKnall(); });
+      else { wuerfelSetzen(werte, false); setTimeout(() => { wuerfelLaeuft = false; Ton.klick(); tempoKnall(); }, 1000); if (pasch) setTimeout(() => GN.fx?.funken($("#blWuerfel"), { anzahl: 14 }), 950); }
     }
     if (mit3d) brett3dSetzen(z); else { felderZeichnen(z); figurenZeichnen(z); }
     kontoZeichnen(z, vorher);
@@ -241,19 +288,40 @@
     if (!ich) { box.innerHTML = '<div class="leise">👀 Du schaust zu.</div>'; return; }
     const meine = Object.keys(z.besitz).map(Number).filter((f) => z.besitz[f] === GN.ich);
     const gruppen = GRUPPEN_REIHE().map((g) => ({ g, felder: felderDerGruppe(g) })).filter(({ felder }) => felder.some((f) => meine.includes(f)));
-    box.innerHTML = `
+    // Eigene Karten als kleine Besitzrechtkarten, je Farbgruppe ein Stapel; fehlende Karten als Platzhalter
+    const miniKarte = (f, g) => {
+      const h = z.haeuser[f] || 0, hyp = z.hypothek[f];
+      const name = F()[f].name.replace(/^Bahnhof /, "Bhf. ");
+      return `<button class="bl-deed ${hyp ? "hypothek" : ""}" data-info="${f}" style="--g:${gruppenFarbe(g)}" aria-label="${esc(F()[f].name)}">
+        <span class="bl-deed-kopf">${g === "bahn" ? "<small>🚆</small>" : g === "werk" ? `<small>${F()[f].icon || "⚡"}</small>` : ""}${esc(name)}</span>
+        <span class="bl-deed-miete"><small>Miete</small>${F()[f].art === "werk" ? `${(z.miete?.[f] || 28) / 7}× 🎲` : `${z.miete?.[f] ?? ""} €`}</span>
+        <span class="bl-deed-haeuser">${h === 5 ? "🏨" : h ? "🏠".repeat(h) : ""}</span>
+        ${hyp ? '<span class="bl-deed-stempel">Hypothek</span>' : ""}</button>`;
+    };
+    const platzhalter = (f) => {
+      const b = z.besitz[f];
+      return `<button class="bl-deed leer" data-info="${f}" title="${esc(F()[f].name)}">${b !== undefined ? person(z, b).avatar : "frei"}</button>`;
+    };
+    const html = `
       <div class="bl-konto-kopf" style="--b:${farbeVon(z, GN.ich)}">
         <span class="bl-konto-figur">${z.figurIcon[GN.ich]}</span>
         <div><small>Dein Guthaben</small><b id="blGuthaben">${geldText(z.geld[GN.ich])}</b><small>Vermögen ${geldText(z.vermoegen?.[GN.ich])}${z.freiKarten.includes(GN.ich) ? " · 🎫 Frei-Karte" : ""}${z.knast[GN.ich] !== undefined ? " · 🚔 im Gefängnis" : ""}</small></div>
       </div>
-      <div class="bl-meine">${gruppen.length ? gruppen.map(({ g, felder }) => `
-        <div class="bl-meine-gruppe">${felder.map((f) => {
-          const mein = z.besitz[f] === GN.ich;
-          return `<button class="bl-mini ${mein ? "mein" : "fremd"} ${z.hypothek[f] ? "hypothek" : ""}" data-info="${f}" style="--g:${gruppenFarbe(g)}" title="${esc(F()[f].name)}">
-            <span class="bl-mini-kopf"></span><span class="bl-mini-name">${esc(F()[f].name.replace(/^Bahnhof /, "Bhf. "))}</span>
-            <span class="bl-mini-info">${mein ? (z.haeuser[f] === 5 ? "🏨" : z.haeuser[f] ? "🏠".repeat(z.haeuser[f]) : `${z.miete?.[f] ?? ""} €`) : z.besitz[f] !== undefined ? person(z, z.besitz[f]).avatar : "frei"}</span></button>`;
-        }).join("")}</div>`).join("") : '<p class="leise klein-text">Noch keine Karten. Lande auf einem freien Feld und kaufe es!</p>'}</div>`;
-    $$("[data-info]", box).forEach((b) => (b.onclick = () => { Ton.klick(); feldInfo(+b.dataset.info); }));
+      <div class="bl-hand-titel">🃏 Deine Karten <b>${meine.length}</b>${meine.length ? "<small>Antippen für die ganze Karte</small>" : ""}</div>
+      <div class="bl-hand">${gruppen.length ? gruppen.map(({ g, felder }) => {
+        const n = felder.filter((f) => meine.includes(f)).length;
+        return `<div class="bl-stapel ${n === felder.length ? "komplett" : ""}" style="--g:${gruppenFarbe(g)}">
+          <div class="bl-stapel-karten">${felder.map((f) => (meine.includes(f) ? miniKarte(f, g) : platzhalter(f))).join("")}</div>
+          <div class="bl-stapel-info">${n === felder.length ? "✓ komplett" : `${n}/${felder.length}`}</div></div>`;
+      }).join("") : '<p class="leise klein-text">Noch keine Karten. Lande auf einem freien Feld und kaufe es!</p>'}</div>`;
+    if (box.dataset.html !== html) {
+      box.dataset.html = html;
+      box.innerHTML = html;
+      $$("[data-info]", box).forEach((b) => {
+        b.onclick = () => { Ton.klick(); vorschauWeg(); feldInfo(+b.dataset.info); };
+        if (matchMedia("(pointer: fine)").matches) { b.onmouseenter = () => vorschauZeigen(+b.dataset.info, b); b.onmouseleave = vorschauWeg; }
+      });
+    }
     if (vorher && vorher.geld?.[GN.ich] !== undefined && vorher.geld[GN.ich] !== z.geld[GN.ich]) {
       const el = $("#blGuthaben");
       GN.fx?.zahl(el, vorher.geld[GN.ich], z.geld[GN.ich], { dauer: 800, format: geldText });
@@ -352,12 +420,23 @@
     } else if (z.schritt === "fertig") {
       const f = F()[z.figur[GN.ich]];
       html = `<div class="bl-ansage">${f ? `Du stehst auf <b>${esc(f.name)}</b>.` : ""} Bauen? Tippe auf deine Karten.</div>
-        <div class="bl-knoepfe"><button class="btn gross" data-a="zugEnde">${z.nochmal ? "🎲 Pasch: weiter" : "✅ Zug beenden"}</button></div>`;
+        <div class="bl-knoepfe"><button class="btn gross" data-a="zugEnde">${z.mrOffen ? "🎩 Mr. Monopoly: weiterfahren" : z.nochmal ? "🎲 Pasch: weiter" : "✅ Zug beenden"}</button></div>`;
+    } else if (z.schritt === "bus") {
+      const von = z.figur[GN.ich];
+      html = `<div class="bl-ansage"><b>🚌 Bus!</b> Wie weit willst du fahren?</div>
+        <div class="bl-knoepfe">${z.busWahl.map((n) => `<button class="btn ${n === Math.max(...z.busWahl) ? "" : "zweit"}" data-bus="${n}">${n} Felder<small class="bl-bus-ziel">→ ${esc(F()[(von + n) % 40].name)}</small></button>`).join("")}</div>`;
+    } else if (z.schritt === "dreier") {
+      const optionen = F().map((f, i) => ({ f, i })).filter(({ i }) => i !== z.figur[GN.ich]);
+      html = `<div class="bl-ansage"><b>🎯 Dreierpasch!</b> Wohin willst du springen? Du kannst auch aufs Brett tippen.</div>
+        <div class="bl-knoepfe"><select id="blDreierZiel" class="feld">${optionen.map(({ f, i }) => `<option value="${i}">${esc(f.name)}${kaufbar(f) ? (z.besitz[i] === undefined ? ` · frei (${f.preis} €)` : ` · ${esc(person(z, z.besitz[i]).name)}`) : ""}</option>`).join("")}</select>
+        <button class="btn gross" id="blDreierLos">🚀 Springen</button></div>`;
     } else if (z.schritt === "karte") html = `<div class="bl-ansage">🃏 Karte${GN.wartePunkte()}</div>`;
     if (box.dataset.html !== html) {
       box.dataset.html = html; box.innerHTML = html;
       box.classList.toggle("ich", ich && !z.angebot);
       $$("[data-info]", box).forEach((b) => (b.onclick = () => { Ton.klick(); feldInfo(+b.dataset.info); }));
+      $$("[data-bus]", box).forEach((b) => (b.onclick = () => { Ton.klick(); GN.aktion("bus", +b.dataset.bus); }));
+      $("#blDreierLos", box)?.addEventListener("click", () => { Ton.richtig(); GN.aktion("dreier", +$("#blDreierZiel").value); });
       $$("[data-a]", box).forEach((b) => (b.onclick = () => {
         const a = b.dataset.a;
         if (a === "aufgeben" && !confirm("Wirklich pleite gehen? Du scheidest aus.")) return;
@@ -413,9 +492,23 @@
     return `<div class="bl-besitzkarte ${z.hypothek[i] ? "hypothek" : ""} ${kompakt ? "kompakt" : ""}" style="--g:${kopfFarbe}">
       <div class="bk-kopf">${!g && f.icon ? `<span class="bk-icon">${f.icon}</span>` : ""}<small>${kaufbar(f) ? "Besitzrechtkarte" : "Feld"}</small><b>${esc(f.name)}</b>${f.preis ? `<em>Kaufpreis ${f.preis} €</em>` : ""}</div>
       <div class="bk-inhalt">${inhalt}</div>
+      ${z.hypothek[i] ? `<div class="bk-stempel">Hypothek<small>beliehen für ${f.preis / 2} € · auslösen ${Math.ceil(f.preis / 2 * 1.1)} €</small></div>` : ""}
       ${b !== undefined ? `<div class="bk-besitzer" style="--b:${farbeVon(z, b)}">Gehört ${person(z, b).avatar} <b>${esc(nameVon(z, b))}</b>${z.hypothek[i] ? " · <b>mit Hypothek</b>" : ""}</div>` : kaufbar(f) ? '<div class="bk-besitzer frei">Noch frei</div>' : ""}
     </div>`;
   }
+
+  // Maus über eine eigene Karte: große Besitzrechtkarte schwebt daneben
+  function vorschauZeigen(i, el) {
+    let v = $("#blVorschau");
+    if (!v) { v = document.createElement("div"); v.id = "blVorschau"; v.className = "bl-vorschau"; document.body.appendChild(v); }
+    v.innerHTML = besitzKarte(GN.zustand, i);
+    const r = el.getBoundingClientRect(), w = 290, h = v.offsetHeight || 420;
+    const links = r.left - w - 14 > 8 ? r.left - w - 14 : Math.min(innerWidth - w - 8, r.right + 14);
+    v.style.left = `${links}px`;
+    v.style.top = `${Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2))}px`;
+    v.classList.add("an");
+  }
+  function vorschauWeg() { $("#blVorschau")?.classList.remove("an"); }
 
   // Feld antippen: Besitzrechtkarte mit Bauen, Hypothek und einfachem Handel
   function feldInfo(i) {
@@ -451,11 +544,13 @@
         <div class="bl-sh-zeile"><select id="blShAn">${andere.map((t) => `<option value="${t.id}">${t.avatar} ${esc(t.name)}</option>`).join("")}</select>
         <input type="number" id="blShVerkauf" min="10" step="10" value="${vorschlag}"><span>€</span><button class="btn" id="blShVerkaufen" ${kannHandeln ? "" : "disabled"}>Anbieten</button></div></div>`;
     }
+    if (z.schritt === "dreier" && ichDran && i !== z.figur[GN.ich]) aktionen = `<button class="btn gross" data-dreier="${i}">🚀 Hierhin springen</button>` + aktionen;
     d.innerHTML = `<div class="fenster-kopf"><h2>${f.icon || "🏠"} ${esc(f.name)}</h2><button class="icon-btn klein" data-schliessen aria-label="Schließen">✕</button></div>
       <div class="fenster-inhalt">${besitzKarte(z, i)}
       ${b !== undefined && b !== GN.ich && kaufbar(f) ? `<p class="bl-jetzt-miete">Wer hier landet, zahlt gerade <b>${f.art === "werk" ? `${z.miete[i] / 7}× die Augenzahl` : `${z.miete[i]} €`}</b></p>` : ""}
       ${aktionen ? `<div class="bl-knoepfe spalte">${aktionen}</div>` : ""}</div>`;
     $("[data-schliessen]", d).onclick = () => d.close();
+    $("[data-dreier]", d)?.addEventListener("click", () => { Ton.richtig(); GN.aktion("dreier", i); d.close(); });
     $$("[data-f]", d).forEach((x) => (x.onclick = () => { Ton.klick(); GN.aktion(x.dataset.f, i); if (x.dataset.f === "bauen") GN.fx?.funken(x); setTimeout(() => d.open && feldInfo(i), 250); }));
     $("#blShKaufen", d)?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("anbieten", { an: b, gibFelder: [], willFelder: [i], gibGeld: +$("#blShPreis", d).value || 0, willGeld: 0 }); d.close(); });
     $("#blShVerkaufen", d)?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("anbieten", { an: $("#blShAn", d).value, gibFelder: [i], willFelder: [], gibGeld: 0, willGeld: +$("#blShVerkauf", d).value || 0 }); d.close(); });

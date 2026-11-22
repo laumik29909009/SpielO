@@ -221,7 +221,10 @@ body[data-spiel="baulowe"], [data-farbe="baulowe"] {
 
 /* Besitzrechtkarte wie im Original */
 .bl-besitzkarte { width: min(280px, 100%); margin: 0 auto; background: #fffdf5; color: #1c2a22; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); border: 2px solid #1c2a22; }
-.bl-besitzkarte.hypothek { filter: grayscale(0.6); }
+.bl-besitzkarte { position: relative; }
+.bl-besitzkarte.hypothek .bk-inhalt, .bl-besitzkarte.hypothek .bk-kopf { filter: grayscale(0.7); opacity: 0.55; }
+.bk-stempel { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%) rotate(-18deg); display: flex; flex-direction: column; align-items: center; padding: 6px 14px; border: 4px double #c62828; border-radius: 8px; color: #c62828; background: rgba(255, 253, 245, 0.85); font-weight: 900; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.bk-stempel small { font-size: 0.62rem; letter-spacing: 0; text-transform: none; }
 .bk-kopf { background: var(--g); margin: 6px; border: 2px solid #1c2a22; text-align: center; padding: 8px 6px; display: flex; flex-direction: column; gap: 1px; }
 .bk-kopf small { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 800; opacity: 0.75; }
 .bk-kopf b { font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.02em; }
@@ -279,3 +282,53 @@ body[data-spiel="baulowe"], [data-farbe="baulowe"] {
   .bl-aktion .btn.gross { padding: 11px 22px; font-size: 1.05rem; }
   .bl-kauf .bl-knoepfe.spalte { flex-direction: row; flex-wrap: wrap; justify-content: center; }
 }
+
+/* Eigene Karten: kleine Besitzrechtkarten, je Farbgruppe ein Stapel */
+.bl-hand-titel { display: flex; align-items: baseline; gap: 6px; margin: 10px 0 6px; font-weight: 800; font-size: 0.9rem; }
+.bl-hand-titel b { padding: 0 7px; border-radius: 999px; background: var(--gold); color: var(--gold-text); font-size: 0.75rem; }
+.bl-hand-titel small { margin-left: auto; font-weight: 500; color: var(--leise); font-size: 0.72rem; }
+.bl-hand { display: flex; flex-wrap: wrap; gap: 10px 12px; }
+.bl-stapel { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bl-stapel-karten { display: flex; }
+.bl-stapel-karten > * + * { margin-left: -14px; }
+.bl-stapel-info { font-size: 0.66rem; font-weight: 800; color: var(--leise); }
+.bl-stapel.komplett .bl-stapel-info { color: var(--gold); }
+.bl-deed { all: unset; box-sizing: border-box; cursor: pointer; position: relative; width: 66px; height: 88px; display: flex; flex-direction: column; border-radius: 6px; background: #fffdf5; color: #1c2a22;
+  border: 1.5px solid #1c2a22; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35); transition: transform 0.18s cubic-bezier(.3, 1.4, .5, 1), box-shadow 0.18s; overflow: hidden; }
+.bl-deed:hover, .bl-deed:focus-visible { transform: translateY(-8px) rotate(-2deg) scale(1.06); z-index: 2; box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45); }
+.bl-deed-kopf { margin: 3px; padding: 3px 2px; min-height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--g); border: 1px solid #1c2a22;
+  font-size: 0.56rem; font-weight: 900; text-transform: uppercase; line-height: 1.05; word-break: break-word; hyphens: auto; }
+.bl-deed-kopf small { font-size: 0.8rem; }
+.bl-deed-miete { display: flex; flex-direction: column; align-items: center; font-weight: 900; font-size: 0.78rem; line-height: 1.1; }
+.bl-deed-miete small { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; opacity: 0.6; letter-spacing: 0.06em; }
+.bl-deed-haeuser { margin-top: auto; text-align: center; font-size: 0.6rem; padding-bottom: 3px; letter-spacing: -2px; }
+.bl-deed.hypothek { background: #e9d7cf; }
+.bl-deed.hypothek > :not(.bl-deed-stempel) { opacity: 0.45; }
+.bl-deed-stempel { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%) rotate(-24deg); padding: 1px 5px; border: 2px solid #c62828; border-radius: 4px; color: #c62828; font-weight: 900; font-size: 0.55rem; text-transform: uppercase; background: rgba(255, 255, 255, 0.7); }
+.bl-deed.leer { box-shadow: none; background: transparent; border: 1.5px dashed color-mix(in srgb, var(--g) 70%, transparent); color: var(--leise); display: grid; place-items: center; font-size: 0.7rem; font-weight: 700; opacity: 0.75; }
+.bl-deed.leer:hover { transform: none; opacity: 1; }
+.bl-vorschau { position: fixed; z-index: 50; width: 290px; pointer-events: none; opacity: 0; transform: translateX(10px) scale(0.96); transition: opacity 0.15s, transform 0.18s; }
+.bl-vorschau.an { opacity: 1; transform: none; }
+.bl-vorschau .bl-besitzkarte { width: 100%; }
+@media (max-width: 600px) { .bl-deed { width: 58px; height: 80px; } .bl-stapel-karten > * + * { margin-left: -12px; } }
+.bl-hand { gap: 10px 8px; }
+.bl-deed { width: 60px; height: 82px; }
+.bl-deed.leer { width: 22px; font-size: 0.58rem; writing-mode: vertical-rl; letter-spacing: 0.05em; }
+.bl-stapel-karten > .bl-deed.leer, .bl-stapel-karten > * + .bl-deed.leer { margin-left: 3px; }
+.bl-stapel-karten > .bl-deed.leer + .bl-deed:not(.leer) { margin-left: 3px; }
+.bl-stapel-karten > .bl-deed.leer:first-child { margin-left: 0; }
+
+/* Figurenwahl in der Lobby */
+.bl-figurwahl { display: flex; flex-wrap: wrap; gap: 6px; }
+.bl-figurwahl button { all: unset; cursor: pointer; position: relative; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 14px; background: var(--flaeche-2); border: 2px solid transparent; font-size: 1.7rem; transition: transform 0.15s; }
+.bl-figurwahl button small { position: absolute; bottom: 2px; font-size: 0.55rem; color: var(--leise); }
+.bl-figurwahl button em { position: absolute; top: -6px; right: -6px; font-style: normal; font-size: 0.9rem; }
+.bl-figurwahl button:hover { transform: translateY(-2px); }
+.bl-figurwahl button.aktiv { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 18%, var(--flaeche-2)); transform: scale(1.08); }
+/* Tempowürfel (2D) */
+.bl-w.tempo .bl-w-seite { background: radial-gradient(circle at 30% 25%, #ff6b6b, #c62828); }
+.bl-w.tempo .bl-w-seite i.an { background: radial-gradient(circle at 35% 35%, #fff, #f1e9e9); }
+.bl-w.tempo .bl-w-seite b { grid-column: 1 / -1; grid-row: 1 / -1; display: grid; place-items: center; font-size: calc(var(--wg) * 0.55); }
+.bl-w.tempo .bl-w-seite:has(b) { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.bl-bus-ziel { display: block; font-size: 0.7rem; font-weight: 600; opacity: 0.8; }
+.bl-ansicht-knopf { width: 100%; }

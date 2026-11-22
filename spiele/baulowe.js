@@ -120,6 +120,8 @@ function wuerfeln(raum, ctx, id) {
   const d = raum.daten;
   const w = [w6(), w6()], pasch = w[0] === w[1], summe = w[0] + w[1];
   d.wuerfel = w; d.wurfNr++;
+  // Tempowürfel (dritter Würfel): 1, 2, 3, zweimal Mr. Monopoly, einmal Bus. Im Gefängnis zählt er nicht.
+  d.tempo = einst(raum).tempo && d.knast[id] === undefined ? TEMPO_SEITEN[randomInt(0, 6)] : null;
   (d.statistik[id] ||= {}).wuerfe = (d.statistik[id].wuerfe || 0) + 1;
   if (pasch) d.statistik[id].pasch = (d.statistik[id].pasch || 0) + 1;
   // Im Gefängnis: Pasch befreit, sonst nach dem dritten Versuch zahlen
@@ -154,10 +156,46 @@ function wuerfeln(raum, ctx, id) {
     planen(raum, ctx, 1500);
     return ctx.sende(raum);
   }
-  aktion(d, { typ: "wurf", spieler: id, wuerfel: w, pasch });
+  aktion(d, { typ: "wurf", spieler: id, wuerfel: w, pasch, tempo: d.tempo });
+  const t = d.tempo;
+  if (typeof t === "number") {
+    if (t === w[0] && t === w[1]) {
+      // Dreierpasch: Ziel frei wählen
+      log(d, `${name(raum, id)} würfelt einen Dreierpasch und darf auf ein beliebiges Feld!`);
+      d.nochmal = false;
+      d.schritt = "dreier";
+      planen(raum, ctx, 1500);
+      return ctx.sende(raum);
+    }
+    return laufen(raum, ctx, id, summe + t);
+  }
+  if (t === "bus") {
+    d.busWahl = [...new Set([w[0], w[1], summe])];
+    d.schritt = "bus";
+    planen(raum, ctx, 1500);
+    return ctx.sende(raum);
+  }
+  if (t === "mr") d.mrOffen = true;
   laufen(raum, ctx, id, summe);
 }
 
+// Mr. Monopoly: zum nächsten freien Grundstück, sonst zum nächsten fremden (dort Miete zahlen)
+function mrZiel(d, id) {
+  const von = d.figur[id];
+  for (let k = 1; k < 40; k++) { const f = (von + k) % 40; if (kaufbar(f) && d.besitz[f] === undefined) return f; }
+  for (let k = 1; k < 40; k++) { const f = (von + k) % 40; if (kaufbar(f) && d.besitz[f] !== id && !d.pleite.includes(d.besitz[f]) && !d.hypothek[f]) return f; }
+  return null;
+}
+// Bot/Zeitablauf: bestes Ziel für Bus oder Dreierpasch
+function wahlWert(d, id, f) {
+  if (!kaufbar(f)) return FELDER[f].art === "geheKnast" ? -500 : FELDER[f].art === "steuer" ? -FELDER[f].betrag : FELDER[f].art === "parken" ? d.topf : 0;
+  const b = d.besitz[f];
+  if (b === undefined) return d.geld[id] >= FELDER[f].preis ? 100 + FELDER[f].preis / 4 : 0;
+  if (b === id) return 5;
+  return -miete(d, f, 7);
+}
+
+const TEMPO_SEITEN = [1, 2, 3, "mr", "mr", "bus"];
 function insKnast(d, id) { d.figur[id] = KNAST_FELD; d.knast[id] = 0; d.pasch = 0; (d.statistik[id] ||= {}).knast = (d.statistik[id].knast || 0) + 1; }
 
 // Figur bewegen (vorwärts um n oder direkt zu einem Feld) und Feld auswerten
@@ -167,8 +205,9 @@ function laufen(raum, ctx, id, n, { zu = null, keinNochmal = false, doppelt = fa
   let nach = zu !== null ? zu : (von + n + 40) % 40;
   const schritte = zu !== null ? (zu - von + 40) % 40 : n;
   if (!rueckwaerts && (zu !== null ? nach < von || (nach === 0 && von !== 0) : von + n >= 40)) {
-    geldAn(d, id, LOS_GELD);
-    log(d, `${name(raum, id)} kommt über Los: +${LOS_GELD}.`);
+    const betrag = nach === 0 && einst(raum).losDoppelt ? LOS_GELD * 2 : LOS_GELD;
+    geldAn(d, id, betrag);
+    log(d, `${name(raum, id)} ${betrag > LOS_GELD ? "landet genau auf Los" : "kommt über Los"}: +${betrag}.`);
   }
   d.figur[id] = nach;
   d.bewegung = { spieler: id, von, nach, schritte: rueckwaerts ? -n : schritte, nr: (d.bewegung?.nr || 0) + 1 };
@@ -267,6 +306,15 @@ function zugBeenden(raum, ctx) {
   const d = raum.daten;
   const id = d.dran;
   d.angebot = null;
+  if (d.mrOffen) {
+    d.mrOffen = false;
+    const ziel = d.knast[id] === undefined && !d.pleite.includes(id) ? mrZiel(d, id) : null;
+    if (ziel !== null) {
+      log(d, `🎩 Mr. Monopoly: ${name(raum, id)} fährt weiter zu ${FELDER[ziel].name}.`);
+      aktion(d, { typ: "mr", spieler: id, feld: ziel });
+      return laufen(raum, ctx, id, 0, { zu: ziel, keinNochmal: d.keinNochmal });
+    }
+  }
   // Pasch: nochmal würfeln (außer im Gefängnis gelandet)
   if (d.nochmal && !d.keinNochmal && d.knast[id] === undefined && !d.pleite.includes(id)) {
     d.nochmal = false;
@@ -423,6 +471,16 @@ function bot(raum, ctx, id) {
     }
     return handle(raum, ctx, id, "wuerfeln");
   }
+  if (d.schritt === "bus") {
+    const von = d.figur[id];
+    const n = [...d.busWahl].sort((a, b) => wahlWert(d, id, (von + b) % 40) - wahlWert(d, id, (von + a) % 40))[0];
+    return handle(raum, ctx, id, "bus", n);
+  }
+  if (d.schritt === "dreier") {
+    const ziele = FELDER.map((_, f) => f).filter((f) => f !== d.figur[id]);
+    const f = ziele.sort((a, b) => wahlWert(d, id, b) - wahlWert(d, id, a))[0];
+    return handle(raum, ctx, id, "dreier", f);
+  }
   if (d.schritt === "kaufen") {
     const f = d.figur[id], preis = FELDER[f].preis;
     const vervollstaendigt = FELDER[f].gruppe && gruppeFelder(FELDER[f].gruppe).filter((x) => x !== f).every((x) => d.besitz[x] === id);
@@ -541,6 +599,18 @@ function handle(raum, ctx, id, typ, daten, still = false) {
     case "wuerfeln":
       if (d.schritt !== "wuerfeln") return;
       return wuerfeln(raum, ctx, id);
+    case "bus": {
+      const n = parseInt(daten);
+      if (d.dran !== id || d.schritt !== "bus" || !d.busWahl.includes(n)) return;
+      log(d, `🚌 ${name(raum, id)} fährt mit dem Bus ${n} Felder.`);
+      return laufen(raum, ctx, id, n);
+    }
+    case "dreier": {
+      const f = parseInt(daten);
+      if (d.dran !== id || d.schritt !== "dreier" || !(f >= 0 && f < 40)) return;
+      log(d, `${name(raum, id)} springt nach ${FELDER[f].name}.`);
+      return laufen(raum, ctx, id, 0, { zu: f, keinNochmal: true });
+    }
     case "freikaufen":
       if (d.schritt !== "wuerfeln" || d.knast[id] === undefined) return;
       if (d.geld[id] < KNAST_PREIS) return `Du brauchst ${KNAST_PREIS}.`;
@@ -598,14 +668,17 @@ function handle(raum, ctx, id, typ, daten, still = false) {
 
 // ---------- Schnittstelle ----------
 module.exports = {
-  meta: () => ({ felder: FELDER, gruppen: GRUPPEN, max: MAX, startGeld: START_GELD }),
-  standardEinstellungen: () => ({ bots: 2, sekunden: 60, runden: 30, topf: true }),
+  meta: () => ({ felder: FELDER, gruppen: GRUPPEN, max: MAX, startGeld: START_GELD, figuren: SPIELFIGUREN }),
+  standardEinstellungen: () => ({ bots: 2, sekunden: 60, runden: 30, topf: true, startGeld: 1500, losDoppelt: false, tempo: false }),
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
     if (e.bots !== undefined) neu.bots = Math.min(5, Math.max(0, parseInt(e.bots) || 0));
     if (e.sekunden !== undefined) { const s = parseInt(e.sekunden); neu.sekunden = s === 0 ? 0 : Math.min(120, Math.max(30, s || 60)); }
     if (e.runden !== undefined) neu.runden = [20, 30, 50].includes(parseInt(e.runden)) ? parseInt(e.runden) : 30;
     if (e.topf !== undefined) neu.topf = !!e.topf;
+    if (e.startGeld !== undefined) neu.startGeld = [1000, 1500, 2000].includes(+e.startGeld) ? +e.startGeld : 1500;
+    if (e.losDoppelt !== undefined) neu.losDoppelt = !!e.losDoppelt;
+    if (e.tempo !== undefined) neu.tempo = !!e.tempo;
     return neu;
   },
   starten(raum, ctx) {
@@ -616,17 +689,25 @@ module.exports = {
     if (menschen.length + botAnzahl < 2) botAnzahl = 2 - menschen.length;
     const bots = mischen(BOTS).slice(0, botAnzahl).map((b, i) => ({ ...b, id: "bot" + (i + 1), punkte: 0 }));
     const reihenfolge = mischen([...menschen.map((s) => s.id), ...bots.map((b) => b.id)]);
-    const figuren = mischen(SPIELFIGUREN);
+    // Wunschfiguren: Wer zuerst gewählt hat, bekommt sie; der Rest wird verteilt
+    const frei = mischen(SPIELFIGUREN);
+    const figurIcon = {};
+    for (const id of reihenfolge) {
+      const w = raum.spieler[id]?.wunsch?.figur;
+      if (w && frei.includes(w)) { figurIcon[id] = w; frei.splice(frei.indexOf(w), 1); }
+    }
+    for (const id of reihenfolge) if (!figurIcon[id]) figurIcon[id] = frei.shift() || "🎩";
+    const startGeld = e.startGeld || START_GELD;
     raum.daten = {
       bots, reihenfolge, dran: reihenfolge[0], runde: 1, zugNr: 0, wurfNr: 0, pasch: 0, wuerfel: [1, 1],
-      geld: Object.fromEntries(reihenfolge.map((id) => [id, START_GELD])),
+      geld: Object.fromEntries(reihenfolge.map((id) => [id, startGeld])),
       figur: Object.fromEntries(reihenfolge.map((id) => [id, 0])),
-      figurIcon: Object.fromEntries(reihenfolge.map((id, i) => [id, figuren[i % figuren.length]])),
+      figurIcon, tempo: null, mrOffen: false,
       besitz: {}, haeuser: {}, hypothek: {}, knast: {}, freiKarten: [], pleite: [], topf: 0,
       stapel: { ereignis: mischen(EREIGNIS.map((_, i) => i)), kasse: mischen(KASSE.map((_, i) => i)) },
       schritt: "wuerfeln", schulden: null, angebot: null, log: [], statistik: {}, timer: null, phase: "spielen", auszeichnungen: [],
     };
-    log(raum.daten, "Los geht's! Jeder startet mit 1500.");
+    log(raum.daten, `Los geht's! Jeder startet mit ${startGeld}.${e.tempo ? " Mit Tempowürfel!" : ""}`);
     aktion(raum.daten, { typ: "start" });
     zugStarten(raum, ctx);
   },
@@ -653,7 +734,7 @@ module.exports = {
     const d = raum.daten;
     return {
       phase: d.phase, dran: d.dran, runde: d.runde, rundenLimit: einst(raum).runden, zugNr: d.zugNr, schritt: d.schritt,
-      wuerfel: d.wuerfel, wurfNr: d.wurfNr, pasch: d.pasch, nochmal: !!(d.nochmal && !d.keinNochmal && d.knast[d.dran] === undefined),
+      wuerfel: d.wuerfel, wurfNr: d.wurfNr, pasch: d.pasch, tempo: d.tempo, busWahl: d.schritt === "bus" ? d.busWahl : null, mrOffen: !!d.mrOffen, mitTempo: !!einst(raum).tempo, nochmal: !!(d.nochmal && !d.keinNochmal && d.knast[d.dran] === undefined),
       geld: d.geld, figur: d.figur, figurIcon: d.figurIcon, besitz: d.besitz, haeuser: d.haeuser, hypothek: d.hypothek,
       knast: d.knast, freiKarten: d.freiKarten.map((k) => k.spieler), pleite: d.pleite, topf: d.topf,
       schulden: d.schulden, angebot: d.angebot, bewegung: d.bewegung || null,
