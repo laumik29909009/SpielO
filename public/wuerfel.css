@@ -153,3 +153,14 @@ thead .w-feldname { background: #2b2140; }
 /* Streichen bestätigen: erster Tipp färbt das Feld rot, zweiter Tipp streicht */
 .w-eintragen.sicher { background: #e8524a; color: #fff; box-shadow: inset 0 0 0 2px #b3261d; font-size: 0.78rem; white-space: nowrap; animation: w-sicher 0.6s ease-in-out infinite alternate; }
 @keyframes w-sicher { to { transform: scale(1.08); } }
+
+/* 63er-Bonus */
+.w-bonus-ov { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; pointer-events: none; }
+.w-bonus-karte { background: rgba(14, 10, 28, 0.92); border: 2px solid #ffcf3f; border-radius: 20px; padding: 16px 22px; text-align: center; animation: reinploppen 0.35s cubic-bezier(.2, 1.4, .4, 1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+.w-bonus-karte b { display: block; font-size: 1.5rem; color: #ffcf3f; margin-bottom: 10px; }
+.w-bonus-balken { position: relative; width: min(280px, 70vw); height: 22px; border-radius: 11px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.w-bonus-balken i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #ff9a3c, #ffcf3f, #fff1a8); animation: w-bonus-fuellen 0.9s cubic-bezier(.3, 0, .2, 1) forwards; }
+.w-bonus-balken span { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 0.8rem; color: #2a1a00; }
+.w-bonus-ov.platzt .w-bonus-karte { animation: w-bonus-platzt 0.5s ease-in 0.6s forwards; }
+@keyframes w-bonus-fuellen { to { width: 100%; } }
+@keyframes w-bonus-platzt { to { transform: scale(1.4); opacity: 0; } }

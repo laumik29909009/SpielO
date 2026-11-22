@@ -518,7 +518,7 @@
     const wer = esc(nameVon(z, a.spieler));
     if (a.typ === "austeilen" && (z.modus === "poker" || z.modus === "siebzehn")) { Ton.wusch(); return; }
     if (a.typ === "austeilen") { austeilenZeigen(z); Ton.wusch(); zeige("<b>🃏 Karten werden verteilt</b>"); if (a.tausch?.length) a.tausch.forEach((t) => zeige(`<b>🔁 Kartentausch</b><span>${esc(nameVon(z, t.von))} gibt ${esc(nameVon(z, t.an))} ${t.karten.length} Karte${t.karten.length > 1 ? "n" : ""}</span>`, "gold", 2400)); return; }
-    if (a.typ === "klopfen") { Ton.treffer(); zeige(`<b class="riesig">✊</b><span>${wer} ${a.spieler === GN.ich ? "klopfst" : "klopft"}! Letzte Runde</span>`, "gold", 1800); }
+    if (a.typ === "klopfen") { Ton.klopf(); GN.fx?.wackeln(2); zeige(`<b class="riesig">✊</b><span>${wer} ${a.spieler === GN.ich ? "klopfst" : "klopft"}! Letzte Runde</span>`, "gold", 1800); }
     if (a.typ === "neueMitte") { Ton.wusch(); zeige("<b>🔄 Alle haben geschoben: neue Mitte</b>"); }
     if (a.typ === "alleTauschen") { Ton.wusch(); zeige(`<b>🔁 ${wer} ${a.spieler === GN.ich ? "tauschst" : "tauscht"} alle 3</b>`); }
     if (a.typ === "tauschen" || a.typ === "legen" || a.typ === "angreifen" || a.typ === "schlagen") Ton.abgeben();
@@ -588,6 +588,10 @@
     if (z.modus === "arschloch" && z.ergebnis) {
       inhalt = `<b>Runde ${z.runde} vorbei</b><div class="fr-re-liste">${z.ergebnis.raenge.map((id, i) => `<div><span>${["👑", "🥈"][i] || (i === z.ergebnis.raenge.length - 1 ? "💩" : "🙂")} ${esc(z.ergebnis.titel[i])}: ${person(z, id).avatar} ${esc(nameVon(z, id))}</span><b>${z.gesamt?.[id] || 0} P.</b></div>`).join("")}</div>`;
       if (z.ergebnis.raenge[0] === GN.ich) GN.konfetti(120);
+      // Zeremonie: Krone für den König, Abwertung für das Arschloch
+      const r = z.ergebnis.raenge;
+      setTimeout(() => { GN.fx?.knall(`👑 ${esc(nameVon(z, r[0]))}`, 2, "wird König!"); Ton.fanfare(); }, 700);
+      setTimeout(() => { GN.fx?.knall(`💩 ${esc(nameVon(z, r[r.length - 1]))}`, 1, "ist das Arschloch"); Ton.falsch(); }, 2300);
     }
     if (z.modus === "durak" && z.phase === "ende") {
       inhalt = z.durak ? `<div class="fr-re-avatar">${person(z, z.durak).avatar}</div><b>${z.durak === GN.ich ? "Du bist der Durak! 🤡" : `${esc(person(z, z.durak).name)} ist der Durak! 🤡`}</b>` : "<b>Unentschieden!</b>";

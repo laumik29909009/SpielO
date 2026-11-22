@@ -1,4 +1,6 @@
-# Merkzettel: geplante Arbeiten (erst umsetzen, wenn Laurin es sagt)
+# Merkzettel: geplante Arbeiten
+
+**Stand: Abschnitt 1 (Fehler/Wünsche) und 2 (Qualitäts-Plan) sind umgesetzt, bis auf die Punkte, die noch auf Material warten (Baulöwe-Straßen, Quartett-Bilder) und das Casino.**
 
 ## 1. Fehler und Wünsche (Stand 22.11.2026)
 - **Knaben von Schechingen:**

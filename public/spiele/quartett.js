@@ -510,6 +510,7 @@
         return;
       }
       Ton.treffer();
+      GN.fx?.stopp(120); GN.fx?.wackeln(1);
       const s = el(k.sieger);
       const g = gespielt.find((x) => x.spieler === k.sieger);
       s.classList.add("sieger");

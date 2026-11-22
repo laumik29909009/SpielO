@@ -431,7 +431,10 @@
       const med = $(".a-medaille");
       med?.classList.add("knall");
       setTimeout(() => kopf(z, stufen, { stufe: s }), 650);
-      if (s === 100) { Ton.fanfare(); GN.konfetti(220); navigator.vibrate?.([60, 40, 120]); }
+      // Publikum jubelt mit der Stufe lauter; Goldener Lorbeer mit Hit-Stop
+      if (s > 0) Ton.jubel({ 10: 1, 30: 2, 60: 3, 85: 4, 100: 5 }[s]);
+      if (s >= 60) setTimeout(() => Ton.serie({ 60: 2, 85: 4, 100: 7 }[s]), 200);
+      if (s === 100) { GN.fx?.stopp(220).then(() => { Ton.fanfare(); GN.konfetti(220); GN.fx?.wackeln(3); }); navigator.vibrate?.([60, 40, 120]); }
       else if (s >= 85) { Ton.volltreffer(); GN.konfetti(90); navigator.vibrate?.(60); }
       if (s >= 30) { GN.fx?.funken(med, { anzahl: s >= 85 ? 26 : 16, weite: s >= 85 ? 150 : 100, farben: [STUFE[s].farbe, "#fff1a8", "#ffcf3f"] }); }
       if (s >= 30 && s < 85) Ton.richtig();

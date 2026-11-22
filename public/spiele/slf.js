@@ -2,6 +2,7 @@
 //  Stadt Land Fluss – Browser-Teil
 // =============================================================
 (() => {
+  const stimmenAlt = {}; // für fliegende Daumen bei neuen Stimmen
   const { $, $$, esc } = GN;
   const app = GN.app;
   const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -457,6 +458,17 @@
     GN.rangliste($("#rangliste"), z.rundenPunkte || {}, neu);
     $("#weiterBtn")?.addEventListener("click", () => GN.aktion("weiter"));
     $("#bereitBtn")?.addEventListener("click", () => { Ton.klick(); GN.aktion("bereit"); });
+    // Neue Stimmen fliegen als Daumen herein
+    for (const el of $$(".eintrag[data-st]")) {
+      const alt = stimmenAlt[el.dataset.st], f = +el.dataset.f, g = +el.dataset.g;
+      if (alt && f > alt.f) GN.fx?.flieg($(".topbar"), el.querySelector("[title='Zählt']") || el, "👍", { dauer: 600 });
+      if (alt && g > alt.g) GN.fx?.flieg($(".topbar"), el.querySelector("[title='Zählt nicht']") || el, "👎", { dauer: 600 });
+      stimmenAlt[el.dataset.st] = { f, g };
+    }
+    if (neu) {
+      const doppelte = $$(".eintrag.doppelt");
+      doppelte.forEach((el, i) => setTimeout(() => { el.classList.add("streichen"); Ton.tick(); }, 900 + i * 180));
+    }
     $$("[data-abstimmen]").forEach((b) => (b.onclick = () => {
       const [typ, kat, spieler, wert] = b.dataset.abstimmen.split("|");
       Ton.klick();
@@ -494,7 +506,7 @@
     const id = `${k.id}|${e.spielerId}`;
 
     return `
-      <div class="eintrag ${klasse} ${meins ? "ich" : ""}">
+      <div class="eintrag ${klasse} ${e.art === "doppelt" ? "doppelt" : ""} ${meins ? "ich" : ""}" data-st="${esc(id)}" data-f="${e.fuer.length}" data-g="${e.gegen.length}">
         <span class="avatar klein" title="${esc(s.name)}">${s.avatar}</span>
         <div class="eintrag-mitte">
           <div class="eintrag-text">${leer ? '<span class="leise">keine Antwort</span>' : esc(e.text)}

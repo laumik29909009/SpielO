@@ -26,13 +26,13 @@
   },
   "patch": {
     "datum": "22.11.2026",
-    "titel": "Jonkler-Kartenabend, Quartett-Seltenheiten & Einstellungen",
+    "titel": "Großes Qualitäts-Update & KI-Stärke",
     "punkte": [
-      "🃏 Jonkler: neu Mau-Mau – mit Computer-Gegnern, 7 zieht 2, 8 setzt aus, Bube wünscht",
-      "💎 Quartett: Karten haben jetzt 5 Seltenheiten nach Gesamtpunkten – Gewöhnlich, Häufig, Selten, Episch, Legendär – jede mit eigener Farbe",
-      "⚙️ Neues Einstellungsmenü: Lautstärke, Animationen aus, Farbsicht-Hilfe für GoonO, Vibration",
-      "✨ Mehr Gefühl: Knöpfe reagieren mit einer kleinen Welle, Funken bei großen Treffern, steigende Töne bei Siegesserien",
-      "🛠️ Fehler behoben: Der erste Klick nach einer Ansage ging verloren (z. B. Straße bei den Knaben von Schechingen)"
+      "🧠 Neu in jedem Spiel mit Computer-Gegnern: KI-Stärke Einfach, Mittel oder Schwer",
+      "🌾 Knaben von Schechingen: Titel-Tafel (längster Weg, Feldwache, Wirtshaus …), Krone für die Führung, klar beschriftete Gewitter- und Winterfelder, ruhigeres Tempo, kein Nachblinken mehr",
+      "🃏 Jonkler: Karten werden jetzt sichtbar ausgeteilt und umgedreht",
+      "✨ Mehr Gefühl überall: Karten neigen sich zur Maus und glänzen, Knöpfe federn, weicher Vorhang zwischen Lobby, Spiel und Siegerehrung",
+      "🎯 Jedes Spiel hat neue große Momente: Hit-Stop im Quartett, steigende +2-Ketten in GoonO, Fünfling-Explosion und Bonus-Balken, fliegende Daumen in Stadt Land Puss, Jubel in der Arena"
     ]
   },
   "musikAus": [

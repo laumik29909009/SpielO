@@ -105,6 +105,17 @@
         const s = z.sieger;
         knall(`🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!<small>Dorfschultheiß von Schechingen</small>`, "gold riesig", 3200);
         Ton.fanfare(); GN.konfetti(180);
+        // Kamera zoomt auf den Gewinner, seine Gebäude leuchten nacheinander auf
+        setTimeout(() => {
+          const svg = $("#scBrett"), teile = $$(`g[data-sp="${s}"]`);
+          if (!svg || !teile.length) return;
+          const r = svg.getBoundingClientRect();
+          const mx = teile.reduce((a, t) => a + t.getBoundingClientRect().left + t.getBoundingClientRect().width / 2, 0) / teile.length - r.left;
+          const my = teile.reduce((a, t) => a + t.getBoundingClientRect().top + t.getBoundingClientRect().height / 2, 0) / teile.length - r.top;
+          svg.style.transformOrigin = `${mx}px ${my}px`;
+          svg.classList.add("sc-sieg-zoom");
+          teile.forEach((t, i) => setTimeout(() => { t.classList.add("sc-sieg-leuchten"); Ton.serie(i); }, 300 + i * 260));
+        }, 600);
         setTimeout(() => GN.zustand?.phase === "ende" && GN.ansicht === "schechingen-ende" && GN.podest("schechingen-podest", { einheit: "Punkte" }), 3800);
       }
       return;
@@ -354,7 +365,7 @@
       const b = z.bauten[e.id];
       const x = e.x * S, y = e.y * S;
       if (b) {
-        h += hofModell(x, y, farbe(b.sp), b.typ === "gut", z.letzterBau?.ort === e.id && z.letzterBau.art !== "weg" && z.letzterBau.t !== letzterBauT);
+        h += `<g data-sp="${b.sp}">${hofModell(x, y, farbe(b.sp), b.typ === "gut", z.letzterBau?.ort === e.id && z.letzterBau.art !== "weg" && z.letzterBau.t !== letzterBauT)}</g>`;
         if (modus === "gut" && erlaubt.has(e.id)) h += `<circle cx="${x}" cy="${y}" r="19" class="sc-ziel-ring" data-gut="${e.id}"/>`;
       } else if (modus === "hof" && erlaubt.has(e.id)) h += `<circle cx="${x}" cy="${y}" r="10" class="sc-ziel-punkt eck" data-hof="${e.id}"/>`;
     }
@@ -923,6 +934,19 @@
       else if (b.art === "gut") { knall(`🏰 Gutshof!<small>${esc(nameVon(z, b.sp))}</small>`, "gold", 1600); Ton.volltreffer(); }
       else if (b.art === "hof") { Ton.aufsteigen(0.3, 1.4); if (b.sp === ich()) knall("🏠 Neuer Hof!", "gold", 1200); }
       else Ton.klick();
+      // Staubwolke an der Baustelle; bei anderen Spielern zeigt ein Zeiger, wo gebaut wurde
+      setTimeout(() => {
+        const neuEl = $(".sc-bau-g.neu, .sc-strasse.neu");
+        if (!neuEl) return;
+        if (b.art !== "weg") GN.fx?.teilchen(neuEl, null, "staub");
+        if (b.sp !== ich()) GN.fx?.flieg($(`.sc-spieler[data-sp="${b.sp}"]`), neuEl, "👆", { dauer: 700 });
+      }, 120);
+    }
+    // Gewitter zieht weiter: Blitz über dem Brett, kurzes Wackeln
+    if (vorher && vorher.gewitter !== undefined && vorher.gewitter !== z.gewitter) {
+      const brettEl = $("#scBrett");
+      brettEl?.classList.remove("sc-blitz-an"); void brettEl?.offsetWidth; brettEl?.classList.add("sc-blitz-an");
+      GN.fx?.wackeln(1); Ton.treffer();
     }
     // Dorfkarte gespielt
     const k = z.letzteKarte;

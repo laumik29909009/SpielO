@@ -152,3 +152,10 @@ body[data-spiel="farbrausch"], [data-farbe="farbrausch"] {
 @keyframes fr-blitz { from { opacity: 0.75; } to { opacity: 0; } }
 .fr-strafe { font-size: 1.6rem; padding: 6px 18px; box-shadow: 0 0 24px rgba(255, 59, 79, 0.7); }
 @media (prefers-reduced-motion: reduce) { .fr-gross b, .fr-hand.austeilen .fr-handkarte { animation: none; } }
+
+/* Abgelegte Karte landet leicht schräg wie echt, mit Abprall */
+.fr-ablage .fk { rotate: var(--schraeg, 0deg); }
+@keyframes fr-ablegen { 0% { transform: translateY(-60px) scale(1.15) rotate(-18deg); opacity: 0.5; } 60% { transform: translateY(4px) scale(0.97); opacity: 1; } 80% { transform: translateY(-3px) scale(1.01); } 100% { transform: none; } }
+/* Wer „Letzte Karte!“ gerufen hat, pulsiert rot */
+.q-sitz:has(.q-blase) .q-schild, .q3d-schild:has(.q-blase) .q-schild { animation: fr-letzte 1s ease-in-out infinite; }
+@keyframes fr-letzte { 50% { box-shadow: 0 0 0 3px #ff3b4f, 0 0 22px rgba(255, 59, 79, 0.7); } }

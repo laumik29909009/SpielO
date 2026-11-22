@@ -438,3 +438,11 @@ button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
 /* Rohstoff-Zugang ruhig anzeigen: ein sanftes Aufleuchten statt Hüpfen */
 .sc-hand .sc-karte.plus { animation: sc-plus-ruhig 0.7s ease-out; }
 @keyframes sc-plus-ruhig { 30% { box-shadow: 0 0 0 2px rgba(63, 196, 125, 0.85), 0 0 12px rgba(63, 196, 125, 0.5); } }
+
+/* Gewitter-Blitz über dem ganzen Brett */
+#scBrett.sc-blitz-an { animation: sc-brett-blitz 0.7s ease-out; }
+@keyframes sc-brett-blitz { 0%, 30% { filter: brightness(2.2) saturate(0.3); } 15%, 45% { filter: brightness(0.8); } 100% { filter: none; } }
+/* Sieg: Zoom auf den Gewinner, seine Gebäude leuchten auf */
+#scBrett.sc-sieg-zoom { transition: transform 1.6s cubic-bezier(.3, 0, .2, 1); transform: scale(1.35); }
+.sc-sieg-leuchten { animation: sc-sieg-leuchten 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes sc-sieg-leuchten { 50% { filter: drop-shadow(0 0 8px #ffd76a) brightness(1.4); transform: scale(1.15); } }

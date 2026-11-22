@@ -121,6 +121,13 @@ const Ton = (() => {
       rauschen(0.5, 0.16);
       ton(120, 0.45, { typ: "sawtooth", laut: 0.05, gleitenZu: 60 });
     },
+    // Zwei kurze Klopfer auf den Tisch
+    klopf() { ton(140, 0.08, { typ: "sine", laut: 0.35, gleitenZu: 70 }); rauschen(0.05, 0.12); ton(140, 0.08, { typ: "sine", laut: 0.35, start: 0.16, gleitenZu: 70 }); rauschen(0.05, 0.12, 0.16); },
+    // Publikum jubelt: je höher die Stufe (1–5), desto länger und lauter
+    jubel(staerke = 1) {
+      const s = Math.max(1, Math.min(5, staerke));
+      for (let i = 0; i < 3 + s * 2; i++) rauschen(0.35 + s * 0.12, 0.03 + s * 0.022, i * 0.07);
+    },
     fanfare() {
       const noten = [[523, 0], [523, 0.15], [523, 0.3], [659, 0.45], [784, 0.75], [659, 1.0], [784, 1.15], [1047, 1.35]];
       noten.forEach(([f, s]) => ton(f, 0.25, { typ: "square", laut: 0.06, start: s }));

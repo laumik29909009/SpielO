@@ -436,16 +436,32 @@
       el.className = "fr-knall " + klasse; el.innerHTML = html; box.appendChild(el);
       setTimeout(() => el.remove(), dauer);
     };
-    if (a.typ === "wurf" && a.fuenfling) { zeige(`<b class="riesig">🎲 FÜNFLING!</b><span>${esc(nameVon(z, a.spieler))}</span>`, "gold", 2200); Ton.fanfare(); GN.konfetti(200); }
+    if (a.typ === "wurf" && a.fuenfling) {
+      // Kurz einfrieren, dann Explosion
+      setTimeout(() => GN.fx ? GN.fx.stopp(220).then(() => { zeige(`<b class="riesig">🎲 FÜNFLING!</b><span>${esc(nameVon(z, a.spieler))}</span>`, "gold", 2200); Ton.fanfare(); GN.konfetti(200); GN.fx.wackeln(3); GN.fx.teilchen($("#wTeller"), null, "sterne"); }) : (Ton.fanfare(), GN.konfetti(200)), 900);
+    }
     if (a.typ === "eintragen") {
       const wer = esc(nameVon(z, a.spieler));
       const gross = { fullhouse: "🏠 Full House!", grossestrasse: "🛣️ Große Straße!", kleinestrasse: "🛤️ Kleine Straße!", fuenfling: "🎲 Fünfling!" }[a.feld];
       if (gross && a.punkte) { zeige(`<b class="riesig">${gross}</b><span>${wer} +${a.punkte}</span>`); Ton.volltreffer(); if (a.feld === "fuenfling") GN.konfetti(160); if (a.spieler === GN.ich) GN.fx?.funken($("#wTeller"), { anzahl: 22, weite: 120 }); }
       else if (!a.punkte) { zeige(`<b>✕ ${NAMEN[a.feld][0]} gestrichen</b><span>${wer}</span>`, "plus2", 1200); Ton.falsch(); }
       else Ton.richtig();
-      if (a.bonus) setTimeout(() => { zeige(`<b class="riesig">⭐ +35 Bonus!</b><span>${wer} hat oben 63 geschafft</span>`); Ton.fanfare(); }, 900);
+      if (a.bonus) setTimeout(() => bonusBalken(wer), 900);
+      // Die Punkte fliegen vom Würfelteller in die Tabelle
+      if (a.punkte) GN.fx?.flieg($("#wTeller"), $(`tr[data-feld="${a.feld}"]`), `+${a.punkte}`, { dauer: 650 });
       if (a.bonusFuenfling) setTimeout(() => zeige(`<b class="riesig">+50 Extra!</b><span>Noch ein Fünfling</span>`), 600);
     }
+  }
+
+  // 63er-Bonus: ein Balken füllt sich bis zum Anschlag und zerplatzt in Sternen
+  function bonusBalken(wer) {
+    const el = document.createElement("div");
+    el.className = "w-bonus-ov";
+    el.innerHTML = `<div class="w-bonus-karte"><b>⭐ Bonus geschafft!</b><div class="w-bonus-balken"><i></i><span>63</span></div><small>${wer} · +35 Punkte</small></div>`;
+    document.body.appendChild(el);
+    Ton.aufsteigen(0.9, 1.3);
+    setTimeout(() => { Ton.fanfare(); GN.fx?.teilchen($(".w-bonus-balken", el), null, "sterne"); GN.fx?.wackeln(2); el.classList.add("platzt"); }, 950);
+    setTimeout(() => el.remove(), 2300);
   }
 
   GN.spiele.wuerfel = {

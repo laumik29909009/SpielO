@@ -376,6 +376,16 @@
       $$(".ergebnis").forEach((el, i) => setTimeout(() => el.classList.add("sichtbar"), 150 + i * 110));
       setTimeout(() => $("#fakt")?.classList.add("sichtbar"), 500);
       if (meins?.volltreffer) GN.konfetti(70);
+      // Je näher dran, desto stärker der Effekt: Die Stärke ist selbst die Information
+      if (meins && meins.tipp !== null && meins.punkte > 0) {
+        const best = Math.max(...r.ergebnisse.map((e) => e.punkte || 0));
+        const staerke = meins.volltreffer ? 3 : meins.punkte >= best ? 2 : 1;
+        setTimeout(() => {
+          GN.fx?.knall(meins.volltreffer ? "🎯 Volltreffer!" : staerke === 2 ? "🥇 Am nächsten dran!" : `+${meins.punkte}`, staerke, staerke > 1 ? `+${meins.punkte} Punkte` : "");
+          if (staerke >= 2) GN.konfetti(staerke === 3 ? 160 : 60);
+          GN.fx?.teilchen($(".ergebnis.ich") || $("#preisGross"), null, staerke === 3 ? "sterne" : "funken");
+        }, 350);
+      }
     }, dauer);
   }
 

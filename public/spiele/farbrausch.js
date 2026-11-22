@@ -229,7 +229,7 @@
     box.innerHTML = `
       ${mitKarten ? `<div class="fr-stapel-reihe">
         <button class="fr-ziehstapel" id="frStapel" ${ichDran ? "" : "disabled"} aria-label="Karte ziehen">${rueckseite()}<span class="fr-stapel-zahl">${z.stapelAnzahl}</span></button>
-        <div class="fr-ablage">${karte(z.oben, { klasse: "gross" })}</div>
+        <div class="fr-ablage" style="--schraeg:${([...String(z.oben?.id || "")].reduce((x, c) => x * 31 + c.charCodeAt(0), 7) % 17) - 8}deg">${karte(z.oben, { klasse: "gross" })}</div>
       </div>` : ""}
       <div class="fr-status">
         <span class="fr-farbe" style="--f:${FARBE[z.farbe]}" title="Aktuelle Farbe">${FARBNAME[z.farbe] || ""}</span>
@@ -367,6 +367,10 @@
           ? (z.regeln.stapeln ? "Du musst ziehen, außer du legst nach!" : "Du ziehst und setzt aus!")
           : `${esc(nameVon(z, e.ziel))} ${z.regeln.stapeln ? "muss ziehen" : "zieht und setzt aus"}`, e.ziel === GN.ich);
         Ton.alarm();
+        // Jede weitere Karte in der Kette: höherer Ton, stärkeres Wackeln
+        const kette = Math.max(1, Math.round((e.summe || 2) / 2));
+        for (let i = 0; i < Math.min(kette, 6); i++) setTimeout(() => Ton.serie(i), 120 + i * 110);
+        GN.fx?.wackeln(Math.min(3, kette));
         if (e.ziel === GN.ich) navigator.vibrate?.([120, 60, 120, 60, 200]);
       }
       if (e?.typ === "tausch") zeige(`<b>🔄 Handtausch!</b><span>${esc(nameVon(z, a.spieler))} ↔ ${esc(nameVon(z, e.ziel))}</span>`, "gold");
@@ -389,7 +393,7 @@
     el.className = `fr-gross ${typ} ${ichBinZiel ? "ich" : ""}`;
     el.innerHTML = `<div class="fr-gross-blitz"></div><b>+${summe}</b><span>${text}</span>`;
     document.body.appendChild(el);
-    $(".fr-buehne")?.animate([{ transform: "translate(0,0)" }, { transform: "translate(-10px,6px)" }, { transform: "translate(9px,-6px)" }, { transform: "translate(-6px,3px)" }, { transform: "translate(0,0)" }], { duration: 420 });
+    // (Wackeln übernimmt GN.fx.wackeln mit der Kettenlänge)
     setTimeout(() => el.remove(), ichBinZiel ? 2000 : 1500);
   }
 

@@ -122,7 +122,7 @@
     if (wenigBewegung()) return;
     const r = ort instanceof Element ? ort.getBoundingClientRect() : { left: ort, top: y, width: 0, height: 0 };
     const x0 = r.left + r.width / 2, y0 = r.top + r.height / 2;
-    const zeichen = art === "muenzen" ? ["🪙"] : ["⭐", "✨", "🌟"];
+    const zeichen = art === "muenzen" ? ["🪙"] : art === "staub" ? ["💨", "☁️"] : ["⭐", "✨", "🌟"];
     for (let i = 0; i < 12; i++) {
       const t = document.createElement("i");
       t.className = "fx-teil"; t.textContent = zeichen[i % zeichen.length];
@@ -160,6 +160,29 @@
     w.animate([{ transform: "scale(0)", opacity: 0.35 }, { transform: "scale(1)", opacity: 0 }], { duration: 520, easing: "ease-out" }).onfinish = () => w.remove();
     if (b.matches(".btn.gross, #startBtn, .btn:not(.zweit):not(.link):not(.klein)")) navigator.vibrate?.(8);
   }, { passive: true });
+
+  // =============================================================
+  //  Karten neigen sich zur Maus und glänzen (nur mit Maus, nicht am Handy)
+  // =============================================================
+  let neigEl = null, neigRaf = 0;
+  const neigAus = () => { if (neigEl) { neigEl.classList.remove("fx-neig"); neigEl.style.removeProperty("--tw"); neigEl = null; } };
+  document.addEventListener("pointermove", (ev) => {
+    if (ev.pointerType !== "mouse" || wenigBewegung()) return;
+    const el = ev.target.closest?.(".fr-handkarte .fk, .sk-handkarte .sk, .q-gal-reihe .qkarte, .q-meine-karte .qkarte");
+    if (el !== neigEl) neigAus();
+    if (!el) return;
+    neigEl = el;
+    cancelAnimationFrame(neigRaf);
+    neigRaf = requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      const x = (ev.clientX - r.left) / r.width - 0.5, y = (ev.clientY - r.top) / r.height - 0.5;
+      el.classList.add("fx-neig");
+      el.style.setProperty("--ax", (-y).toFixed(3)); el.style.setProperty("--ay", x.toFixed(3));
+      el.style.setProperty("--tw", `${Math.min(14, Math.hypot(x, y) * 26).toFixed(1)}deg`);
+      el.style.setProperty("--gx", `${((x + 0.5) * 100).toFixed(0)}%`); el.style.setProperty("--gy", `${((y + 0.5) * 100).toFixed(0)}%`);
+    });
+  }, { passive: true });
+  document.addEventListener("pointerleave", neigAus);
 
   // =============================================================
   //  Einstellungen-Fenster (⚙️ oben rechts)
