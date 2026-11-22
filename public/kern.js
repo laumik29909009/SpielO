@@ -118,15 +118,31 @@ new MutationObserver(farbeStatusleiste).observe(document.body, { attributes: tru
 
 // Weicher Übergang, sobald eine neue Ansicht erscheint
 let letzteArt = "";
+// Ladebildschirm vor dem Spielstart: Spiel-Symbol, Name, ruhiger Ladebalken
+let ladeEl = null, ladeSeit = 0;
+socket.on("spielLaedt", ({ spiel, ms }) => {
+  const s = GN.spiele[spiel] || {};
+  ladeEl?.remove();
+  ladeEl = document.createElement("div");
+  ladeEl.className = "laden-ov";
+  ladeEl.style.setProperty("--ms", ms + "ms");
+  ladeEl.innerHTML = `<div class="laden-karte"><div class="laden-icon">${s.icon || "🎮"}</div><b>${esc(s.titel || "Spiel")}</b><small>wird vorbereitet …</small><div class="laden-balken"><i></i></div></div>`;
+  document.body.appendChild(ladeEl);
+  ladeSeit = Date.now();
+  Ton.klick();
+  setTimeout(ladenEnde, ms + 4000); // Sicherheitsnetz, falls der Start scheitert
+});
+socket.on("fehler", () => ladenEnde());
+function ladenEnde() {
+  if (!ladeEl) return;
+  const el = ladeEl; ladeEl = null;
+  setTimeout(() => { el.classList.add("weg"); setTimeout(() => el.remove(), 600); }, Math.max(0, 400 - (Date.now() - ladeSeit)));
+}
 function seitenWechsel() {
   // Großer Wechsel (Lobby ↔ Spiel ↔ Siegerehrung): kurzer Vorhang, sonst nur sanftes Einblenden
   const art = /podest/.test(GN.ansicht) ? "podest" : GN.ansicht === "lobby" ? "lobby" : "spiel";
-  if (letzteArt && art !== letzteArt && document.documentElement.dataset.animationen !== "aus" && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const v = document.createElement("div");
-    v.className = "fx-vorhang " + art;
-    document.body.appendChild(v);
-    v.addEventListener("animationend", () => v.remove());
-  }
+  // Großer Wechsel: der Ladebildschirm blendet ruhig aus (statt Vorhang)
+  if (art !== "lobby") ladenEnde();
   letzteArt = art;
   app.classList.remove("seite-rein");
   void app.offsetWidth; // Animation neu starten

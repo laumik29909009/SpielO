@@ -12,6 +12,7 @@ const FARBEN = ["kreuz", "pik", "herz", "karo"];
 const WERTE32 = ["7", "8", "9", "10", "B", "D", "K", "A"];
 const WERTE36 = ["6", ...WERTE32];
 const BOT_DENKEN = [900, 1700];
+const AUSTEIL_MS = 3400; // so lange dauert die Austeil-Animation im Browser
 const BOTS = [
   { name: "Robo-Rudi", avatar: "🤖" }, { name: "Kara Kartenhai", avatar: "🦈" }, { name: "Professor Pixel", avatar: "👾" },
   { name: "Lotti Luchs", avatar: "🦊" }, { name: "Bruno Bär", avatar: "🐼" }, { name: "Fritzi Frosch", avatar: "🐸" }, { name: "Theo Tiger", avatar: "🐯" },
@@ -68,10 +69,12 @@ function zeitPlanen(raum, ctx, id, auto) {
   const t = teilnehmer(raum).find((x) => x.id === id);
   const sek = einst(raum).sekunden;
   let warten = null;
-  if (!t || t.bot) warten = BOT_DENKEN[0] + Math.random() * (BOT_DENKEN[1] - BOT_DENKEN[0]);
+  // Nach dem Austeilen erst die Animation abwarten
+  const austeilRest = d.letzteAktion?.typ === "austeilen" ? Math.max(0, AUSTEIL_MS - (Date.now() - d.letzteAktion.t)) : 0;
+  if (!t || t.bot) warten = austeilRest + BOT_DENKEN[0] + Math.random() * (BOT_DENKEN[1] - BOT_DENKEN[0]);
   else if (!t.online) warten = 6000;
   else if (t.afk) warten = 2500;
-  else if (sek) warten = sek * 1000;
+  else if (sek) warten = sek * 1000 + austeilRest;
   d.endetUm = warten && t && !t.bot ? Date.now() + warten : null;
   if (warten) d.timer = setTimeout(() => {
     const s = raum.spieler[id];

@@ -559,7 +559,7 @@
 
   // Austeilen: verdeckte Karten fliegen aus der Mitte zu jedem Mitspieler, die eigenen drehen sich um
   function austeilenZeigen(z) {
-    const dauer = 1600;
+    const dauer = 3200; // gemütlich austeilen
     austeilenBis = Date.now() + dauer;
     zeichneHand(z);
     const mitte = $("#skMitte");

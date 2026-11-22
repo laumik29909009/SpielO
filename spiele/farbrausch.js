@@ -336,7 +336,7 @@ function neueRunde(raum, ctx) {
   d.dran = d.rundenSieger[d.rundenSieger.length - 1] || d.reihenfolge[Math.floor(Math.random() * d.reihenfolge.length)];
   if (!d.reihenfolge.includes(d.dran)) d.dran = d.reihenfolge[0];
   // Austeilen dauert einen Moment (Animation), erst danach beginnt der erste Zug
-  const dauer = Math.min(4200, 700 + d.reihenfolge.length * einst(raum).startKarten * 75);
+  const dauer = Math.min(7000, 1400 + d.reihenfolge.length * einst(raum).startKarten * 140); // gemütlich, Karte für Karte
   d.austeilenBis = Date.now() + dauer;
   d.letzteAktion = { typ: "austeilen", t: Date.now(), dauer, karten: einst(raum).startKarten };
   zugStarten(raum, ctx, dauer);

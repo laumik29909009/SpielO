@@ -22,6 +22,7 @@ const SPIELE = {
   baulowe: require("./spiele/baulowe"),
 };
 const MAX_SPIELER = 10;
+const LADE_MS = 2500; // Ladebildschirm vor jedem Spielstart
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];
 
 const app = express();
@@ -389,6 +390,14 @@ io.on("connection", (socket) => {
     if (!istHost()) return;
     const raum = meinRaum;
     if (raum.phase === "spiel" && !modul(raum).istVorbei?.(raum)) return;
+    if (raum.laedt) return;
+    // Erst ruhig laden (alle sehen einen Ladebildschirm), dann geht es los
+    raum.laedt = true;
+    io.to(raum.code).emit("spielLaedt", { spiel: raum.spiel, ms: LADE_MS });
+    setTimeout(() => { raum.laedt = false; spielWirklichStarten(raum, socket); }, LADE_MS);
+  });
+  function spielWirklichStarten(raum, socket) {
+    if (raum.phase === "spiel" && !modul(raum).istVorbei?.(raum)) return;
     for (const s of Object.values(raum.spieler)) {
       if (!s.online) delete raum.spieler[s.id];
       else s.punkte = 0;
@@ -403,7 +412,7 @@ io.on("connection", (socket) => {
     }
     gespielt(raum.spiel);
     sendeZustand(raum);
-  });
+  }
 
   // Alle spielspezifischen Aktionen (Antworten, Abstimmungen, ...)
   auf("aktion", (typ, nutzlast) => {

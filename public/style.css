@@ -1338,3 +1338,16 @@ html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(6)::a
 .fx-neig { rotate: var(--ay) var(--ax) 0 var(--tw); transition: rotate 0.08s; }
 .fx-neig::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 6;
   background: radial-gradient(circle at var(--gx) var(--gy), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08) 35%, transparent 60%); mix-blend-mode: soft-light; }
+
+/* Ladebildschirm vor dem Spielstart: ruhig, ohne Blitzen */
+.laden-ov { position: fixed; inset: 0; z-index: 170; display: grid; place-items: center; background: var(--bg, #0c0a18); animation: laden-rein 0.45s ease-out; }
+.laden-ov.weg { opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
+.laden-karte { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.laden-icon { font-size: 4.2rem; animation: laden-schweben 2.4s ease-in-out infinite; }
+.laden-karte b { font-size: 1.6rem; }
+.laden-karte small { color: var(--leise); }
+.laden-balken { width: min(240px, 60vw); height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden; margin-top: 10px; }
+.laden-balken i { display: block; height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--gold-2, #ff7a3d), var(--gold, #ffcf3f)); animation: laden-fuellen var(--ms, 2500ms) cubic-bezier(.4, 0, .2, 1) forwards; }
+@keyframes laden-rein { from { opacity: 0; } }
+@keyframes laden-schweben { 50% { transform: translateY(-8px); } }
+@keyframes laden-fuellen { to { width: 100%; } }
