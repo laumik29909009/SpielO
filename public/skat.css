@@ -122,3 +122,54 @@ body[data-spiel="skat"], [data-farbe="skat"] {
 .sk-r-stein { width: 40cqw; height: 40cqw; background: linear-gradient(145deg, #fff1b8, #c9a24a 50%, #8a6514); box-shadow: 0 0 0 2.5cqw #0b2a1f, 0 0 0 3.6cqw #c9a24a, 0 3cqw 8cqw rgba(0, 0, 0, 0.5); z-index: 1; }
 .sk-r-stein::after { background: #0b2a1f; inset: 36%; }
 @media (prefers-reduced-motion: reduce) { .sk-ass-ring { animation: none; } }
+
+/* =============================================================
+   Mau-Mau, 17 und 4, Texas Hold'em
+   ============================================================= */
+.sk-mm-tisch { display: flex; align-items: center; justify-content: center; gap: clamp(18px, 6vw, 48px); }
+.sk-mm-stapel { all: unset; position: relative; cursor: pointer; width: clamp(64px, 16vw, 96px); transition: transform 0.15s; }
+.sk-mm-stapel .sk { width: 100%; box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.25), 6px 6px 0 rgba(0, 0, 0, 0.18); }
+.sk-mm-stapel:not(:disabled):hover { transform: translateY(-4px) rotate(-2deg); }
+.sk-mm-stapel:not(:disabled) .sk { outline: 3px solid rgba(255, 210, 90, 0.85); outline-offset: 2px; animation: sk-zieh-puls 1.6s ease-in-out infinite; }
+.sk-mm-stapel:disabled { cursor: default; opacity: 0.85; }
+.sk-mm-zahl { position: absolute; right: -8px; bottom: -8px; min-width: 26px; padding: 2px 7px; border-radius: 999px; background: #1d1d2e; border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 900; font-size: 0.85rem; text-align: center; }
+@keyframes sk-zieh-puls { 50% { outline-color: rgba(255, 210, 90, 0.25); } }
+.sk-mm-ablage { position: relative; width: clamp(76px, 19vw, 116px); }
+.sk-mm-ablage .sk { width: 100%; animation: sk-ablegen 0.35s cubic-bezier(.2, 1.3, .4, 1); }
+@keyframes sk-ablegen { from { transform: translateY(-40px) rotate(-12deg) scale(1.1); opacity: 0.4; } }
+.sk-mm-wunsch { position: absolute; top: -14px; right: -14px; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 1.6rem; background: #fff; color: #111; border: 3px solid #ffcf3f; box-shadow: 0 0 16px rgba(255, 207, 63, 0.7); animation: reinploppen 0.35s cubic-bezier(.2, 1.4, .4, 1); }
+.sk-mm-wunsch.rot { color: #d2232a; }
+.sk-mau { background: linear-gradient(135deg, #ff9f1c, #ff5d8f); }
+.sk-mau.aktiv { box-shadow: 0 0 0 3px #fff, 0 0 18px rgba(255, 159, 28, 0.9); transform: scale(1.05); }
+.sk-wunsch-raster button { background: #fff; color: #111; flex-direction: column; gap: 2px; }
+.sk-wunsch-raster button span { font-size: 2rem; line-height: 1; }
+.sk-wunsch-raster button.rot { color: #d2232a; }
+
+.sk-bj-bank { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.sk-bj-name { font-weight: 900; }
+.sk-bj-wert { min-width: 38px; padding: 4px 10px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.25); font-size: 1.2rem; text-align: center; }
+.sk-bj-wert.drueber { background: #b3261e; }
+.sk-bj-plaetze { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+.sk-bj-platz { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 8px; border-radius: 12px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.8rem; }
+.sk-bj-platz.dran { border-color: #ffcf3f; box-shadow: 0 0 12px rgba(255, 207, 63, 0.5); }
+.sk-reihe.mini .sk { width: 34px; }
+.sk-reihe.mini { gap: 2px; }
+.sk-chip-knopf { min-width: 64px; }
+
+.sk-pk-pot { text-align: center; font-size: 1.05rem; margin-bottom: 6px; }
+.sk-pk-pot b { padding: 3px 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 207, 63, 0.5); color: #ffdf6b; }
+.sk-pk-board { gap: clamp(4px, 1.4vw, 10px); }
+.sk-pk-board .sk-pk-karte, .sk-pk-leer { width: clamp(50px, 14vw, 86px); aspect-ratio: 5 / 7; }
+.sk-pk-karte .sk { width: 100%; animation: sk-umdrehen 0.45s ease-out both; animation-delay: calc(var(--i) * 0.08s); }
+.sk-pk-leer { border-radius: 8px; border: 2px dashed rgba(255, 255, 255, 0.2); }
+@keyframes sk-umdrehen { from { transform: rotateY(90deg) translateY(-10px); opacity: 0; } }
+.sk-pk-erhoehen { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.sk-pk-erhoehen input[type="range"] { width: min(220px, 60vw); accent-color: #ffcf3f; }
+.sk-pk-presets { display: flex; gap: 4px; }
+.sk-pk-presets button { all: unset; cursor: pointer; padding: 5px 9px; border-radius: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.8rem; font-weight: 800; }
+.sk-pk-presets button:hover { background: rgba(255, 255, 255, 0.2); }
+.sk-pk-raise { background: linear-gradient(135deg, #ffb23d, #ff6a2a); }
+.sk-blatt em.sk-plus, .sk-plus { color: #6fe39a; font-style: normal; font-weight: 900; }
+.fr-re-liste .plus b { color: #6fe39a; }
+.fr-re-liste .minus b { color: #ff8a80; }
+@media (prefers-reduced-motion: reduce) { .sk-mm-stapel:not(:disabled) .sk, .sk-mm-ablage .sk, .sk-pk-karte .sk { animation: none; } }
