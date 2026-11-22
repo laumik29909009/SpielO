@@ -415,3 +415,26 @@ button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
   .sc-k span { font-size: 0.72rem; }
 }
 @media (max-width: 700px) { .sc-sb-kosten i { font-size: 0.7rem; padding: 1px 0; } .sc-sb-kosten { gap: 0; } }
+
+/* Klare Feld-Schilder: Gewitter, ruhende Jahreszeit, doppelter Ertrag */
+.sc-feldschild { pointer-events: none; }
+.sc-feldschild rect { fill: rgba(30, 24, 40, 0.88); stroke: rgba(255, 255, 255, 0.5); stroke-width: 1; }
+.sc-feldschild text { font-size: 10px; font-weight: 800; fill: #fff; text-anchor: middle; }
+.sc-feldschild.doppelt rect { fill: #3fc47d; } .sc-feldschild.ruht rect { fill: #5a7fa8; }
+.sc-feld.ruht .sc-hex { filter: saturate(.3) brightness(1.15); }
+.sc-feld.ruht .sc-marke { opacity: .5; }
+/* Übersicht: Krone für die Führung, Fortschrittsbalken, Titel-Tafel */
+.sc-sp-punkte { position: relative; }
+.sc-krone { position: absolute; top: -2px; left: -18px; font-size: 0.95rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+.sc-sp-balken { display: block; width: 100%; height: 4px; border-radius: 2px; background: rgba(255,255,255,.15); margin-top: 3px; overflow: hidden; }
+.sc-sp-balken i { display: block; height: 100%; background: var(--f); border-radius: 2px; transition: width .6s; }
+.sc-titel-tafel { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
+.sc-titel-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; border-radius: 12px; background: rgba(0,0,0,.22); border: 1px dashed rgba(255,255,255,.2); font-size: .78rem; line-height: 1.15; }
+.sc-titel-chip > span:first-child { font-size: 1.2rem; }
+.sc-titel-chip.vergeben { border: 2px solid var(--f); background: color-mix(in srgb, var(--f) 22%, rgba(0,0,0,.3)); }
+.sc-titel-chip small { display: block; color: var(--leise); font-size: .7rem; }
+.sc-titel-chip small i { font-style: normal; color: #ffd76a; font-weight: 800; }
+.sc-titel-chip em { font-style: normal; opacity: .6; }
+/* Rohstoff-Zugang ruhig anzeigen: ein sanftes Aufleuchten statt Hüpfen */
+.sc-hand .sc-karte.plus { animation: sc-plus-ruhig 0.7s ease-out; }
+@keyframes sc-plus-ruhig { 30% { box-shadow: 0 0 0 2px rgba(63, 196, 125, 0.85), 0 0 12px rgba(63, 196, 125, 0.5); } }

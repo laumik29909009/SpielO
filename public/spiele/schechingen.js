@@ -314,11 +314,14 @@
       const cx = f.x * S, cy = f.y * S;
       const klick = gewitterWahl && f.id !== z.gewitter;
       const blockiert = f.id === z.gewitter && b.typ !== "dorfplatz";
-      h += `<g class="sc-feld ${klick ? "waehlbar" : ""} ${blockiert ? "blockiert" : ""} ${b.typ}" data-feld="${f.id}" style="--i:${FELD_ORDNUNG().get(f.id)}">
+      // Jahreszeit: im Winter ruhen die Kornfelder, eine Landschaft bringt doppelt
+      const saison = z.jahreszeiten ? meta().saison[z.saison] : {};
+      const ruht = saison.ruht === b.typ, doppelt = saison.doppelt === b.typ;
+      h += `<g class="sc-feld ${klick ? "waehlbar" : ""} ${blockiert ? "blockiert" : ""} ${ruht ? "ruht" : ""} ${b.typ}" data-feld="${f.id}" style="--i:${FELD_ORDNUNG().get(f.id)}">
         <polygon points="${f.ecken.map((e) => pkt(e)).join(" ")}" fill="url(#scG_${b.typ})" class="sc-hex"/>
         <polygon points="${f.ecken.map((e) => pkt(e, 0.9, cx, cy)).join(" ")}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
         ${landschaft(b.typ, cx, cy, f.id)}
-        <title>${b.typ === "dorfplatz" ? "Dorfplatz: liefert nichts, Hof daneben = Marktrecht 3:1" : `${LAND[b.typ].name}: liefert ${ROH_INFO[LAND_ROH[b.typ]][0]} bei einer ${b.zahl} (${Math.round((pipsVon(b.zahl) / 36) * 100)} % pro Wurf)`}</title>
+        <title>${b.typ === "dorfplatz" ? "Dorfplatz: liefert nichts, Hof daneben = Marktrecht 3:1" : blockiert ? "⛈️ Gewitter: Dieses Feld liefert nichts, bis das Gewitter weiterzieht (bei einer 7 oder mit dem Feldhüter)." : ruht ? `${saison.icon} ${saison.name}: ${LAND[b.typ].name} ruht und liefert diese Jahreszeit nichts.` : `${LAND[b.typ].name}: liefert ${ROH_INFO[LAND_ROH[b.typ]][0]} bei einer ${b.zahl} (${Math.round((pipsVon(b.zahl) / 36) * 100)} % pro Wurf)${doppelt ? ` – im ${saison.name} doppelt!` : ""}`}</title>
         ${b.typ !== "dorfplatz" ? `<g class="sc-abz"><rect x="${cx - 17}" y="${cy - 45}" width="34" height="19" rx="9.5" fill="rgba(255,250,235,.92)" stroke="${LAND[b.typ].farbe[1]}" stroke-width="2"/><text x="${cx}" y="${cy - 31}">${ROH_INFO[LAND_ROH[b.typ]][1]}</text></g>` : ""}`;
       if (b.zahl) {
         const rot = b.zahl === 6 || b.zahl === 8;
@@ -331,13 +334,16 @@
         const g = Object.entries(z.gemein).filter(([, s]) => s);
         g.forEach(([was, s]) => { const i = Object.keys(meta().gemein).indexOf(was); const w = (Math.PI * 2 * i) / 4 + Math.PI / 4; h += `<g class="sc-gemein"><circle cx="${cx + Math.cos(w) * 33}" cy="${cy + Math.sin(w) * 28}" r="10" fill="#fff8e6" stroke="${farbe(s)}" stroke-width="3"/><text x="${cx + Math.cos(w) * 33}" y="${cy + Math.sin(w) * 28 + 4}">${meta().gemein[was].icon}</text></g>`; });
       }
-      if (blockiert) h += wolke(cx, cy - 22);
+      if (blockiert) h += wolke(cx, cy - 22) + `<g class="sc-feldschild gewitter"><rect x="${cx - 34}" y="${cy + 18}" width="68" height="17" rx="8.5"/><text x="${cx}" y="${cy + 30}">⛈️ liefert nichts</text></g>`;
+      else if (ruht) h += `<g class="sc-feldschild ruht"><rect x="${cx - 30}" y="${cy + 18}" width="60" height="17" rx="8.5"/><text x="${cx}" y="${cy + 30}">${saison.icon} ruht</text></g>`;
+      else if (doppelt && b.zahl) h += `<g class="sc-feldschild doppelt"><rect x="${cx - 16}" y="${cy + 18}" width="32" height="17" rx="8.5"/><text x="${cx}" y="${cy + 30}">×2</text></g>`;
       h += `</g>`;
     }
     // Wege
     for (const kante of k.kanten) {
       const s = z.wege[kante.id];
-      if (s !== undefined) h += strasse(E, kante, farbe(s), z.letzterBau?.art === "weg" && z.letzterBau.ort === kante.id ? "neu" : "");
+      // „neu“ nur beim ersten Zeichnen nach dem Bauen, sonst blinkt der Weg bei jeder Aktualisierung erneut
+      if (s !== undefined) h += strasse(E, kante, farbe(s), z.letzterBau?.art === "weg" && z.letzterBau.ort === kante.id && z.letzterBau.t !== letzterBauT ? "neu" : "");
       else if (modus === "weg" && erlaubt.has(kante.id)) {
         const mx = ((E[kante.a].x + E[kante.b].x) / 2) * S, my = ((E[kante.a].y + E[kante.b].y) / 2) * S;
         h += `<g class="sc-ziel" data-weg="${kante.id}"><g opacity=".45">${strasse(E, kante, farbe(ich()))}</g><circle cx="${mx}" cy="${my}" r="9" class="sc-ziel-punkt"/></g>`;
@@ -348,7 +354,7 @@
       const b = z.bauten[e.id];
       const x = e.x * S, y = e.y * S;
       if (b) {
-        h += hofModell(x, y, farbe(b.sp), b.typ === "gut", z.letzterBau?.ort === e.id && z.letzterBau.art !== "weg");
+        h += hofModell(x, y, farbe(b.sp), b.typ === "gut", z.letzterBau?.ort === e.id && z.letzterBau.art !== "weg" && z.letzterBau.t !== letzterBauT);
         if (modus === "gut" && erlaubt.has(e.id)) h += `<circle cx="${x}" cy="${y}" r="19" class="sc-ziel-ring" data-gut="${e.id}"/>`;
       } else if (modus === "hof" && erlaubt.has(e.id)) h += `<circle cx="${x}" cy="${y}" r="10" class="sc-ziel-punkt eck" data-hof="${e.id}"/>`;
     }
@@ -375,6 +381,10 @@
     const s = meta().saison[z.saison];
     $("#scSaison").innerHTML = z.jahreszeiten ? `${s.icon} ${s.name} · Runde ${z.runde}` : `Runde ${z.runde}`;
     $("#scSaison").title = SAISON_TEXT[z.saison];
+    const pk = (id) => z.punkteOffen[id] + (id === ich() && z.phase !== "ende" ? hand.kirchweih || 0 : 0);
+    const best = Math.max(...(z.teilnehmer || []).map((t) => pk(t.id)));
+    let fuehrt = best > 0 ? (z.teilnehmer || []).filter((t) => pk(t.id) === best).map((t) => t.id) : [];
+    if (fuehrt.length === (z.teilnehmer || []).length) fuehrt = []; // alle gleichauf: keine Krone
     $("#scLeiste").innerHTML = (z.teilnehmer || []).map((t) => {
       const p = z.punkteOffen[t.id] + (t.id === ich() && z.phase !== "ende" ? hand.kirchweih || 0 : 0);
       return `<div class="sc-spieler ${t.id === z.dran ? "dran" : ""} ${t.online ? "" : "offline"} ${t.id === ich() ? "ich" : ""}" data-sp="${t.id}" style="--f:${z.farben[t.id]}">
@@ -383,9 +393,23 @@
           <b>${esc(t.id === ich() ? "Du" : t.name)}</b>
           <small><span title="Rohstoffkarten">🂠 ${z.karten[t.id]}</span>${z.dorfkarten[t.id] ? `<span title="Dorfkarten">🃏 ${z.dorfkarten[t.id]}</span>` : ""}<span class="${z.laengsterWeg === t.id ? "sc-bonus" : ""}" title="${z.laengsterWeg === t.id ? "Längster Weg (+2)" : "Längste Wegstrecke"}">🛤️ ${z.wegLaengen?.[t.id] || 0}</span>${z.wache?.[t.id] ? `<span class="${z.feldwache === t.id ? "sc-bonus" : ""}" title="Gespielte Feldhüter">👮 ${z.wache[t.id]}</span>` : ""}${z.kurs[t.id] === 3 ? '<span title="Marktrecht 3:1">⚖️</span>' : ""}</small>
         </div>
-        <div class="sc-sp-punkte"><b>${p}</b><small>/${z.ziel}</small></div>
+        <div class="sc-sp-punkte">${fuehrt.includes(t.id) ? '<span class="sc-krone" title="Führt">👑</span>' : ""}<b>${p}</b><small>/${z.ziel}</small><i class="sc-sp-balken"><i style="width:${Math.min(100, (p / z.ziel) * 100)}%"></i></i></div>
       </div>`;
     }).join("");
+    // Titel-Tafel als eigene Zeile unter den Spielern
+    let tt = $("#scTitel");
+    if (!tt) { tt = document.createElement("div"); tt.id = "scTitel"; $("#scLeiste").after(tt); }
+    tt.innerHTML = titelTafel(z);
+  }
+  // Wer hat gerade welchen Titel (+2 Punkte)? Auf einen Blick über dem Brett
+  function titelTafel(z) {
+    const wer = (id) => id ? `<b style="--f:${z.farben[id]}">${(z.teilnehmer || []).find((t) => t.id === id)?.avatar || ""} ${esc(id === ich() ? "Du" : (z.teilnehmer || []).find((t) => t.id === id)?.name || "?")}</b>` : '<em>noch niemand</em>';
+    const titel = [
+      ["🛤️", "Längster Weg", z.laengsterWeg, z.laengsterWeg ? `${z.wegLaengen[z.laengsterWeg]} am Stück` : "ab 5 Wegen am Stück"],
+      ["👮", "Feldwache", z.feldwache, z.feldwache ? `${z.wache[z.feldwache]} Feldhüter` : "ab 3 Feldhütern"],
+      ...(z.gebaeude ? Object.entries(meta().gemein).map(([k, g]) => [g.icon, g.name, z.gemein[k], "am Dorfplatz"]) : []),
+    ];
+    return `<div class="sc-titel-tafel">${titel.map(([icon, name, id, info]) => `<div class="sc-titel-chip ${id ? "vergeben" : ""}" style="${id ? `--f:${z.farben[id]}` : ""}" title="${name}: +2 Punkte · ${info}"><span>${icon}</span><span><small>${name} <i>+2</i></small>${wer(id)}</span></div>`).join("")}</div>`;
   }
 
   // ---------- Status rechts: was passiert gerade? ----------

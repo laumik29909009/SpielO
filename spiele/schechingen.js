@@ -9,7 +9,7 @@
 //  - Bei einer 7 zieht ein Gewitter auf: Wer viele Karten hat, verliert die Hälfte
 // =============================================================
 const MAX_TEILNEHMER = 4;
-const BOT_PAUSE = 900;
+const BOT_PAUSE = 1700; // langsam genug, dass man sieht, was die Computer tun
 const BOTS = [
   { name: "Bauer Bert", avatar: "👨‍🌾" }, { name: "Müllerin Mia", avatar: "👩‍🌾" }, { name: "Schmied Sepp", avatar: "🧔" }, { name: "Wirtin Wally", avatar: "👵" },
 ];
