@@ -74,7 +74,7 @@
     return [
       {
         id: "spielwahl", wichtig: true, icon: "🃏", titel: "Welches Spiel?", info: `${SPIELICON[e.modus]} ${SPIELNAME[e.modus]}`,
-        html: `<div class="modus-gitter">${Object.keys(spiele).map((m) => `
+        html: `<div class="modus-gitter">${Object.keys(spiele).filter((m) => !(GN.meta.spiele.skat?.ausgeblendet || []).includes(m)).map((m) => `
           <button class="modus-karte ${e.modus === m ? "aktiv" : ""}" data-sk-modus="${m}" ${dis}>
             <div class="icon">${SPIELICON[m]}</div><div class="titel">${SPIELNAME[m]}</div><div class="text">${spiele[m]}</div>
           </button>`).join("")}</div>`,
@@ -607,9 +607,9 @@
   GN.spiele.skat = {
     icon: "🃏",
     titel: "Jonkler",
-    kurz: "Schwimmen, Arschloch, Durak, Mau-Mau, 17 und 4 und Poker.",
-    beschreibung: "Die Kartenklassiker für den Abend: Schwimmen (31), Arschloch, Durak, Mau-Mau, 17 und 4 gegen die Bank und Texas Hold'em. Am 3D-Tisch, mit Computer-Gegnern.",
-    tags: ["🔄 Mau-Mau", "♠️ Poker", "🎰 17 und 4", "🏊 Schwimmen", "👑 Arschloch", "🛡️ Durak", "👥 1–8 Spieler"],
+    kurz: "Schwimmen, Arschloch, Durak und Mau-Mau mit dem Skat-Blatt.",
+    beschreibung: "Die Kartenklassiker für den Abend: Schwimmen (31), Arschloch, Durak und Mau-Mau. Am 3D-Tisch, mit Computer-Gegnern.",
+    tags: ["🔄 Mau-Mau", "🏊 Schwimmen", "👑 Arschloch", "🛡️ Durak", "👥 2–8 Spieler"],
     abschnitte,
     binde,
     zeige,

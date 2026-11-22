@@ -1262,6 +1262,9 @@ const Poker = {
 };
 
 const SPIELE = { schwimmen: Schwimmen, arschloch: Arschloch, durak: Durak, maumau: MauMau, siebzehn: Siebzehn, poker: Poker };
+// Glücksspiele (17 und 4, Poker) sind vorerst ausgeblendet: Code bleibt, wird später überarbeitet (Casino)
+const AUSGEBLENDET = ["siebzehn", "poker"];
+const waehlbar = (m) => !!SPIELE[m] && !AUSGEBLENDET.includes(m);
 
 function setzePunkte(raum, t, p) {
   if (!t) return;
@@ -1321,11 +1324,11 @@ function auszeichnungen(raum) {
 
 // ---------- Schnittstelle ----------
 module.exports = {
-  meta: () => ({ max: MAX, runden: RUNDEN }),
+  meta: () => ({ max: MAX, runden: RUNDEN, ausgeblendet: AUSGEBLENDET }),
   standardEinstellungen: () => ({ modus: "schwimmen", bots: 2, sekunden: 30, leben: 3, runden: 5 }),
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
-    if (SPIELE[e.modus]) {
+    if (waehlbar(e.modus)) {
       neu.modus = e.modus;
       if (RUNDEN[neu.modus] && !RUNDEN[neu.modus].includes(neu.runden)) neu.runden = RUNDEN_STANDARD[neu.modus];
     }
@@ -1337,6 +1340,7 @@ module.exports = {
   },
   starten(raum, ctx) {
     const e = einst(raum);
+    if (!waehlbar(e.modus)) e.modus = "schwimmen";
     const max = MAX[e.modus];
     const menschen = Object.values(raum.spieler).filter((s) => s.online);
     const NAMEN = { schwimmen: "Schwimmen", arschloch: "Arschloch", durak: "Durak", maumau: "Mau-Mau", siebzehn: "17 und 4", poker: "Texas Hold'em" };
