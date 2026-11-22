@@ -17,11 +17,11 @@ const SPIELE = {
   farbrausch: require("./spiele/farbrausch"),
   skat: require("./spiele/skat"),
   wuerfel: require("./spiele/wuerfel"),
-  arena: require("./spiele/arena"),
+  // arena: require("./spiele/arena"),       // vorübergehend ausgeblendet
   schechingen: require("./spiele/schechingen"),
   baulowe: require("./spiele/baulowe"),
   ludo: require("./spiele/ludo"),
-  deckname: require("./spiele/deckname"),
+  // deckname: require("./spiele/deckname"), // vorübergehend ausgeblendet
   schlange: require("./spiele/schlange"),
 };
 const MAX_SPIELER = 10;
@@ -325,6 +325,7 @@ io.on("connection", (socket) => {
 
   // Arena: Tages-Rangliste abfragen und (nach einem Server-Neustart) eigenes Ergebnis erneut melden
   auf("arenaTag", (d) => {
+    if (!SPIELE.arena) return; // Arena ist gerade ausgeblendet
     const { geraet, ergebnis } = daten(d);
     const id = saubereId(geraet);
     if (ergebnis && typeof ergebnis === "object") SPIELE.arena.ergebnisMelden({ ...ergebnis, geraet: id });
