@@ -520,7 +520,7 @@
 
   GN.spiele.slf = {
     icon: "🌍",
-    titel: "Stadt Land Fluss",
+    titel: "Stadt Land Puss",
     kurz: "Der Klassiker mit eigenen Kategorien und schlauem Schiedsrichter.",
     beschreibung: "Der Klassiker neu gedacht: Glücksrad, Stopp-Knopf, eigene Kategorien und ein Schiedsrichter, der Antworten wirklich prüft.",
     tags: ["🗂️ 92 Kategorien", "✏️ Eigene Kategorien", "🌐 Auto-Prüfung", "🔞 Ü18 optional"],
