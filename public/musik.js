@@ -1,6 +1,6 @@
 // =============================================================
 //  Hintergrundmusik: 🎵-Knopf oben rechts
-//  - 🎹 SpielO-Beat: eigener Beat (beat.js), läuft standardmäßig
+//  - 🎹 SpielO-Beat: eigener Song (beat.js spielt public/musik/spielo-beat.mp3 als Schleife), läuft standardmäßig
 //  - weitere Musikrichtungen kommen vom Server (/api/musik),
 //    der die Ordner in public/musik/ ausliest
 //  Browser erlauben Ton erst nach dem ersten Tippen/Klicken.
