@@ -33,8 +33,15 @@ function futterNeu(d, x, y, v, f) {
   const id = ++d.futterNr;
   const fu = { id, x, y, v, f: f ?? Math.floor(Math.random() * FARBEN) };
   d.futter.set(id, fu);
+  const k = Math.floor(x / ZELLE) * 100003 + Math.floor(y / ZELLE);
+  let z = d.futterRaster.get(k); if (!z) d.futterRaster.set(k, (z = new Set()));
+  z.add(fu);
   d.neuesFutter.push(fu);
   return fu;
+}
+function futterWeg(d, f) {
+  d.futter.delete(f.id);
+  d.futterRaster.get(Math.floor(f.x / ZELLE) * 100003 + Math.floor(f.y / ZELLE))?.delete(f);
 }
 function zufallsPunkt(R, rand = 60) {
   const w = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * (R - rand);
@@ -232,22 +239,37 @@ function tick(raum, ctx) {
       else if (o.lebt === false) { /* nichts */ }
     }
   }
-  for (const [s, von] of tote) if (s.lebt) sterben(raum, ctx, s, von);
+  // Kopf an Kopf (beide treffen sich gegenseitig): nur die kleinere platzt, bei Gleichstand der Zufall
+  const trifft = new Map(tote.map(([s, von]) => [s.i, von]));
+  const verschont = new Set();
+  for (const [s, von] of tote) {
+    if (von < 0 || trifft.get(von) !== s.i || verschont.has(s.i) || verschont.has(von)) continue;
+    const o = d.schlangen[von];
+    const sieger = s.masse > o.masse ? s : o.masse > s.masse ? o : Math.random() < 0.5 ? s : o;
+    verschont.add(sieger.i);
+  }
+  for (const [s, von] of tote) if (s.lebt && !verschont.has(s.i)) sterben(raum, ctx, s, von);
   // Fressen
   for (const s of d.schlangen) {
     if (!s.lebt) continue;
     const reich = radius(s.masse) + 14;
-    for (const f of d.futter.values()) {
-      const dx = f.x - s.x, dy = f.y - s.y;
-      if (dx * dx + dy * dy < reich * reich) {
-        s.masse += f.v; d.futter.delete(f.id); d.gefressen.push(f.id);
-        if (f.normal) d.normalFutter--;
+    const cx = Math.floor(s.x / ZELLE), cy = Math.floor(s.y / ZELLE);
+    for (let ix = cx - 1; ix <= cx + 1; ix++) for (let iy = cy - 1; iy <= cy + 1; iy++) {
+      const zelle = d.futterRaster.get(ix * 100003 + iy);
+      if (!zelle) continue;
+      for (const f of zelle) {
+        if (!d.futter.has(f.id)) continue;
+        const dx = f.x - s.x, dy = f.y - s.y;
+        if (dx * dx + dy * dy < reich * reich) {
+          s.masse += f.v; futterWeg(d, f); d.gefressen.push(f.id);
+          if (f.normal) d.normalFutter--;
+        }
       }
     }
   }
   // Altes Sprint-Futter verschwindet irgendwann
   if (d.futter.size > d.futterZiel * 3) {
-    for (const f of d.futter.values()) { if (!f.normal && d.futter.size > d.futterZiel * 2.5) { d.futter.delete(f.id); d.gefressen.push(f.id); } }
+    for (const f of d.futter.values()) { if (!f.normal && d.futter.size > d.futterZiel * 2.5) { futterWeg(d, f); d.gefressen.push(f.id); } }
   }
   futterAuffuellen(d);
   // Paket an alle
@@ -296,7 +318,7 @@ function starten(raum, ctx) {
   const R = Math.round(Math.min(2300, 900 + n * 110));
   const d = raum.daten = {
     phase: "countdown", tick: 0, R, stufe: e.stufe || "mittel", bots,
-    futter: new Map(), futterNr: 0, normalFutter: 0, futterZiel: Math.round(110 + (R * R) / 11000),
+    futter: new Map(), futterRaster: new Map(), futterNr: 0, normalFutter: 0, futterZiel: Math.round(110 + (R * R) / 11000),
     neuesFutter: [], gefressen: [], ereignisse: [], raster: new Map(),
     schlangen: alle.map((a, i) => ({ i, id: a.id, bot: a.bot, farbe: farben[i % FARBEN], best: START_MASSE, faenge: 0, tode: 0, lebt: false, pfad: [], masse: START_MASSE, x: 0, y: 0, a: 0, ziel: 0 })),
     startUm: Date.now() + COUNTDOWN_MS, endetUm: Date.now() + COUNTDOWN_MS + e.dauer * 1000,
