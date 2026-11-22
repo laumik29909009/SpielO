@@ -1,11 +1,6 @@
 {
   "wartung": false,
-  "imAufbau": [
-    "arena",
-    "ludo",
-    "deckname",
-    "schlange"
-  ],
+  "imAufbau": [],
   "wartungInfo": {
     "punkte": [
       "Neues Spiel: Farbrausch – der Karten-Klassiker am 3D-Tisch",
@@ -28,8 +23,12 @@
   },
   "patch": {
     "datum": "22.11.2026",
-    "titel": "Neu: Baulöwe – die Schechingen-Edition!",
+    "titel": "Neu: Raus da!, Deckname, Schlangengrube und Baulöwe",
     "punkte": [
+      "🎲 Neues Spiel: Raus da! – das Würfel-Laufspiel mit Rausschmeißen",
+      "🕵️ Neues Spiel: Deckname – ein Wort, eine Zahl, findet eure Agenten",
+      "🐍 Neues Spiel: Schlangengrube – Echtzeit-Schlangen-Arena für alle gleichzeitig",
+      "⚔️ Arena ist jetzt für alle spielbar",
       "🎩 Neues Spiel: Baulöwe – Straßen kaufen, Häuser bauen, Miete kassieren. Mit dem Ochsen, dem Osterbrunnen, dem Freibad und ganz Schechingen auf dem Brett",
       "🧠 Neu in jedem Spiel mit Computer-Gegnern: KI-Stärke Einfach, Mittel oder Schwer",
       "🌾 Knaben von Schechingen: Titel-Tafel (längster Weg, Feldwache, Wirtshaus …), Krone für die Führung, klar beschriftete Gewitter- und Winterfelder, ruhigeres Tempo, kein Nachblinken mehr",
