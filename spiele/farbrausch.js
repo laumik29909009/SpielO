@@ -1,5 +1,5 @@
 // =============================================================
-//  Spiel-Modul: Farbrausch (Karten-Klassiker: Farbe oder Zahl bedienen)
+//  Spiel-Modul: GoonO (Karten-Klassiker: Farbe oder Zahl bedienen)
 //  Regeln (Grundspiel):
 //  - 108 Karten: 4 Farben × (0 einmal, 1–9 zweimal, je 2× Aussetzen, Richtungswechsel, +2)
 //    plus 4× Farbwahl und 4× Farbwahl +4
@@ -384,7 +384,7 @@ module.exports = {
   starten(raum, ctx) {
     const e = einst(raum);
     const menschen = Object.values(raum.spieler).filter((s) => s.online);
-    if (menschen.length > MAX_TEILNEHMER) return `Farbrausch geht mit höchstens ${MAX_TEILNEHMER} Spielern. Gerade seid ihr ${menschen.length}.`;
+    if (menschen.length > MAX_TEILNEHMER) return `GoonO geht mit höchstens ${MAX_TEILNEHMER} Spielern. Gerade seid ihr ${menschen.length}.`;
     let botAnzahl = Math.min(e.bots, MAX_TEILNEHMER - menschen.length);
     if (menschen.length + botAnzahl < 2) botAnzahl = 1;
     const bots = mischen(BOTS).slice(0, botAnzahl).map((b, i) => ({ ...b, id: "bot" + (i + 1), punkte: 0 }));

@@ -1,5 +1,5 @@
 // =============================================================
-//  Die Knaben von Schingen: Browser-Teil (Spiel-ID bleibt "schechingen")
+//  Knaben von Schechingen: Browser-Teil (Spiel-ID bleibt "schechingen")
 //  Sechseck-Karte als SVG, Bauen per Antippen, Hand, Handel, Dorfplatz
 // =============================================================
 (() => {
@@ -103,7 +103,7 @@
         brett(z); leiste(z); dock(z); status(z); dialog(z);
         GN.stoppeTimer();
         const s = z.sieger;
-        knall(`🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!<small>Dorfschultheiß von Schingen</small>`, "gold riesig", 3200);
+        knall(`🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!<small>Dorfschultheiß von Schechingen</small>`, "gold riesig", 3200);
         Ton.fanfare(); GN.konfetti(180);
         setTimeout(() => GN.zustand?.phase === "ende" && GN.ansicht === "schechingen-ende" && GN.podest("schechingen-podest", { einheit: "Punkte" }), 3800);
       }
@@ -146,7 +146,7 @@
     app.innerHTML = `
       <div class="sc-buehne">
         <div class="runden-kopf">
-          <span class="modus-badge">🌾 Knaben von Schingen</span>
+          <span class="modus-badge">🌾 Knaben von Schechingen</span>
           ${GN.euleKnopf()}
           <span class="runden-nr sc-saison" id="scSaison"></span>
           <span class="timer-zahl" id="timerZahl"></span>
@@ -327,7 +327,7 @@
           <text x="${cx}" y="${cy + 4}" class="sc-zahl ${rot ? "rot" : ""}">${b.zahl}</text>
           ${Array.from({ length: punkte }, (_, i) => `<circle cx="${cx - (punkte - 1) * 2 + i * 4}" cy="${cy + 9}" r="1.2" class="sc-pip ${rot ? "rot" : ""}"/>`).join("")}</g>`;
       } else {
-        h += `<g class="sc-schild"><rect x="${cx - 28}" y="${cy + 27}" width="56" height="12" rx="3" fill="#6b4a2b" stroke="#3e2a17"/><text x="${cx}" y="${cy + 36}" class="sc-dorfname">Schingen</text></g>`;
+        h += `<g class="sc-schild"><rect x="${cx - 28}" y="${cy + 27}" width="56" height="12" rx="3" fill="#6b4a2b" stroke="#3e2a17"/><text x="${cx}" y="${cy + 36}" class="sc-dorfname">Schechingen</text></g>`;
         const g = Object.entries(z.gemein).filter(([, s]) => s);
         g.forEach(([was, s]) => { const i = Object.keys(meta().gemein).indexOf(was); const w = (Math.PI * 2 * i) / 4 + Math.PI / 4; h += `<g class="sc-gemein"><circle cx="${cx + Math.cos(w) * 33}" cy="${cy + Math.sin(w) * 28}" r="10" fill="#fff8e6" stroke="${farbe(s)}" stroke-width="3"/><text x="${cx + Math.cos(w) * 33}" y="${cy + Math.sin(w) * 28 + 4}">${meta().gemein[was].icon}</text></g>`; });
       }
@@ -692,7 +692,7 @@
         <button class="btn link" id="scSchliessen">Schließen</button>`;
     } else if (fenster === "dorfplatz") {
       const g = meta().gemein;
-      h = `<h2>⛪ Der Dorfplatz von Schingen</h2>
+      h = `<h2>⛪ Der Dorfplatz von Schechingen</h2>
         <p>Die Mitte der Karte bringt keine Rohstoffe, ist aber wertvoll:</p>
         <ul class="sc-liste">
           <li><b>⚖️ Marktrecht:</b> Steht einer deiner Höfe direkt an einer Ecke des Dorfplatzes, tauschst du am Markt <b>3:1</b> statt 4:1.</li>
@@ -922,9 +922,9 @@
 
   GN.spiele.schechingen = {
     icon: "🌾",
-    titel: "Die Knaben von Schingen",
+    titel: "Knaben von Schechingen",
     kurz: "Höfe bauen, Rohstoffe tauschen, Dorfschultheiß werden.",
-    beschreibung: "Das Aufbauspiel rund um den Dorfplatz von Schingen: Höfe und Wege bauen, mit Jahreszeiten, Gewittern und Handel. Wer zuerst 10 Punkte hat, gewinnt.",
+    beschreibung: "Das Aufbauspiel rund um den Dorfplatz von Schechingen: Höfe und Wege bauen, mit Jahreszeiten, Gewittern und Handel. Wer zuerst 10 Punkte hat, gewinnt.",
     tags: ["🗺️ Sechseck-Karte", "⚖️ Handel", "🤖 Gegen Computer", "👥 2–4 Spieler"],
     abschnitte,
     binde,

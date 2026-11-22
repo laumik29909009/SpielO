@@ -1,5 +1,5 @@
 // =============================================================
-//  Farbrausch – Browser-Teil
+//  GoonO – Browser-Teil
 //  Eigenes Kartendesign (SpielO), 3D-Tisch, Fächerhand, Effekte
 // =============================================================
 (() => {
@@ -42,7 +42,7 @@
   }
 
   // Rückseite mit SpielO-Artwork
-  const rueckseite = () => `<span class="fk-ruecken" aria-hidden="true"><span class="fk-r-stein"></span><b>Spiel<i></i></b><small>Farbrausch</small></span>`;
+  const rueckseite = () => `<span class="fk-ruecken" aria-hidden="true"><span class="fk-r-stein"></span><b>Spiel<i></i></b><small>GoonO</small></span>`;
   GN.farbrauschRueckseite = rueckseite;
 
   // Dieselbe Karte als Bild für den 3D-Tisch
@@ -98,7 +98,7 @@
         id: "spieler", wichtig: true, icon: "🤖", titel: "Mitspieler", info: `${menschen} ${menschen === 1 ? "Mensch" : "Menschen"} + ${botsEcht} Computer · max. ${max}`,
         html: `<div class="unter-titel">Computer-Gegner</div>
           <div class="segment">${[0, 1, 2, 3, 4, 5].map((n) => `<button data-fr-bots="${n}" class="${e.bots === n ? "aktiv" : ""}" ${dis}>${n === 0 ? "Keine" : n}</button>`).join("")}</div>
-          <p class="leise klein-text" style="margin-top:8px">${menschen > max ? `⚠️ Farbrausch geht mit höchstens ${max} Spielern.` : `2 bis ${max} Spieler am Tisch. Solo spielst du gegen den Computer.`}</p>`,
+          <p class="leise klein-text" style="margin-top:8px">${menschen > max ? `⚠️ GoonO geht mit höchstens ${max} Spielern.` : `2 bis ${max} Spieler am Tisch. Solo spielst du gegen den Computer.`}</p>`,
       },
       {
         id: "runde", wichtig: true, icon: "🎯", titel: "Spiel", info: `${e.startKarten} Startkarten · ${e.ziel ? `bis ${e.ziel} Punkte` : "1 Runde"} · ${e.sekunden ? e.sekunden + " s pro Zug" : "ohne Zeitlimit"}`,
@@ -160,7 +160,7 @@
     app.innerHTML = `
       <div class="fr-buehne q-buehne">
         <div class="runden-kopf">
-          <span class="modus-badge">🌈 Farbrausch</span>
+          <span class="modus-badge">🌈 GoonO</span>
           <span class="runden-nr" id="frRunde"></span>
           <button class="q-3d-knopf" id="fr3dKnopf" title="Zwischen 3D-Tisch und einfacher Ansicht wechseln">${QuartettTisch3D.moeglich() ? "2D" : "3D"}</button>
           <span class="timer-zahl" id="timerZahl"></span>
@@ -413,7 +413,7 @@
 
   GN.spiele.farbrausch = {
     icon: "🌈",
-    titel: "Farbrausch",
+    titel: "GoonO",
     kurz: "Der Karten-Klassiker: Farbe oder Zahl bedienen.",
     beschreibung: "Farbe oder Zahl bedienen, Aktionskarten ausspielen und als Erster alle Karten loswerden. Am 3D-Tisch, mit Hausregeln nach eurem Geschmack.",
     tags: ["🃏 108 Karten", "🏠 Hausregeln", "🤖 Auch gegen Computer", "👥 2–8 Spieler"],

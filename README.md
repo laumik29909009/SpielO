@@ -34,7 +34,7 @@ Eure eigene Spieleseite für 1 bis 10 Leute: Ein Raum, ein Link, und der Host w�
 - **Platzhalter:** Solange kein offizielles Bild im Ordner liegt, zeigt die Karte ein neutrales Symbol (Twemoji, CC-BY 4.0, siehe `public/quartett/tiere/LIZENZ.md`).
 - **Computer-Gegner** füllen freie Plätze auf und wählen meist ihren stärksten Wert. Solo spielt man immer gegen den Computer.
 
-## Farbrausch
+## GoonO (Spiel-ID `farbrausch`)
 - **Grundregeln:** Farbe, Zahl oder Symbol bedienen; ⦸ Aussetzen, ⇄ Richtungswechsel, +2, Farbwahl, Farbwahl +4. Wer nicht kann, zieht eine Karte und darf sie legen, wenn sie passt.
 - **Letzte Karte!** Bei 2 Karten erscheint der Knopf. Wer seine vorletzte Karte legt, ohne zu rufen, kann 4 Sekunden lang erwischt werden (+2).
 - **Punkte:** Der Rundensieger bekommt die Kartenwerte der anderen (Zahl = Augen, Aktion = 20, Farbwahl = 50). Spielziel: 1 Runde, 200 oder 500 Punkte.
@@ -63,7 +63,7 @@ Tages-Quiz mit freien Antworten. Jede Aufgabe ist eine Kategorie („Nenne eine 
 - Antwortprüfung wie bei Krillion in zwei Stufen: erst Listen (inkl. Tippfehler, Mehrzahl, Wortteile), dann für unbekannte Antworten **Wikipedia** (`spiele/arena-pruefer.js`, Regeln pro Aufgabe). Dort anerkannte Antworten zählen als Legende (85) und werden gelernt. Mit Freunden: **Einspruch** („Gilt!“), die Mehrheit der Mitspieler entscheidet (dann Krieger, 30).
 - Aufgaben: `daten/arena.js`, `daten/arena-2.js` und zusätzliche Antworten in `daten/arena-extra.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
 
-## Die Knaben von Schingen (Spiel-ID `schechingen`)
+## Knaben von Schechingen (Spiel-ID `schechingen`)
 Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner).
 - 5 Rohstoffe: 🪵 Holz (Wald), 🪨 Stein (Steinbruch), 🌾 Korn (Feld), 🥛 Milch (Weide), 🍎 Obst (Streuobstwiese). Gewürfelte Landschaften liefern an angrenzende Höfe (Gutshof doppelt).
 - Bauen: Weg (Holz, Stein), Hof (Holz, Korn, Milch, Obst; 1 Punkt), Gutshof (3 Stein, 2 Obst; 2 Punkte), Dorfkarte (Korn, Milch, Obst).

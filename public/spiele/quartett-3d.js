@@ -342,7 +342,7 @@ const QuartettTisch3D = (() => {
       }
     }
 
-    // ---------- Farbrausch: Ablage, Stapel, Handfächer, Richtung, Farbe ----------
+    // ---------- GoonO (Farbrausch): Ablage, Stapel, Handfächer, Richtung, Farbe ----------
     farbrausch(z, ich) {
       const THREE_ = THREE;
       if (!this.fr) {
