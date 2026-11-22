@@ -88,6 +88,61 @@
     },
   });
 
+  // ---------- Vollständiger Baukasten mit festen Regeln ----------
+  // Zahl zählt hoch, mit leisen Tick-Tönen (höchstens alle 70 ms)
+  fx.zaehle = (el, von, bis, opt = {}) => {
+    fx.zahl(el, von, bis, opt);
+    if (wenigBewegung() || von === bis) return;
+    const dauer = opt.dauer || 900, ende = performance.now() + dauer * 0.85;
+    const tick = () => { if (performance.now() < ende) { Ton.tick(); setTimeout(tick, 70 + (performance.now() + dauer - ende) / 25); } };
+    tick();
+  };
+  // Einheitliche Einblendung in drei Stufen: 1 klein, 2 mittel, 3 groß (mit Wackeln und Funken)
+  fx.knall = (text, staerke = 1, unter = "") => {
+    const el = document.createElement("div");
+    el.className = `fx-knall s${staerke}`;
+    el.innerHTML = `<b>${text}</b>${unter ? `<span>${unter}</span>` : ""}`;
+    document.body.appendChild(el);
+    const dauer = [0, 1100, 1500, 2100][staerke] || 1300;
+    if (staerke >= 3) { fx.wackeln(2); fx.teilchen(el, null, "sterne"); }
+    setTimeout(() => el.classList.add("weg"), dauer - 300);
+    setTimeout(() => el.remove(), dauer);
+    return el;
+  };
+  // Bildschirm wackelt: 1 = Kleinigkeit, 2 = Treffer, 3 = nur beim Sieg
+  fx.wackeln = (staerke = 1) => {
+    if (wenigBewegung()) return;
+    const a = [0, 3, 7, 13][Math.min(3, staerke)] || 3;
+    GN.app.animate([0, -a, a * 0.8, -a * 0.5, a * 0.25, 0].map((x, i) => ({ transform: `translate(${x}px, ${i % 2 ? a * 0.3 : 0}px)` })), { duration: 260 + staerke * 90, easing: "ease-out" });
+    if (staerke >= 2) navigator.vibrate?.(staerke >= 3 ? [30, 40, 60] : 25);
+  };
+  // Teilchen an einer Stelle: Funken, Sterne oder Münzen
+  fx.teilchen = (ort, y = null, art = "funken") => {
+    if (art === "funken") return fx.funken(ort instanceof Element ? ort : { x: ort, y }, { anzahl: 16 });
+    if (wenigBewegung()) return;
+    const r = ort instanceof Element ? ort.getBoundingClientRect() : { left: ort, top: y, width: 0, height: 0 };
+    const x0 = r.left + r.width / 2, y0 = r.top + r.height / 2;
+    const zeichen = art === "muenzen" ? ["🪙"] : ["⭐", "✨", "🌟"];
+    for (let i = 0; i < 12; i++) {
+      const t = document.createElement("i");
+      t.className = "fx-teil"; t.textContent = zeichen[i % zeichen.length];
+      t.style.cssText = `left:${x0}px;top:${y0}px`;
+      document.body.appendChild(t);
+      const w = (i / 12) * Math.PI * 2, d = 60 + Math.random() * 70;
+      t.animate([{ transform: "translate(-50%,-50%) scale(.4)", opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(w) * d}px), calc(-50% + ${Math.sin(w) * d - 30}px)) scale(1)`, opacity: 1, offset: 0.6 }, { transform: `translate(calc(-50% + ${Math.cos(w) * d * 1.1}px), calc(-50% + ${Math.sin(w) * d + 40}px)) scale(.6)`, opacity: 0 }],
+        { duration: 900 + Math.random() * 300, easing: "cubic-bezier(.2,.7,.3,1)" }).onfinish = () => t.remove();
+    }
+  };
+  // Gegenstand fliegt von A nach B
+  fx.flieg = (von, nach, icon, opt) => fx.flug(von, nach, `<span class="fx-flieg-icon">${icon}</span>`, opt);
+  // Hit-Stop: alles friert kurz ein (mit Blitz), danach geht es weiter
+  fx.stopp = (ms = 140) => new Promise((ok) => {
+    if (wenigBewegung()) return ok();
+    document.body.classList.add("fx-stopp");
+    const blitz = document.createElement("div"); blitz.className = "fx-blitz"; document.body.appendChild(blitz);
+    setTimeout(() => { document.body.classList.remove("fx-stopp"); blitz.remove(); ok(); }, ms);
+  });
+
   // =============================================================
   //  Knopf-Feedback: kleine Welle an der Stelle, an der getippt wurde
   // =============================================================
@@ -103,6 +158,7 @@
     b.classList.add("fx-welle-huelle");
     b.appendChild(w);
     w.animate([{ transform: "scale(0)", opacity: 0.35 }, { transform: "scale(1)", opacity: 0 }], { duration: 520, easing: "ease-out" }).onfinish = () => w.remove();
+    if (b.matches(".btn.gross, #startBtn, .btn:not(.zweit):not(.link):not(.klein)")) navigator.vibrate?.(8);
   }, { passive: true });
 
   // =============================================================

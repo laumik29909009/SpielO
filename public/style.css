@@ -100,7 +100,7 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
   transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
 }
 .btn:hover { filter: brightness(1.06); }
-.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--btn-schatten); }
+.btn:active { transform: translateY(4px) scale(0.96); box-shadow: 0 2px 0 var(--btn-schatten); transition-duration: 0.05s; }
 .btn:disabled { filter: saturate(0.35) brightness(0.8); opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
 .btn.voll { width: 100%; }
 .btn.gross { font-size: 1.2rem; padding: 18px 22px; }
@@ -190,9 +190,10 @@ button.avatar:hover { border-color: var(--gold); }
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .warte { text-align: center; color: var(--leise); padding: 10px; }
-.warte .punkte span { animation: blinken 1.2s infinite; }
-.warte .punkte span:nth-child(2) { animation-delay: 0.2s; }
-.warte .punkte span:nth-child(3) { animation-delay: 0.4s; }
+.punkte span { display: inline-block; animation: fx-huepf 1.2s ease-in-out infinite; }
+.punkte span:nth-child(2) { animation-delay: 0.15s; }
+.punkte span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes fx-huepf { 0%, 60%, 100% { transform: none; opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
 @keyframes blinken { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
 
 /* ---------- Runde ---------- */
@@ -1289,3 +1290,40 @@ html[data-farbsicht="an"] .fr-farbwahl-raster button[data-f="rot"]::before { con
 html[data-farbsicht="an"] .fr-farbwahl-raster button[data-f="gelb"]::before { content: "● "; }
 html[data-farbsicht="an"] .fr-farbwahl-raster button[data-f="gruen"]::before { content: "■ "; }
 html[data-farbsicht="an"] .fr-farbwahl-raster button[data-f="blau"]::before { content: "◆ "; }
+
+/* =============================================================
+   Qualität Teil 2: Baukasten, Vorhang, Idle-Leben, Farbsicht für Spieler
+   ============================================================= */
+.fx-knall { position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 150; pointer-events: none; text-align: center; padding: 12px 22px; border-radius: 20px;
+  background: rgba(12, 10, 24, 0.86); border: 2px solid var(--gold, #ffcf3f); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); animation: fx-knall-rein 0.45s cubic-bezier(.2, 1.5, .4, 1); transition: opacity 0.3s, transform 0.3s; }
+.fx-knall b { display: block; font-size: 1.3rem; color: var(--gold, #ffcf3f); }
+.fx-knall span { font-size: 0.9rem; color: var(--leise); }
+.fx-knall.s2 b { font-size: 1.9rem; } .fx-knall.s3 b { font-size: 2.6rem; } .fx-knall.s3 { padding: 18px 32px; box-shadow: 0 0 60px rgba(255, 207, 63, 0.45), 0 20px 50px rgba(0, 0, 0, 0.5); }
+.fx-knall.weg { opacity: 0; transform: translate(-50%, -70%); }
+@keyframes fx-knall-rein { from { transform: translate(-50%, -50%) scale(0.4); opacity: 0; } }
+.fx-teil { position: fixed; z-index: 200; pointer-events: none; font-size: 1.3rem; font-style: normal; }
+.fx-flieg-icon { font-size: 1.6rem; }
+body.fx-stopp *:not(.fx-blitz), body.fx-stopp *::before, body.fx-stopp *::after { animation-play-state: paused !important; }
+.fx-blitz { position: fixed; inset: 0; z-index: 190; pointer-events: none; background: rgba(255, 255, 255, 0.55); animation: fx-blitz 0.2s ease-out forwards; }
+@keyframes fx-blitz { to { opacity: 0; } }
+/* Vorhang beim großen Wechsel */
+.fx-vorhang { position: fixed; inset: 0; z-index: 180; pointer-events: none; background: linear-gradient(100deg, transparent 0%, var(--gold, #ffcf3f) 12%, var(--bg, #0c0a18) 24%, var(--bg, #0c0a18) 76%, var(--gold-2, #ff7a3d) 88%, transparent 100%);
+  background-size: 300% 100%; animation: fx-vorhang 0.65s cubic-bezier(.65, 0, .35, 1) forwards; }
+@keyframes fx-vorhang { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+/* Idle-Leben: Hintergrund atmet, aktive Spieler pulsieren, Handkarten schweben leicht */
+.hintergrund { animation: fx-hintergrund 40s ease-in-out infinite alternate; }
+@keyframes fx-hintergrund { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.12) translate(-2%, 2%); } }
+.sk-chip.dran, .bl-person.dran, .sc-spieler.dran, .fr-sitz.dran .q-schild, .q-sitz.dran .q-schild { animation: fx-atmen 2.2s ease-in-out infinite; }
+@keyframes fx-atmen { 50% { filter: brightness(1.18); box-shadow: 0 0 0 2px var(--gold, #ffcf3f), 0 0 18px rgba(255, 207, 63, 0.35); } }
+.fr-hand:not(.austeilen) .fr-handkarte { animation: fx-schweben 3.2s ease-in-out infinite; animation-delay: calc(var(--z, 0) * -0.41s); }
+@keyframes fx-schweben { 50% { translate: 0 -3px; } }
+/* Farbsicht-Hilfe auch für Spielerfarben: jeder Platz bekommt ein eigenes Zeichen */
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip) { position: relative; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip)::after { position: absolute; top: 2px; right: 6px; font-size: 0.75rem; font-weight: 900; color: #fff; text-shadow: 0 0 3px #000; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(1)::after { content: "▲"; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(2)::after { content: "●"; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(3)::after { content: "■"; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(4)::after { content: "◆"; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(5)::after { content: "★"; }
+html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(6)::after { content: "✚"; }
+@media (prefers-reduced-motion: reduce) { .hintergrund, .fr-handkarte, .fx-vorhang { animation: none !important; } }

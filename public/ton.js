@@ -80,7 +80,9 @@ const Ton = (() => {
       const jetzt = Date.now();
       serieZaehler = n ?? (jetzt - serieZeit < 4000 ? serieZaehler + 1 : 0);
       serieZeit = jetzt;
-      const f = 523 * Math.pow(2, Math.min(12, serieZaehler) / 12);
+      // Dur-Tonleiter ab C: jede weitere Stufe der Serie klingt einen Ton höher
+      const SKALA = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24];
+      const f = 523.25 * Math.pow(2, SKALA[Math.min(SKALA.length - 1, serieZaehler)] / 12);
       ton(f, 0.12, { typ: "triangle", laut: 0.1 });
       ton(f * 1.5, 0.18, { typ: "sine", laut: 0.06, start: 0.05 });
       return serieZaehler;

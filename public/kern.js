@@ -117,7 +117,17 @@ function farbeStatusleiste() {
 new MutationObserver(farbeStatusleiste).observe(document.body, { attributes: true, attributeFilter: ["data-spiel"] });
 
 // Weicher Übergang, sobald eine neue Ansicht erscheint
+let letzteArt = "";
 function seitenWechsel() {
+  // Großer Wechsel (Lobby ↔ Spiel ↔ Siegerehrung): kurzer Vorhang, sonst nur sanftes Einblenden
+  const art = /podest/.test(GN.ansicht) ? "podest" : GN.ansicht === "lobby" ? "lobby" : "spiel";
+  if (letzteArt && art !== letzteArt && document.documentElement.dataset.animationen !== "aus" && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const v = document.createElement("div");
+    v.className = "fx-vorhang " + art;
+    document.body.appendChild(v);
+    v.addEventListener("animationend", () => v.remove());
+  }
+  letzteArt = art;
   app.classList.remove("seite-rein");
   void app.offsetWidth; // Animation neu starten
   app.classList.add("seite-rein");
