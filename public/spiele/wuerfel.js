@@ -159,10 +159,10 @@
         <div class="w-oben">
           <div class="w-tisch">
             <div class="w-wer" id="wWer"></div>
-            <div class="w-halte" id="wHalte"><span class="w-halte-text">Festgehalten</span></div>
+            <div class="w-halte" id="wHalte"><span class="w-halte-text">Festgehalten</span>${[0, 1, 2, 3, 4].map((i) => `<span class="w-platz" data-p="${i}"></span>`).join("")}</div>
             <div class="w-teller" id="wTeller">
               <div class="w-becher" id="wBecher" aria-hidden="true"><span class="w-becher-koerper"></span><span class="w-becher-rand"></span></div>
-              <div class="w-reihe" id="wReihe">${[0, 1, 2, 3, 4].map(wuerfelHTML).join("")}</div>
+              <div class="w-reihe" id="wReihe">${[0, 1, 2, 3, 4].map((i) => `<span class="w-platz" data-p="${i}">${wuerfelHTML(i)}</span>`).join("")}</div>
               <div class="fr-effekt" id="wEffekt" aria-live="polite"></div>
             </div>
             <div class="w-knoepfe" id="wKnoepfe"></div>
@@ -172,8 +172,10 @@
         <div class="w-block-huelle"><table class="w-block" id="wBlock"></table></div>
       </div>`;
     $$(".w-wuerfel").forEach((b) => (b.onclick = () => halten(+b.dataset.i)));
-    $$(".w-kubus").forEach((k, i) => zeigeZahl(k, z.wuerfel[i]));
+    $$(".w-wuerfel").forEach((b) => zeigeZahl($(".w-kubus", b), z.wuerfel[+b.dataset.i]));
   }
+  // Wichtig: Würfel immer über ihre feste Nummer (data-i) ansprechen, nie über die
+  // Reihenfolge auf der Seite – die ändert sich, sobald ein Würfel nach oben wandert.
 
   function aktualisieren(z, vorher) {
     $("#wRunde").textContent = `Runde ${Math.min(13, z.runde)} / 13`;
@@ -197,30 +199,31 @@
 
   function wuerfelZustand(z) {
     const ichDran = z.dran === GN.ich && z.phase === "spielen";
-    $$(".w-wuerfel").forEach((b, i) => {
+    $$(".w-wuerfel").forEach((b) => {
+      const i = +b.dataset.i;
       b.classList.toggle("gehalten", !!(z.wurf && z.gehalten[i]));
       b.classList.toggle("leer", !z.wurf);
       b.disabled = !(ichDran && z.wurf > 0 && z.wurf < 3);
     });
   }
 
-  // Festgehaltene Würfel wandern auf die Halteleiste
+  // Festgehaltene Würfel wandern auf die Halteleiste. Jeder Würfel hat oben und unten
+  // seinen festen Platz – die anderen Würfel rutschen dabei nicht nach.
   function ordneWuerfel(z) {
     const reihe = $("#wReihe"), halte = $("#wHalte");
-    $$(".w-wuerfel").forEach((b, i) => {
-      const ziel = z.wurf && z.gehalten[i] ? halte : reihe;
-      if (b.parentElement !== ziel) {
-        const vorher = b.getBoundingClientRect();
-        ziel.appendChild(b);
-        const nachher = b.getBoundingClientRect();
-        b.animate([{ transform: `translate(${vorher.left - nachher.left}px, ${vorher.top - nachher.top}px)` }, { transform: "none" }], { duration: 320, easing: "cubic-bezier(.2,1.2,.4,1)" });
-      }
+    $$(".w-wuerfel").forEach((b) => {
+      const i = +b.dataset.i;
+      const ziel =(z.wurf && z.gehalten[i] ? halte : reihe).querySelector(`.w-platz[data-p="${i}"]`);
+      if (!ziel || b.parentElement === ziel) return;
+      const vorher = b.getBoundingClientRect();
+      ziel.appendChild(b);
+      const nachher = b.getBoundingClientRect();
+      b.animate([{ transform: `translate(${vorher.left - nachher.left}px, ${vorher.top - nachher.top}px)` }, { transform: "none" }], { duration: 300, easing: "cubic-bezier(.2,1,.4,1)" });
     });
-    for (const box of [reihe, halte]) [...box.querySelectorAll(".w-wuerfel")].sort((a, b) => a.dataset.i - b.dataset.i).forEach((b) => box.appendChild(b));
   }
 
   function zuruecksetzen(z) {
-    $$(".w-kubus").forEach((k, i) => { k.getAnimations().forEach((a) => a.cancel()); zeigeZahl(k, z.wuerfel[i]); });
+    $$(".w-wuerfel").forEach((b) => { const k = $(".w-kubus", b); k.getAnimations().forEach((a) => a.cancel()); zeigeZahl(k, z.wuerfel[+b.dataset.i]); });
   }
 
   // Wurf in drei Teilen: Würfel springen in den Becher → Becher wird geschüttelt → Würfel rollen über den Filz
