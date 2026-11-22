@@ -319,7 +319,7 @@ function auszeichnungen(raum) {
 // ---------- Schnittstelle für den Server-Kern ----------
 module.exports = {
   meta: () => ({
-    decks: Object.values(DECKS).map((d) => ({ ...d, fotos: FOTOS[d.id] })),
+    decks: Object.values(DECKS).filter((d) => !d.offline).map((d) => ({ ...d, fotos: FOTOS[d.id] })),
     maxTeilnehmer: MAX_TEILNEHMER,
     kampfMs: KAMPF_MS,
   }),
@@ -328,7 +328,7 @@ module.exports = {
 
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
-    if (typeof e.deck === "string" && DECKS[e.deck]) neu.deck = e.deck;
+    if (typeof e.deck === "string" && DECKS[e.deck] && !DECKS[e.deck].offline) neu.deck = e.deck;
     if (e.hand !== undefined) neu.hand = Math.min(3, Math.max(1, parseInt(e.hand) || 3));
     if (e.bots !== undefined) neu.bots = Math.min(3, Math.max(0, parseInt(e.bots) || 0));
     if (e.runden !== undefined) {

@@ -166,6 +166,7 @@ const WERTE_CARS = [
 const CAR = (id, name, emoji, stil, text, w) => ({ id, name, tier: "1f402", emoji, stil, text, w });
 const CARS = {
   id: "cars",
+  offline: true, // erst sichtbar, wenn die Bilder da sind (public/quartett/bilder/cars/<ID>.png)
   name: "Cars",
   icon: "🏎️",
   lizenz: "Figuren © Disney/Pixar",
