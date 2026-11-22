@@ -85,21 +85,48 @@ const MITTE = KARTE.felder.find((f) => f.q === 0 && f.r === 0).id;
 const DORFPLATZ_ECKEN = new Set(KARTE.felder[MITTE].ecken);
 const nachbarFelder = (f) => KARTE.felder.filter((g) => g.id !== f.id && Math.abs(g.q - f.q) + Math.abs(g.r - f.r) + Math.abs(g.q + g.r - f.q - f.r) === 2);
 
+// Faire Zufallskarte: jede Partie neu, aber nie übermächtig
+//  1. 6 und 8 nie nebeneinander, gleiche Zahlen nie nebeneinander
+//  2. 2 und 12 nicht nebeneinander (sonst entsteht eine "tote" Ecke)
+//  3. Keine Ecke ist zu stark: höchstens 12 Würfelpunkte (Pips) an einer Ecke
+//  4. Die vier roten Zahlen (6, 8) liegen auf mindestens drei verschiedenen Landschaften
+//  5. Jede Landschaft bekommt im Schnitt ähnlich gute Zahlen (Unterschied höchstens 0,9 Pips)
+//  6. Keine Landschaft klumpt: kein Feld hat zwei Nachbarn derselben Art
+const NACHBARN = new Map();
+function nachbarn(f) { if (!NACHBARN.has(f.id)) NACHBARN.set(f.id, nachbarFelder(f).map((g) => g.id)); return NACHBARN.get(f.id); }
+function karteFair(belegung, streuung = 0.9) {
+  for (const f of KARTE.felder) {
+    const b = belegung[f.id];
+    if (!b.zahl) continue;
+    let gleicheArt = 0;
+    for (const n of nachbarn(f)) {
+      const c = belegung[n];
+      if (c.typ === b.typ) gleicheArt++;
+      if (!c.zahl) continue;
+      if (c.zahl === b.zahl) return false;
+      if ([6, 8].includes(b.zahl) && [6, 8].includes(c.zahl)) return false;
+      if ([2, 12].includes(b.zahl) && [2, 12].includes(c.zahl)) return false;
+    }
+    if (gleicheArt >= 2) return false;
+  }
+  for (const e of KARTE.ecken) if (e.felder.reduce((s, f) => s + pips(belegung[f].zahl), 0) > 12) return false;
+  const rot = new Set(belegung.filter((b) => b.zahl === 6 || b.zahl === 8).map((b) => b.typ));
+  if (rot.size < 3) return false;
+  const schnitt = Object.keys(LAND).map((t) => { const l = belegung.filter((b) => b.typ === t); return l.reduce((s, b) => s + pips(b.zahl), 0) / l.length; });
+  return Math.max(...schnitt) - Math.min(...schnitt) <= streuung;
+}
 function landschaftVerteilen() {
   const typen = [...Array(5).fill("wald"), ...Array(5).fill("feld"), ...Array(4).fill("weide"), ...Array(4).fill("steinbruch")];
   const zahlen = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
-  for (let versuch = 0; versuch < 500; versuch++) {
+  let letzte = null;
+  for (let versuch = 0; versuch < 20000; versuch++) {
     const t = mischen(typen), z = mischen(zahlen);
     const belegung = KARTE.felder.map((f) => (f.id === MITTE ? { typ: "dorfplatz", zahl: null } : { typ: t.pop(), zahl: z.pop() }));
-    // 6 und 8 nie nebeneinander, gleiche Zahlen nicht direkt benachbart
-    const ok = KARTE.felder.every((f) => {
-      const b = belegung[f.id];
-      if (!b.zahl) return true;
-      return nachbarFelder(f).every((g) => { const c = belegung[g.id]; return !c.zahl || (c.zahl !== b.zahl && !([6, 8].includes(b.zahl) && [6, 8].includes(c.zahl))); });
-    });
-    if (ok) return belegung;
+    letzte = belegung;
+    // Nach vielen Versuchen die Zahlen-Streuung etwas lockern (alle anderen Regeln bleiben)
+    if (karteFair(belegung, versuch < 12000 ? 0.9 : 1.3)) return belegung;
   }
-  return null;
+  return letzte; // kommt praktisch nie vor
 }
 
 // =============================================================
@@ -774,5 +801,5 @@ module.exports = {
       auszeichnungen: d.phase === "ende" ? d.auszeichnungen : null,
     };
   },
-  _intern: { wegLaenge, KARTE, MITTE, hofOrte, wegOrte, punkte, botSchritt },
+  _intern: { landschaftVerteilen, karteFair, wegLaenge, KARTE, MITTE, hofOrte, wegOrte, punkte, botSchritt },
 };
