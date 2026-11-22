@@ -159,13 +159,17 @@ function botWahl(raum, id) {
   const wert = (k) => {
     let w = 0;
     if (k.farbe === "schwarz") w -= 30;
-    if (["plus2", "aussetzen", "richtung", "plus4"].includes(k.wert)) w += bedrohlich ? 40 : 5;
+    if (["plus2", "aussetzen", "richtung", "plus4"].includes(k.wert)) w += bedrohlich ? 40 : regeln.stufe === "schwer" ? -4 : 5; // schwer: Aktionskarten für den richtigen Moment aufheben
     if (k.farbe === d.farbe) w += 8;
     w += punkteVon(k) / 5; // teure Karten zuerst loswerden
     return w + Math.random() * 4;
   };
-  const k = moeglich.sort((a, b) => wert(b) - wert(a))[0];
-  return { karte: k.id, farbe: k.farbe === "schwarz" ? beliebtesteFarbe(hand, k) : null };
+  // KI-Stärke: einfach legt oft irgendeine passende Karte, schwer spart Schwarze und zielt auf den Nächsten
+  const stufe = regeln.stufe || "mittel";
+  const zufall = (stufe === "einfach" && Math.random() < 0.45) || (stufe === "mittel" && Math.random() < 0.08);
+  const k = zufall ? moeglich[Math.floor(Math.random() * moeglich.length)] : moeglich.sort((a, b) => wert(b) - wert(a))[0];
+  const farbe = k.farbe === "schwarz" ? (stufe === "einfach" && Math.random() < 0.5 ? ["rot", "gelb", "gruen", "blau"][Math.floor(Math.random() * 4)] : beliebtesteFarbe(hand, k)) : null;
+  return { karte: k.id, farbe };
 }
 
 function ziehenAktion(raum, ctx, id, auto = false) {

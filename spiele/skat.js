@@ -29,6 +29,10 @@ function deck(werte) {
   return mischen(k);
 }
 const einst = (raum) => raum.einstellungen.skat;
+// KI-Stärke: Wie oft macht ein Computer einen unüberlegten Zug?
+const FEHLER = { einfach: 0.35, mittel: 0.07, schwer: 0 };
+const patzer = (raum) => Math.random() < FEHLER[einst(raum).stufe || "mittel"];
+const irgendeine = (liste) => liste[Math.floor(Math.random() * liste.length)];
 
 function teilnehmer(raum) {
   const d = raum.daten;
@@ -129,6 +133,7 @@ const Schwimmen = {
     const d = raum.daten;
     if (d.phase !== "spielen" || d.dran !== id) return;
     const h = d.haende[id];
+    if (istBot(d, id) && patzer(raum)) return Math.random() < 0.5 ? this.aktion(raum, ctx, id, "schieben") : this.aktion(raum, ctx, id, "tauschen", { hand: irgendeine(h).id, mitte: irgendeine(d.mitte).id });
     const jetzt = swPunkte(h);
     // Bester einzelner Tausch
     let best = { p: jetzt, art: null };
@@ -301,6 +306,7 @@ const Arschloch = {
     if (!optionen.length) return this.aktion(raum, ctx, id, "passen");
     // Ausspielen: möglichst viele niedrige Karten; Stechen: so niedrig wie möglich, Asse sparen (außer kurz vor Schluss)
     let wahl = d.stich ? optionen[0] : optionen.sort((a, b) => b.length - a.length || AR_RANG(a[0].wert) - AR_RANG(b[0].wert))[0];
+    if (istBot(d, id) && patzer(raum)) wahl = irgendeine(optionen);
     if (d.stich && wahl[0].wert === "A" && h.length > 4 && Math.random() < 0.6) return this.aktion(raum, ctx, id, "passen");
     return this.aktion(raum, ctx, id, "legen", wahl.map((k) => k.id));
   },
@@ -448,11 +454,11 @@ const Durak = {
       if (!offen) return;
       const moeglich = h.filter((k) => this.schlaegt(d, k, offen.angriff)).sort((a, b) => (a.farbe === d.trumpf) - (b.farbe === d.trumpf) || DU_RANG(a.wert) - DU_RANG(b.wert));
       if (!moeglich.length || (moeglich[0].farbe === d.trumpf && DU_RANG(moeglich[0].wert) > DU_RANG("D") && d.stapel.length > 6 && d.tisch.length < 2)) return this.aktion(raum, ctx, id, "nehmen");
-      return this.aktion(raum, ctx, id, "schlagen", { angriff: offen.angriff.id, karte: moeglich[0].id });
+      return this.aktion(raum, ctx, id, "schlagen", { angriff: offen.angriff.id, karte: (istBot(d, id) && patzer(raum) ? irgendeine(moeglich) : moeglich[0]).id });
     }
     if (id === d.angreifer) {
       if (!d.tisch.length) {
-        const k = [...h].sort((a, b) => (a.farbe === d.trumpf) - (b.farbe === d.trumpf) || DU_RANG(a.wert) - DU_RANG(b.wert))[0];
+        const k = istBot(d, id) && patzer(raum) ? irgendeine(h) : [...h].sort((a, b) => (a.farbe === d.trumpf) - (b.farbe === d.trumpf) || DU_RANG(a.wert) - DU_RANG(b.wert))[0];
         return this.aktion(raum, ctx, id, "angreifen", k.id);
       }
       const nach = h.filter((k) => this.darfAngreifen(d, id, k) && (k.farbe !== d.trumpf || d.stapel.length === 0)).sort((a, b) => DU_RANG(a.wert) - DU_RANG(b.wert))[0];
@@ -674,7 +680,7 @@ const MauMau = {
     const anzahl = (f) => h.filter((k) => k.farbe === f).length;
     // Buben aufheben, 7 und 8 gegen knappe Gegner einsetzen, sonst die längste Farbe abbauen
     const nutzen = (k) => (k.wert === "B" ? -6 : 0) + (["7", "8"].includes(k.wert) && naechsterHat <= 3 ? 6 : 0) + anzahl(k.farbe) + MM_STRAFE(k.wert) / 8 + Math.random() * 0.5;
-    const k = moeglich.sort((a, b) => nutzen(b) - nutzen(a))[0];
+    const k = istBot(d, id) && patzer(raum) ? irgendeine(moeglich) : moeglich.sort((a, b) => nutzen(b) - nutzen(a))[0];
     const rest = h.filter((x) => x !== k);
     return this.aktion(raum, ctx, id, "legen", { karte: k.id, wunsch: besteFarbe(rest.length ? rest : h), mau: istBot(d, id) ? Math.random() < 0.88 : true });
   },

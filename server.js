@@ -378,7 +378,10 @@ io.on("connection", (socket) => {
   auf("einstellungen", (e) => {
     if (!istHost() || meinRaum.phase !== "lobby" || !e || typeof e !== "object") return;
     const m = modul(meinRaum);
-    meinRaum.einstellungen[meinRaum.spiel] = m.einstellungenSetzen(meinRaum.einstellungen[meinRaum.spiel], e);
+    const neu = m.einstellungenSetzen(meinRaum.einstellungen[meinRaum.spiel], e);
+    // KI-Stärke gilt für alle Spiele mit Computer-Gegnern (die Spiele lesen einstellungen.stufe)
+    if (["einfach", "mittel", "schwer"].includes(e.stufe)) neu.stufe = e.stufe;
+    meinRaum.einstellungen[meinRaum.spiel] = neu;
     sendeZustand(meinRaum);
   });
 

@@ -185,7 +185,9 @@ function frageStarten(raum, ctx) {
   for (const b of d.bots) {
     b.timer = setTimeout(() => {
       if (d.phase !== "frage") return;
-      const r = Math.random();
+      // KI-Stärke verschiebt die Verteilung: einfach meist naheliegende Antworten, schwer öfter seltene
+      const k = ({ einfach: 0.55, mittel: 1, schwer: 1.6 })[einst(raum).stufe || "mittel"];
+      const r = Math.random() ** k;
       const stufe = r < 0.2 ? 0 : r < 0.55 ? 10 : r < 0.8 ? 30 : r < 0.92 ? 60 : r < 0.985 ? 85 : 100;
       const pool = stufe === 0 ? null : stufe === 100 ? [aufgabe.gold] : aufgabe.stufen[stufe];
       const text = pool ? pool[Math.floor(Math.random() * pool.length)].split("|")[0] : ["Keine Ahnung", "Äh …", "Hmm"][Math.floor(Math.random() * 3)];

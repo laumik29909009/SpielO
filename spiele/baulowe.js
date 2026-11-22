@@ -401,11 +401,13 @@ function bot(raum, ctx, id) {
   const d = raum.daten;
   if (d.phase !== "spielen") return;
   if (d.angebot && d.angebot.an === id) {
-    const ok = istBot(d, id) && angebotBewerten(d, d.angebot) > 30;
+    const ok = istBot(d, id) && (einst(raum).stufe === "einfach" ? angebotBewerten(d, d.angebot) > -80 : angebotBewerten(d, d.angebot) > (einst(raum).stufe === "schwer" ? 80 : 30));
     return handle(raum, ctx, id, ok ? "annehmen" : "ablehnen");
   }
   if (d.dran !== id) return;
-  const reserve = 150 + 30 * d.runde;
+  const stufe = einst(raum).stufe || "mittel";
+  const reserve = (stufe === "schwer" ? 120 : 150) + 30 * d.runde;
+  const dumm = () => Math.random() < ({ einfach: 0.45, mittel: 0.06, schwer: 0 })[stufe];
   if (d.schritt === "zahlen") {
     geldBeschaffen(d, id, d.schulden.betrag);
     return handle(raum, ctx, id, d.geld[id] >= d.schulden.betrag ? "bezahlen" : "aufgeben");
@@ -421,7 +423,8 @@ function bot(raum, ctx, id) {
   if (d.schritt === "kaufen") {
     const f = d.figur[id], preis = FELDER[f].preis;
     const vervollstaendigt = FELDER[f].gruppe && gruppeFelder(FELDER[f].gruppe).filter((x) => x !== f).every((x) => d.besitz[x] === id);
-    const kaufen = istBot(d, id) && d.geld[id] >= preis && (d.geld[id] - preis >= reserve || (vervollstaendigt && d.geld[id] - preis >= 50));
+    let kaufen = istBot(d, id) && d.geld[id] >= preis && (d.geld[id] - preis >= reserve || (vervollstaendigt && d.geld[id] - preis >= 50));
+    if (istBot(d, id) && dumm()) kaufen = d.geld[id] >= preis && Math.random() < 0.5;
     return handle(raum, ctx, id, kaufen ? "kaufen" : "nichtKaufen");
   }
   if (d.schritt === "fertig" && istBot(d, id)) {
@@ -432,7 +435,7 @@ function bot(raum, ctx, id) {
       gebaut = false;
       const kandidaten = besitzVon(d, id).filter((f) => !kannBauen(d, id, f)).sort((a, b) => (d.haeuser[a] || 0) - (d.haeuser[b] || 0) || FELDER[b].preis - FELDER[a].preis);
       for (const f of kandidaten) {
-        if (d.geld[id] - GRUPPEN[FELDER[f].gruppe].haus < reserve) continue;
+        if (d.geld[id] - GRUPPEN[FELDER[f].gruppe].haus < reserve || dumm()) continue;
         handle(raum, ctx, id, "bauen", f, true); gebaut = true; break;
       }
     }

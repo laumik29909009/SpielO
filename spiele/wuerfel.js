@@ -158,6 +158,11 @@ function besteFeld(blatt, w) {
   return frei.sort((a, b) => wert(b) - wert(a))[0];
 }
 
+// Fehlerquote je KI-Stärke: einfach viele, mittel ab und zu, schwer keine
+const stufe = (raum) => einst(raum).stufe || "mittel";
+const FEHLER = { einfach: 0.3, mittel: 0.04, schwer: 0 };
+const patzer = (raum) => Math.random() < FEHLER[stufe(raum)];
+
 // Computer: würfeln, sinnvoll festhalten, eintragen
 function botZug(raum, ctx) {
   const d = raum.daten;
@@ -169,7 +174,13 @@ function botZug(raum, ctx) {
   // Schon etwas Großes? Sofort eintragen
   const sofort = ["fuenfling", "grossestrasse", "fullhouse", "kleinestrasse"].find((f) => blatt[f] === null && punkte(f, w) > 0);
   if (sofort && (sofort !== "kleinestrasse" || d.wurf === 3 || blatt.grossestrasse !== null)) return eintragen(raum, ctx, id, sofort);
+  // Einfach: manchmal unüberlegt eintragen
+  if (patzer(raum)) {
+    const frei = FELDER.filter((f) => blatt[f] === null);
+    return eintragen(raum, ctx, id, frei[Math.floor(Math.random() * frei.length)]);
+  }
   if (d.wurf >= 3) return eintragen(raum, ctx, id, besteFeld(blatt, w));
+
   // Festhalten: entweder auf Straße spielen oder die häufigste (hohe) Zahl
   const anz = [0, 0, 0, 0, 0, 0, 0];
   for (const x of w) anz[x]++;
@@ -182,6 +193,7 @@ function botZug(raum, ctx) {
     for (let z = 6; z >= 1; z--) if (anz[z] > anz[ziel] || (anz[z] === anz[ziel] && blatt[OBEN[z - 1]] === null && blatt[OBEN[ziel - 1]] !== null)) ziel = z;
     d.gehalten = w.map((x) => x === ziel);
   }
+  if (patzer(raum)) d.gehalten = w.map(() => Math.random() < 0.5);
   if (d.gehalten.every(Boolean)) return eintragen(raum, ctx, id, besteFeld(blatt, w));
   d.letzteAktion = { typ: "halten", spieler: id, t: Date.now() };
   ctx.sende(raum);

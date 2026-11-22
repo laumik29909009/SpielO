@@ -59,10 +59,12 @@ function staerke(deckId, karte, i) {
   const gleich = liste.filter((v) => v === karte.w[i]).length;
   return (unter + gleich / 2) / liste.length;
 }
-function botWahl(deckId, karte) {
+// KI-Stärke: einfach wählt oft zufällig, mittel manchmal den zweitbesten Wert, schwer immer den stärksten
+function botWahl(deckId, karte, stufe = "mittel") {
   const bewertet = karte.w.map((_, i) => ({ i, s: staerke(deckId, karte, i) + Math.random() * 0.08 }));
-  // Meist der stärkste Wert, manchmal (15 %) der zweitbeste: Der Computer soll nicht unschlagbar sein
   bewertet.sort((a, b) => b.s - a.s);
+  if (stufe === "einfach") return Math.random() < 0.5 ? bewertet[Math.floor(Math.random() * bewertet.length)].i : bewertet[Math.random() < 0.3 ? 1 : 0].i;
+  if (stufe === "schwer") return bewertet[0].i;
   return Math.random() < 0.15 ? bewertet[1].i : bewertet[0].i;
 }
 
@@ -136,7 +138,7 @@ function besteWahl(raum, id) {
   let beste = null;
   for (const kid of handVon(raum, id)) {
     const k = karteVon(raum, kid);
-    const i = botWahl(d.deck, k);
+    const i = botWahl(d.deck, k, einst(raum).stufe);
     const s = staerke(d.deck, k, i);
     if (!beste || s > beste.s) beste = { karte: kid, wert: i, s };
   }

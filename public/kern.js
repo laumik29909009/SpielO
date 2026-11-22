@@ -340,6 +340,15 @@ function zeigeLobby() {
   const fokusWert = document.activeElement?.value;
   const scroll = scrollY;
   const abschnitte = spiel.abschnitte(z, host);
+  // KI-Stärke: für jedes Spiel mit Computer-Gegnern (nicht in der Tagesarena, dort gibt es keine)
+  const e = z.einstellungen || {};
+  if (e.bots > 0 && !(z.spiel === "arena" && e.modus === "tag")) {
+    const st = e.stufe || "mittel";
+    const STUFEN = { einfach: ["🐣", "Einfach", "Macht öfter Fehler"], mittel: ["🙂", "Mittel", "Spielt solide, mit kleinen Patzern"], schwer: ["😈", "Schwer", "Spielt immer den besten Zug"] };
+    abschnitte.push({ id: "kistufe", wichtig: true, icon: "🧠", titel: "KI-Stärke", info: `${STUFEN[st][0]} ${STUFEN[st][1]}`,
+      html: `<div class="segment">${Object.entries(STUFEN).map(([k, [icon, name]]) => `<button data-ki-stufe="${k}" class="${st === k ? "aktiv" : ""}" ${host ? "" : "disabled"}>${icon} ${name}</button>`).join("")}</div>
+        <p class="leise klein-text" style="margin-top:6px">${STUFEN[st][2]}.</p>` });
+  }
   const wichtig = abschnitte.filter((a) => a.wichtig);
   const extras = abschnitte.filter((a) => !a.wichtig);
   const offenesFenster = $("dialog[data-fenster][open]")?.dataset.fenster; // bleibt nach Änderungen offen
@@ -407,6 +416,7 @@ function zeigeLobby() {
     </div>`;
 
   if (host) spiel.binde?.($("#spielEinstellungen"), z);
+  if (host) for (const b of document.querySelectorAll("[data-ki-stufe]")) b.onclick = () => GN.einstellungen({ stufe: b.dataset.kiStufe });
   spiel.lobbyFertig?.(z, host);
   // Fenster für Regeln & Punkte
   $$("[data-oeffne]").forEach((b) => (b.onclick = () => { Ton.klick(); $(`dialog[data-fenster="${b.dataset.oeffne}"]`).showModal(); }));

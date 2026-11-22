@@ -678,6 +678,10 @@ function botSchritt(raum, ctx) {
   const weiter = (ms = BOT_PAUSE) => { d.botTimer = setTimeout(() => botSchritt(raum, ctx), ms); };
   if (d.phase === "aufbau") return autoZug(raum, ctx);
   const h = d.hand[id];
+  // KI-Stärke: einfach baut oft an zufälligen Plätzen und handelt kaum, schwer spielt immer den besten Zug
+  const stufe = einst(raum).stufe || "mittel";
+  const dumm = () => Math.random() < ({ einfach: 0.5, mittel: 0.1, schwer: 0 })[stufe];
+  const irgend = (l) => l[Math.floor(Math.random() * l.length)];
   // Feldhüter vor dem Wurf, wenn das Gewitter auf mir sitzt
   if (!d.zug.wurf && !d.zug.gespielt && d.karten[id].includes("feldhueter") && d.zug.gekauft.filter((k) => k === "feldhueter").length < d.karten[id].filter((k) => k === "feldhueter").length
     && KARTE.felder[d.gewitter].ecken.some((e) => d.bauten[e]?.sp === id)) { karteSpielen(raum, ctx, id, "feldhueter"); senden(raum, ctx); return weiter(); }
@@ -693,14 +697,14 @@ function botSchritt(raum, ctx) {
   if (spielbar("viehmarkt")) { const r = ROH.reduce((m, x) => (h[x] < h[m] ? x : m), "stein"); karteSpielen(raum, ctx, id, "viehmarkt", r); senden(raum, ctx); return weiter(); }
   // Bauen: Gutshof > Hof > Dorfplatz > Weg > Dorfkarte
   const gut = gutOrte(d, id), hof = hofOrte(d, id);
-  if (gut.length && hat(h, KOSTEN.gut)) { bauen(raum, ctx, id, "gut", besteEcke(d, id, gut)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
-  if (hof.length && hat(h, KOSTEN.hof)) { bauen(raum, ctx, id, "hof", besteEcke(d, id, hof)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
+  if (gut.length && hat(h, KOSTEN.gut)) { bauen(raum, ctx, id, "gut", dumm() ? irgend(gut) : besteEcke(d, id, gut)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
+  if (hof.length && hat(h, KOSTEN.hof)) { bauen(raum, ctx, id, "hof", dumm() ? irgend(hof) : besteEcke(d, id, hof)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
   const g = d.gebaeude && Object.keys(GEMEIN).find((x) => !d.gemein[x] && amDorfplatz(d, id) && hat(h, GEMEIN[x].kosten));
   if (g) { gemeinBauen(raum, ctx, id, g); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
   const wegLohnt = !hof.length || (summe(h) >= 6 && (d.wegLengenBot = (d.wegLaengen?.[id] || 0)) >= 3 && d.laengsterWeg !== id);
-  if (wegLohnt && wegOrte(d, id).length && hat(h, KOSTEN.weg)) { bauen(raum, ctx, id, "weg", besterWeg(d, id, wegOrte(d, id))); senden(raum, ctx); return weiter(); }
+  if (wegLohnt && wegOrte(d, id).length && hat(h, KOSTEN.weg)) { bauen(raum, ctx, id, "weg", dumm() ? irgend(wegOrte(d, id)) : besterWeg(d, id, wegOrte(d, id))); senden(raum, ctx); return weiter(); }
   // Markt: ein Tausch pro Ziel und Zug
-  if ((d.zug.botTausche || 0) < 3) {
+  if ((d.zug.botTausche || 0) < ({ einfach: 1, mittel: 3, schwer: 4 })[stufe]) {
     const ziele = [hof.length && KOSTEN.hof, gut.length && KOSTEN.gut, d.gebaeude && amDorfplatz(d, id) && Object.keys(GEMEIN).filter((x) => !d.gemein[x]).map((x) => GEMEIN[x].kosten)[0], !hof.length && KOSTEN.weg, KOSTEN.karte].filter(Boolean);
     for (const ziel of ziele) if (botMarkt(raum, ctx, id, ziel)) { d.zug.botTausche = (d.zug.botTausche || 0) + 1; senden(raum, ctx); return weiter(); }
   }
