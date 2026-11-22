@@ -22,13 +22,15 @@
     ]
   },
   "patch": {
-    "datum": "21.11.2026",
-    "titel": "Drei neue Spiele: Arena, Schechingen & Würfelglück",
+    "datum": "22.11.2026",
+    "titel": "Großes Update für Würfelglück, Arena & Schechingen",
     "punkte": [
-      "🏛️ Arena: das Tages-Quiz – je seltener deine Antwort, desto mehr Ruhm. Mit Serie, Rangliste und Statistik",
-      "🌾 Schechingen – Hof & Handel: Höfe bauen, handeln, Längster Weg und Dorfplatz",
-      "🎲 Würfelglück: der Würfelklassiker mit 3D-Würfeln und Punkteblock",
-      "Alle drei auch alleine gegen Computer spielbar"
+      "🎲 Würfelglück: Würfel-Fehler behoben, neue Würfel, Becher sammelt ein, schüttelt und kippt aus",
+      "🦉 Neu: die Würfel-Eule zeigt dir Punkte, Chancen und was du halten solltest",
+      "🏛️ Arena: 3D-Kolosseum – dein Gladiator läuft mit jedem Punkt weiter zum Goldenen Lorbeer",
+      "🔥 Arena: Serien-Anzeige nach jeder Tagesarena, rund 6000 neue richtige Antworten",
+      "🌾 Schechingen: größeres Spielfeld, neue Übersicht, einfacher Handel und große Auswahlfenster",
+      "🎲 Schechingen: große 3D-Würfel, fliegende Rohstoffe, Ansagen und mehr Sounds"
     ]
   },
   "musikAus": [

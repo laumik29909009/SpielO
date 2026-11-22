@@ -50,7 +50,7 @@ Edles Kartendesign (Elfenbein, Goldrahmen, Serifenschrift, eigene Goldornamente 
 
 ## Würfelglück
 Würfelklassiker mit 5 Würfeln: bis zu 3 Würfe, Würfel festhalten, 13 Felder (Einser–Sechser mit Bonus 35 ab 63, Dreier-/Viererpasch, Full House 25, Kleine Straße 30, Große Straße 40, Fünfling 50, Chance), jeder weitere Fünfling +50.
-3D-Würfel in CSS (`public/wuerfel.css`), Würfelbecher, Halteleiste, Punkteblock. Logik: `spiele/wuerfel.js`, Oberfläche: `public/spiele/wuerfel.js`. 1–8 Spieler, Computer-Gegner.
+3D-Würfel in CSS (`public/wuerfel.css`), Würfelbecher (einsammeln, schütteln, auskippen), Halteleiste, Punkteblock und die Würfel-Eule als Live-Helfer (Punkte, Chancen per Simulation, Halte-Tipp). Logik: `spiele/wuerfel.js`, Oberfläche: `public/spiele/wuerfel.js`. 1–8 Spieler, Computer-Gegner.
 
 ## Arena
 Tages-Quiz mit freien Antworten. Jede Aufgabe ist eine Kategorie („Nenne eine Nudelsorte“), jeder tippt **eine** Antwort. Je seltener die richtige Antwort, desto mehr **Ruhm**: Fußvolk 10 · Krieger 30 · Champion 60 · Legende 85 · **Goldener Lorbeer 100** (eine besondere Antwort pro Aufgabe). Ruhm × 100 = Zuschauer im Kolosseum.
@@ -58,7 +58,8 @@ Tages-Quiz mit freien Antworten. Jede Aufgabe ist eine Kategorie („Nenne eine 
 - **Freies Spiel:** 5–15 zufällige Aufgaben (ohne die von heute), mit Freunden und bis zu 3 Computern.
 - **Statistik:** auf dem Gerät gespeichert (Serie, Rekord, Schnitt, Verlauf, Stufen, Lorbeer-Sammlung, Archiv). „Sichern“ erzeugt einen Code zum Umziehen auf ein anderes Gerät.
 - Die Tages-Rangliste liegt im Server-Speicher. Nach einem Neustart melden Spieler ihr heutiges Ergebnis beim nächsten Besuch automatisch neu.
-- Aufgaben: `daten/arena.js` und `daten/arena-2.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
+- 3D-Kolosseum (`public/spiele/arena-3d.js`, three.js): Gladiator läuft mit dem Ruhm zum Goldenen Lorbeer, das Publikum füllt die Ränge. Nach der Tagesarena erscheint die Serien-Anzeige.
+- Aufgaben: `daten/arena.js`, `daten/arena-2.js` und zusätzliche Antworten in `daten/arena-extra.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
 
 ## Schechingen – Hof & Handel
 Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner).

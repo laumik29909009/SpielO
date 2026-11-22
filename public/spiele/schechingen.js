@@ -38,7 +38,7 @@
 
   GN.socket.on("schechingen:hand", (h) => {
     hand = h;
-    if (GN.zustand?.spiel === "schechingen" && GN.ansicht === "schechingen-spiel") seite(GN.zustand);
+    if (GN.zustand?.spiel === "schechingen" && GN.ansicht === "schechingen-spiel") { dock(GN.zustand); leiste(GN.zustand); dialog(GN.zustand); }
   });
 
   // =============================================================
@@ -81,19 +81,26 @@
   // =============================================================
   //  Spielansicht
   // =============================================================
+  // =============================================================
+  //  Spielansicht: oben Spielerleiste, Mitte großes Brett, unten deine Hand
+  //  mit vier Knöpfen. Entscheidungen erscheinen als großes Fenster.
+  // =============================================================
+  let fenster = null; // "bauen" | "handel" | "dorfplatz" | null
+  let angebotGesehen = null;
+
   function zeige(z, vorher) {
     if (z.phase === "ende") {
       if (/podest/.test(GN.ansicht)) return;
       if (GN.ansicht !== "schechingen-ende") {
         if (GN.ansicht !== "schechingen-spiel") aufbauen(z);
         GN.ansicht = "schechingen-ende";
-        modus = null;
-        brett(z); seite(z);
+        modus = null; fenster = null; auswahl = null;
+        brett(z); leiste(z); dock(z); status(z); dialog(z);
         GN.stoppeTimer();
         const s = z.sieger;
-        $("#scEffekt").innerHTML = `<div class="fr-knall gold"><b class="riesig">🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!</b><span>Dorfschultheiß von Schechingen</span></div>`;
-        Ton.fanfare(); GN.konfetti(160);
-        setTimeout(() => GN.zustand?.phase === "ende" && GN.ansicht === "schechingen-ende" && GN.podest("schechingen-podest", { einheit: "Punkte" }), 3500);
+        knall(`🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!<small>Dorfschultheiß von Schechingen</small>`, "gold riesig", 3200);
+        Ton.fanfare(); GN.konfetti(180);
+        setTimeout(() => GN.zustand?.phase === "ende" && GN.ansicht === "schechingen-ende" && GN.podest("schechingen-podest", { einheit: "Punkte" }), 3800);
       }
       return;
     }
@@ -103,16 +110,25 @@
     else if (istDran(z) && z.zug?.modus === "wegebau") modus = "weg";
     else if (!istDran(z) || z.zug?.modus || !z.zug?.wurf) modus = null;
     if (z.zug?.modus !== "abwerfen") abwurf = {};
-    brett(z);
-    seite(z);
+    if ((!istDran(z) || z.zug?.modus || z.phase !== "spielen") && fenster !== "dorfplatz") fenster = null;
+    brett(z); leiste(z); dock(z); status(z); dialog(z);
     effekte(z, vorher);
     if (!vorher || vorher.dran !== z.dran || vorher.zug?.modus !== z.zug?.modus || vorher.aufbauSchritt !== z.aufbauSchritt || GN.timerNeu) {
       GN.timerNeu = false;
       if (z.restMs > 0) { $("#timer")?.classList.remove("unendlich"); GN.starteTimer(z.restMs, z.zug?.modus === "abwerfen" ? 30000 : Math.max(z.restMs, (z.sekunden || 120) * 1000), { tickAb: 10000, tonAus: () => GN.zustand?.dran !== ich() }); }
       else GN.ohneZeitlimit();
-      if (vorher && istDran(z) && vorher.dran !== ich()) { Ton.ding(); navigator.vibrate?.(40); }
+    }
+    // Du bist dran / neue Jahreszeit
+    if (vorher && istDran(z) && vorher.dran !== ich()) {
+      GN.intro({ icon: "🌾", titel: "Du bist dran!", text: z.phase === "aufbau" ? (z.aufbauSchritt === "hof" ? "Setze einen Hof" : "Setze einen Weg") : "Würfle!", dauer: 1100 });
+      navigator.vibrate?.(40);
+    }
+    if (vorher && vorher.saison !== z.saison && z.phase === "spielen") {
+      const s = meta().saison[z.saison];
+      setTimeout(() => { knall(`${s.icon} ${s.name}!<small>${SAISON_TEXT[z.saison]}</small>`, "saison", 2400); Ton.wusch(); }, 400);
     }
   }
+  const SAISON_TEXT = ["Weiden bringen doppelt Milch", "Steinbrüche bringen doppelt Stein", "Felder bringen doppelt Korn", "Wälder bringen doppelt Holz, Felder ruhen"];
 
   function aufbauen(z) {
     GN.ansicht = "schechingen-spiel";
@@ -122,24 +138,26 @@
       <div class="sc-buehne">
         <div class="runden-kopf">
           <span class="modus-badge">🌾 Schechingen</span>
-          <span class="runden-nr" id="scSaison"></span>
+          <span class="runden-nr sc-saison" id="scSaison"></span>
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
         <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
+        <div class="sc-leiste" id="scLeiste"></div>
         <div class="sc-haupt">
-          <div class="sc-brett-huelle">
-            <svg id="scBrett" class="sc-brett" role="img" aria-label="Spielbrett"></svg>
-            <div class="sc-wuerfel" id="scWuerfel"></div>
-            <div class="fr-effekt" id="scEffekt" aria-live="polite"></div>
+          <div class="sc-brett-huelle" id="scHuelle">
+            <svg id="scBrett" class="sc-brett" role="img" aria-label="Spielbrett" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="sc-banner" id="scBanner"></div>
+            <div class="sc-wurf" id="scWurf"></div>
+            <div class="sc-effekt" id="scEffekt" aria-live="polite"></div>
           </div>
           <aside class="sc-seite">
-            <div class="sc-leute" id="scLeute"></div>
-            <div class="sc-aktion" id="scAktion"></div>
-            <div class="sc-hand" id="scHand"></div>
-            <div class="sc-bau" id="scBau"></div>
-            <details class="sc-log"><summary>📜 Dorfchronik</summary><div id="scLog"></div></details>
+            <div class="sc-status" id="scStatus"></div>
+            <div class="sc-kostenkarte" id="scKosten"></div>
+            <details class="sc-log" open><summary>📜 Dorfchronik</summary><div id="scLog"></div></details>
           </aside>
         </div>
+        <div class="sc-dock" id="scDock"></div>
+        <div class="sc-dialog versteckt" id="scDialog"></div>
       </div>`;
   }
 
@@ -313,195 +331,345 @@
     svg.innerHTML = h;
     // Klicks
     $$("[data-feld]", svg).forEach((g) => g.classList.contains("waehlbar") && (g.onclick = () => { Ton.klick(); GN.aktion("gewitter", { feld: +g.dataset.feld }); }));
+    // Dorfplatz antippen: Erklärung
+    const dorf = svg.querySelector(".sc-feld.dorfplatz:not(.waehlbar)");
+    if (dorf) { dorf.classList.add("info"); dorf.onclick = () => { Ton.klick(); fenster = "dorfplatz"; dialog(GN.zustand); }; }
     $$("[data-weg]", svg).forEach((g) => (g.onclick = () => { Ton.abgeben(); GN.aktion("bauen", { art: "weg", ort: +g.dataset.weg }); if (z.phase !== "aufbau" && z.zug?.modus !== "wegebau") modus = null; }));
     $$("[data-hof]", svg).forEach((g) => (g.onclick = () => { Ton.abgeben(); GN.aktion("bauen", { art: "hof", ort: +g.dataset.hof }); if (z.phase !== "aufbau") modus = null; }));
     $$("[data-gut]", svg).forEach((g) => (g.onclick = () => { Ton.abgeben(); GN.aktion("bauen", { art: "gut", ort: +g.dataset.gut }); modus = null; }));
   }
 
-  // ---------- Seitenleiste ----------
-  function seite(z) {
+  // ---------- Spielerleiste oben ----------
+  function leiste(z) {
     const s = meta().saison[z.saison];
     $("#scSaison").innerHTML = `${s.icon} ${s.name} · Runde ${z.runde}`;
-    $("#scSaison").title = `${s.name}: ${{ weide: "Weiden", steinbruch: "Steinbrüche", feld: "Felder", wald: "Wälder" }[s.doppelt]} doppelt${s.ruht ? ", Felder ruhen" : ""}`;
-    leute(z); aktion(z); handZeigen(z); bauMenue(z);
-    $("#scLog").innerHTML = (z.log || []).slice().reverse().map((l) => `<div>${esc(l.text)}</div>`).join("");
-  }
-
-  function leute(z) {
-    $("#scLeute").innerHTML = (z.teilnehmer || []).map((t) => `
-      <div class="sc-person ${t.id === z.dran ? "dran" : ""} ${t.online ? "" : "offline"}" style="--f:${z.farben[t.id]}">
+    $("#scSaison").title = SAISON_TEXT[z.saison];
+    $("#scLeiste").innerHTML = (z.teilnehmer || []).map((t) => {
+      const p = z.punkteOffen[t.id] + (t.id === ich() && z.phase !== "ende" ? hand.kirchweih || 0 : 0);
+      return `<div class="sc-spieler ${t.id === z.dran ? "dran" : ""} ${t.online ? "" : "offline"} ${t.id === ich() ? "ich" : ""}" style="--f:${z.farben[t.id]}">
         <span class="sc-ava">${t.avatar}</span>
-        <span class="sc-pname">${esc(t.id === ich() ? "Du" : t.name)}${z.kurs[t.id] === 3 ? ' <span title="Marktrecht 3:1">⚖️</span>' : ""}</span>
-        <span class="sc-pinfo" title="Rohstoffkarten / Dorfkarten / Weglänge">🂠 ${z.karten[t.id]}${z.dorfkarten[t.id] ? ` · 🃏 ${z.dorfkarten[t.id]}` : ""} · <span class="${z.laengsterWeg === t.id ? "sc-bonus" : ""}" title="${z.laengsterWeg === t.id ? "Längster Weg: +2 Punkte" : "Längste Wegstrecke (ab 5 gibt es den Längsten Weg)"}">🛤️ ${z.wegLaengen?.[t.id] || 0}</span>${z.wache?.[t.id] ? ` · <span class="${z.feldwache === t.id ? "sc-bonus" : ""}" title="${z.feldwache === t.id ? "Stärkste Feldwache: +2 Punkte" : "Gespielte Feldhüter (ab 3: Stärkste Feldwache)"}">👮 ${z.wache[t.id]}</span>` : ""}</span>
-        <b class="sc-punkte" title="Punkte">${z.punkteOffen[t.id] + (t.id === ich() && z.phase !== "ende" ? hand.kirchweih || 0 : 0)}<small>/${z.ziel}</small></b>
-      </div>`).join("");
+        <div class="sc-sp-text">
+          <b>${esc(t.id === ich() ? "Du" : t.name)}</b>
+          <small><span title="Rohstoffkarten">🂠 ${z.karten[t.id]}</span>${z.dorfkarten[t.id] ? `<span title="Dorfkarten">🃏 ${z.dorfkarten[t.id]}</span>` : ""}<span class="${z.laengsterWeg === t.id ? "sc-bonus" : ""}" title="${z.laengsterWeg === t.id ? "Längster Weg (+2)" : "Längste Wegstrecke"}">🛤️ ${z.wegLaengen?.[t.id] || 0}</span>${z.wache?.[t.id] ? `<span class="${z.feldwache === t.id ? "sc-bonus" : ""}" title="Gespielte Feldhüter">👮 ${z.wache[t.id]}</span>` : ""}${z.kurs[t.id] === 3 ? '<span title="Marktrecht 3:1">⚖️</span>' : ""}</small>
+        </div>
+        <div class="sc-sp-punkte"><b>${p}</b><small>/${z.ziel}</small></div>
+      </div>`;
+    }).join("");
   }
 
-  function aktion(z) {
-    const box = $("#scAktion");
+  // ---------- Status rechts: was passiert gerade? ----------
+  function status(z) {
     const dran = istDran(z);
     const m = z.zug?.modus;
     const wer = `${person(z, z.dran).avatar} <b>${esc(person(z, z.dran).name)}</b>`;
-    let h = "";
+    let h;
     if (z.phase === "ende") h = `<div class="sc-hinweis gold">🏆 ${esc(nameVon(z, z.sieger))} ${z.sieger === ich() ? "gewinnst" : "gewinnt"}!</div>`;
-    else if (m === "abwerfen" && z.abwerfen[ich()]) {
-      const soll = z.abwerfen[ich()];
-      const n = ROH.reduce((a, r) => a + (abwurf[r] || 0), 0);
-      h = `<div class="sc-hinweis rot">⛈️ Gewitter! Gib <b>${soll}</b> Karten ab.</div>
-        <div class="sc-waehler">${ROH.map((r) => `<div><span>${ROH_INFO[r][1]} ${hand.roh[r]}</span><button class="mini" data-ab="${r}" data-d="-1">−</button><b>${abwurf[r] || 0}</b><button class="mini" data-ab="${r}" data-d="1">+</button></div>`).join("")}</div>
-        <button class="btn voll" id="scAbgeben" ${n === soll ? "" : "disabled"}>Abgeben (${n}/${soll})</button>`;
-    } else if (m === "abwerfen") h = `<div class="sc-hinweis">⛈️ Gewitter! Warte, bis alle Karten abgegeben haben${GN.wartePunkte()}</div>`;
+    else if (m === "abwerfen") h = `<div class="sc-hinweis rot">⛈️ Gewitter! Wer mehr als 8 Karten hat, gibt die Hälfte ab.</div>`;
     else if (!dran) h = `<div class="sc-hinweis">${wer} ist dran${z.phase === "aufbau" ? ` und setzt ${z.aufbauSchritt === "hof" ? "einen Hof" : "einen Weg"}` : ""}${GN.wartePunkte()}</div>`;
-    else if (z.phase === "aufbau") h = `<div class="sc-hinweis gold">${z.aufbauSchritt === "hof" ? "🏠 Tippe eine leuchtende Ecke an, um deinen Hof zu setzen." : "🛤️ Setze einen Weg an deinen neuen Hof."}</div>`;
+    else if (z.phase === "aufbau") h = `<div class="sc-hinweis gold">${z.aufbauSchritt === "hof" ? "🏠 Tippe eine leuchtende Ecke an: dort entsteht dein Hof. Gute Plätze grenzen an Felder mit 6 und 8." : "🛤️ Setze einen Weg an deinen neuen Hof."}</div>`;
     else if (m === "gewitter") h = `<div class="sc-hinweis gold">⛈️ Tippe ein Feld an, auf das das Gewitter zieht.</div>`;
-    else if (m === "stehlen") h = `<div class="sc-hinweis gold">Wem nimmst du eine Karte ab?</div><div class="sc-knoepfe">${z.zug.opfer.map((o) => `<button class="btn klein" data-stehlen="${o}">${person(z, o).avatar} ${esc(person(z, o).name)}</button>`).join("")}</div>`;
     else if (m === "wegebau") h = `<div class="sc-hinweis gold">🛤️ Baue noch ${z.zug.gratisWege} ${z.zug.gratisWege === 1 ? "Weg" : "Wege"} gratis.</div>`;
-    else if (!z.zug?.wurf) h = `<button class="btn gross voll" id="scWuerfeln">🎲 Würfeln</button>`;
-    else h = `<div class="sc-knoepfe">${modus ? `<button class="btn zweit" id="scAbbrechen">✕ ${{ hof: "Hof", weg: "Weg", gut: "Gutshof" }[modus]} abbrechen</button>` : ""}<button class="btn voll" id="scFertig">✓ Zug beenden</button></div>${modus ? `<div class="leise klein-text">Tippe auf dem Brett einen leuchtenden Platz an.</div>` : ""}`;
-    // Tauschangebot eines anderen
-    const a = z.angebot;
-    if (a && a.von !== ich() && z.phase === "spielen") {
-      const kann = Object.entries(a.will).every(([r, n]) => hand.roh[r] >= n);
-      const abgelehnt = a.nein.includes(ich());
-      h += `<div class="sc-angebot"><div>🤝 <b>${esc(person(z, a.von).name)}</b> bietet: ${tauschText(a.gib)} <br>und möchte: ${tauschText(a.will)}</div>
-        ${abgelehnt ? '<span class="leise klein-text">Abgelehnt</span>' : `<div class="sc-knoepfe"><button class="btn klein" id="scAnnehmen" ${kann ? "" : "disabled"}>✓ Annehmen</button><button class="btn klein zweit" id="scAblehnen">✕</button></div>`}</div>`;
-    } else if (a && a.von === ich()) {
-      h += `<div class="sc-angebot">Dein Angebot: ${tauschText(a.gib)} gegen ${tauschText(a.will)} <br><span class="leise klein-text">${a.nein.length ? `${a.nein.length} abgelehnt · ` : ""}warte auf Antworten</span> <button class="btn klein zweit" id="scZurueck">Zurückziehen</button></div>`;
-    }
-    box.innerHTML = h;
-    $("#scWuerfeln")?.addEventListener("click", () => { $("#scWuerfeln").disabled = true; GN.aktion("wuerfeln"); });
-    $("#scFertig")?.addEventListener("click", () => { Ton.klick(); modus = null; GN.aktion("fertig"); });
-    $("#scAbbrechen")?.addEventListener("click", () => { modus = null; brett(z); seite(z); });
-    $$("[data-stehlen]", box).forEach((b) => (b.onclick = () => GN.aktion("stehlen", { opfer: b.dataset.stehlen })));
-    $$("[data-ab]", box).forEach((b) => (b.onclick = () => { const r = b.dataset.ab; abwurf[r] = Math.max(0, Math.min(hand.roh[r], (abwurf[r] || 0) + +b.dataset.d)); aktion(z); }));
-    $("#scAbgeben")?.addEventListener("click", () => GN.aktion("abwerfen", abwurf));
-    $("#scAnnehmen")?.addEventListener("click", () => GN.aktion("annehmen"));
-    $("#scAblehnen")?.addEventListener("click", () => GN.aktion("ablehnen"));
-    $("#scZurueck")?.addEventListener("click", () => GN.aktion("zurueckziehen"));
+    else if (!z.zug?.wurf) h = `<div class="sc-hinweis gold">🎲 Du bist dran! Würfle zuerst.</div>`;
+    else if (modus) h = `<div class="sc-hinweis gold">Tippe auf dem Brett einen leuchtenden Platz an.</div>`;
+    else h = `<div class="sc-hinweis">Bauen, handeln oder Zug beenden.</div>`;
+    $("#scStatus").innerHTML = h;
+    const k = meta().kosten;
+    $("#scKosten").innerHTML = `<div class="sc-titel">Baukosten</div>
+      ${[["🛤️", "Weg", k.weg, ""], ["🏠", "Hof", k.hof, "1"], ["🏰", "Gutshof", k.gut, "2"], ["🃏", "Dorfkarte", k.karte, "?"]].map(([i, n, c, p]) => `<div class="sc-kz"><span>${i} ${n}${p ? ` <em>${p === "?" ? "" : "+" + p}</em>` : ""}</span><span>${kostenHTML(c)}</span></div>`).join("")}
+      <button class="sc-dorfknopf" id="scDorfInfo">⛪ Was ist der Dorfplatz?</button>`;
+    $("#scDorfInfo").onclick = () => { Ton.klick(); fenster = "dorfplatz"; dialog(GN.zustand); };
+    $("#scLog").innerHTML = (z.log || []).slice().reverse().map((l) => `<div>${esc(l.text)}</div>`).join("");
   }
-  const tauschText = (o) => ROH.filter((r) => o[r]).map((r) => `${o[r]}${ROH_INFO[r][1]}`).join(" ") || "–";
 
-  function handZeigen(z) {
-    const box = $("#scHand");
-    const kannSpielen = istDran(z) && z.phase === "spielen" && !z.zug?.modus && !z.zug?.gespielt;
+  // ---------- Unten: deine Hand und die vier Knöpfe ----------
+  function dock(z) {
+    const box = $("#scDock");
+    const dran = istDran(z) && z.phase === "spielen";
+    const m = z.zug?.modus;
+    const frei = dran && z.zug?.wurf && !m;
     const karten = hand.karten || [];
     const neu = [...(hand.neu || [])];
-    box.innerHTML = `<div class="sc-roh">${ROH.map((r) => `<div class="sc-karte ${r}"><span>${ROH_INFO[r][1]}</span><b>${hand.roh[r]}</b><small>${ROH_INFO[r][0]}</small></div>`).join("")}</div>
-      ${karten.length || hand.kirchweih ? `<div class="sc-dorfkarten">${karten.map((k, i) => {
-        const frisch = neu.includes(k) && (neu.splice(neu.indexOf(k), 1), true);
-        const ok = kannSpielen && !frisch && (k === "feldhueter" || z.zug?.wurf);
-        return `<button class="sc-dk" data-dk="${k}" ${ok ? "" : "disabled"} title="${KARTEN[k][2]}${frisch ? " (ab nächstem Zug)" : ""}"><span>${KARTEN[k][1]}</span>${KARTEN[k][0]}</button>`;
-      }).join("")}${hand.kirchweih ? `<span class="sc-dk kirchweih" title="Kirchweih: je 1 geheimer Punkt"><span>🎪</span>Kirchweih ×${hand.kirchweih}</span>` : ""}</div>` : ""}
-      ${auswahl ? `<div class="sc-wahl"><div>${auswahl.k === "erntedank" ? `Wähle 2 Rohstoffe (${auswahl.wahl.length}/2):` : "Welchen Rohstoff willst du von allen?"}</div><div class="sc-knoepfe">${ROH.map((r) => `<button class="btn klein zweit" data-wahl="${r}">${ROH_INFO[r][1]} ${ROH_INFO[r][0]}</button>`).join("")}<button class="btn klein link" id="scWahlAus">Abbrechen</button></div></div>` : ""}`;
+    const kannSpielen = dran && !m && !z.zug?.gespielt;
+    let knoepfe;
+    if (dran && !z.zug?.wurf && !m) knoepfe = `<button class="btn gross sc-k-wurf" id="scWuerfeln">🎲 Würfeln</button>`;
+    else if (modus && dran) knoepfe = `<button class="btn zweit" id="scAbbrechen">✕ ${{ hof: "Hof", weg: "Weg", gut: "Gutshof" }[modus]} abbrechen</button>`;
+    else knoepfe = `
+      <button class="btn sc-k" id="scBauen" ${frei ? "" : "disabled"}>🔨<span>Bauen</span></button>
+      <button class="btn sc-k" id="scHandeln" ${frei ? "" : "disabled"}>⚖️<span>Handeln</span></button>
+      <button class="btn sc-k sc-k-fertig" id="scFertig" ${frei ? "" : "disabled"}>✓<span>Zug beenden</span></button>`;
+    box.innerHTML = `
+      <div class="sc-hand">
+        ${ROH.map((r) => `<div class="sc-karte ${r}" data-roh="${r}"><span class="sc-k-icon">${ROH_INFO[r][1]}</span><b>${hand.roh[r]}</b><small>${ROH_INFO[r][0]}</small></div>`).join("")}
+        ${karten.map((k) => {
+          const frisch = neu.includes(k) && (neu.splice(neu.indexOf(k), 1), true);
+          const ok = kannSpielen && !frisch && (k === "feldhueter" || z.zug?.wurf);
+          return `<button class="sc-dk ${ok ? "spielbar" : ""}" data-dk="${k}" ${ok ? "" : "disabled"} title="${KARTEN[k][2]}${frisch ? " (ab deinem nächsten Zug)" : ""}"><span>${KARTEN[k][1]}</span><small>${KARTEN[k][0]}</small></button>`;
+        }).join("")}
+        ${hand.kirchweih ? `<div class="sc-dk kirchweih" title="Kirchweih: je 1 geheimer Punkt"><span>🎪</span><small>Kirchweih ×${hand.kirchweih}</small></div>` : ""}
+      </div>
+      <div class="sc-knoepfe-dock">${knoepfe}</div>`;
+    $("#scWuerfeln")?.addEventListener("click", () => { $("#scWuerfeln").disabled = true; GN.aktion("wuerfeln"); });
+    $("#scAbbrechen")?.addEventListener("click", () => { Ton.klick(); modus = null; brett(z); dock(z); status(z); });
+    $("#scBauen")?.addEventListener("click", () => { Ton.klick(); fenster = "bauen"; dialog(z); });
+    $("#scHandeln")?.addEventListener("click", () => { Ton.klick(); fenster = "handel"; dialog(z); });
+    $("#scFertig")?.addEventListener("click", () => { Ton.klick(); modus = null; GN.aktion("fertig"); });
     $$("[data-dk]", box).forEach((b) => (b.onclick = () => {
       const k = b.dataset.dk;
       Ton.klick();
-      if (k === "erntedank" || k === "viehmarkt") { auswahl = { k, wahl: [] }; handZeigen(z); return; }
+      if (k === "erntedank" || k === "viehmarkt") { auswahl = { k, wahl: [] }; dialog(z); return; }
       GN.aktion("spielen", { karte: k });
     }));
+  }
+
+  // ---------- Große Fenster in der Mitte ----------
+  function dialog(z) {
+    const box = $("#scDialog");
+    if (!box || !z) return;
+    const dran = istDran(z);
+    const m = z.zug?.modus;
+    const a = z.angebot;
+    let h = "", klasse = "";
+    const resKnopf = (r, attr, extra = "") => `<button class="sc-res ${r}" ${attr}><span>${ROH_INFO[r][1]}</span><b>${ROH_INFO[r][0]}</b>${extra}</button>`;
+    if (z.phase === "ende") h = "";
+    else if (m === "abwerfen" && z.abwerfen[ich()]) {
+      const soll = z.abwerfen[ich()];
+      const n = ROH.reduce((s, r) => s + (abwurf[r] || 0), 0);
+      klasse = "rot";
+      h = `<h2>⛈️ Gewitter!</h2><p>Du hast zu viele Karten. Tippe <b>${soll}</b> Karten an, die du abgibst.</p>
+        <div class="sc-res-reihe">${ROH.map((r) => resKnopf(r, `data-ab="${r}" ${hand.roh[r] - (abwurf[r] || 0) > 0 && n < soll ? "" : "disabled"}`, `<em>${hand.roh[r] - (abwurf[r] || 0)}</em>`)).join("")}</div>
+        <div class="sc-chips">${ROH.flatMap((r) => Array(abwurf[r] || 0).fill(r)).map((r) => `<button class="sc-chip" data-ab-weg="${r}">${ROH_INFO[r][1]} ✕</button>`).join("") || '<span class="leise">Noch nichts ausgewählt</span>'}</div>
+        <button class="btn gross voll" id="scAbgeben" ${n === soll ? "" : "disabled"}>Abgeben (${n}/${soll})</button>`;
+    } else if (dran && m === "stehlen") {
+      h = `<h2>🫳 Wem nimmst du eine Karte ab?</h2><p>Du ziehst eine zufällige Karte.</p>
+        <div class="sc-opfer">${z.zug.opfer.map((o) => `<button class="sc-opfer-k" data-stehlen="${o}" style="--f:${z.farben[o]}"><span>${person(z, o).avatar}</span><b>${esc(person(z, o).name)}</b><small>🂠 ${z.karten[o]} Karten</small></button>`).join("")}</div>`;
+    } else if (auswahl) {
+      h = `<h2>${auswahl.k === "erntedank" ? "🧺 Erntedank" : "🐮 Viehmarkt"}</h2>
+        <p>${auswahl.k === "erntedank" ? `Wähle 2 Rohstoffe (${auswahl.wahl.length}/2).` : "Welchen Rohstoff sollen dir alle anderen geben?"}</p>
+        <div class="sc-res-reihe">${ROH.map((r) => resKnopf(r, `data-wahl="${r}"`)).join("")}</div>
+        ${auswahl.wahl.length ? `<div class="sc-chips">${auswahl.wahl.map((r) => `<span class="sc-chip">${ROH_INFO[r][1]}</span>`).join("")}</div>` : ""}
+        <button class="btn link" id="scSchliessen">Abbrechen</button>`;
+    } else if (a && a.von !== ich() && !a.nein.includes(ich()) && z.phase === "spielen") {
+      const kann = Object.entries(a.will).every(([r, n]) => hand.roh[r] >= n);
+      if (angebotGesehen !== a.id) { angebotGesehen = a.id; Ton.ding(); navigator.vibrate?.(60); }
+      h = `<h2>🤝 Tauschangebot</h2><p><b>${person(z, a.von).avatar} ${esc(person(z, a.von).name)}</b> möchte mit dir tauschen:</p>
+        <div class="sc-tausch-gross"><div><small>Du bekommst</small><div>${tauschIcons(a.gib)}</div></div><span>⇄</span><div><small>Du gibst</small><div>${tauschIcons(a.will)}</div></div></div>
+        <div class="sc-knoepfe"><button class="btn gross" id="scAnnehmen" ${kann ? "" : "disabled"}>✓ Annehmen</button><button class="btn gross zweit" id="scAblehnen">✕ Ablehnen</button></div>
+        ${kann ? "" : '<p class="leise klein-text">Dafür fehlen dir die Karten.</p>'}`;
+    } else if (fenster === "bauen" && dran && z.zug?.wurf && !m) {
+      const k = meta().kosten;
+      const kn = (art, icon, titel, kosten, orte, text) => {
+        const ok = hat(kosten) && (orte === null || orte.length);
+        const grund = !hat(kosten) ? "Rohstoffe fehlen" : orte && !orte.length ? "Kein freier Platz" : text;
+        return `<button class="sc-bau-gross" data-bau="${art}" ${ok ? "" : "disabled"}><span class="sc-bau-icon">${icon}</span><b>${titel}</b><span class="sc-bau-kosten">${kostenHTML(kosten)}</span><small>${grund}</small></button>`;
+      };
+      const dorf = z.amDorfplatz[ich()];
+      h = `<h2>🔨 Bauen</h2>
+        <div class="sc-bau-gitter">
+          ${kn("weg", "🛤️", "Weg", k.weg, z.moeglich.weg, "Verbindet deine Höfe")}
+          ${kn("hof", "🏠", "Hof · +1", k.hof, z.moeglich.hof, "An deinem Weg, mit Abstand")}
+          ${kn("gut", "🏰", "Gutshof · +2", k.gut, z.moeglich.gut, "Aus einem Hof, bringt doppelt")}
+          ${kn("karte", "🃏", "Dorfkarte", k.karte, z.stapel ? null : [], `${z.stapel} im Stapel`)}
+        </div>
+        <h3>⛪ Dorfplatz ${dorf ? "" : '<small>(nur mit Hof oder Weg direkt am Dorfplatz)</small>'}</h3>
+        <div class="sc-bau-gitter">${Object.entries(meta().gemein).map(([was, g]) => z.gemein[was]
+          ? `<div class="sc-bau-gross fertig" style="--f:${z.farben[z.gemein[was]]}"><span class="sc-bau-icon">${g.icon}</span><b>${g.name}</b><small>gebaut von ${esc(nameVon(z, z.gemein[was]))}</small></div>`
+          : `<button class="sc-bau-gross" data-gemein="${was}" ${dorf && hat(g.kosten) ? "" : "disabled"}><span class="sc-bau-icon">${g.icon}</span><b>${g.name} · +2</b><span class="sc-bau-kosten">${kostenHTML(g.kosten)}</span></button>`).join("")}</div>
+        <button class="btn link" id="scSchliessen">Schließen</button>`;
+    } else if (fenster === "handel" && dran && z.zug?.wurf && !m) {
+      const kurs = z.kurs[ich()];
+      const zahler = ROH.filter((r) => hand.roh[r] >= kurs);
+      const gib = tausch.gib, will = tausch.will;
+      const summe = (o) => ROH.reduce((s, r) => s + (o[r] || 0), 0);
+      const mehrere = (z.teilnehmer || []).length > 1;
+      h = `<h2>⚖️ Handeln</h2>
+        <h3>🏪 Markt · ${kurs} gleiche gegen 1 ${kurs === 3 ? '<small>(Marktrecht!)</small>' : ""}</h3>
+        ${zahler.length ? `<div class="sc-markt-liste">${zahler.map((r) => `<div class="sc-markt-zeile"><span>${kurs}× ${ROH_INFO[r][1]} ➜</span>${ROH.filter((x) => x !== r).map((x) => `<button class="sc-res klein ${x}" data-markt="${r}:${x}"><span>${ROH_INFO[x][1]}</span><b>${ROH_INFO[x][0]}</b></button>`).join("")}</div>`).join("")}</div>`
+          : `<p class="leise">Du brauchst ${kurs} gleiche Karten für den Markt.</p>`}
+        ${mehrere ? `<h3>🤝 Mit Mitspielern</h3>
+        ${a && a.von === ich() ? `<div class="sc-angebot-mein">Dein Angebot: ${tauschIcons(a.gib)} gegen ${tauschIcons(a.will)}<br><span class="leise klein-text">${a.nein.length ? `${a.nein.length} abgelehnt · ` : ""}warte auf Antworten${GN.wartePunkte()}</span><button class="btn klein zweit" id="scZurueck">Zurückziehen</button></div>` : `
+        <div class="sc-tausch-teil"><small>Ich gebe (tippe deine Karten an)</small>
+          <div class="sc-res-reihe klein">${ROH.map((r) => resKnopf(r, `data-gib="${r}" ${hand.roh[r] - (gib[r] || 0) > 0 ? "" : "disabled"}`, `<em>${hand.roh[r] - (gib[r] || 0)}</em>`)).join("")}</div>
+          <div class="sc-chips">${ROH.flatMap((r) => Array(gib[r] || 0).fill(r)).map((r) => `<button class="sc-chip" data-gib-weg="${r}">${ROH_INFO[r][1]} ✕</button>`).join("") || '<span class="leise">–</span>'}</div>
+        </div>
+        <div class="sc-tausch-teil"><small>Ich möchte</small>
+          <div class="sc-res-reihe klein">${ROH.map((r) => resKnopf(r, `data-will="${r}"`)).join("")}</div>
+          <div class="sc-chips">${ROH.flatMap((r) => Array(will[r] || 0).fill(r)).map((r) => `<button class="sc-chip" data-will-weg="${r}">${ROH_INFO[r][1]} ✕</button>`).join("") || '<span class="leise">–</span>'}</div>
+        </div>
+        <button class="btn gross voll" id="scAnbieten" ${summe(gib) && summe(will) ? "" : "disabled"}>🤝 Allen anbieten</button>`}` : ""}
+        <button class="btn link" id="scSchliessen">Schließen</button>`;
+    } else if (fenster === "dorfplatz") {
+      const g = meta().gemein;
+      h = `<h2>⛪ Der Dorfplatz von Schechingen</h2>
+        <p>Die Mitte der Karte bringt keine Rohstoffe, ist aber wertvoll:</p>
+        <ul class="sc-liste">
+          <li><b>⚖️ Marktrecht:</b> Steht einer deiner Höfe direkt an einer Ecke des Dorfplatzes, tauschst du am Markt <b>3:1</b> statt 4:1.</li>
+          <li><b>🏛️ Gemeinschaftsbauten:</b> Wer einen Hof oder Weg am Dorfplatz hat, darf dort bauen. Jedes Gebäude gibt es nur einmal und es bringt <b>2 Punkte</b>.</li>
+        </ul>
+        <div class="sc-dorf-liste">${Object.entries(g).map(([was, x]) => `<div><span>${x.icon} ${x.name}</span><span>${kostenHTML(x.kosten)}</span><em>${z.gemein[was] ? `gebaut: ${esc(nameVon(z, z.gemein[was]))}` : "noch frei"}</em></div>`).join("")}</div>
+        <button class="btn gross voll" id="scSchliessen">Verstanden</button>`;
+    }
+    box.className = `sc-dialog ${h ? "" : "versteckt"}`;
+    if (!h) { box.innerHTML = ""; return; }
+    const neu = !box.firstElementChild;
+    box.innerHTML = `<div class="sc-dialog-karte ${klasse} ${neu ? "rein" : ""}">${h}</div>`;
+    const zu = () => { Ton.klick(); fenster = null; auswahl = null; dialog(GN.zustand); dock(GN.zustand); };
+    $("#scSchliessen", box)?.addEventListener("click", zu);
+    box.onclick = (ev) => { if (ev.target === box && (fenster || auswahl)) zu(); };
+    // Abwerfen
+    $$("[data-ab]", box).forEach((b) => (b.onclick = () => { Ton.klick(); abwurf[b.dataset.ab] = (abwurf[b.dataset.ab] || 0) + 1; dialog(z); }));
+    $$("[data-ab-weg]", box).forEach((b) => (b.onclick = () => { abwurf[b.dataset.abWeg]--; dialog(z); }));
+    $("#scAbgeben", box)?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("abwerfen", abwurf); });
+    // Stehlen
+    $$("[data-stehlen]", box).forEach((b) => (b.onclick = () => { Ton.wusch(); GN.aktion("stehlen", { opfer: b.dataset.stehlen }); }));
+    // Kartenwahl
     $$("[data-wahl]", box).forEach((b) => (b.onclick = () => {
+      Ton.klick();
       auswahl.wahl.push(b.dataset.wahl);
       if (auswahl.k === "viehmarkt") { GN.aktion("spielen", { karte: "viehmarkt", wahl: auswahl.wahl[0] }); auswahl = null; }
       else if (auswahl.wahl.length === 2) { GN.aktion("spielen", { karte: "erntedank", wahl: auswahl.wahl }); auswahl = null; }
-      handZeigen(z);
+      dialog(z);
     }));
-    $("#scWahlAus")?.addEventListener("click", () => { auswahl = null; handZeigen(z); });
-  }
-
-  function bauMenue(z) {
-    const box = $("#scBau");
-    const kann = istDran(z) && z.phase === "spielen" && z.zug?.wurf && !z.zug?.modus;
-    if (!kann) { box.innerHTML = ""; return; }
-    const k = meta().kosten;
-    const knopf = (art, icon, titel, kosten, orte) => `<button class="sc-baukn ${modus === art ? "aktiv" : ""}" data-bau="${art}" ${hat(kosten) && (orte === null || orte.length) ? "" : "disabled"}><span>${icon}</span><b>${titel}</b><em>${kostenHTML(kosten)}</em></button>`;
-    const dorf = z.amDorfplatz[ich()];
-    const markt = z.kurs[ich()];
-    box.innerHTML = `
-      <div class="sc-titel">Bauen</div>
-      <div class="sc-baugitter">
-        ${knopf("weg", "🛤️", "Weg", k.weg, z.moeglich.weg)}
-        ${knopf("hof", "🏠", "Hof +1", k.hof, z.moeglich.hof)}
-        ${knopf("gut", "🏰", "Gutshof +2", k.gut, z.moeglich.gut)}
-        ${knopf("karte", "🃏", `Dorfkarte (${z.stapel})`, k.karte, z.stapel ? null : [])}
-      </div>
-      <div class="sc-titel">⛪ Dorfplatz ${dorf ? "" : '<small class="leise">(erst mit Hof oder Weg am Dorfplatz)</small>'}</div>
-      <div class="sc-baugitter">${Object.entries(meta().gemein).map(([was, g]) => z.gemein[was]
-        ? `<div class="sc-baukn fertig" style="--f:${z.farben[z.gemein[was]]}"><span>${g.icon}</span><b>${g.name}</b><em>${esc(nameVon(z, z.gemein[was]))}</em></div>`
-        : `<button class="sc-baukn" data-gemein="${was}" ${dorf && hat(g.kosten) ? "" : "disabled"}><span>${g.icon}</span><b>${g.name} +2</b><em>${kostenHTML(g.kosten)}</em></button>`).join("")}</div>
-      <details class="sc-handel" ${tausch.offen ? "open" : ""}><summary>⚖️ Handeln</summary>
-        <div class="sc-titel">Markt (${markt}:1)</div>
-        <div class="sc-markt">
-          <select id="scGib">${ROH.map((r) => `<option value="${r}" ${hand.roh[r] >= markt ? "" : "disabled"}>${markt} ${ROH_INFO[r][1]} ${ROH_INFO[r][0]}</option>`).join("")}</select>
-          <span>➜</span>
-          <select id="scNimm">${ROH.map((r) => `<option value="${r}">1 ${ROH_INFO[r][1]} ${ROH_INFO[r][0]}</option>`).join("")}</select>
-          <button class="btn klein" id="scMarkt">Tauschen</button>
-        </div>
-        ${(z.teilnehmer || []).length > 1 ? `<div class="sc-titel">Mit Mitspielern</div>
-        <div class="sc-tausch">${["gib", "will"].map((s) => `<div><small>${s === "gib" ? "Ich gebe" : "Ich möchte"}</small>${ROH.map((r) => `<span class="sc-tz"><button class="mini" data-t="${s}" data-r="${r}" data-d="-1">−</button>${ROH_INFO[r][1]}<b>${tausch[s][r] || 0}</b><button class="mini" data-t="${s}" data-r="${r}" data-d="1">+</button></span>`).join("")}</div>`).join("")}</div>
-        <button class="btn klein voll" id="scAnbieten" ${z.angebot ? "disabled" : ""}>🤝 Anbieten</button>` : ""}
-      </details>`;
-    const gib = $("#scGib");
-    const erste = ROH.find((r) => hand.roh[r] >= markt);
-    if (erste) gib.value = erste;
+    // Angebot beantworten
+    $("#scAnnehmen", box)?.addEventListener("click", () => { Ton.wusch(); GN.aktion("annehmen"); });
+    $("#scAblehnen", box)?.addEventListener("click", () => { Ton.klick(); GN.aktion("ablehnen"); });
+    // Bauen
     $$("[data-bau]", box).forEach((b) => (b.onclick = () => {
       Ton.klick();
       const art = b.dataset.bau;
-      if (art === "karte") { GN.aktion("kaufen"); return; }
-      modus = modus === art ? null : art;
-      brett(z); seite(z);
-      if (modus && matchMedia("(max-width: 900px)").matches) $("#scBrett").scrollIntoView({ behavior: "smooth", block: "center" });
+      fenster = null;
+      if (art === "karte") GN.aktion("kaufen");
+      else modus = art;
+      brett(z); dock(z); status(z); dialog(z);
     }));
-    $$("[data-gemein]", box).forEach((b) => (b.onclick = () => { Ton.abgeben(); GN.aktion("gemein", { was: b.dataset.gemein }); }));
-    $("#scMarkt").onclick = () => GN.aktion("markt", { gib: $("#scGib").value, nimm: $("#scNimm").value });
-    $(".sc-handel", box).ontoggle = (e) => { tausch.offen = e.target.open; };
-    $$("[data-t]", box).forEach((b) => (b.onclick = () => {
-      const s = b.dataset.t, r = b.dataset.r;
-      const max = s === "gib" ? hand.roh[r] : 9;
-      tausch[s][r] = Math.max(0, Math.min(max, (tausch[s][r] || 0) + +b.dataset.d));
-      bauMenue(z);
-    }));
-    $("#scAnbieten")?.addEventListener("click", () => { GN.aktion("angebot", { gib: tausch.gib, will: tausch.will }); tausch = { gib: {}, will: {}, offen: true }; });
+    $$("[data-gemein]", box).forEach((b) => (b.onclick = () => { Ton.abgeben(); fenster = null; GN.aktion("gemein", { was: b.dataset.gemein }); }));
+    // Handel
+    $$("[data-markt]", box).forEach((b) => (b.onclick = () => { const [gib, nimm] = b.dataset.markt.split(":"); Ton.wusch(); GN.aktion("markt", { gib, nimm }); }));
+    $$("[data-gib]", box).forEach((b) => (b.onclick = () => { Ton.klick(); tausch.gib[b.dataset.gib] = (tausch.gib[b.dataset.gib] || 0) + 1; dialog(z); }));
+    $$("[data-will]", box).forEach((b) => (b.onclick = () => { Ton.klick(); tausch.will[b.dataset.will] = (tausch.will[b.dataset.will] || 0) + 1; dialog(z); }));
+    $$("[data-gib-weg]", box).forEach((b) => (b.onclick = () => { tausch.gib[b.dataset.gibWeg]--; dialog(z); }));
+    $$("[data-will-weg]", box).forEach((b) => (b.onclick = () => { tausch.will[b.dataset.willWeg]--; dialog(z); }));
+    $("#scAnbieten", box)?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("angebot", { gib: tausch.gib, will: tausch.will }); tausch = { gib: {}, will: {} }; });
+    $("#scZurueck", box)?.addEventListener("click", () => GN.aktion("zurueckziehen"));
+  }
+  const tauschIcons = (o) => ROH.filter((r) => o[r]).map((r) => `<span class="sc-chip">${o[r]}× ${ROH_INFO[r][1]}</span>`).join(" ") || "–";
+
+  // ---------- Effekte: große Würfel, fliegende Rohstoffe, Ansagen ----------
+  const AUGEN = { 1: [5], 2: [3, 7], 3: [3, 5, 7], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+  const DREH = { 1: [0, 0], 2: [0, -90], 3: [-90, 0], 4: [90, 0], 5: [0, 90], 6: [0, 180] };
+  const wuerfel3d = () => `<div class="w-wuerfel sc-w3"><span class="w-kubus"><span class="w-kern k1"></span><span class="w-kern k2"></span><span class="w-kern k3"></span>${[1, 2, 3, 4, 5, 6].map((n) => `<span class="w-seite s${n}">${Array.from({ length: 9 }, (_, i) => `<i class="${AUGEN[n].includes(i + 1) ? "an" : ""}"></i>`).join("")}</span>`).join("")}</span></div>`;
+
+  function wurfZeigen(z) {
+    const box = $("#scWurf");
+    const w = z.zug.wurf;
+    const sieben = w[0] + w[1] === 7;
+    box.className = "sc-wurf gross";
+    box.innerHTML = `${wuerfel3d()}${wuerfel3d()}<b class="sc-summe ${sieben ? "sieben" : ""}">${w[0] + w[1]}</b>`;
+    const ruhig = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $$(".w-kubus", box).forEach((k, i) => {
+      const [x, y] = DREH[w[i]];
+      k.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+      if (ruhig) return;
+      k.animate([
+        { transform: `rotateX(${x + 900 + i * 180}deg) rotateY(${y + 720}deg) rotateZ(${200 * (i ? -1 : 1)}deg)` },
+        { transform: `rotateX(${x + 40}deg) rotateY(${y - 30}deg) rotateZ(-8deg)`, offset: 0.8 },
+        { transform: `rotateX(${x}deg) rotateY(${y}deg)` },
+      ], { duration: 1100 + i * 120, easing: "cubic-bezier(.15,.7,.3,1)" });
+      k.parentElement.animate([
+        { transform: `translate(${i ? 160 : -160}px, -120px) scale(.4)`, opacity: 0 },
+        { transform: "translate(0, 10px) scale(1.1)", opacity: 1, offset: 0.55 },
+        { transform: "translate(0, -12px)", offset: 0.75 },
+        { transform: "none" },
+      ], { duration: 1100 + i * 120, easing: "ease-out" });
+    });
+    Ton.trommel(0.9);
+    setTimeout(() => { Ton.klick(); Ton.klick(); }, 700);
+    setTimeout(() => { if (sieben) { Ton.alarm(); knall("⛈️ Gewitter zieht auf!", "rot", 2000); } }, 1200);
+    clearTimeout(wurfZeigen.t);
+    wurfZeigen.t = setTimeout(() => { if ($("#scWurf") === box) box.className = "sc-wurf klein"; }, 2300);
   }
 
-  // ---------- Effekte ----------
+  // Gewonnene Rohstoffe fliegen von der Landschaft zu deiner Hand
+  function rohstoffeFliegen(z, gewinn, n) {
+    const svg = $("#scBrett");
+    if (!svg) return;
+    const k = meta().karte;
+    const R = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch" };
+    let verz = 0;
+    for (const r of ROH) {
+      if (!gewinn[r]) continue;
+      // Quelle: ein Feld mit der Zahl, das diesen Rohstoff liefert und an einem meiner Höfe liegt
+      const f = k.felder.find((f) => z.belegung[f.id].zahl === n && R[z.belegung[f.id].typ] === r && f.ecken.some((e) => z.bauten[e]?.sp === ich()));
+      const ziel = $(`.sc-karte.${r}`);
+      if (!f || !ziel) continue;
+      const pt = svg.createSVGPoint(); pt.x = f.x * S; pt.y = f.y * S;
+      const p = pt.matrixTransform(svg.getScreenCTM());
+      const zr = ziel.getBoundingClientRect();
+      for (let i = 0; i < gewinn[r]; i++) {
+        const el = document.createElement("div");
+        el.className = "sc-flieger"; el.textContent = ROH_INFO[r][1];
+        el.style.left = p.x + "px"; el.style.top = p.y + "px";
+        document.body.appendChild(el);
+        const dx = zr.left + zr.width / 2 - p.x, dy = zr.top + zr.height / 2 - p.y;
+        const start = 300 + verz * 140; verz++;
+        el.animate([
+          { transform: "translate(-50%, -50%) scale(.3)", opacity: 0 },
+          { transform: "translate(-50%, -110%) scale(1.5)", opacity: 1, offset: 0.25 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.8)`, opacity: 1 },
+        ], { duration: 900, delay: start, easing: "cubic-bezier(.5,0,.3,1)", fill: "both" }).onfinish = () => {
+          el.remove();
+          ziel.classList.remove("plus"); void ziel.offsetWidth; ziel.classList.add("plus");
+          Ton.klick();
+        };
+      }
+    }
+  }
+
   function effekte(z, vorher) {
     // Würfel
-    const box = $("#scWuerfel");
     const w = z.zug?.wurf;
-    const FACE = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-    if (w) {
-      const neu = z.wurfId !== letzteWurfId;
-      box.innerHTML = `<span class="sc-w ${neu ? "rollt" : ""}">${FACE[w[0]]}</span><span class="sc-w ${neu ? "rollt" : ""}">${FACE[w[1]]}</span><b class="${w[0] + w[1] === 7 ? "sieben" : ""}">${w[0] + w[1]}</b>`;
-      if (neu) { letzteWurfId = z.wurfId; Ton.trommel(0.4); if (w[0] + w[1] === 7) setTimeout(() => { Ton.alarm(); knall("⛈️ Gewitter!", "plus2"); }, 500); }
-    } else box.innerHTML = "";
+    if (w && z.wurfId !== letzteWurfId) { letzteWurfId = z.wurfId; wurfZeigen(z); }
+    else if (w && !$("#scWurf .sc-w3")) { const box = $("#scWurf"); box.className = "sc-wurf klein"; box.innerHTML = `${wuerfel3d()}${wuerfel3d()}<b class="sc-summe ${w[0] + w[1] === 7 ? "sieben" : ""}">${w[0] + w[1]}</b>`; $$(".w-kubus", box).forEach((k, i) => { const [x, y] = DREH[w[i]]; k.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`; }); }
+    else if (!w) { const box = $("#scWurf"); if (box) { box.className = "sc-wurf"; box.innerHTML = ""; } }
     // Ertrag
     const e = z.letzterErtrag;
     if (e && e.t !== letzterErtragT) {
       letzterErtragT = e.t;
       const mein = e.wer?.[ich()];
-      if (mein) setTimeout(() => { knall(`+ ${ROH.filter((r) => mein[r]).map((r) => `${mein[r]}${ROH_INFO[r][1]}`).join(" ")}`, "gold", 1500); Ton.richtig(); }, 600);
+      if (mein) setTimeout(() => { rohstoffeFliegen(z, mein, e.n); Ton.richtig(); }, 1300);
+      else if (!Object.keys(e.wer || {}).length) setTimeout(() => knall("Niemand bekommt etwas", "leise", 1300), 1300);
     }
     // Längster Weg / Feldwache
     const bo = z.bonusEreignis;
     if (bo && bo.t !== letzterBonusT) {
-      const erstes = !letzterBonusT;
+      const erstes = letzterBonusT === -1 && !vorher;
       letzterBonusT = bo.t;
-      if (!erstes) { knall(`${bo.art === "weg" ? "🛤️ Längster Weg" : "👮 Stärkste Feldwache"}: ${esc(nameVon(z, bo.sp))} +2`, "gold", 2200); Ton.fanfare(); }
+      if (!erstes) { knall(`${bo.art === "weg" ? "🛤️ Längster Weg" : "👮 Stärkste Feldwache"}<small>${esc(nameVon(z, bo.sp))} +2 Punkte</small>`, "gold", 2600); Ton.fanfare(); }
     }
     // Bauen
     const b = z.letzterBau;
     if (b && b.t !== letzterBauT) {
       letzterBauT = b.t;
-      if (b.art === "gemein") { knall(`${meta().gemein[b.was].icon} ${esc(nameVon(z, b.sp))}: ${meta().gemein[b.was].name}!`, "gold"); Ton.volltreffer(); }
-      else if (b.art === "gut") { Ton.volltreffer(); }
+      if (b.art === "gemein") { knall(`${meta().gemein[b.was].icon} ${meta().gemein[b.was].name}!<small>${esc(nameVon(z, b.sp))} +2 Punkte</small>`, "gold", 2400); Ton.volltreffer(); GN.konfetti(80); }
+      else if (b.art === "gut") { knall(`🏰 Gutshof!<small>${esc(nameVon(z, b.sp))}</small>`, "gold", 1600); Ton.volltreffer(); }
+      else if (b.art === "hof") { Ton.aufsteigen(0.3, 1.4); if (b.sp === ich()) knall("🏠 Neuer Hof!", "gold", 1200); }
       else Ton.klick();
+    }
+    // Dorfkarte gespielt
+    const k = z.letzteKarte;
+    if (k && vorher && vorher.letzteKarte?.t !== k.t && k.sp !== ich()) { knall(`${KARTEN[k.k]?.[1] || "🃏"} ${esc(person(z, k.sp).name)} spielt ${KARTEN[k.k]?.[0] || "eine Karte"}`, "", 1800); Ton.wusch(); }
+    // Gewitter-Hinweis direkt auf dem Brett
+    const banner = $("#scBanner");
+    if (banner) {
+      const zeig = istDran(z) && z.zug?.modus === "gewitter" ? "⛈️ Tippe ein Feld an, auf das das Gewitter zieht"
+        : istDran(z) && modus ? { hof: "🏠 Tippe eine leuchtende Ecke an", weg: "🛤️ Tippe einen leuchtenden Weg an", gut: "🏰 Tippe einen deiner Höfe an" }[modus] : "";
+      banner.textContent = zeig; banner.classList.toggle("an", !!zeig);
     }
   }
   function knall(html, klasse = "gold", dauer = 1700) {
     const box = $("#scEffekt");
     if (!box) return;
     const el = document.createElement("div");
-    el.className = "fr-knall " + klasse; el.innerHTML = `<b>${html}</b>`;
+    el.className = "sc-knall " + klasse; el.innerHTML = `<b>${html}</b>`;
     box.appendChild(el);
     setTimeout(() => el.remove(), dauer);
   }

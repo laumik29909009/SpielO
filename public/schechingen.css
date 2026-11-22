@@ -146,3 +146,165 @@ button.mini:hover { background: var(--gold); color: var(--gold-text); }
 .sc-feld.waehlbar { pointer-events: auto; }
 @keyframes sc-blitz { 0%, 70%, 80%, 100% { opacity: 0; } 72%, 76% { opacity: 1; } }
 @keyframes sc-regen { from { transform: translateY(-3px); opacity: 1; } to { transform: translateY(4px); opacity: 0; } }
+
+/* =============================================================
+   Neues Layout: Spielerleiste – großes Brett – Hand unten
+   ============================================================= */
+.sc-buehne { max-width: 1680px; padding-bottom: 0; }
+.sc-saison { cursor: help; }
+.sc-leiste { display: flex; gap: 8px; margin: 10px 0; overflow-x: auto; scrollbar-width: none; }
+.sc-spieler { flex: 1 1 0; min-width: 170px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 16px; background: var(--flaeche); border: 2px solid transparent; border-top: 4px solid var(--f); transition: transform 0.25s, box-shadow 0.25s; }
+.sc-spieler.dran { border-color: var(--gold); border-top-color: var(--f); background: var(--flaeche-2); transform: translateY(-2px); box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.25), 0 10px 24px rgba(0, 0, 0, 0.35); }
+.sc-spieler.dran .sc-ava { animation: sc-dran 1.6s ease-in-out infinite; }
+.sc-spieler.offline { opacity: 0.5; }
+.sc-spieler .sc-ava { font-size: 1.7rem; }
+.sc-sp-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sc-sp-text b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-sp-text small { display: flex; flex-wrap: wrap; gap: 2px 8px; color: var(--leise); font-size: 0.76rem; }
+.sc-sp-punkte { text-align: right; line-height: 1; }
+.sc-sp-punkte b { font-size: 1.6rem; color: var(--gold); }
+.sc-sp-punkte small { font-size: 0.75rem; color: var(--leise); }
+@keyframes sc-dran { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15) rotate(-6deg); } }
+
+.sc-haupt { grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; margin-top: 0; }
+.sc-brett-huelle { height: clamp(460px, calc(100vh - 300px), 980px); display: flex; align-items: center; justify-content: center; }
+.sc-brett { width: 100%; height: 100%; max-height: none; }
+.sc-feld.info { pointer-events: auto; cursor: help; }
+.sc-feld.info:hover .sc-hex { stroke: #fff; stroke-width: 5; }
+
+/* Hinweis-Banner auf dem Brett */
+.sc-banner { position: absolute; left: 50%; top: 14px; transform: translate(-50%, -20px); opacity: 0; pointer-events: none; padding: 10px 18px; border-radius: 999px; background: rgba(20, 14, 8, 0.85); color: #ffe9a8; font-weight: 800; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); transition: 0.3s; white-space: nowrap; max-width: 92%; overflow: hidden; text-overflow: ellipsis; }
+.sc-banner.an { opacity: 1; transform: translate(-50%, 0); }
+
+/* Große Würfel mitten auf dem Brett, danach klein in der Ecke */
+.sc-wurf { position: absolute; display: flex; align-items: center; gap: 18px; pointer-events: none; transition: all 0.6s cubic-bezier(.3, .8, .3, 1); }
+.sc-wurf.gross { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.6); filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.6)); z-index: 6; }
+.sc-wurf.klein { right: 14px; top: 12px; left: auto; transform: scale(0.7); transform-origin: top right; z-index: 4; }
+.sc-w3.w-wuerfel { --g: 58px; }
+.sc-summe { min-width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; font-size: 1.7rem; font-weight: 900; background: #fff8e6; color: #2a1d10; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); animation: sc-plopp 0.5s cubic-bezier(.2, 1.6, .4, 1) 0.9s backwards; }
+.sc-summe.sieben { background: #c62b22; color: #fff; }
+
+/* Ansagen */
+.sc-effekt { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 8; }
+.sc-knall { grid-area: 1 / 1; padding: 16px 26px; border-radius: 22px; text-align: center; background: rgba(20, 14, 8, 0.88); border: 2px solid var(--gold); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); animation: sc-knall 1.8s cubic-bezier(.2, 1.4, .4, 1) forwards; }
+.sc-knall b { display: block; font-size: clamp(1.3rem, 3vw, 2rem); color: #ffe9a8; }
+.sc-knall small { display: block; font-size: 0.95rem; color: var(--leise); font-weight: 700; margin-top: 2px; }
+.sc-knall.riesig b { font-size: clamp(1.8rem, 5vw, 3rem); }
+.sc-knall.rot { border-color: #e8524a; } .sc-knall.rot b { color: #ff9a92; }
+.sc-knall.saison { border-color: #7fd17a; } .sc-knall.saison b { color: #c9f5b0; }
+.sc-knall.leise { border-color: var(--rand); } .sc-knall.leise b { font-size: 1.1rem; color: var(--leise); }
+@keyframes sc-knall { 0% { transform: scale(0.4); opacity: 0; } 15% { transform: scale(1.06); opacity: 1; } 25% { transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+
+/* Rechte Spalte */
+.sc-seite { gap: 10px; }
+.sc-status .sc-hinweis { font-size: 0.95rem; line-height: 1.35; }
+.sc-kostenkarte { padding: 12px 14px; border-radius: 16px; background: var(--flaeche); display: grid; gap: 6px; }
+.sc-kz { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.88rem; }
+.sc-kz em { font-style: normal; color: var(--gold); font-weight: 800; }
+.sc-dorfknopf { all: unset; cursor: pointer; margin-top: 4px; text-align: center; padding: 8px; border-radius: 12px; background: rgba(242, 193, 78, 0.12); border: 1px solid rgba(242, 193, 78, 0.4); font-weight: 800; font-size: 0.85rem; }
+.sc-dorfknopf:hover { background: rgba(242, 193, 78, 0.22); }
+.sc-log #scLog { max-height: 260px; overflow-y: auto; }
+
+/* Hand-Leiste unten */
+.sc-dock { position: sticky; bottom: 0; z-index: 30; display: flex; gap: 12px; align-items: center; justify-content: space-between; margin: 12px -8px 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(17, 24, 15, 0.86), rgba(17, 24, 15, 0.97)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--rand); border-radius: 20px 20px 0 0; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35); }
+.sc-hand { display: flex; gap: 8px; align-items: stretch; overflow-x: auto; scrollbar-width: none; }
+.sc-hand .sc-karte { width: 74px; flex: none; padding: 6px 4px; border-radius: 12px; position: relative; }
+.sc-hand .sc-karte .sc-k-icon { font-size: 1.7rem; }
+.sc-hand .sc-karte b { font-size: 1.4rem; }
+.sc-hand .sc-karte.plus { animation: sc-plus 0.5s cubic-bezier(.2, 1.8, .4, 1); }
+@keyframes sc-plus { 0% { transform: scale(1); } 40% { transform: scale(1.18) translateY(-6px); box-shadow: 0 0 0 3px var(--gold); } 100% { transform: none; } }
+.sc-hand .sc-dk { flex-direction: column; justify-content: center; gap: 2px; width: 74px; padding: 6px 4px; text-align: center; }
+.sc-hand .sc-dk span { font-size: 1.5rem; }
+.sc-hand .sc-dk small { font-size: 0.7rem; line-height: 1.1; }
+.sc-dk.spielbar { box-shadow: 0 0 0 2px #b98bff, 0 0 16px rgba(185, 139, 255, 0.6); animation: sc-spielbar 1.6s ease-in-out infinite; }
+@keyframes sc-spielbar { 50% { transform: translateY(-3px); } }
+.sc-knoepfe-dock { display: flex; gap: 8px; flex: none; }
+.sc-k { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 86px; padding: 10px 12px; font-size: 1.3rem; }
+.sc-k span { font-size: 0.82rem; }
+.sc-k-wurf { min-width: 220px; font-size: 1.2rem; animation: sc-spielbar 1.4s ease-in-out infinite; }
+.sc-flieger { position: fixed; z-index: 200; font-size: 2rem; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
+
+/* Große Fenster */
+.sc-dialog { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(8, 10, 6, 0.6); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.sc-dialog.versteckt { display: none; }
+.sc-dialog-karte { width: min(620px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 22px 22px 16px; border-radius: 26px; background: linear-gradient(180deg, #24331f, #1b2617); border: 1px solid rgba(242, 193, 78, 0.35); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); text-align: center; }
+.sc-dialog-karte.rein { animation: sc-dialog 0.35s cubic-bezier(.2, 1.3, .4, 1); }
+.sc-dialog-karte.rot { border-color: #e8524a; }
+.sc-dialog-karte h2 { margin: 0 0 6px; font-size: 1.5rem; }
+.sc-dialog-karte h3 { margin: 18px 0 8px; font-size: 1rem; color: var(--gold); text-align: left; }
+.sc-dialog-karte h3 small { color: var(--leise); font-weight: 600; }
+.sc-dialog-karte p { margin: 4px 0 12px; color: var(--leise); }
+.sc-dialog-karte .btn.link { margin-top: 8px; }
+@keyframes sc-dialog { from { transform: scale(0.85) translateY(20px); opacity: 0; } }
+.sc-res-reihe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 10px 0; }
+.sc-res { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 6px; border-radius: 18px; border: 2px solid rgba(255, 255, 255, 0.15); position: relative; transition: transform 0.15s; }
+.sc-res span { font-size: 2.2rem; }
+.sc-res b { font-size: 0.85rem; }
+.sc-res em { position: absolute; top: 6px; right: 8px; font-style: normal; font-weight: 900; font-size: 0.85rem; padding: 1px 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); }
+.sc-res:not(:disabled):hover { transform: translateY(-3px) scale(1.03); border-color: var(--gold); }
+.sc-res:disabled { opacity: 0.35; cursor: default; }
+.sc-res.holz { background: linear-gradient(180deg, rgba(63, 154, 88, 0.45), rgba(35, 95, 54, 0.3)); }
+.sc-res.stein { background: linear-gradient(180deg, rgba(185, 192, 200, 0.4), rgba(125, 135, 145, 0.2)); }
+.sc-res.korn { background: linear-gradient(180deg, rgba(242, 207, 91, 0.45), rgba(201, 154, 36, 0.2)); }
+.sc-res.milch { background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(166, 222, 124, 0.15)); }
+.sc-res-reihe.klein .sc-res { padding: 8px 4px; }
+.sc-res-reihe.klein .sc-res span { font-size: 1.6rem; }
+.sc-res.klein { padding: 6px 10px; flex-direction: row; gap: 6px; }
+.sc-res.klein span { font-size: 1.3rem; }
+.sc-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 34px; align-items: center; margin-bottom: 10px; }
+.sc-chip { all: unset; cursor: pointer; padding: 5px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); font-weight: 800; font-size: 0.95rem; }
+button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
+.sc-opfer { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
+.sc-opfer-k { all: unset; cursor: pointer; width: 150px; padding: 16px 10px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--flaeche); border: 3px solid var(--f); transition: transform 0.15s; }
+.sc-opfer-k:hover { transform: translateY(-4px) scale(1.04); }
+.sc-opfer-k span { font-size: 3rem; }
+.sc-opfer-k b { font-size: 1.1rem; }
+.sc-opfer-k small { color: var(--leise); }
+.sc-tausch-gross { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 12px 0 16px; }
+.sc-tausch-gross > div { padding: 12px 16px; border-radius: 16px; background: var(--flaeche); }
+.sc-tausch-gross small { display: block; color: var(--leise); margin-bottom: 6px; }
+.sc-tausch-gross > span { font-size: 1.8rem; color: var(--gold); }
+.sc-tausch-teil { text-align: left; margin-top: 6px; }
+.sc-tausch-teil > small { color: var(--leise); font-weight: 700; }
+.sc-markt-liste { display: grid; gap: 8px; }
+.sc-markt-zeile { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 14px; background: var(--flaeche); }
+.sc-markt-zeile > span { font-weight: 800; min-width: 74px; text-align: left; }
+.sc-angebot-mein { padding: 12px; border-radius: 14px; background: rgba(61, 125, 255, 0.12); border: 1px solid rgba(61, 125, 255, 0.5); display: grid; gap: 8px; justify-items: center; }
+.sc-bau-gitter { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.sc-bau-gross { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px; border-radius: 18px; background: var(--flaeche); border: 2px solid var(--rand); transition: transform 0.15s, border-color 0.15s; }
+.sc-bau-gross:not(:disabled):not(.fertig):hover { transform: translateY(-3px); border-color: var(--gold); }
+.sc-bau-gross:disabled { opacity: 0.45; cursor: default; }
+.sc-bau-gross.fertig { cursor: default; border-left: 6px solid var(--f); }
+.sc-bau-icon { font-size: 2.2rem; }
+.sc-bau-kosten { font-size: 1rem; }
+.sc-bau-gross small { color: var(--leise); font-size: 0.78rem; }
+.sc-liste { text-align: left; padding-left: 20px; display: grid; gap: 8px; }
+.sc-dorf-liste { display: grid; gap: 6px; margin: 10px 0 14px; }
+.sc-dorf-liste div { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 8px 12px; border-radius: 12px; background: var(--flaeche); text-align: left; }
+.sc-dorf-liste em { grid-column: 1 / 3; font-style: normal; font-size: 0.8rem; color: var(--leise); }
+
+@media (max-width: 1000px) {
+  .sc-haupt { grid-template-columns: 1fr; }
+  .sc-brett-huelle { height: auto; aspect-ratio: 1 / 0.95; }
+  .sc-seite { order: 2; }
+  .sc-kostenkarte, .sc-log { display: none; }
+  .sc-spieler { min-width: 140px; padding: 6px 8px; gap: 6px; }
+  .sc-spieler .sc-ava { font-size: 1.3rem; }
+  .sc-sp-punkte b { font-size: 1.25rem; }
+}
+@media (max-width: 700px) {
+  .sc-dock { flex-direction: column; align-items: stretch; gap: 8px; margin: 10px -10px 0; }
+  .sc-hand .sc-karte, .sc-hand .sc-dk { width: 62px; }
+  .sc-hand .sc-karte .sc-k-icon { font-size: 1.35rem; }
+  .sc-knoepfe-dock { justify-content: stretch; }
+  .sc-knoepfe-dock .btn { flex: 1; min-width: 0; }
+  .sc-k-wurf { min-width: 0; }
+  .sc-wurf.gross { transform: translate(-50%, -50%) scale(1.15); }
+  .sc-res-reihe { gap: 6px; }
+  .sc-res span { font-size: 1.7rem; }
+  .sc-bau-gitter { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sc-dialog { align-items: end; padding: 0; }
+  .sc-dialog-karte { border-radius: 26px 26px 0 0; padding: 18px 14px calc(14px + env(safe-area-inset-bottom)); }
+  .sc-banner { font-size: 0.8rem; top: 8px; }
+}
