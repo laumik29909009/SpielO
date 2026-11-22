@@ -1,5 +1,5 @@
 // =============================================================
-//  Quartett-Decks: Kung Fu Panda und Dragons – Die Reiter von Berk
+//  Quartett-Decks: Kung Fu Panda, Dragons – Die Reiter von Berk und Cars
 //  Sprache: alles deutsch, nur die Namen der Figuren/Drachen(arten) sind englisch.
 //  Figuren © DreamWorks Animation, Nutzung mit Erlaubnis.
 //  Jedes Deck: 8 Gruppen (A–H), bis zu 4 Karten pro Gruppe, 5 Werte.
@@ -150,7 +150,75 @@ const DRAGONS = {
   ],
 };
 
-const DECKS = { kungfupanda: KUNGFUPANDA, dragons: DRAGONS };
+
+// =============================================================
+//  Cars-Quartett (Figuren © Disney/Pixar): 32 Figuren aus Cars 1–3 in 8 Gruppen
+//  Werte sind eine eigene Einschätzung anhand der Filme (keine offiziellen Zahlen).
+//  Bilder: public/quartett/bilder/cars/<Karten-ID>.png, bis dahin ein Auto-Symbol.
+// =============================================================
+const WERTE_CARS = [
+  { id: "tempo", name: "Spitze", icon: "🏁", einheit: "km/h" },
+  { id: "ps", name: "Leistung", icon: "🐎", einheit: "PS" },
+  { id: "kurven", name: "Kurven", icon: "↪️" },
+  { id: "ausdauer", name: "Ausdauer", icon: "🔋" },
+  { id: "charme", name: "Charme", icon: "😎" },
+];
+const CAR = (id, name, emoji, stil, text, w) => ({ id, name, tier: "1f402", emoji, stil, text, w });
+const CARS = {
+  id: "cars",
+  name: "Cars",
+  icon: "🏎️",
+  lizenz: "Figuren © Disney/Pixar",
+  beschreibung: "Lightning McQueen, Hook und die ganze Bande aus Radiator Springs – dazu Rennfahrer, Agenten und Legenden.",
+  platzhalter: true,
+  werte: WERTE_CARS,
+  gruppen: [
+    { id: "A", name: "Team Lightning", icon: "⚡", element: "licht", farbe: "#d32f2f", farbe2: "#ffe082" },
+    { id: "B", name: "Radiator Springs", icon: "🌵", element: "feuer", farbe: "#e67e22", farbe2: "#ffe0b2" },
+    { id: "C", name: "Die Nachbarn", icon: "🏜️", element: "stein", farbe: "#8d6e63", farbe2: "#efdcc8" },
+    { id: "D", name: "Piston-Cup-Stars", icon: "🏆", element: "wind", farbe: "#1565c0", farbe2: "#bbdefb" },
+    { id: "E", name: "Next-Gen-Rennfahrer", icon: "🚀", element: "blitz", farbe: "#263238", farbe2: "#80deea" },
+    { id: "F", name: "World Grand Prix", icon: "🌍", element: "wasser", farbe: "#00897b", farbe2: "#b2dfdb" },
+    { id: "G", name: "Agenten & Schurken", icon: "🕶️", element: "schatten", farbe: "#4a148c", farbe2: "#e1bee7" },
+    { id: "H", name: "Freunde & Legenden", icon: "🛣️", element: "eis", farbe: "#2e7d32", farbe2: "#c8e6c9" },
+  ],
+  karten: [
+    CAR("A1", "Lightning McQueen", "🏎️", "Rennwagen Nr. 95", "Ka-chow! Der Rookie, der in Radiator Springs gelernt hat, was wirklich zählt.", [320, 750, 88, 85, 95]),
+    CAR("A2", "Hook", "🛻", "Abschleppwagen", "McQueens bester Freund. Rückwärtsfahren kann er wie kein Zweiter.", [140, 200, 62, 90, 99]),
+    CAR("A3", "Sally", "🚗", "Porsche 911", "Anwältin und Herz von Radiator Springs. Liebt die Route 66.", [270, 380, 84, 70, 92]),
+    CAR("A4", "Doc Hudson", "🚗", "Fabulous Hudson Hornet", "Dreifacher Piston-Cup-Sieger und McQueens Lehrmeister.", [250, 300, 97, 80, 88]),
+    CAR("B1", "Luigi", "🚗", "Fiat 500", "Betreibt den Reifenladen und liebt Ferrari über alles.", [100, 25, 55, 60, 85]),
+    CAR("B2", "Guido", "🚜", "Gabelstapler", "Der schnellste Reifenwechsler der Welt. Pit Stop!", [40, 15, 70, 75, 90]),
+    CAR("B3", "Ramone", "🚗", "Lowrider", "Lackierkünstler. Jeden Tag eine neue Farbe.", [180, 300, 60, 55, 87]),
+    CAR("B4", "Flo", "🚗", "Showcar", "Führt das Café mit dem besten Benzin der Stadt.", [190, 320, 58, 60, 86]),
+    CAR("C1", "Fillmore", "🚐", "Hippie-Bus", "Braut sein eigenes Bio-Benzin. Ganz entspannt.", [110, 50, 40, 85, 82]),
+    CAR("C2", "Sarge", "🚙", "Armee-Jeep", "Hält Ordnung und weckt Fillmore jeden Morgen.", [120, 70, 66, 95, 70]),
+    CAR("C3", "Sheriff", "🚓", "Polizeiwagen", "Passt auf, dass in Radiator Springs keiner rast.", [200, 280, 64, 80, 68]),
+    CAR("C4", "Lizzie", "🚗", "Ford Model T", "Die älteste Bewohnerin. Verkauft Souvenirs.", [70, 20, 30, 50, 80]),
+    CAR("D1", "The King", "🏎️", "Strip Weathers", "Legende des Piston Cups mit sieben Titeln.", [310, 700, 90, 88, 84]),
+    CAR("D2", "Chick Hicks", "🏎️", "Rennwagen Nr. 86", "Ewiger Zweiter, der unbedingt gewinnen will – egal wie.", [315, 720, 78, 80, 30]),
+    CAR("D3", "Cal Weathers", "🏎️", "Neffe von The King", "Tritt in die Fußstapfen seines berühmten Onkels.", [305, 690, 80, 75, 66]),
+    CAR("D4", "Bobby Swift", "🏎️", "Rennwagen Nr. 19", "Freund von McQueen aus der alten Rennfahrer-Generation.", [305, 690, 76, 74, 64]),
+    CAR("E1", "Jackson Storm", "🏎️", "Next-Gen-Rennwagen", "Hightech-Rennwagen und McQueens größter Rivale.", [345, 850, 92, 78, 35]),
+    CAR("E2", "Cruz Ramirez", "🏎️", "Trainerin & Rennfahrerin", "Wollte immer Rennfahrerin werden – und schafft es.", [335, 800, 89, 92, 93]),
+    CAR("E3", "Danny Swervez", "🏎️", "Next-Gen-Rennwagen", "Einer der neuen, schnellen Fahrer im Feld.", [335, 800, 82, 76, 55]),
+    CAR("E4", "Chase Racelott", "🏎️", "Next-Gen-Rennwagen", "Ein weiterer Rookie der Next-Gen-Generation.", [333, 790, 80, 76, 55]),
+    CAR("F1", "Francesco Bernoulli", "🏎️", "Formel-Rennwagen", "Italiens Superstar. Spricht über sich selbst gern in der dritten Person.", [340, 770, 94, 72, 70]),
+    CAR("F2", "Shu Todoroki", "🏎️", "Le-Mans-Prototyp", "Japans Champion beim World Grand Prix.", [325, 740, 86, 80, 65]),
+    CAR("F3", "Raoul ÇaRoule", "🚗", "Rallyewagen", "Der beste Rallyefahrer der Welt – auf Schotter unschlagbar.", [260, 560, 96, 85, 68]),
+    CAR("F4", "Carla Veloso", "🏎️", "Le-Mans-Prototyp", "Aus Brasilien, tanzt gern und fährt noch lieber.", [322, 730, 85, 78, 72]),
+    CAR("G1", "Finn McMissile", "🚗", "Britischer Spion", "Geheimagent mit Raketen, Haken und Unterwasser-Modus.", [280, 450, 90, 85, 90]),
+    CAR("G2", "Holley Shiftwell", "🚗", "Agentin", "Technik-Expertin mit Elektroschocker und Flügeln.", [270, 420, 86, 80, 88]),
+    CAR("G3", "Professor Z", "🚗", "Superhirn", "Der Bösewicht mit dem Monokel. Plant den großen Coup.", [120, 60, 40, 50, 20]),
+    CAR("G4", "Sir Miles Axlerod", "🚙", "Elektro-Milliardär", "Erfinder des Biosprits Allinol – mit einem Geheimnis.", [210, 400, 60, 90, 40]),
+    CAR("H1", "Mack", "🚛", "Lastwagen", "McQueens treuer Transporter. Fährt die ganze Nacht.", [130, 500, 30, 99, 85]),
+    CAR("H2", "Smokey", "🚗", "Hudson-Truck", "Docs alter Mechaniker und Lehrmeister von Cruz.", [160, 180, 70, 82, 80]),
+    CAR("H3", "Miss Fritter", "🚌", "Schulbus", "Die Königin des Crazy-8-Rennens. Unbesiegt im Chaos.", [140, 450, 45, 95, 40]),
+    CAR("H4", "Rod Redline", "🏎️", "Amerikanischer Agent", "Der beste US-Spion. Gibt seine Informationen an Hook weiter.", [270, 480, 84, 82, 74]),
+  ],
+};
+
+const DECKS = { kungfupanda: KUNGFUPANDA, dragons: DRAGONS, cars: CARS };
 
 // =============================================================
 //  Spezialangriffe: Jede Karte hat ihren eigenen Angriff
@@ -158,6 +226,7 @@ const DECKS = { kungfupanda: KUNGFUPANDA, dragons: DRAGONS };
 //  wirbel, krallen, sprung, regen, eis, nebel, schlag, beben, peitsche, werfen, chi
 // =============================================================
 const ANGRIFFE = {
+  cars: { A1: ["strahl", "Ka-chow!", "#ffd23f"], A2: ["peitsche", "Abschlepphaken", "#c9884b"], A3: ["wirbel", "Kurvenzauber", "#7fd3ff"], A4: ["wirbel", "Dirt-Track-Drift", "#c8a27a"], B1: ["sprung", "Hupkonzert", "#ffcc80"], B2: ["wirbel", "Blitz-Boxenstopp", "#ffffff"], B3: ["welle", "Farbspritzer", "#b363ff"], B4: ["sprung", "Hupkonzert", "#ffcc80"], C1: ["welle", "Staubwolke", "#d7ccc8"], C2: ["welle", "Staubwolke", "#d7ccc8"], C3: ["blitz", "Blaulicht", "#3d7dff"], C4: ["welle", "Staubwolke", "#d7ccc8"], D1: ["strahl", "Windschatten", "#90caf9"], D2: ["schlag", "Rempler", "#3fbf72"], D3: ["strahl", "Windschatten", "#90caf9"], D4: ["strahl", "Windschatten", "#90caf9"], E1: ["strahl", "Next-Gen-Boost", "#80deea"], E2: ["strahl", "Hightech-Boost", "#80deea"], E3: ["strahl", "Hightech-Boost", "#80deea"], E4: ["strahl", "Hightech-Boost", "#80deea"], F1: ["wirbel", "Grand-Prix-Kurve", "#80cbc4"], F2: ["wirbel", "Grand-Prix-Kurve", "#80cbc4"], F3: ["wirbel", "Schotter-Drift", "#c8a27a"], F4: ["wirbel", "Grand-Prix-Kurve", "#80cbc4"], G1: ["feuerball", "Raketenwerfer", "#ff5a1f"], G2: ["blitz", "Elektroschocker", "#7fe3ff"], G3: ["nebel", "Geheimplan", "#9e9e9e"], G4: ["nebel", "Tarnung", "#ce93d8"], H1: ["beben", "Hupe", "#ff9f1c"], H2: ["beben", "Motorbrummen", "#a5d6a7"], H3: ["beben", "Crazy 8", "#ffd23f"], H4: ["beben", "Motorbrummen", "#a5d6a7"] },
   kungfupanda: {
     A1: ["krallen", "Tigerkralle", "#ff7a1a"], A2: ["schlag", "Stabwirbel", "#c98a4b"], A3: ["stacheln", "Druckpunkt-Salve", "#7ddc5a"], A4: ["peitsche", "Schlangenpeitsche", "#52c46a"],
     B1: ["sprung", "Drachenkrieger-Wumms", "#ffd23f"], B2: ["wirbel", "Flügelsturm", "#f5f0e6"], B3: ["schlag", "Meisterhand", "#ff9f1c"], B4: ["chi", "Blütenblatt-Chi", "#ffb7d5", "🌸"],
