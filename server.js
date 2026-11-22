@@ -22,6 +22,7 @@ const SPIELE = {
   baulowe: require("./spiele/baulowe"),
   ludo: require("./spiele/ludo"),
   deckname: require("./spiele/deckname"),
+  schlange: require("./spiele/schlange"),
 };
 const MAX_SPIELER = 10;
 const LADE_MS = 1400; // Ladebildschirm vor jedem Spielstart
@@ -166,6 +167,8 @@ const ctx = {
     const s = raum.spieler[spielerId];
     if (s && s.online) io.to(s.socketId).emit(ereignis, daten);
   },
+  // Schnelle Echtzeit-Nachricht an alle im Raum (ohne den ganzen Zustand)
+  funk: (raum, ereignis, daten) => io.to(raum.code).emit(ereignis, daten),
   onlineSpieler: (raum) => Object.values(raum.spieler).filter((s) => s.online),
   // Wer spielt diese Runde mit? (ohne Zuschauer, die erst später eingestiegen sind)
   teilnehmer: (raum) => Object.values(raum.spieler).filter((s) => !s.zuschauer),
