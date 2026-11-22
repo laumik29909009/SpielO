@@ -251,7 +251,7 @@
 
   function zeichnen(jetzt, dt) {
     const cv = $("#sgCanvas");
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(matchMedia("(pointer: coarse)").matches ? 1.5 : 2, window.devicePixelRatio || 1);
     const B = cv.clientWidth, H = cv.clientHeight;
     if (cv.width !== Math.round(B * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(B * dpr); cv.height = Math.round(H * dpr); }
     const c = cv.getContext("2d");
@@ -282,14 +282,14 @@
     c.save();
     c.beginPath(); c.arc(mx, my, welt.R * z, 0, Math.PI * 2); c.clip();
     c.translate(mx, my); c.scale(z, z);
-    c.fillStyle = c.createPattern(kachel, "repeat"); c.fillRect(-welt.R, -welt.R, welt.R * 2, welt.R * 2);
+    if (!zeichnen.muster || zeichnen.musterCtx !== c) { zeichnen.muster = c.createPattern(kachel, "repeat"); zeichnen.musterCtx = c; }
+    c.fillStyle = zeichnen.muster; c.fillRect(-welt.R, -welt.R, welt.R * 2, welt.R * 2);
     c.restore();
     // Rand glüht rot
-    c.save();
-    c.lineWidth = 8 * z + 4; c.strokeStyle = `rgba(255, 70, 70, ${0.55 + Math.sin(jetzt / 300) * 0.15})`;
-    c.shadowColor = "#ff3b3b"; c.shadowBlur = 24;
-    c.beginPath(); c.arc(mx, my, welt.R * z, 0, Math.PI * 2); c.stroke();
-    c.restore();
+    const puls = 0.55 + Math.sin(jetzt / 300) * 0.15;
+    c.beginPath(); c.arc(mx, my, welt.R * z, 0, Math.PI * 2);
+    c.lineWidth = 30 * z + 10; c.strokeStyle = `rgba(255, 60, 60, ${puls * 0.18})`; c.stroke();
+    c.lineWidth = 8 * z + 4; c.strokeStyle = `rgba(255, 70, 70, ${puls})`; c.stroke();
 
     // Futter (nur was im Bild ist)
     const sichtbar = (x, y, rand) => { const [sx, sy] = zuBild(x, y); return sx > -rand && sy > -rand && sx < B + rand && sy < H + rand ? [sx, sy] : null; };
@@ -330,21 +330,34 @@
       return q < 1;
     });
 
-    hudZeichnen(jetzt);
-    minikarte();
+    if (jetzt - (zeichnen.hudZeit || 0) > 120) { zeichnen.hudZeit = jetzt; hudZeichnen(jetzt); }
+    if (jetzt - (zeichnen.karteZeit || 0) > 100) { zeichnen.karteZeit = jetzt; minikarte(); }
   }
 
   function schlangeZeichnen(c, s, kopf, zuBild, z, jetzt) {
     const m = MUSTER[info(s.i)?.farbe ?? s.i % MUSTER.length];
     const r = radius(s.masse) * z;
-    const pts = s.pfad.map((p) => zuBild(p[0], p[1]));
-    pts[pts.length - 1] = zuBild(kopf[0], kopf[1]);
+    // Nur Punkte, die sichtbar etwas ändern (Abstand ≥ ~⅓ Radius), und nichts außerhalb des Bildes
+    const pts = [];
+    const B = c.canvas.clientWidth, H = c.canvas.clientHeight, rand = r * 2 + 40;
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9, lx = 1e9, ly = 1e9;
+    const schritt = Math.max(1.5, r * 0.33);
+    for (let i = 0; i < s.pfad.length - 1; i++) {
+      const q = zuBild(s.pfad[i][0], s.pfad[i][1]);
+      if (i > 0 && Math.abs(q[0] - lx) + Math.abs(q[1] - ly) < schritt) continue;
+      pts.push(q); lx = q[0]; ly = q[1];
+      if (q[0] < minX) minX = q[0]; if (q[0] > maxX) maxX = q[0]; if (q[1] < minY) minY = q[1]; if (q[1] > maxY) maxY = q[1];
+    }
+    const kq = zuBild(kopf[0], kopf[1]);
+    pts.push(kq);
+    minX = Math.min(minX, kq[0]); maxX = Math.max(maxX, kq[0]); minY = Math.min(minY, kq[1]); maxY = Math.max(maxY, kq[1]);
+    if (maxX < -rand || maxY < -rand || minX > B + rand || minY > H + rand) return;
     const neu = s.neu ? Math.min(1, (performance.now() - s.neu) / 400) : 1;
     // Schwanz zieht sich weich mit: erster Punkt Richtung zweitem verschieben
     const pfadZiehen = () => { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); };
     c.lineCap = "round"; c.lineJoin = "round";
     c.globalAlpha = neu;
-    if (s.sprint) { c.save(); c.shadowColor = m[0]; c.shadowBlur = 22; c.strokeStyle = m[0] + "66"; c.lineWidth = r * 2 + 10 * z; pfadZiehen(); c.stroke(); c.restore(); }
+    if (s.sprint) { c.strokeStyle = m[0] + "30"; c.lineWidth = r * 2 + 18 * z; pfadZiehen(); c.stroke(); c.strokeStyle = m[0] + "55"; c.lineWidth = r * 2 + 8 * z; pfadZiehen(); c.stroke(); }
     // Schatten, Rand, Körper
     c.strokeStyle = "rgba(0,0,0,0.35)"; c.lineWidth = r * 2 + 3; c.save(); c.translate(3 * z, 5 * z); pfadZiehen(); c.stroke(); c.restore();
     c.strokeStyle = "rgba(0,0,0,0.55)"; c.lineWidth = r * 2 + 3; pfadZiehen(); c.stroke();
