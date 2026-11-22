@@ -120,7 +120,7 @@
   function feldHtml(f, i) {
     const p = platz(i);
     const g = f.gruppe ? G()[f.gruppe] : null;
-    const kurz = f.name.replace(/straße$/i, "str.").replace(/^Bushaltestelle /, "Bus ");
+    const kurz = f.name.replace(/straße$/i, "str.").replace(/^Bahnhof /, "Bhf. ").replace(/^Kirche /, "");
     return `<button class="bl-feld ${p.seite} ${ecke(i) ? "ecke" : ""} art-${f.art}" data-feld="${i}" style="grid-row:${p.r};grid-column:${p.c};${g ? `--g:${g.farbe}` : ""}" aria-label="${esc(f.name)}">
       ${g ? '<span class="bl-band"></span>' : ""}
       <span class="bl-feld-inhalt">${f.icon ? `<span class="bl-icon">${f.icon}</span>` : ""}<span class="bl-name">${esc(ecke(i) ? f.name.split(" /")[0] : kurz)}</span>${f.preis ? `<span class="bl-preis">${f.preis}</span>` : ""}</span>
@@ -311,7 +311,7 @@
     let tabelle = "";
     if (f.art === "strasse") tabelle = `<table class="bl-miete">${["Miete", "Mit 1 Haus", "Mit 2 Häusern", "Mit 3 Häusern", "Mit 4 Häusern", "Mit Hotel"].map((n, k) => `<tr class="${(z.haeuser[i] || 0) === k && z.besitz[i] !== undefined ? "jetzt" : ""}"><td>${n}</td><td>${f.miete[k]}</td></tr>`).join("")}</table>
       <div class="bl-karte-fuss">Volle Farbgruppe: doppelte Miete ohne Haus · Haus ${g.haus} · Hypothek ${f.preis / 2}</div>`;
-    else if (f.art === "bahn") tabelle = `<table class="bl-miete">${[25, 50, 100, 200].map((m, k) => `<tr><td>${k + 1} Haltestelle${k ? "n" : ""}</td><td>${m}</td></tr>`).join("")}</table><div class="bl-karte-fuss">Hypothek ${f.preis / 2}</div>`;
+    else if (f.art === "bahn") tabelle = `<table class="bl-miete">${[25, 50, 100, 200].map((m, k) => `<tr><td>${k + 1} Bahnh${k ? "öfe" : "of"}</td><td>${m}</td></tr>`).join("")}</table><div class="bl-karte-fuss">Hypothek ${f.preis / 2}</div>`;
     else if (f.art === "werk") tabelle = `<p class="klein-text">1 Werk: 4 × Augenzahl<br>Beide Werke: 10 × Augenzahl</p><div class="bl-karte-fuss">Hypothek ${f.preis / 2}</div>`;
     else tabelle = `<p class="klein-text">${{ start: "Wer über Los kommt, bekommt 200.", ereignis: "Ziehe eine Glück-Karte.", kasse: "Ziehe eine Dorfkasse-Karte.", steuer: `Zahle ${f.betrag}.`, knast: "Nur zu Besuch – oder sitzt hier fest.", parken: z.topf ? `Hier liegt der Topf: ${z.topf}` : "Eine Runde Pause auf dem Dorfplatz.", geheKnast: "Direkt ins Gefängnis, ohne über Los." }[f.art] || ""}</p>`;
     return `<div class="bl-karte ${z.hypothek[i] ? "hypothek" : ""}" style="${g ? `--g:${g.farbe}` : ""}">
