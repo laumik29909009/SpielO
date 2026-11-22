@@ -10,6 +10,7 @@
   let mitteAuswahl = null; // Schwimmen: Karte aus der Mitte
   let angriffAuswahl = null; // Durak: welche Angriffskarte geschlagen wird
   let letzteT = 0;
+  let austeilenBis = 0; // Austeil-Animation: Handkarten fliegen ein und drehen sich um
   let mauGerufen = false; // Mau-Mau: „Mau!“ vor der vorletzten Karte
   let pkZiel = null; // Poker: gewählte Erhöhung
 
@@ -307,10 +308,16 @@
     const abstand = n > 1 ? Math.min(kb * 0.6, (breite - kb) / (n - 1)) : 0;
     const winkel = Math.min(7, 64 / Math.max(1, n));
     box.style.setProperty("--kb", kb + "px");
+    const austeilen = Date.now() < austeilenBis;
+    // Während des Austeilens nicht neu zeichnen, sonst beginnt die Animation immer wieder von vorn
+    const schluessel = karten.map((k) => k.id).join();
+    if (austeilen && box.dataset.schluessel === schluessel && box.classList.contains("austeilen")) return knoepfe(z);
+    box.dataset.schluessel = schluessel;
+    box.classList.toggle("austeilen", austeilen);
     box.innerHTML = karten.map((k, i) => {
       const m = i - (n - 1) / 2;
       return `<button class="fr-handkarte sk-handkarte ${spielbar(z, k) ? "spielbar" : ""} ${auswahl.has(k.id) ? "ausgewaehlt" : ""}" data-karte="${k.id}"
-        style="--x:${m * abstand}px;--r:${m * winkel}deg;--y:${m * m * 0.9}px;--z:${i}">${karte(k)}</button>`;
+        style="--x:${m * abstand}px;--r:${m * winkel}deg;--y:${m * m * 0.9}px;--z:${i};--v:${austeilen ? Math.round(((austeilenBis - Date.now()) * 0.75 * i) / Math.max(1, n)) : 0}ms">${karte(k)}</button>`;
     }).join("");
     $$(".sk-handkarte", box).forEach((b) => (b.onclick = () => handKlick(b.dataset.karte)));
     knoepfe(z);
@@ -510,7 +517,7 @@
     };
     const wer = esc(nameVon(z, a.spieler));
     if (a.typ === "austeilen" && (z.modus === "poker" || z.modus === "siebzehn")) { Ton.wusch(); return; }
-    if (a.typ === "austeilen") { Ton.wusch(); zeige("<b>🃏 Karten werden verteilt</b>"); if (a.tausch?.length) a.tausch.forEach((t) => zeige(`<b>🔁 Kartentausch</b><span>${esc(nameVon(z, t.von))} gibt ${esc(nameVon(z, t.an))} ${t.karten.length} Karte${t.karten.length > 1 ? "n" : ""}</span>`, "gold", 2400)); return; }
+    if (a.typ === "austeilen") { austeilenZeigen(z); Ton.wusch(); zeige("<b>🃏 Karten werden verteilt</b>"); if (a.tausch?.length) a.tausch.forEach((t) => zeige(`<b>🔁 Kartentausch</b><span>${esc(nameVon(z, t.von))} gibt ${esc(nameVon(z, t.an))} ${t.karten.length} Karte${t.karten.length > 1 ? "n" : ""}</span>`, "gold", 2400)); return; }
     if (a.typ === "klopfen") { Ton.treffer(); zeige(`<b class="riesig">✊</b><span>${wer} ${a.spieler === GN.ich ? "klopfst" : "klopft"}! Letzte Runde</span>`, "gold", 1800); }
     if (a.typ === "neueMitte") { Ton.wusch(); zeige("<b>🔄 Alle haben geschoben: neue Mitte</b>"); }
     if (a.typ === "alleTauschen") { Ton.wusch(); zeige(`<b>🔁 ${wer} ${a.spieler === GN.ich ? "tauschst" : "tauscht"} alle 3</b>`); }
@@ -548,6 +555,23 @@
       if (a.typ === "passen" && a.spieler !== GN.ich) zeige(`<b>✋ ${wer} passt</b>`, "info", 900);
     }
     if (a.typ === "abgewehrt") { Ton.richtig(); zeige(`<b class="riesig">🛡️</b><span>${wer} ${a.spieler === GN.ich ? "hast" : "hat"} alles abgewehrt!</span>`, "gold", 1600); }
+  }
+
+  // Austeilen: verdeckte Karten fliegen aus der Mitte zu jedem Mitspieler, die eigenen drehen sich um
+  function austeilenZeigen(z) {
+    const dauer = 1600;
+    austeilenBis = Date.now() + dauer;
+    zeichneHand(z);
+    const mitte = $("#skMitte");
+    const andere = leute(z).filter((t) => t.id !== GN.ich);
+    const runden = Math.min(3, Math.max(1, Math.round((z.teilnehmer?.[0]?.karten || 3) / 3)));
+    let n = 0;
+    for (let r = 0; r < runden; r++) for (const t of andere) {
+      const ziel = $(`[data-teilnehmer="${t.id}"]`) || $(`.sk-chip:nth-child(${leute(z).indexOf(t) + 1})`);
+      const v = (n++ * dauer) / (runden * Math.max(1, andere.length) + 2);
+      setTimeout(() => { GN.fx?.flug(mitte, ziel, '<span class="sk-flug-karte"></span>', { dauer: 450 }); if (n % 2) Ton.klick(); }, v);
+    }
+    setTimeout(() => GN.ansicht.startsWith("skat-spiel") && zeichneHand(GN.zustand), dauer + 80);
   }
 
   function ergebnisZeigen(z) {
