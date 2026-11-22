@@ -2,7 +2,8 @@
   "wartung": false,
   "imAufbau": [
     "arena",
-    "ludo"
+    "ludo",
+    "deckname"
   ],
   "wartungInfo": {
     "punkte": [

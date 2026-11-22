@@ -1,0 +1,89 @@
+/* =============================================================
+   Deckname: Agenten-Look, Karten drehen sich beim Aufdecken
+   ============================================================= */
+body[data-spiel="deckname"], [data-farbe="deckname"] {
+  --bg: #12151c; --flaeche: #1d222c; --flaeche-2: #262c38; --leise: #b8c0cc; --text: #f4f6fa;
+  --gold: #ffcf3f; --gold-2: #ff8a3d; --gold-text: #231600; --btn-schatten: #a8621e;
+  --glow-1: rgba(229, 57, 53, 0.14); --glow-2: rgba(30, 136, 229, 0.14); --glow-3: rgba(255, 207, 63, 0.08);
+  --konfetti: #e53935, #1e88e5, #ffcf3f, #fff;
+  --rot: #e53935; --blau: #1e88e5;
+}
+.dn-buehne { max-width: 960px; margin: 0 auto; padding-bottom: 24px; }
+.dn-stand { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 10px 0 6px; }
+.dn-zaehler { padding: 8px 16px; border-radius: 14px; background: var(--flaeche); border: 2px solid transparent; font-size: 1.05rem; transition: transform 0.2s; }
+.dn-zaehler b { font-size: 1.4rem; }
+.dn-zaehler.rot { border-color: color-mix(in srgb, var(--rot) 60%, transparent); }
+.dn-zaehler.blau { border-color: color-mix(in srgb, var(--blau) 60%, transparent); }
+.dn-zaehler.dran { transform: scale(1.06); box-shadow: 0 0 18px color-mix(in srgb, currentColor 30%, transparent); }
+.dn-zaehler.rot.dran { background: color-mix(in srgb, var(--rot) 22%, var(--flaeche)); }
+.dn-zaehler.blau.dran { background: color-mix(in srgb, var(--blau) 22%, var(--flaeche)); }
+.dn-gegen { color: var(--leise); font-size: 0.85rem; }
+.dn-rolle { text-align: center; font-size: 0.9rem; padding: 6px 12px; border-radius: 12px; margin: 0 auto 8px; width: fit-content; background: var(--flaeche); }
+.dn-rolle.rot { box-shadow: inset 3px 0 0 var(--rot); } .dn-rolle.blau { box-shadow: inset 3px 0 0 var(--blau); }
+
+/* Hinweis-Bereich */
+.dn-hinweis { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 64px; margin-bottom: 12px; }
+.dn-hinweis-form { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; width: 100%; max-width: 720px; padding: 12px; border-radius: 18px; background: var(--flaeche); border: 2px solid var(--gold); }
+.dn-hinweis-form .feld { flex: 1 1 220px; font-size: 1.1rem; }
+.dn-zahlen { display: flex; gap: 4px; }
+.dn-zahlen button { all: unset; cursor: pointer; width: 34px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: var(--flaeche-2); font-weight: 900; border: 1px solid var(--rand); transition: transform 0.15s; }
+.dn-zahlen button.aktiv { background: var(--gold); color: var(--gold-text); transform: scale(1.1); }
+.dn-aktuell { display: flex; align-items: baseline; gap: 12px; padding: 10px 22px; border-radius: 18px; background: var(--flaeche); border: 2px solid var(--gold); }
+.dn-aktuell.rot { border-color: var(--rot); } .dn-aktuell.blau { border-color: var(--blau); }
+.dn-aktuell span { color: var(--leise); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.dn-aktuell b { font-size: clamp(1.4rem, 4vw, 2rem); }
+.dn-aktuell em { font-style: normal; font-weight: 900; font-size: 1.6rem; min-width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--gold); color: var(--gold-text); }
+.dn-info, .dn-warten, .dn-ende-text { color: var(--leise); text-align: center; }
+.dn-ende-text { font-size: 1.2rem; color: var(--text); font-weight: 800; }
+
+/* Karten */
+.dn-gitter { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(5px, 1.2vw, 10px); }
+.dn-karte { all: unset; cursor: default; aspect-ratio: 1.55; perspective: 700px; animation: dn-rein 0.45s cubic-bezier(.2, 1.3, .4, 1) backwards; animation-delay: calc(var(--i) * 22ms); }
+@keyframes dn-rein { from { opacity: 0; transform: translateY(12px) scale(0.9); } }
+.dn-innen { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(.3, .7, .3, 1.2); }
+.dn-vorne, .dn-hinten { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; }
+.dn-vorne { background: linear-gradient(180deg, #f6efe0, #e6dcc6); color: #2a2418; box-shadow: 0 3px 0 #b9ab8a, 0 6px 14px rgba(0, 0, 0, 0.35); }
+.dn-vorne::before { content: ""; position: absolute; inset: 6px; border: 1px solid rgba(60, 40, 10, 0.25); border-radius: 6px; pointer-events: none; }
+.dn-wort { font-weight: 900; font-size: clamp(0.62rem, 2.1vw, 1.08rem); text-transform: uppercase; letter-spacing: 0.02em; text-align: center; word-break: break-word; hyphens: auto; }
+.dn-hinten { transform: rotateY(180deg); color: #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35); }
+.dn-hinten .dn-wort { font-size: clamp(0.55rem, 1.6vw, 0.82rem); opacity: 0.85; padding: 2px 6px; border-radius: 6px; background: rgba(0, 0, 0, 0.22); }
+.dn-karte.offen .dn-innen { transform: rotateY(180deg); }
+.dn-karte.rot .dn-hinten { background: radial-gradient(circle at 50% 35%, #ff7a70, var(--rot) 60%, #9e1b17); }
+.dn-karte.blau .dn-hinten { background: radial-gradient(circle at 50% 35%, #6fb3ff, var(--blau) 60%, #0d47a1); }
+.dn-karte.neutral .dn-hinten { background: radial-gradient(circle at 50% 35%, #e8dcc2, #c8b58f 70%); color: #3a2f1a; }
+.dn-karte.attentaeter .dn-hinten { background: radial-gradient(circle at 50% 35%, #555, #111 70%); }
+.dn-karte.offen .dn-hinten::before { font-size: clamp(1rem, 4vw, 2rem); content: "🕵️"; }
+.dn-karte.offen.neutral .dn-hinten::before { content: "🚶"; }
+.dn-karte.offen.attentaeter .dn-hinten::before { content: "💀"; }
+/* Chef-Ansicht: dezente Färbung der Vorderseite */
+.dn-karte.chef .dn-vorne { box-shadow: inset 0 0 0 4px var(--c), 0 3px 0 #b9ab8a, 0 6px 14px rgba(0, 0, 0, 0.35); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 22%, #f6efe0), color-mix(in srgb, var(--c) 30%, #e6dcc6)); }
+.dn-karte.chef.rot { --c: var(--rot); } .dn-karte.chef.blau { --c: var(--blau); } .dn-karte.chef.neutral { --c: #b9a77d; } .dn-karte.chef.attentaeter { --c: #111; }
+.dn-karte.chef.attentaeter .dn-vorne { color: #fff; background: linear-gradient(180deg, #5a5a5a, #2c2c2c); }
+/* Raten */
+.dn-karte.waehlbar { cursor: pointer; }
+.dn-karte.waehlbar:hover .dn-innen { transform: translateY(-3px) rotateX(6deg); }
+.dn-karte.markiert .dn-vorne { outline: 3px solid var(--gold); outline-offset: -3px; }
+.dn-karte.meine .dn-vorne { animation: dn-puls 1s ease-in-out infinite; }
+@keyframes dn-puls { 50% { box-shadow: 0 0 0 4px rgba(255, 207, 63, 0.6), 0 6px 14px rgba(0, 0, 0, 0.35); } }
+.dn-marken { position: absolute; top: 3px; right: 4px; display: flex; gap: 1px; font-size: clamp(0.7rem, 1.8vw, 1rem); }
+
+/* Teams und Verlauf */
+.dn-unten { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.dn-teams { display: grid; gap: 8px; }
+.dn-team { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px; border-radius: 14px; background: var(--flaeche); }
+.dn-team.rot { box-shadow: inset 4px 0 0 var(--rot); } .dn-team.blau { box-shadow: inset 4px 0 0 var(--blau); }
+.dn-team b { width: 100%; font-size: 0.85rem; }
+.dn-mitglied { font-size: 0.82rem; padding: 3px 8px; border-radius: 999px; background: var(--flaeche-2); }
+.dn-mitglied em { font-style: normal; color: var(--gold); font-size: 0.72rem; }
+.dn-verlauf { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; padding: 8px 10px; border-radius: 14px; background: var(--flaeche); font-size: 0.82rem; }
+.dn-verlauf:empty { display: none; }
+.dn-verlauf b { width: 100%; }
+.dn-v { padding: 3px 8px; border-radius: 8px; background: var(--flaeche-2); }
+.dn-v.rot { box-shadow: inset 3px 0 0 var(--rot); } .dn-v.blau { box-shadow: inset 3px 0 0 var(--blau); }
+@media (max-width: 700px) {
+  .dn-unten { grid-template-columns: 1fr; }
+  .dn-karte { aspect-ratio: 1.2; }
+  .dn-vorne, .dn-hinten { border-radius: 7px; }
+  .dn-zahlen button { width: 28px; height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) { .dn-karte, .dn-karte.meine .dn-vorne { animation: none !important; } .dn-innen { transition: none; } }

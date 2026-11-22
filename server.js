@@ -21,6 +21,7 @@ const SPIELE = {
   schechingen: require("./spiele/schechingen"),
   baulowe: require("./spiele/baulowe"),
   ludo: require("./spiele/ludo"),
+  deckname: require("./spiele/deckname"),
 };
 const MAX_SPIELER = 10;
 const LADE_MS = 1400; // Ladebildschirm vor jedem Spielstart
