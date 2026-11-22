@@ -162,3 +162,120 @@ body[data-spiel="baulowe"], [data-farbe="baulowe"] {
   .bl-p-text b { font-size: 0.75rem; }
 }
 @media (prefers-reduced-motion: reduce) { .bl-w.rollt, .bl-figur.hops span, .bl-ereignis-karte, .bl-knall { animation: none !important; } }
+
+/* =============================================================
+   Neues Layout: 3D-Brett links, Seitenleiste rechts, Aktionsleiste unter dem Brett
+   ============================================================= */
+.bl-buehne { max-width: 1240px; }
+.bl-haupt { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; align-items: start; margin-top: 8px; }
+.bl-links { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bl-brettbox { position: relative; }
+.bl-brettbox.drei { aspect-ratio: 1.25; border-radius: 18px; overflow: hidden; background: radial-gradient(circle at 50% 35%, #2a4d3a, #0c1f16 75%); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+.bl-3d { position: absolute; inset: 0; }
+.bl-3d canvas { display: block; width: 100% !important; height: 100% !important; touch-action: manipulation; }
+.bl-laedt { position: absolute; inset: 0; display: grid; place-items: center; color: var(--leise); }
+.bl-knallbox { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: start center; padding-top: 12%; }
+.bl-knallbox .bl-knall { position: static; transform: none; animation: bl-knall2 2s ease forwards; padding: 10px 22px; }
+.bl-knallbox .bl-knall b { font-size: clamp(1.1rem, 3vw, 1.7rem); }
+.bl-knallbox .bl-knall span { font-size: 0.9rem; }
+@keyframes bl-knall2 { 0% { transform: scale(0.5); opacity: 0; } 12% { transform: scale(1.06); opacity: 1; } 22% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px); } }
+
+/* Aktionsleiste: großer Würfeln-Knopf direkt unter dem Brett */
+.bl-aktion { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; border-radius: 18px; background: var(--flaeche); border: 1px solid var(--rand); min-height: 64px; justify-content: center; }
+.bl-aktion.ich { border-color: var(--gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 40%, transparent); }
+.bl-aktion .bl-ansage { background: none; padding: 0; font-size: 1rem; }
+.bl-aktion .btn.gross { font-size: 1.2rem; padding: 14px 30px; }
+.bl-wurf-knopf { min-width: 220px; animation: bl-wurf-puls 1.6s ease-in-out infinite; }
+@keyframes bl-wurf-puls { 50% { box-shadow: 0 6px 0 var(--btn-schatten), 0 0 0 6px rgba(255, 207, 63, 0.25); } }
+.bl-kauf { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.bl-kauf .bl-knoepfe.spalte { margin: 0; align-items: stretch; }
+
+/* Seitenleiste */
+.bl-rechts { display: flex; flex-direction: column; gap: 10px; }
+.bl-konto { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 18px; padding: 12px; }
+.bl-konto-kopf { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.bl-konto-figur { font-size: 1.8rem; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: #fffdf6; box-shadow: 0 0 0 3px var(--b); flex: none; }
+.bl-konto-kopf small { display: block; color: var(--leise); font-size: 0.75rem; }
+.bl-konto-kopf b { display: block; font-size: 1.9rem; font-variant-numeric: tabular-nums; color: #c8f5d8; line-height: 1.1; }
+.bl-konto-kopf b.plus { animation: bl-plus 0.9s; } .bl-konto-kopf b.minus { animation: bl-minus 0.9s; }
+.bl-meine { display: flex; flex-direction: column; gap: 6px; }
+.bl-meine-gruppe { display: flex; gap: 4px; }
+.bl-mini { all: unset; cursor: pointer; flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: #fffdf5; color: #1c2a22; font-size: 0.66rem; line-height: 1.15; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); transition: transform 0.15s; }
+.bl-mini:hover { transform: translateY(-2px); }
+.bl-mini-kopf { height: 8px; background: var(--g); }
+.bl-mini-name { padding: 3px 5px 0; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bl-mini-info { padding: 1px 5px 4px; font-weight: 700; opacity: 0.8; }
+.bl-mini.fremd { opacity: 0.38; filter: grayscale(0.4); }
+.bl-mini.hypothek { background: #c9c2b0; }
+.bl-leute { flex-direction: column; flex-wrap: nowrap; margin: 0; }
+.bl-person { width: 100%; box-sizing: border-box; flex-wrap: wrap; }
+.bl-p-text { flex: 1; }
+.bl-p-besitz { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; }
+.bl-p-besitz:empty { display: none; }
+.bl-p-besitz i { cursor: pointer; width: 18px; height: 14px; border-radius: 3px; background: var(--g); font-style: normal; font-size: 0.6rem; font-weight: 900; display: grid; place-items: center; color: #fff; text-shadow: 0 0 2px #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4); }
+.bl-reihe { display: flex; gap: 8px; }
+.bl-reihe .btn { flex: 1; }
+.bl-log-box { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 14px; padding: 8px 12px; }
+.bl-log-box summary { cursor: pointer; font-weight: 800; font-size: 0.85rem; }
+.bl-log-box .bl-log { text-align: left; max-width: none; margin-top: 6px; font-size: 0.8rem; display: grid; gap: 3px; }
+
+/* Besitzrechtkarte wie im Original */
+.bl-besitzkarte { width: min(280px, 100%); margin: 0 auto; background: #fffdf5; color: #1c2a22; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); border: 2px solid #1c2a22; }
+.bl-besitzkarte.hypothek { filter: grayscale(0.6); }
+.bk-kopf { background: var(--g); margin: 6px; border: 2px solid #1c2a22; text-align: center; padding: 8px 6px; display: flex; flex-direction: column; gap: 1px; }
+.bk-kopf small { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 800; opacity: 0.75; }
+.bk-kopf b { font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.02em; }
+.bk-kopf em { font-style: normal; font-size: 0.78rem; font-weight: 700; }
+.bk-icon { font-size: 1.8rem; }
+.bk-inhalt { padding: 4px 14px 10px; }
+.bk-zeile { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; padding: 2px 4px; border-radius: 4px; }
+.bk-zeile.gross { font-size: 0.95rem; font-weight: 700; }
+.bk-zeile.klein { font-size: 0.78rem; }
+.bk-zeile.jetzt { background: #ffe9a8; font-weight: 800; }
+.bk-trenn { border-top: 1px solid #1c2a22; margin: 6px 0; }
+.bk-hinweis, .bk-text { font-size: 0.75rem; text-align: center; margin: 6px 0 0; line-height: 1.35; }
+.bk-text { font-size: 0.85rem; }
+.bk-besitzer { font-size: 0.8rem; text-align: center; padding: 6px; background: color-mix(in srgb, var(--b, #e9dfc4) 30%, #fffdf5); border-top: 2px solid var(--b, #1c2a22); }
+.bk-besitzer.frei { background: #e8f7ec; border-top-color: #3fc47d; color: #1f7a45; font-weight: 800; }
+.bl-besitzkarte.kompakt { width: min(220px, 100%); font-size: 0.9em; }
+.bl-jetzt-miete { text-align: center; margin: 10px 0 0; }
+.bl-schnellhandel { padding: 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--rand); display: flex; flex-direction: column; gap: 6px; }
+.bl-sh-zeile { display: flex; gap: 6px; align-items: center; }
+.bl-sh-zeile input, .bl-sh-zeile select { flex: 1; min-width: 0; padding: 8px; border-radius: 8px; border: 1px solid var(--rand); background: rgba(0, 0, 0, 0.25); color: inherit; font: inherit; }
+.bl-sh-zeile .btn { padding: 8px 14px; }
+
+/* Übersicht aller Felder */
+.bl-fenster.breit { width: min(760px, calc(100vw - 24px)); }
+.bl-ueb { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.bl-ueb-gruppe { border-radius: 12px; overflow: hidden; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rand); }
+.bl-ueb-titel { background: var(--g); color: #111; font-weight: 900; padding: 5px 10px; font-size: 0.85rem; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4); }
+.bl-ueb-feld { all: unset; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 0 6px; padding: 6px 10px; border-top: 1px solid var(--rand); font-size: 0.82rem; width: 100%; box-sizing: border-box; }
+.bl-ueb-feld:hover { background: rgba(255, 255, 255, 0.06); }
+.bl-ueb-feld em { font-style: normal; color: var(--leise); font-size: 0.75rem; }
+.bl-ueb-feld b { grid-column: 1 / -1; font-size: 0.75rem; }
+.bl-ueb-feld b.frei { color: #6fe39a; }
+.bl-ueb-feld b.besetzt { color: var(--b); }
+
+/* Handy: Brett oben, Aktionsleiste klebt am unteren Rand */
+@media (max-width: 900px) {
+  .bl-haupt { grid-template-columns: 1fr; }
+  .bl-brettbox.drei { aspect-ratio: 0.92; margin: 0 -8px; border-radius: 14px; }
+  .bl-aktion { position: sticky; bottom: 8px; z-index: 20; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: color-mix(in srgb, var(--flaeche) 88%, transparent); box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.35); }
+  .bl-kauf { flex-direction: column; }
+  .bl-besitzkarte.kompakt { width: 100%; }
+}
+.bl-log-box .bl-log { display: grid !important; }
+.bl-fenster .fenster-inhalt { overflow-x: hidden; }
+.bl-fenster .bl-knoepfe.spalte { align-items: stretch; }
+.bl-fenster .bl-knoepfe.spalte > .btn { width: 100%; box-sizing: border-box; }
+
+.bk-mehr { all: unset; cursor: pointer; display: block; margin: 6px auto 0; font-size: 0.75rem; font-weight: 800; color: #2a6b4c; text-decoration: underline; }
+@media (max-width: 900px) {
+  .bl-besitzkarte.kompakt { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+  .bl-besitzkarte.kompakt .bk-kopf { margin: 6px 0 6px 6px; padding: 6px 4px; }
+  .bl-besitzkarte.kompakt .bk-kopf b { font-size: 0.9rem; }
+  .bl-besitzkarte.kompakt .bk-inhalt { padding: 4px 8px; }
+  .bl-besitzkarte.kompakt .bk-besitzer { grid-column: 1 / -1; padding: 3px; }
+  .bl-aktion .btn.gross { padding: 11px 22px; font-size: 1.05rem; }
+  .bl-kauf .bl-knoepfe.spalte { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+}
