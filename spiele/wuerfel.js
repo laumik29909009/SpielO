@@ -17,7 +17,9 @@ const UNTEN = ["dreierpasch", "viererpasch", "fullhouse", "kleinestrasse", "gros
 const FELDER = [...OBEN, ...UNTEN];
 
 const mischen = (a) => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const w6 = () => 1 + Math.floor(Math.random() * 6);
+// Echter, gleichverteilter Zufall (kryptografischer Zufallsgenerator von Node)
+const { randomInt } = require("crypto");
+const w6 = () => randomInt(1, 7);
 const einst = (raum) => raum.einstellungen.wuerfel;
 
 // Punkte, die diese Würfel in einem Feld bringen würden

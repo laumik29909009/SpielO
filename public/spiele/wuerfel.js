@@ -405,7 +405,18 @@
       ${meta.unten.map(zeile).join("")}${alle.some((p) => z.extra?.[p.id]) ? summe("Fünfling-Extra", "extra") : ""}${summe("Gesamt", "gesamt", "gesamt")}</tbody>`;
     $$("[data-eintragen]", t).forEach((b) => (b.onclick = () => {
       const f = b.dataset.eintragen;
-      if (!GN.zustand.vorschau[f] && !confirm(`${NAMEN[f][0]} streichen (0 Punkte)?`)) return;
+      // Streichen (0 Punkte): erst nachfragen – direkt im Feld, ohne Browser-Fenster
+      if (!GN.zustand.vorschau[f] && !b.classList.contains("sicher")) {
+        $$(".w-eintragen.sicher", t).forEach((x) => { x.classList.remove("sicher"); x.textContent = "✕"; });
+        b.classList.add("sicher");
+        b.textContent = "Streichen?";
+        b.title = `Nochmal tippen: ${NAMEN[f][0]} mit 0 Punkten streichen`;
+        Ton.klick();
+        navigator.vibrate?.(30);
+        clearTimeout(b._t);
+        b._t = setTimeout(() => { if (b.isConnected) { b.classList.remove("sicher"); b.textContent = "✕"; } }, 4000);
+        return;
+      }
       Ton.abgeben();
       GN.aktion("eintragen", f);
     }));
