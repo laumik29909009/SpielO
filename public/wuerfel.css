@@ -148,3 +148,5 @@ thead .w-feldname { background: #2b2140; }
   .w-ava { font-size: 1.05rem; }
   .w-eintragen { min-width: 30px; padding: 3px 5px; }
 }
+
+.w-oben.ohne-eule { grid-template-columns: 1fr; }

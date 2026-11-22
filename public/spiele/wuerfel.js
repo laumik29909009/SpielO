@@ -145,6 +145,7 @@
   }
 
   function aufbauen(z) {
+    GN.euleNeu = () => GN.zustand?.spiel === "wuerfel" && eule(GN.zustand);
     GN.ansicht = "wuerfel-spiel";
     GN.stoppeTimer();
     letzteWurfId = z.wurfId;
@@ -152,6 +153,7 @@
       <div class="w-buehne">
         <div class="runden-kopf">
           <span class="modus-badge">🎲 Würfelglück</span>
+          ${GN.euleKnopf()}
           <span class="runden-nr" id="wRunde"></span>
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
@@ -312,6 +314,10 @@
     const box = $("#wEule");
     if (!box) return;
     $$(".w-wuerfel.tipp").forEach((b) => b.classList.remove("tipp"));
+    const an = GN.euleAn();
+    box.classList.toggle("versteckt", !an);
+    $(".w-oben")?.classList.toggle("ohne-eule", !an);
+    if (!an) return;
     const blatt = z.blaetter[GN.ich];
     if (!blatt) { box.innerHTML = ""; return; }
     const frei = Object.keys(NAMEN).filter((f) => blatt[f] === null);

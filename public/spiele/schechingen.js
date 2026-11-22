@@ -1,5 +1,5 @@
 // =============================================================
-//  Schechingen – Hof & Handel: Browser-Teil
+//  Die Knaben von Schingen: Browser-Teil (Spiel-ID bleibt "schechingen")
 //  Sechseck-Karte als SVG, Bauen per Antippen, Hand, Handel, Dorfplatz
 // =============================================================
 (() => {
@@ -12,7 +12,7 @@
     feld: { name: "Feld", icon: "🌾", farbe: ["#f2cf5b", "#c99a24"] },
     weide: { name: "Weide", icon: "🐄", farbe: ["#a6de7c", "#5fae45"] },
     steinbruch: { name: "Steinbruch", icon: "⛏️", farbe: ["#b9c0c8", "#7d8791"] },
-    obstwiese: { name: "Streuobstwiese", icon: "🍎", farbe: ["#c4e27e", "#79a63c"] },
+    obstwiese: { name: "Streuobstwiese", icon: "🍎", farbe: ["#ffc9d4", "#d7869b"] },
     dorfplatz: { name: "Dorfplatz", icon: "⛪", farbe: ["#ecd0a6", "#c79e6a"] },
   };
   const KARTEN = {
@@ -103,7 +103,7 @@
         brett(z); leiste(z); dock(z); status(z); dialog(z);
         GN.stoppeTimer();
         const s = z.sieger;
-        knall(`🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!<small>Dorfschultheiß von Schechingen</small>`, "gold riesig", 3200);
+        knall(`🏆 ${esc(nameVon(z, s))} ${s === ich() ? "gewinnst" : "gewinnt"}!<small>Dorfschultheiß von Schingen</small>`, "gold riesig", 3200);
         Ton.fanfare(); GN.konfetti(180);
         setTimeout(() => GN.zustand?.phase === "ende" && GN.ansicht === "schechingen-ende" && GN.podest("schechingen-podest", { einheit: "Punkte" }), 3800);
       }
@@ -118,7 +118,8 @@
     else if (!istDran(z) || z.zug?.modus || !z.zug?.wurf) modus = null;
     if (z.zug?.modus !== "abwerfen") abwurf = {};
     if ((!istDran(z) || z.zug?.modus || z.phase !== "spielen") && fenster !== "dorfplatz") fenster = null;
-    brett(z); leiste(z); dock(z); status(z); dialog(z);
+    euleAktuell = eulePlan(z);
+    brett(z); leiste(z); dock(z); status(z); dialog(z); euleZeigen(z);
     effekte(z, vorher);
     if (!vorher || vorher.dran !== z.dran || vorher.zug?.modus !== z.zug?.modus || vorher.aufbauSchritt !== z.aufbauSchritt || GN.timerNeu) {
       GN.timerNeu = false;
@@ -138,13 +139,15 @@
   const SAISON_TEXT = ["Weiden bringen doppelt Milch", "Felder bringen doppelt Korn", "Obstwiesen bringen doppelt Obst", "Wälder bringen doppelt Holz, Felder ruhen"];
 
   function aufbauen(z) {
+    GN.euleNeu = () => { const z2 = GN.zustand; if (z2?.spiel === "schechingen") { brett(z2); euleZeigen(z2); } };
     GN.ansicht = "schechingen-spiel";
     GN.stoppeTimer();
     letzteWurfId = z.wurfId; letzterBauT = z.letzterBau?.t || 0; letzterErtragT = z.letzterErtrag?.t || 0; letzterBonusT = z.bonusEreignis?.t || -1;
     app.innerHTML = `
       <div class="sc-buehne">
         <div class="runden-kopf">
-          <span class="modus-badge">🌾 Schechingen</span>
+          <span class="modus-badge">🌾 Knaben von Schingen</span>
+          ${GN.euleKnopf()}
           <span class="runden-nr sc-saison" id="scSaison"></span>
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
@@ -159,6 +162,7 @@
           </div>
           <aside class="sc-seite">
             <div class="sc-status" id="scStatus"></div>
+            <div class="sc-eule" id="scEule"></div>
             <div class="sc-kostenkarte" id="scKosten"></div>
             <details class="sc-log" open><summary>📜 Dorfchronik</summary><div id="scLog"></div></details>
           </aside>
@@ -280,6 +284,7 @@
 
   let feldOrdnung = null;
   const FELD_ORDNUNG = () => (feldOrdnung ||= new Map([...meta().karte.felder].sort((a, b) => Math.hypot(a.x, a.y) - Math.hypot(b.x, b.y) || Math.atan2(a.y, a.x) - Math.atan2(b.y, b.x)).map((f, i) => [f.id, i])));
+  const LAND_ROH = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch", obstwiese: "obst" };
   function brett(z) {
     const svg = $("#scBrett");
     if (!svg) return;
@@ -312,7 +317,9 @@
       h += `<g class="sc-feld ${klick ? "waehlbar" : ""} ${blockiert ? "blockiert" : ""} ${b.typ}" data-feld="${f.id}" style="--i:${FELD_ORDNUNG().get(f.id)}">
         <polygon points="${f.ecken.map((e) => pkt(e)).join(" ")}" fill="url(#scG_${b.typ})" class="sc-hex"/>
         <polygon points="${f.ecken.map((e) => pkt(e, 0.9, cx, cy)).join(" ")}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
-        ${landschaft(b.typ, cx, cy, f.id)}`;
+        ${landschaft(b.typ, cx, cy, f.id)}
+        <title>${b.typ === "dorfplatz" ? "Dorfplatz: liefert nichts, Hof daneben = Marktrecht 3:1" : `${LAND[b.typ].name}: liefert ${ROH_INFO[LAND_ROH[b.typ]][0]} bei einer ${b.zahl} (${Math.round((pipsVon(b.zahl) / 36) * 100)} % pro Wurf)`}</title>
+        ${b.typ !== "dorfplatz" ? `<g class="sc-abz"><rect x="${cx - 17}" y="${cy - 45}" width="34" height="19" rx="9.5" fill="rgba(255,250,235,.92)" stroke="${LAND[b.typ].farbe[1]}" stroke-width="2"/><text x="${cx}" y="${cy - 31}">${ROH_INFO[LAND_ROH[b.typ]][1]}</text></g>` : ""}`;
       if (b.zahl) {
         const rot = b.zahl === 6 || b.zahl === 8;
         const punkte = 6 - Math.abs(7 - b.zahl);
@@ -320,7 +327,7 @@
           <text x="${cx}" y="${cy + 4}" class="sc-zahl ${rot ? "rot" : ""}">${b.zahl}</text>
           ${Array.from({ length: punkte }, (_, i) => `<circle cx="${cx - (punkte - 1) * 2 + i * 4}" cy="${cy + 9}" r="1.2" class="sc-pip ${rot ? "rot" : ""}"/>`).join("")}</g>`;
       } else {
-        h += `<g class="sc-schild"><rect x="${cx - 28}" y="${cy + 27}" width="56" height="12" rx="3" fill="#6b4a2b" stroke="#3e2a17"/><text x="${cx}" y="${cy + 36}" class="sc-dorfname">Schechingen</text></g>`;
+        h += `<g class="sc-schild"><rect x="${cx - 28}" y="${cy + 27}" width="56" height="12" rx="3" fill="#6b4a2b" stroke="#3e2a17"/><text x="${cx}" y="${cy + 36}" class="sc-dorfname">Schingen</text></g>`;
         const g = Object.entries(z.gemein).filter(([, s]) => s);
         g.forEach(([was, s]) => { const i = Object.keys(meta().gemein).indexOf(was); const w = (Math.PI * 2 * i) / 4 + Math.PI / 4; h += `<g class="sc-gemein"><circle cx="${cx + Math.cos(w) * 33}" cy="${cy + Math.sin(w) * 28}" r="10" fill="#fff8e6" stroke="${farbe(s)}" stroke-width="3"/><text x="${cx + Math.cos(w) * 33}" y="${cy + Math.sin(w) * 28 + 4}">${meta().gemein[was].icon}</text></g>`; });
       }
@@ -344,6 +351,13 @@
         h += hofModell(x, y, farbe(b.sp), b.typ === "gut", z.letzterBau?.ort === e.id && z.letzterBau.art !== "weg");
         if (modus === "gut" && erlaubt.has(e.id)) h += `<circle cx="${x}" cy="${y}" r="19" class="sc-ziel-ring" data-gut="${e.id}"/>`;
       } else if (modus === "hof" && erlaubt.has(e.id)) h += `<circle cx="${x}" cy="${y}" r="10" class="sc-ziel-punkt eck" data-hof="${e.id}"/>`;
+    }
+    // Eulen-Markierungen (nur für dich, wenn die Eule an ist)
+    const plan = euleAktuell;
+    if (plan) {
+      plan.felder.forEach((f) => { const ff = k.felder[f]; h += `<g class="sc-eule-mark"><circle cx="${ff.x * S + 26}" cy="${ff.y * S - 22}" r="13" /><text x="${ff.x * S + 26}" y="${ff.y * S - 17}">🦉</text></g>`; });
+      plan.ecken.forEach((e, i) => { h += `<g class="sc-eule-mark ecke"><circle cx="${E[e].x * S}" cy="${E[e].y * S - 24}" r="11"/><text x="${E[e].x * S}" y="${E[e].y * S - 20}">${["①", "②", "③"][i] || "🦉"}</text></g>`; });
+      plan.kanten.forEach((kid) => { const kk = k.kanten[kid]; h += `<g class="sc-eule-mark"><circle cx="${((E[kk.a].x + E[kk.b].x) / 2) * S}" cy="${((E[kk.a].y + E[kk.b].y) / 2) * S - 18}" r="11"/><text x="${((E[kk.a].x + E[kk.b].x) / 2) * S}" y="${((E[kk.a].y + E[kk.b].y) / 2) * S - 14}">🦉</text></g>`; });
     }
     svg.innerHTML = h;
     // Klicks
@@ -391,9 +405,9 @@
     else if (modus) h = `<div class="sc-hinweis gold">Tippe auf dem Brett einen leuchtenden Platz an.</div>`;
     else h = `<div class="sc-hinweis">Bauen, handeln oder Zug beenden.</div>`;
     $("#scStatus").innerHTML = h;
-    const k = meta().kosten;
-    $("#scKosten").innerHTML = `<div class="sc-titel">Baukosten</div>
-      ${[["🛤️", "Weg", k.weg, ""], ["🏠", "Hof", k.hof, "1"], ["🏰", "Gutshof", k.gut, "2"], ["🃏", "Dorfkarte", k.karte, "?"]].map(([i, n, c, p]) => `<div class="sc-kz"><span>${i} ${n}${p ? ` <em>${p === "?" ? "" : "+" + p}</em>` : ""}</span><span>${kostenHTML(c)}</span></div>`).join("")}
+    $("#scKosten").innerHTML = `<div class="sc-titel">Was liefert welches Feld?</div>
+      ${["wald", "steinbruch", "feld", "weide", "obstwiese"].map((t) => `<div class="sc-legende"><i style="background:linear-gradient(135deg, ${LAND[t].farbe[0]}, ${LAND[t].farbe[1]})"></i><span>${LAND[t].name}</span><b>${ROH_INFO[LAND_ROH[t]][1]} ${ROH_INFO[LAND_ROH[t]][0]}</b></div>`).join("")}
+      <div class="sc-legende"><i style="background:linear-gradient(135deg, ${LAND.dorfplatz.farbe[0]}, ${LAND.dorfplatz.farbe[1]})"></i><span>Dorfplatz</span><b>⚖️ Marktrecht</b></div>
       <button class="sc-dorfknopf" id="scDorfInfo">⛪ Was ist der Dorfplatz?</button>`;
     $("#scDorfInfo").onclick = () => { Ton.klick(); fenster = "dorfplatz"; dialog(GN.zustand); };
     $("#scLog").innerHTML = (z.log || []).slice().reverse().map((l) => `<div>${esc(l.text)}</div>`).join("");
@@ -412,7 +426,7 @@
     if (dran && !z.zug?.wurf && !m) knoepfe = `<button class="btn gross sc-k-wurf" id="scWuerfeln">🎲 Würfeln</button>`;
     else if (modus && dran) knoepfe = `<button class="btn zweit" id="scAbbrechen">✕ ${{ hof: "Hof", weg: "Weg", gut: "Gutshof" }[modus]} abbrechen</button>`;
     else knoepfe = `
-      <button class="btn sc-k" id="scBauen" ${frei ? "" : "disabled"}>🔨<span>Bauen</span></button>
+      ${z.gebaeude ? `<button class="btn sc-k" id="scBauen" ${frei ? "" : "disabled"} title="Gebäude auf dem Dorfplatz">⛪<span>Dorfplatz</span></button>` : ""}
       <button class="btn sc-k" id="scHandeln" ${frei ? "" : "disabled"}>⚖️<span>Handeln</span></button>
       <button class="btn sc-k sc-k-fertig" id="scFertig" ${frei ? "" : "disabled"}>✓<span>Zug beenden</span></button>`;
     box.innerHTML = `
@@ -425,7 +439,16 @@
         }).join("")}
         ${hand.kirchweih ? `<div class="sc-dk kirchweih" title="Kirchweih: je 1 geheimer Punkt"><span>🎪</span><small>Kirchweih ×${hand.kirchweih}</small></div>` : ""}
       </div>
+      <div class="sc-bauleiste">${bauLeiste(z, frei)}</div>
       <div class="sc-knoepfe-dock">${knoepfe}</div>`;
+    $$("[data-schnellbau]", box).forEach((b) => (b.onclick = () => {
+      const art = b.dataset.schnellbau;
+      Ton.klick();
+      if (art === "karte") { GN.aktion("kaufen"); return; }
+      modus = modus === art ? null : art;
+      brett(z); dock(z); status(z); effekte(z, z);
+      if (modus && matchMedia("(max-width: 1000px)").matches) $("#scBrett").scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
     $("#scWuerfeln")?.addEventListener("click", () => { $("#scWuerfeln").disabled = true; GN.aktion("wuerfeln"); });
     $("#scAbbrechen")?.addEventListener("click", () => { Ton.klick(); modus = null; brett(z); dock(z); status(z); });
     $("#scBauen")?.addEventListener("click", () => { Ton.klick(); fenster = "bauen"; dialog(z); });
@@ -437,6 +460,158 @@
       if (k === "erntedank" || k === "viehmarkt") { auswahl = { k, wahl: [] }; dialog(z); return; }
       GN.aktion("spielen", { karte: k });
     }));
+  }
+
+  // Bau-Knöpfe mit Kosten: grün = hast du, rot = fehlt. Leuchtet, wenn du es jetzt bauen kannst.
+  function bauLeiste(z, frei) {
+    const k = meta().kosten;
+    const teile = [["weg", "🛤️", "Weg", k.weg, z.moeglich?.weg], ["hof", "🏠", "Hof", k.hof, z.moeglich?.hof], ["gut", "🏰", "Gutshof", k.gut, z.moeglich?.gut], ["karte", "🃏", "Karte", k.karte, z.stapel ? null : []]];
+    return teile.map(([art, icon, name, kosten, orte]) => {
+      const fehlt = Object.entries(kosten).reduce((n, [r, x]) => n + Math.max(0, x - (hand.roh[r] || 0)), 0);
+      const platz = orte === null || orte === undefined || orte.length > 0;
+      const kann = frei && !fehlt && platz;
+      const titel = !fehlt ? (platz ? `${name} bauen` : "Gerade kein freier Platz") : `Dir fehlen noch ${fehlt} Rohstoff${fehlt > 1 ? "e" : ""}`;
+      return `<button class="sc-sb ${kann ? "kann" : ""} ${!fehlt ? "bezahlbar" : ""} ${modus === art ? "aktiv" : ""}" data-schnellbau="${art}" ${kann ? "" : "disabled"} title="${titel}">
+        <span class="sc-sb-kopf">${icon} ${name}${fehlt ? `<em>−${fehlt}</em>` : ""}</span>
+        <span class="sc-sb-kosten">${Object.entries(kosten).flatMap(([r, x]) => Array.from({ length: x }, (_, i) => `<i class="${i < (hand.roh[r] || 0) ? "ok" : "fehlt"}">${ROH_INFO[r][1]}</i>`)).join("")}</span>
+      </button>`;
+    }).join("");
+  }
+
+  // =============================================================
+  //  Dorf-Eule: statistische Tipps (optional, jeder Spieler für sich)
+  // =============================================================
+  const pipsVon = (n) => (n ? 6 - Math.abs(7 - n) : 0);
+  let eckeFelder = null;
+  const felderAn = (e) => (eckeFelder ||= (() => { const m = {}; for (const f of meta().karte.felder) for (const x of f.ecken) (m[x] ||= []).push(f.id); return m; })())[e] || [];
+  function meineRohstoffe(z) {
+    const typen = new Set();
+    for (const [e, b] of Object.entries(z.bauten)) if (b.sp === ich()) for (const f of felderAn(+e)) { const r = LAND_ROH[z.belegung[f].typ]; if (r) typen.add(r); }
+    return typen;
+  }
+  function eckeWert(z, e, habe) {
+    let w = 0;
+    const roh = [];
+    for (const f of felderAn(e)) {
+      const b = z.belegung[f];
+      if (b.typ === "dorfplatz") { w += 1.5; continue; }
+      const p = pipsVon(b.zahl) * (f === z.gewitter ? 0.3 : 1);
+      w += p;
+      const r = LAND_ROH[b.typ];
+      roh.push(`${ROH_INFO[r][1]}${b.zahl}`);
+      if (!habe.has(r)) w += 1.5;
+    }
+    return { w, roh };
+  }
+  function einnahmen(z, sp) {
+    const e = Object.fromEntries(ROH.map((r) => [r, 0]));
+    for (const [ecke, b] of Object.entries(z.bauten)) if (b.sp === sp) for (const f of felderAn(+ecke)) {
+      const t = z.belegung[f];
+      if (!t.zahl || f === z.gewitter) continue;
+      e[LAND_ROH[t.typ]] += (pipsVon(t.zahl) / 36) * (b.typ === "gut" ? 2 : 1);
+    }
+    return e;
+  }
+  // Was rät die Eule gerade? { text, ecken:[ids], felder:[ids], kanten:[ids] }
+  function eulePlan(z) {
+    if (!GN.euleAn() || z.phase === "ende" || (z.phase === "aufbau" && z.introMs > 300)) return null;
+    const dran = istDran(z), m = z.zug?.modus;
+    const habe = meineRohstoffe(z);
+    const plan = { tipps: [], ecken: [], felder: [], kanten: [] };
+    const besteEcken = (orte, n = 3) => orte.map((e) => ({ e, ...eckeWert(z, e, habe) })).sort((a, b) => b.w - a.w).slice(0, n);
+    if (z.phase === "aufbau") {
+      if (!dran) { plan.tipps.push("Wenn du dran bist, zeige ich dir die besten Startplätze."); return plan; }
+      if (z.aufbauSchritt === "hof") {
+        const top = besteEcken(z.moeglich.hof);
+        plan.ecken = top.map((x) => x.e);
+        plan.tipps.push(`Die besten Plätze sind mit 🦉 markiert. Platz ① bringt im Schnitt am meisten: ${top[0]?.roh.join(" · ") || ""}.`);
+        plan.tipps.push("Achte auf viele verschiedene Rohstoffe und auf 6 und 8 (die fallen am häufigsten).");
+      } else {
+        // Weg Richtung des besten freien Platzes in der Nähe
+        const ziele = z.moeglich.weg.map((k) => {
+          const kk = meta().karte.kanten[k];
+          const weiter = [kk.a, kk.b].flatMap((x) => [x, ...meta().karte.kanten.filter((q) => q.a === x || q.b === x).flatMap((q) => [q.a, q.b])]);
+          const w = Math.max(...weiter.filter((x) => !z.bauten[x]).map((x) => eckeWert(z, x, habe).w));
+          return { k, w };
+        }).sort((a, b) => b.w - a.w);
+        if (ziele[0]) plan.kanten = [ziele[0].k];
+        plan.tipps.push("Der markierte Weg zeigt Richtung eines guten freien Platzes für später.");
+      }
+      return plan;
+    }
+    const ein = einnahmen(z, ich());
+    const proRunde = ROH.filter((r) => ein[r] > 0.001).map((r) => `${ROH_INFO[r][1]} ${(ein[r] * (z.teilnehmer || []).length).toFixed(1)}`).join(" · ");
+    const fehlend = ROH.filter((r) => ein[r] < 0.001);
+    if (dran && m === "gewitter") {
+      let best = null, bw = -1e9;
+      z.belegung.forEach((b, f) => {
+        if (f === z.gewitter) return;
+        let w = 0;
+        for (const e of meta().karte.felder[f].ecken) { const bau = z.bauten[e]; if (!bau) continue; const x = pipsVon(b.zahl) * (bau.typ === "gut" ? 2 : 1); w += bau.sp === ich() ? -3 * x - 5 : x + (z.punkteOffen[bau.sp] || 0) * 0.3; }
+        if (w > bw) { bw = w; best = f; }
+      });
+      if (best !== null) plan.felder = [best];
+      plan.tipps.push("Das 🦉-Feld trifft deine Gegner am stärksten und dich gar nicht.");
+      return plan;
+    }
+    if (m === "abwerfen" && z.abwerfen?.[ich()]) {
+      const ueber = ROH.filter((r) => hand.roh[r] > 0).sort((a, b) => hand.roh[b] - hand.roh[a]);
+      plan.tipps.push(`Gib vor allem ab, wovon du viel hast: ${ueber.slice(0, 2).map((r) => ROH_INFO[r][1]).join(" ")}. Behalte, was dir für einen Hof fehlt.`);
+      return plan;
+    }
+    if (!dran) {
+      plan.tipps.push(proRunde ? `Pro Runde bekommst du im Schnitt: ${proRunde}.` : "Du bekommst noch nichts – deine Felder haben keine Zahlen oder das Gewitter sitzt drauf.");
+      if (fehlend.length) plan.tipps.push(`Dir fehlt eine Quelle für ${fehlend.map((r) => ROH_INFO[r][1] + " " + ROH_INFO[r][0]).join(", ")}. Baue Richtung ${fehlend.map((r) => Object.keys(LAND_ROH).find((t) => LAND_ROH[t] === r)).map((t) => LAND[t].name).join(" oder ")}.`);
+      return plan;
+    }
+    if (!z.zug?.wurf) {
+      const zahlen = [...new Set(Object.entries(z.bauten).filter(([, b]) => b.sp === ich()).flatMap(([e]) => felderAn(+e)).filter((f) => f !== z.gewitter).map((f) => z.belegung[f].zahl).filter(Boolean))].sort((a, b) => a - b);
+      const p = zahlen.reduce((s, n) => s + pipsVon(n), 0) / 36;
+      plan.tipps.push(`Chance, dass du bei diesem Wurf etwas bekommst: <b>${Math.round(p * 100)} %</b> (deine Zahlen: ${zahlen.join(", ") || "keine"}).`);
+      if (KARTEN && (hand.karten || []).includes("feldhueter") && meta().karte.felder[z.gewitter].ecken.some((e) => z.bauten[e]?.sp === ich())) plan.tipps.push("Das Gewitter sitzt auf deinem Feld: Spiele jetzt den 👮 Feldhüter, bevor du würfelst!");
+      return plan;
+    }
+    if (m) return plan;
+    // Nach dem Wurf: was lohnt sich?
+    const kosten = meta().kosten;
+    const kann = (c) => Object.entries(c).every(([r, x]) => hand.roh[r] >= x);
+    const fehlt = (c) => Object.entries(c).flatMap(([r, x]) => Array(Math.max(0, x - hand.roh[r])).fill(r));
+    if (z.moeglich.gut.length && kann(kosten.gut)) {
+      const top = besteEcken(z.moeglich.gut, 1);
+      plan.ecken = top.map((x) => x.e);
+      plan.tipps.push("Baue einen <b>Gutshof</b> (+2, bringt doppelt). Am besten auf dem 🦉-Hof mit den stärksten Zahlen.");
+    } else if (z.moeglich.hof.length && kann(kosten.hof)) {
+      const top = besteEcken(z.moeglich.hof, 2);
+      plan.ecken = top.map((x) => x.e);
+      plan.tipps.push(`Baue einen <b>Hof</b> (+1) – der beste Platz ist mit 🦉 markiert (${top[0].roh.join(" · ")}).`);
+    } else {
+      const ziel = z.moeglich.hof.length ? ["Hof", kosten.hof] : z.moeglich.gut.length ? ["Gutshof", kosten.gut] : ["Weg", kosten.weg];
+      const f = fehlt(ziel[1]);
+      if (!f.length && ziel[0] === "Weg") plan.tipps.push("Baue Wege Richtung eines freien Platzes, damit du wieder Höfe bauen kannst.");
+      else if (f.length) {
+        const kurs = z.kurs[ich()];
+        const zahler = ROH.filter((r) => hand.roh[r] - (ziel[1][r] || 0) >= kurs);
+        if (f.length === 1 && zahler.length) plan.tipps.push(`Für einen ${ziel[0]} fehlt dir nur 1 ${ROH_INFO[f[0]][1]}. Tausche am Markt <b>${kurs}× ${ROH_INFO[zahler[0]][1]} → 1 ${ROH_INFO[f[0]][1]}</b>.`);
+        else {
+          const ueber = ROH.filter((r) => hand.roh[r] > (ziel[1][r] || 0)).sort((a, b) => hand.roh[b] - hand.roh[a]);
+          plan.tipps.push(`Für einen ${ziel[0]} fehlt dir: ${f.map((r) => ROH_INFO[r][1]).join(" ")}.${ueber.length ? ` Biete deinen Mitspielern ${ROH_INFO[ueber[0]][1]} dafür an.` : ""}`);
+        }
+      }
+      if (kann(kosten.karte) && z.stapel && !plan.tipps.length) plan.tipps.push("Kauf eine 🃏 Dorfkarte – Feldhüter helfen gegen das Gewitter und bringen die Stärkste Feldwache.");
+    }
+    if (fehlend.length) plan.tipps.push(`Du hast keine Quelle für ${fehlend.map((r) => ROH_INFO[r][1]).join(" ")} – plane deine nächsten Höfe dort.`);
+    return plan;
+  }
+  let euleAktuell = null;
+  function euleZeigen(z) {
+    const box = $("#scEule");
+    if (!box) return;
+    const an = GN.euleAn();
+    box.classList.toggle("versteckt", !an);
+    if (!an) return;
+    const plan = euleAktuell;
+    box.innerHTML = `<div class="sc-eule-kopf"><span>🦉</span><b>Dorf-Eule</b><small>nur du siehst das</small></div>
+      ${(plan?.tipps || ["Ich schaue mit. Sobald du etwas entscheiden musst, gebe ich dir einen Tipp."]).map((t) => `<p>${t}</p>`).join("")}`;
   }
 
   // ---------- Große Fenster in der Mitte ----------
@@ -517,7 +692,7 @@
         <button class="btn link" id="scSchliessen">Schließen</button>`;
     } else if (fenster === "dorfplatz") {
       const g = meta().gemein;
-      h = `<h2>⛪ Der Dorfplatz von Schechingen</h2>
+      h = `<h2>⛪ Der Dorfplatz von Schingen</h2>
         <p>Die Mitte der Karte bringt keine Rohstoffe, ist aber wertvoll:</p>
         <ul class="sc-liste">
           <li><b>⚖️ Marktrecht:</b> Steht einer deiner Höfe direkt an einer Ecke des Dorfplatzes, tauschst du am Markt <b>3:1</b> statt 4:1.</li>
@@ -608,7 +783,6 @@
   }
 
   // Gewonnene Rohstoffe fliegen von der Landschaft zum Spieler (bei dir: in deine Hand)
-  const LAND_ROH = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch", obstwiese: "obst" };
   function fliegen(von, zielEl, icon, verz, fertig) {
     const zr = zielEl.getBoundingClientRect();
     const el = document.createElement("div");
@@ -748,9 +922,9 @@
 
   GN.spiele.schechingen = {
     icon: "🌾",
-    titel: "Schechingen",
+    titel: "Die Knaben von Schingen",
     kurz: "Höfe bauen, Rohstoffe tauschen, Dorfschultheiß werden.",
-    beschreibung: "Das Aufbauspiel rund um den Dorfplatz von Schechingen: Höfe und Wege bauen, mit Jahreszeiten, Gewittern und Handel. Wer zuerst 10 Punkte hat, gewinnt.",
+    beschreibung: "Das Aufbauspiel rund um den Dorfplatz von Schingen: Höfe und Wege bauen, mit Jahreszeiten, Gewittern und Handel. Wer zuerst 10 Punkte hat, gewinnt.",
     tags: ["🗺️ Sechseck-Karte", "⚖️ Handel", "🤖 Gegen Computer", "👥 2–4 Spieler"],
     abschnitte,
     binde,

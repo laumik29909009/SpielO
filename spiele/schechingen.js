@@ -1,7 +1,7 @@
 // =============================================================
-//  Spiel-Modul: Schechingen – Hof & Handel
+//  Spiel-Modul: Die Knaben von Schingen (Aufbau & Handel)
 //  Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte rund um
-//  den Dorfplatz von Schechingen.
+//  den Dorfplatz von Schingen.
 //  - 5 Rohstoffe: Holz (Wald), Stein (Steinbruch), Korn (Feld), Milch (Weide), Obst (Streuobstwiese)
 //  - Höfe (1 Punkt), Gutshöfe (2), Wege, 25 Dorfkarten
 //  - Dorfplatz in der Mitte: Marktrecht 3:1, optional Gemeinschaftsbauten (je 2 Punkte)
@@ -16,7 +16,7 @@ const BOTS = [
 const FARBEN = ["#e8524a", "#3d7dff", "#f2b33d", "#3fbf72"];
 const ROH = ["holz", "stein", "korn", "milch", "obst"];
 const LAND = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch", obstwiese: "obst" };
-// Eigene Baukosten (Schechingen)
+// Eigene Baukosten
 const KOSTEN = {
   weg: { holz: 1, stein: 1 },
   hof: { holz: 1, korn: 1, milch: 1, obst: 1 },
@@ -523,7 +523,7 @@ function ende(raum, ctx, sieger) {
   d.phase = "ende";
   d.sieger = sieger;
   d.endetUm = null;
-  log(d, `🏆 ${name(raum, sieger)} ist Dorfschultheiß von Schechingen!`);
+  log(d, `🏆 ${name(raum, sieger)} ist Dorfschultheiß von Schingen!`);
   const alle = teilnehmer(raum);
   const liste = [];
   const beste = (f, min, icon, titel, text) => {
@@ -730,9 +730,9 @@ module.exports = {
   starten(raum, ctx) {
     const e = einst(raum);
     const menschen = Object.values(raum.spieler).filter((s) => s.online);
-    if (menschen.length > MAX_TEILNEHMER) return `Schechingen geht mit höchstens ${MAX_TEILNEHMER} Spielern.`;
+    if (menschen.length > MAX_TEILNEHMER) return `Die Knaben von Schingen gehen mit höchstens ${MAX_TEILNEHMER} Spielern.`;
     const botAnzahl = Math.min(e.bots, MAX_TEILNEHMER - menschen.length);
-    if (menschen.length + botAnzahl < 2) return "Schechingen braucht mindestens 2 Spieler. Nimm einen Computer dazu!";
+    if (menschen.length + botAnzahl < 2) return "Die Knaben von Schingen brauchen mindestens 2 Spieler. Nimm einen Computer dazu!";
     const bots = mischen(BOTS).slice(0, botAnzahl).map((b, i) => ({ ...b, id: "bot" + (i + 1), punkte: 0 }));
     const reihenfolge = mischen([...menschen.map((s) => s.id), ...bots.map((b) => b.id)]);
     raum.daten = {

@@ -63,7 +63,7 @@ Tages-Quiz mit freien Antworten. Jede Aufgabe ist eine Kategorie („Nenne eine 
 - Antwortprüfung wie bei Krillion in zwei Stufen: erst Listen (inkl. Tippfehler, Mehrzahl, Wortteile), dann für unbekannte Antworten **Wikipedia** (`spiele/arena-pruefer.js`, Regeln pro Aufgabe). Dort anerkannte Antworten zählen als Legende (85) und werden gelernt. Mit Freunden: **Einspruch** („Gilt!“), die Mehrheit der Mitspieler entscheidet (dann Krieger, 30).
 - Aufgaben: `daten/arena.js`, `daten/arena-2.js` und zusätzliche Antworten in `daten/arena-extra.js` (Schreibweisen mit `|` trennen). Tippfehler und Mehrzahl werden erkannt.
 
-## Schechingen – Hof & Handel
+## Die Knaben von Schingen (Spiel-ID `schechingen`)
 Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner).
 - 5 Rohstoffe: 🪵 Holz (Wald), 🪨 Stein (Steinbruch), 🌾 Korn (Feld), 🥛 Milch (Weide), 🍎 Obst (Streuobstwiese). Gewürfelte Landschaften liefern an angrenzende Höfe (Gutshof doppelt).
 - Bauen: Weg (Holz, Stein), Hof (Holz, Korn, Milch, Obst; 1 Punkt), Gutshof (3 Stein, 2 Obst; 2 Punkte), Dorfkarte (Korn, Milch, Obst).
@@ -73,6 +73,8 @@ Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Comput
 - 7 = Gewitter: über 8 Karten die Hälfte abgeben, Gewitter blockiert ein Feld, eine Karte klauen.
 - Längster Weg (ab 5) und Stärkste Feldwache (ab 3 Feldhütern): je 2 Punkte. Sieg bei 8/10/12 Punkten.
 - Faire Zufallskarte jede Partie (`karteFair` in `spiele/schechingen.js`): keine starken Ecken, 6/8 und 2/12 getrennt, Zahlen pro Landschaft ausgeglichen, keine Klumpen.
+- Bau-Leiste in der Hand-Leiste zeigt die Kosten (grün vorhanden, rot fehlt); Rohstoff-Abzeichen auf jedem Feld, Legende rechts.
+- Dorf-Eule 🦉 (optional, pro Spieler über den Schalter oben, gespeichert auf dem Gerät – gilt auch für die Würfel-Eule): beste Start- und Bauplätze, fehlende Rohstoffe und Markt-Tausch, Gewitter-Ziel, Chance pro Wurf.
 - Startanimation: Karte legen, Zahlen fallen, Reihenfolge auslosen; Start- und Würfelerträge fliegen zu den Spielern.
 
 ## Stadt Land Fluss: Punkte

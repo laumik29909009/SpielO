@@ -415,6 +415,17 @@ function zeigeLobby() {
 
 GN.einstellungen = (e) => { Ton.klick(); socket.emit("einstellungen", e); };
 
+// Eule (Tipps) an/aus: entscheidet jeder Spieler für sich, gespeichert auf dem Gerät
+GN.euleAn = () => speicher("eule") !== "aus";
+GN.euleKnopf = () => `<button class="eule-schalter ${GN.euleAn() ? "an" : ""}" data-eule-schalter title="Die Eule gibt dir Tipps. Nur du siehst sie.">🦉 ${GN.euleAn() ? "Eule an" : "Eule aus"}</button>`;
+document.addEventListener("click", (ev) => {
+  if (!ev.target.closest("[data-eule-schalter]")) return;
+  speicher("eule", GN.euleAn() ? "aus" : "an");
+  Ton.klick();
+  $$("[data-eule-schalter]").forEach((b) => { b.classList.toggle("an", GN.euleAn()); b.textContent = `🦉 ${GN.euleAn() ? "Eule an" : "Eule aus"}`; });
+  GN.euleNeu?.();
+});
+
 const einladungsLink = () => `${location.origin}/?raum=${GN.zustand.code}`;
 async function kopieren() {
   try { await navigator.clipboard.writeText(einladungsLink()); toast("Link kopiert! Schick ihn deinen Freunden.", true); }

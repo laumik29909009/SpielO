@@ -342,3 +342,76 @@ button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
   .sc-los-k { width: 76px; }
 }
 @media (prefers-reduced-motion: reduce) { .sc-brett.sc-intro .sc-feld, .sc-brett.sc-intro .sc-marke, .sc-los-k { animation: none !important; } }
+
+/* Rohstoff-Abzeichen auf jedem Feld */
+.sc-abz text { font-size: 13px; text-anchor: middle; pointer-events: none; }
+.sc-abz { pointer-events: none; }
+
+/* Legende */
+.sc-legende { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; font-size: 0.86rem; }
+.sc-legende i { width: 22px; height: 18px; border-radius: 5px; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+.sc-legende b { font-weight: 800; }
+
+/* Bau-Leiste unten: Kosten auf einen Blick */
+.sc-bauleiste { display: flex; gap: 6px; flex: none; }
+.sc-sb { all: unset; box-sizing: border-box; cursor: default; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border-radius: 12px; background: var(--flaeche); border: 2px solid var(--rand); min-width: 92px; opacity: 0.85; }
+.sc-sb-kopf { font-size: 0.8rem; font-weight: 800; display: flex; justify-content: space-between; gap: 4px; white-space: nowrap; }
+.sc-sb-kopf em { font-style: normal; color: #ff8f86; }
+.sc-sb-kosten { display: flex; gap: 1px; flex-wrap: wrap; }
+.sc-sb-kosten i { font-style: normal; font-size: 0.95rem; line-height: 1; padding: 2px; border-radius: 5px; }
+.sc-sb-kosten i.ok { background: rgba(63, 196, 125, 0.25); }
+.sc-sb-kosten i.fehlt { background: rgba(232, 82, 74, 0.25); filter: grayscale(0.8); opacity: 0.6; }
+.sc-sb.bezahlbar { border-color: rgba(63, 196, 125, 0.55); opacity: 1; }
+.sc-sb.kann { cursor: pointer; border-color: #3fc47d; background: rgba(63, 196, 125, 0.14); box-shadow: 0 0 14px rgba(63, 196, 125, 0.35); animation: sc-spielbar 1.8s ease-in-out infinite; }
+.sc-sb.kann:hover { background: rgba(63, 196, 125, 0.26); }
+.sc-sb.aktiv { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); animation: none; }
+
+/* Dorf-Eule */
+.sc-eule { padding: 12px 14px; border-radius: 16px; background: linear-gradient(180deg, #22304a, #1a2438); border: 1px solid rgba(120, 200, 255, 0.4); display: grid; gap: 6px; }
+.sc-eule-kopf { display: flex; align-items: center; gap: 8px; }
+.sc-eule-kopf span { font-size: 1.6rem; animation: w-eule 3s ease-in-out infinite; }
+.sc-eule-kopf small { margin-left: auto; color: var(--leise); font-size: 0.72rem; }
+.sc-eule p { margin: 0; font-size: 0.88rem; line-height: 1.35; }
+.sc-eule p b { color: #9fd6ff; }
+.sc-eule-mark { pointer-events: none; animation: sc-eule-mark 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.sc-eule-mark circle { fill: rgba(30, 60, 100, 0.9); stroke: #9fd6ff; stroke-width: 2; }
+.sc-eule-mark text { font-size: 13px; text-anchor: middle; fill: #fff; font-weight: 900; }
+@keyframes sc-eule-mark { 50% { transform: translateY(-3px); } }
+@keyframes w-eule { 0%, 100% { transform: rotate(0); } 10% { transform: rotate(-8deg); } 20% { transform: rotate(6deg); } 30% { transform: rotate(0); } }
+
+@media (max-width: 1000px) {
+  .sc-dock { flex-wrap: wrap; }
+  .sc-bauleiste { order: 3; width: 100%; overflow-x: auto; }
+  .sc-sb { flex: 1; min-width: 76px; }
+}
+
+/* Hand-Leiste in zwei Zeilen: oben Hand + Knöpfe, darunter die Bau-Leiste über die ganze Breite */
+.sc-dock { flex-wrap: wrap; row-gap: 8px; }
+.sc-hand { flex: 1 1 auto; min-width: 0; }
+.sc-bauleiste { order: 3; width: 100%; justify-content: center; }
+.sc-sb { flex: 1 1 0; max-width: 240px; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 10px; }
+.sc-sb-kopf { font-size: 0.88rem; }
+@media (max-width: 700px) {
+  .sc-sb { flex-direction: column; align-items: flex-start; gap: 3px; padding: 5px 6px; min-width: 0; }
+  .sc-sb-kopf { font-size: 0.74rem; }
+  .sc-sb-kosten i { font-size: 0.8rem; padding: 1px; }
+  .sc-bauleiste { order: 2; overflow-x: visible; gap: 4px; }
+  .sc-knoepfe-dock { order: 3; }
+}
+
+/* Handy: Hand-Leiste kompakt, damit das Brett sichtbar bleibt */
+@media (max-width: 700px) {
+  .sc-dock { padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); gap: 6px; }
+  .sc-hand { gap: 5px; }
+  .sc-hand .sc-karte { width: auto; flex: 1 1 0; flex-direction: row; justify-content: center; gap: 4px; padding: 5px 2px; }
+  .sc-hand .sc-karte .sc-k-icon { font-size: 1.15rem; }
+  .sc-hand .sc-karte b { font-size: 1.05rem; }
+  .sc-hand .sc-karte small { display: none; }
+  .sc-hand .sc-dk { width: auto; flex-direction: row; padding: 4px 6px; }
+  .sc-hand .sc-dk span { font-size: 1.1rem; }
+  .sc-sb { padding: 4px 5px; border-radius: 10px; }
+  .sc-sb-kosten { flex-wrap: nowrap; }
+  .sc-knoepfe-dock .btn { padding: 7px 4px; font-size: 1rem; }
+  .sc-k span { font-size: 0.72rem; }
+}
+@media (max-width: 700px) { .sc-sb-kosten i { font-size: 0.7rem; padding: 1px 0; } .sc-sb-kosten { gap: 0; } }
