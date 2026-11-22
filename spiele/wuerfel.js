@@ -227,7 +227,7 @@ module.exports = {
   starten(raum, ctx) {
     const e = einst(raum);
     const menschen = Object.values(raum.spieler).filter((s) => s.online);
-    if (menschen.length > MAX_TEILNEHMER) return `Würfelglück geht mit höchstens ${MAX_TEILNEHMER} Spielern.`;
+    if (menschen.length > MAX_TEILNEHMER) return `Kiffel geht mit höchstens ${MAX_TEILNEHMER} Spielern.`;
     const botAnzahl = Math.min(e.bots, MAX_TEILNEHMER - menschen.length);
     const bots = mischen(BOTS).slice(0, botAnzahl).map((b, i) => ({ ...b, id: "bot" + (i + 1), punkte: 0 }));
     const reihenfolge = mischen([...menschen.map((s) => s.id), ...bots.map((b) => b.id)]);
