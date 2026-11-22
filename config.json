@@ -1,8 +1,7 @@
 {
   "wartung": false,
   "imAufbau": [
-    "arena",
-    "baulowe"
+    "arena"
   ],
   "wartungInfo": {
     "punkte": [
@@ -26,12 +25,13 @@
   },
   "patch": {
     "datum": "22.11.2026",
-    "titel": "Großes Qualitäts-Update & KI-Stärke",
+    "titel": "Neu: Baulöwe – die Schechingen-Edition!",
     "punkte": [
+      "🎩 Neues Spiel: Baulöwe – Straßen kaufen, Häuser bauen, Miete kassieren. Mit dem Ochsen, dem Osterbrunnen, dem Freibad und ganz Schechingen auf dem Brett",
       "🧠 Neu in jedem Spiel mit Computer-Gegnern: KI-Stärke Einfach, Mittel oder Schwer",
       "🌾 Knaben von Schechingen: Titel-Tafel (längster Weg, Feldwache, Wirtshaus …), Krone für die Führung, klar beschriftete Gewitter- und Winterfelder, ruhigeres Tempo, kein Nachblinken mehr",
       "🃏 Jonkler: Karten werden jetzt sichtbar ausgeteilt und umgedreht",
-      "✨ Mehr Gefühl überall: Karten neigen sich zur Maus und glänzen, Knöpfe federn, weicher Vorhang zwischen Lobby, Spiel und Siegerehrung",
+      "✨ Mehr Gefühl überall: Karten neigen sich zur Maus und glänzen, Knöpfe federn, ruhiger Ladebildschirm vor jedem Spiel",
       "🎯 Jedes Spiel hat neue große Momente: Hit-Stop im Quartett, steigende +2-Ketten in GoonO, Fünfling-Explosion und Bonus-Balken, fliegende Daumen in Stadt Land Puss, Jubel in der Arena"
     ]
   },
@@ -47,14 +47,9 @@
         "Das Tages-Quiz im Kolosseum – fast fertig"
       ],
       [
-        "🎩",
-        "Neues Brettspiel",
-        "Straßen kaufen, Häuser bauen, Miete kassieren"
-      ],
-      [
-        "🐼",
-        "Neue Quartett-Karten",
-        "Mehr Meister bei Kung Fu Panda und neue Drachen"
+        "🃏",
+        "Neues Quartett",
+        "Ein komplett neues Deck ist in Planung"
       ],
       [
         "🎰",

@@ -22,7 +22,7 @@ const SPIELE = {
   baulowe: require("./spiele/baulowe"),
 };
 const MAX_SPIELER = 10;
-const LADE_MS = 2500; // Ladebildschirm vor jedem Spielstart
+const LADE_MS = 1400; // Ladebildschirm vor jedem Spielstart
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];
 
 const app = express();

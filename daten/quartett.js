@@ -188,43 +188,4 @@ for (const deck of Object.values(DECKS)) {
     k.angriff = { art, name, farbe: farbe || null, objekt: objekt || null };
   }
 }
-// =============================================================
-//  Demnächst: Karten-Ideen, die noch NICHT im Spiel sind (je zwei neue Quartette).
-//  Sie erscheinen nur im Vorschau-Raum in der Galerie unter „🔒 Demnächst“.
-//  Freischalten: Gruppen und Karten oben in die Decks übernehmen und Bilder ablegen.
-// =============================================================
-const K = (id, name, tier, stil, text, w, angriff) => ({ id, name, tier, stil, text, w, gruppe: id[0], angriff: { art: angriff[0], name: angriff[1], farbe: angriff[2] || null, objekt: angriff[3] || null } });
-KUNGFUPANDA.bald = {
-  gruppen: [
-    { id: "I", name: "Legenden der Ehrfurcht", icon: "🐉", element: "feuer", farbe: "#c0392b", farbe2: "#ffd27a" },
-    { id: "J", name: "Pfoten des Schicksals", icon: "✨", element: "licht", farbe: "#2c7fb8", farbe2: "#c9f0ff" },
-  ],
-  karten: [
-    K("I1", "Ke-Pa", "1f409", "Höllendrache", "Ein uralter Drachendämon, der das Tal erobern will.", [96, 70, 82, 99, 95], ["feuerball", "Höllenfeuer", "#ff3d1a"]),
-    K("I2", "Fung", "1f40a", "Krokodil-Bandit", "Anführer der Krokodil-Banditen. Großes Maul, großes Herz.", [78, 48, 55, 40, 82], ["peitsche", "Schwanzhieb", "#5a9a3a"]),
-    K("I3", "Scorpion", "1f98e", "Giftmeisterin", "Eine ehemalige Meisterin, die mit Gift den Willen ihrer Gegner bricht.", [62, 80, 90, 88, 66], ["stacheln", "Giftstachel", "#b07cff"]),
-    K("I4", "Hundun", "1f417", "Unterwelt-Boss", "Herr der Unterwelt. Plant lieber, als selbst zu kämpfen.", [70, 38, 60, 55, 85], ["werfen", "Goldmünzen-Hagel", "#ffd23f", "🪙"]),
-    K("J1", "Nu Hai", "1f43c", "Blauer Drache", "Eine der vier Auserwählten mit der Kraft des Blauen Drachen.", [62, 78, 74, 90, 66], ["welle", "Drachenwelle", "#38a8ff"]),
-    K("J2", "Jing", "1f43c", "Weißer Tiger", "Schnell, stolz und mit den Krallen des Weißen Tigers.", [70, 88, 86, 72, 64], ["krallen", "Tigerklaue", "#f5f0e6"]),
-    K("J3", "Bao", "1f43c", "Roter Phönix", "Kann mit der Kraft des Phönix Feuer rufen.", [58, 84, 70, 80, 60], ["feuerball", "Phönixflamme", "#ff6a2a"]),
-    K("J4", "Fan Tong", "1f43c", "Schwarze Schildkröte", "Der Ruhige der Gruppe, unverwüstlich wie ein Panzer.", [86, 40, 62, 70, 92], ["beben", "Panzer-Stampfer", "#3a7a4a"]),
-  ],
-};
-DRAGONS.bald = {
-  gruppen: [
-    { id: "I", name: "Wüste & Wolken", icon: "🏜️", element: "wind", farbe: "#c9a24a", farbe2: "#fff0b8" },
-    { id: "J", name: "Riesen der Meere", icon: "🌊", element: "wasser", farbe: "#1f6fa8", farbe2: "#a8e0ff" },
-  ],
-  karten: [
-    K("I1", "Sand Wraith", "1f409", "Sandgeist", "Gräbt sich in Sekunden ein und schießt Sandladungen.", [70, 140, 55, 15, 72], ["welle", "Sandsturm", "#e0c27a"]),
-    K("I2", "Woolly Howl", "1f409", "Wolkenjäger", "Versteckt sich in Wolken, sein dickes Fell trotzt jeder Kälte.", [68, 170, 50, 18, 80], ["eis", "Frostfeuer", "#dfefff"]),
-    K("I3", "Triple Stryke", "1f409", "Dreischwanz-Jäger", "Drei Stachelschwänze, jeder mit einem anderen Gift.", [85, 160, 75, 16, 78], ["stacheln", "Dreifachstich", "#ff9f1c"]),
-    K("I4", "Flightmare", "1f409", "Leuchtnebel", "Leuchtet nachts blau und lähmt mit seinem Atem vor Angst.", [60, 120, 40, 14, 60], ["nebel", "Lähmnebel", "#6fe3ff"]),
-    K("J1", "Seashocker", "1f409", "Blitz unter Wasser", "Jagt mit Stromstößen in der Tiefe.", [72, 110, 70, 20, 58], ["blitz", "Unterwasserblitz", "#7fe3ff"]),
-    K("J2", "Submaripper", "1f409", "Meeresgigant", "Taucht unter Schiffen auf und zieht sie in die Tiefe.", [88, 60, 85, 60, 55], ["welle", "Riesensog", "#2a7fbf"]),
-    K("J3", "Boneknapper", "1f409", "Knochenpanzer", "Trägt eine Rüstung aus Knochen und sucht seinen letzten Knochen.", [66, 90, 99, 22, 60], ["beben", "Knochenbrecher", "#e8e0cf"]),
-    K("J4", "Buffalord", "1f409", "Sanfter Riese", "Sein Speichel heilt Krankheiten. Kaum je gesehen.", [64, 70, 80, 30, 70], ["chi", "Heilschleim", "#9be15d", "💚"]),
-  ],
-};
-
 module.exports = { DECKS };

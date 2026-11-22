@@ -635,9 +635,9 @@
   GN.spiele.skat = {
     icon: "🃏",
     titel: "Jonkler",
-    kurz: "Schwimmen, Arschloch, Durak und Mau-Mau mit dem Skat-Blatt.",
-    beschreibung: "Die Kartenklassiker für den Abend: Schwimmen (31), Arschloch, Durak und Mau-Mau. Am 3D-Tisch, mit Computer-Gegnern.",
-    tags: ["🔄 Mau-Mau", "🏊 Schwimmen", "👑 Arschloch", "🛡️ Durak", "👥 2–8 Spieler"],
+    kurz: "Schwimmen, Arschloch und Durak mit dem Skat-Blatt.",
+    beschreibung: "Die Kartenklassiker für den Abend: Schwimmen (31), Arschloch und Durak. Am 3D-Tisch, mit Computer-Gegnern.",
+    tags: ["🏊 Schwimmen", "👑 Arschloch", "🛡️ Durak", "👥 2–8 Spieler"],
     abschnitte,
     binde,
     zeige,

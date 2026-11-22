@@ -1272,7 +1272,7 @@ const Poker = {
 
 const SPIELE = { schwimmen: Schwimmen, arschloch: Arschloch, durak: Durak, maumau: MauMau, siebzehn: Siebzehn, poker: Poker };
 // Glücksspiele (17 und 4, Poker) sind vorerst ausgeblendet: Code bleibt, wird später überarbeitet (Casino)
-const AUSGEBLENDET = ["siebzehn", "poker"];
+const AUSGEBLENDET = ["siebzehn", "poker", "maumau"]; // Mau-Mau: zu ähnlich wie GoonO
 const waehlbar = (m) => !!SPIELE[m] && !AUSGEBLENDET.includes(m);
 
 function setzePunkte(raum, t, p) {
