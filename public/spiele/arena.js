@@ -306,8 +306,24 @@
     leuteZeigen(z);
   }
 
+  // =============================================================
+  //  Vollbild-Welt: das Kolosseum liegt hinter dem ganzen Spiel
+  // =============================================================
+  let welt = null, weltAnflug = "";
+  function weltHolen() {
+    if (!welt) {
+      welt = document.createElement("div");
+      welt.className = "a-welt"; welt.setAttribute("aria-hidden", "true");
+      document.body.prepend(welt);
+      // Sichtbar nur, solange die Arena läuft
+      setInterval(() => document.body.classList.toggle("arena-welt", GN.zustand?.spiel === "arena" && /^arena-(spiel|ende)/.test(GN.ansicht || "")), 300);
+    }
+    return welt;
+  }
+
   function aufbauen(z) {
     GN.ansicht = "arena-spiel";
+    document.body.classList.add("arena-welt");
     GN.stoppeTimer();
     schluessel = "";
     app.innerHTML = `
@@ -318,7 +334,7 @@
           <span class="timer-zahl" id="timerZahl"></span>
         </div>
         <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
-        <div class="a-kopf" id="aKopf"><div class="a-3d-huelle" id="a3d"><div class="a-3d-info" id="a3dInfo"></div></div><div id="aSchilde"></div></div>
+        <div class="a-kopf" id="aKopf"><div class="a-3d-huelle fenster" id="a3d"><div class="a-3d-info" id="a3dInfo"></div></div><div id="aSchilde"></div></div>
         <div id="aInhalt"></div>
         <div class="a-leute" id="aLeute"></div>
       </div>`;
@@ -333,6 +349,7 @@
   // 3D-Kolosseum mit Gladiator (Rückfall: Halbkreis-Anzeige ohne WebGL)
   function buehne(huelle, punkte, max, opt = {}) {
     if (!huelle) return;
+    const istFenster = huelle.classList.contains("fenster");
     const t = titelFuer(punkte, max);
     const info = huelle.querySelector(".a-3d-info");
     const text = `<b class="a-ruhm-zahl">${fmt(punkte)}</b><span>/ ${fmt(max)} Ruhm</span><em>${t.icon} ${t.name} · ${zuschauer(punkte)} Zuschauer</em>`;
@@ -342,7 +359,13 @@
       return;
     }
     if (info) info.innerHTML = text;
-    ArenaBuehne3D.einhaengen(huelle).then((b) => b.setzen(punkte, max, opt)).catch(() => { huelle.classList.add("ohne3d"); huelle.innerHTML = ruhmAnzeige(punkte, max); });
+    ArenaBuehne3D.einhaengen(istFenster ? weltHolen() : huelle).then((b) => {
+      document.body.classList.add("arena-welt-bereit");
+      // Beim ersten Bild eines Spiels fliegt die Kamera von oben ins Kolosseum
+      const id = GN.zustand?.spielId || "";
+      if (istFenster && weltAnflug !== id) { weltAnflug = id; b.anflug(); }
+      b.setzen(punkte, max, { ende: !!opt.ende, ...opt });
+    }).catch(() => { huelle.classList.remove("fenster"); huelle.classList.add("ohne3d"); huelle.innerHTML = ruhmAnzeige(punkte, max); });
   }
 
   function timerStarten(z) {
@@ -410,9 +433,10 @@
       setTimeout(() => kopf(z, stufen, { stufe: s }), 650);
       if (s === 100) { Ton.fanfare(); GN.konfetti(220); navigator.vibrate?.([60, 40, 120]); }
       else if (s >= 85) { Ton.volltreffer(); GN.konfetti(90); navigator.vibrate?.(60); }
-      else if (s >= 30) Ton.richtig();
-      else if (s > 0) Ton.ding();
-      else Ton.falsch();
+      if (s >= 30) { GN.fx?.funken(med, { anzahl: s >= 85 ? 26 : 16, weite: s >= 85 ? 150 : 100, farben: [STUFE[s].farbe, "#fff1a8", "#ffcf3f"] }); }
+      if (s >= 30 && s < 85) Ton.richtig();
+      else if (s > 0 && s < 30) Ton.ding();
+      else if (s === 0) Ton.falsch();
     } else kopf(z, stufen);
     weiterKnopf(z);
   }
@@ -464,7 +488,7 @@
     app.innerHTML = `
       <div class="max-breite a-ende">
         <div class="a-ende-titel">${tag ? `🏛️ Tagesarena #${z.tagNr} geschlagen!` : "🎲 Freies Spiel beendet"}</div>
-        <div class="a-3d-huelle gross" id="a3dEnde"><div class="a-3d-info"></div></div>
+        <div class="a-3d-huelle gross fenster" id="a3dEnde"><div class="a-3d-info"></div></div>
         ${schilde(stufen, z.gesamt)}
         <div class="a-ende-info">${tag ? (gezaehlt ? `✓ Zählt für die Tages-Rangliste${stat.serie > 1 ? ` · 🔥 ${stat.serie} Tage in Folge!` : ""}` : "Übungsrunde: Dein erstes Ergebnis von heute zählt.") : ""}</div>
         <div class="a-ende-knoepfe">
@@ -484,10 +508,10 @@
     endeKnoepfe(z);
     // Gladiator startet am Anfang und läuft bis zu seinem Ergebnis, der Ruhm zählt mit
     const huelle = $("#a3dEnde");
-    buehne(huelle, 0, z.gesamt * 100, { sofort: true });
+    buehne(huelle, 0, z.gesamt * 100, { sofort: true, ende: true });
     const dauer = 1200 + (punkte / (z.gesamt * 100)) * 4200;
     setTimeout(() => {
-      buehne(huelle, punkte, z.gesamt * 100, { stufe: punkte >= z.gesamt * 40 ? 100 : 30 });
+      buehne(huelle, punkte, z.gesamt * 100, { stufe: punkte >= z.gesamt * 40 ? 100 : 30, ende: true });
       const zahl = huelle.querySelector(".a-ruhm-zahl");
       const start = performance.now();
       const lauf = (t) => { const k = Math.min(1, (t - start) / dauer); if (zahl) zahl.textContent = fmt(punkte * k); if (k < 1) requestAnimationFrame(lauf); };

@@ -528,7 +528,7 @@
       else if (k.sieger === GN.ich) box.innerHTML = `<b>🏆 Du gewinnst ${n} Karten!</b>${k.topfGewonnen ? `<span>inklusive ${k.topfGewonnen} aus dem Topf</span>` : ""}`;
       else box.innerHTML = `<b>${person(z, k.sieger).avatar} ${esc(person(z, k.sieger).name)} gewinnt ${n} Karten</b>${k.topfGewonnen ? `<span>inklusive ${k.topfGewonnen} aus dem Topf</span>` : ""}`;
       box.classList.add("zeigen");
-      if (k.sieger === GN.ich) { Ton.richtig(); if (k.topfGewonnen) GN.konfetti(80); }
+      if (k.sieger === GN.ich) { Ton.serie(); GN.fx?.funken(box, { anzahl: 18, weite: 110 }); GN.fx?.pop(box, 0.6); if (k.topfGewonnen) GN.konfetti(80); }
       else if (k.gespielt.some((x) => x.spieler === GN.ich) && !k.gleichstand) Ton.falsch();
     });
     spaeter(5200, () => {

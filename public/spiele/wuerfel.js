@@ -440,7 +440,7 @@
     if (a.typ === "eintragen") {
       const wer = esc(nameVon(z, a.spieler));
       const gross = { fullhouse: "🏠 Full House!", grossestrasse: "🛣️ Große Straße!", kleinestrasse: "🛤️ Kleine Straße!", fuenfling: "🎲 Fünfling!" }[a.feld];
-      if (gross && a.punkte) { zeige(`<b class="riesig">${gross}</b><span>${wer} +${a.punkte}</span>`); Ton.volltreffer(); if (a.feld === "fuenfling") GN.konfetti(160); }
+      if (gross && a.punkte) { zeige(`<b class="riesig">${gross}</b><span>${wer} +${a.punkte}</span>`); Ton.volltreffer(); if (a.feld === "fuenfling") GN.konfetti(160); if (a.spieler === GN.ich) GN.fx?.funken($("#wTeller"), { anzahl: 22, weite: 120 }); }
       else if (!a.punkte) { zeige(`<b>✕ ${NAMEN[a.feld][0]} gestrichen</b><span>${wer}</span>`, "plus2", 1200); Ton.falsch(); }
       else Ton.richtig();
       if (a.bonus) setTimeout(() => { zeige(`<b class="riesig">⭐ +35 Bonus!</b><span>${wer} hat oben 63 geschafft</span>`); Ton.fanfare(); }, 900);

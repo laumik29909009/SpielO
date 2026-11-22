@@ -214,3 +214,23 @@ body[data-spiel="arena"], [data-farbe="arena"] {
 .a-einspruch:hover { background: rgba(63, 196, 125, 0.3); }
 .a-einspruch.an { opacity: 0.6; cursor: default; }
 @media (max-width: 700px) { .a-anderer { grid-template-columns: auto 1fr auto; } .a-einspruch { grid-column: 2 / 4; justify-self: start; } }
+
+/* =============================================================
+   Vollbild-Kolosseum: liegt fest hinter dem ganzen Spiel
+   ============================================================= */
+.a-welt { position: fixed; inset: 0; z-index: 0; display: none; pointer-events: none; }
+body.arena-welt .a-welt { display: block; }
+body.arena-welt.arena-welt-bereit { background: #150b1c; }
+body.arena-welt .a-welt::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 5, 16, 0.55) 0, transparent 14%, transparent 42%, rgba(12, 6, 18, 0.55) 62%, rgba(12, 6, 18, 0.82) 100%); }
+body.arena-welt #app, body.arena-welt .topbar { position: relative; z-index: 1; }
+/* Das Sichtfenster ist durchsichtig: man schaut direkt in die Arena */
+.a-3d-huelle.fenster { background: none; box-shadow: none; border-radius: 0; height: clamp(190px, 34vh, 340px); overflow: visible; }
+.a-3d-huelle.fenster.gross { height: clamp(260px, 48vh, 470px); }
+.a-3d-huelle.fenster .a3d { display: none; }
+body.arena-welt .a-karte { background: radial-gradient(120% 90% at 50% 0%, rgba(58, 37, 71, 0.9), rgba(36, 23, 48, 0.9) 70%); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+body.arena-welt .a-ergebnis { background: radial-gradient(110% 90% at 50% 0%, color-mix(in srgb, var(--st) 30%, rgba(36, 23, 48, 0.88)), rgba(36, 23, 48, 0.9) 72%); }
+body.arena-welt .a-liste, body.arena-welt .a-andere, body.arena-welt .a-rueckblick, body.arena-welt .rangliste { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+body.arena-welt .runden-kopf, body.arena-welt .a-ende-titel { text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8); }
+.a-3d-info { padding: 8px 12px; border-radius: 14px; background: rgba(15, 8, 20, 0.35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+body.arena-welt .a-schilde { filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6)); }

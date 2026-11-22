@@ -25,14 +25,13 @@
   },
   "patch": {
     "datum": "22.11.2026",
-    "titel": "Knaben von Schechingen, GoonO & die Eule",
+    "titel": "Jonkler-Kartenabend, Quartett-Seltenheiten & Einstellungen",
     "punkte": [
-      "🎲 Würfelglück: echter Zufall (kryptografischer Zufallsgenerator), Streichen jetzt mit Bestätigung direkt im Feld",
-      "🌾 Das Aufbauspiel heißt jetzt „Knaben von Schechingen“, das Farbspiel „GoonO“",
-      "🔨 Bau-Leiste unten: Kosten auf einen Blick, grün = hast du, rot = fehlt – ein Tipp und du baust",
-      "🗺️ Klarere Felder: Rohstoff-Abzeichen auf jedem Feld, rosa Obstwiesen, Legende und Infos beim Drüberfahren",
-      "🦉 Dorf-Eule: beste Startplätze, beste Bauplätze, was dir fehlt und wohin das Gewitter soll",
-      "🦉 Die Eule kann jeder für sich ein- und ausschalten – auch in Würfelglück"
+      "🃏 Jonkler: neu Mau-Mau, 17 und 4 (gegen die Bank, auch allein) und Texas Hold'em – alle mit Computer-Gegnern",
+      "💎 Quartett: Karten haben jetzt 5 Seltenheiten nach Gesamtpunkten – Gewöhnlich, Häufig, Selten, Episch, Legendär – jede mit eigener Farbe",
+      "⚙️ Neues Einstellungsmenü: Lautstärke, Animationen aus, Farbsicht-Hilfe für GoonO, Vibration",
+      "✨ Mehr Gefühl: Knöpfe reagieren mit einer kleinen Welle, Funken bei großen Treffern, steigende Töne bei Siegesserien",
+      "🛠️ Fehler behoben: Der erste Klick nach einer Ansage ging verloren (z. B. Straße bei den Knaben von Schechingen)"
     ]
   },
   "musikAus": [
@@ -42,24 +41,24 @@
     "titel": "Demnächst auf SpielO",
     "punkte": [
       [
-        "✨",
-        "Großes Qualitäts-Update",
-        "Mehr Animationen, Effekte und Sounds in allen Spielen"
+        "🏛️",
+        "Arena",
+        "Das Tages-Quiz im Kolosseum – fast fertig"
       ],
       [
-        "🎵",
-        "Neue Hintergrundmusik",
-        "Neue Stücke und mehr Auswahl"
+        "🎩",
+        "Neues Brettspiel",
+        "Straßen kaufen, Häuser bauen, Miete kassieren"
       ],
       [
-        "🎮",
-        "Neue Spiele",
-        "Es ist schon etwas in Arbeit …"
+        "🐼",
+        "Neue Quartett-Karten",
+        "Mehr Meister bei Kung Fu Panda und neue Drachen"
       ],
       [
-        "🛠️",
-        "Fehlerbehebungen",
-        "Unter anderem bei den Knaben von Schechingen"
+        "🎰",
+        "Casino",
+        "Mit Anmeldung und Münzen"
       ]
     ]
   }

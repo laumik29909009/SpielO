@@ -2,9 +2,10 @@
 //  Sounds – komplett im Browser erzeugt (Web Audio), keine Dateien nötig
 // =============================================================
 const Ton = (() => {
-  let ctx = null;
-  let an = true;
-  try { an = localStorage.getItem("ton") !== "aus"; } catch {}
+  let ctx = null, master = null;
+  let an = true, lautstaerke = 0.8;
+  try { an = localStorage.getItem("ton") !== "aus"; const l = parseFloat(localStorage.getItem("lautstaerke")); if (l >= 0 && l <= 1) lautstaerke = l; } catch {}
+  let serieZaehler = 0, serieZeit = 0;
 
   function kontext() {
     if (!an) return null;
@@ -12,6 +13,11 @@ const Ton = (() => {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
       ctx = new AC();
+      // Alle Töne laufen über einen gemeinsamen Regler (Lautstärke) und einen sanften Begrenzer
+      const begrenzer = ctx.createDynamicsCompressor();
+      begrenzer.threshold.value = -10; begrenzer.ratio.value = 6;
+      master = ctx.createGain(); master.gain.value = lautstaerke;
+      master.connect(begrenzer).connect(ctx.destination);
     }
     if (ctx.state === "suspended") ctx.resume();
     return ctx;
@@ -30,7 +36,7 @@ const Ton = (() => {
     gain.gain.setValueAtTime(0.0001, t);
     gain.gain.exponentialRampToValueAtTime(laut, t + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + dauer);
-    osc.connect(gain).connect(c.destination);
+    osc.connect(gain).connect(master);
     osc.start(t);
     osc.stop(t + dauer + 0.05);
   }
@@ -48,12 +54,18 @@ const Ton = (() => {
     filter.frequency.value = 900;
     gain.gain.value = laut;
     quelle.buffer = puffer;
-    quelle.connect(filter).connect(gain).connect(c.destination);
+    quelle.connect(filter).connect(gain).connect(master);
     quelle.start(c.currentTime + start);
   }
 
   return {
     get an() { return an; },
+    get lautstaerke() { return lautstaerke; },
+    set lautstaerke(v) {
+      lautstaerke = Math.max(0, Math.min(1, v));
+      try { localStorage.setItem("lautstaerke", String(lautstaerke)); } catch {}
+      if (master) master.gain.setTargetAtTime(lautstaerke, ctx.currentTime, 0.03);
+    },
     umschalten() {
       an = !an;
       try { localStorage.setItem("ton", an ? "an" : "aus"); } catch {}
@@ -61,7 +73,18 @@ const Ton = (() => {
       return an;
     },
     entsperren() { kontext(); },
-    klick() { ton(660, 0.06, { typ: "triangle", laut: 0.08 }); },
+    // Klick mit minimaler Zufallsstimmung, damit viele Klicks nicht maschinell klingen
+    klick() { ton(660 * (0.97 + Math.random() * 0.06), 0.06, { typ: "triangle", laut: 0.08 }); },
+    // Serie: jeder Erfolg kurz hintereinander klingt einen Halbton höher (bis 12 Stufen)
+    serie(n = null) {
+      const jetzt = Date.now();
+      serieZaehler = n ?? (jetzt - serieZeit < 4000 ? serieZaehler + 1 : 0);
+      serieZeit = jetzt;
+      const f = 523 * Math.pow(2, Math.min(12, serieZaehler) / 12);
+      ton(f, 0.12, { typ: "triangle", laut: 0.1 });
+      ton(f * 1.5, 0.18, { typ: "sine", laut: 0.06, start: 0.05 });
+      return serieZaehler;
+    },
     tick() { ton(1200, 0.05, { typ: "square", laut: 0.04 }); },
     abgeben() { ton(520, 0.08, { typ: "triangle" }); ton(780, 0.12, { typ: "triangle", start: 0.07 }); },
     rundeStart() { ton(300, 0.35, { typ: "sawtooth", laut: 0.05, gleitenZu: 900 }); rauschen(0.3, 0.05); },
