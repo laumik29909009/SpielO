@@ -152,7 +152,7 @@
     app.innerHTML = `
       <div class="w-buehne">
         <div class="runden-kopf">
-          <span class="modus-badge">🎲 Würfelglück</span>
+          <span class="modus-badge">🎲 Kiffel</span>
           ${GN.euleKnopf()}
           <span class="runden-nr" id="wRunde"></span>
           <span class="timer-zahl" id="timerZahl"></span>
@@ -450,7 +450,7 @@
 
   GN.spiele.wuerfel = {
     icon: "🎲",
-    titel: "Würfelglück",
+    titel: "Kiffel",
     kurz: "Der Würfelklassiker mit 5 Würfeln und Punkteblock.",
     beschreibung: "Fünf Würfel, drei Würfe, 13 Felder: Full House, Straßen und der Fünfling. Mit 3D-Würfeln, Becher, Punkteblock und der Würfel-Eule als Helfer.",
     tags: ["🎲 3D-Würfel", "🦉 Live-Helfer", "🤖 Auch gegen Computer", "👥 1–8 Spieler"],
