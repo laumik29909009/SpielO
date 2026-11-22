@@ -63,13 +63,15 @@ Tages-Quiz mit freien Antworten. Jede Aufgabe ist eine Kategorie („Nenne eine 
 
 ## Schechingen – Hof & Handel
 Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte (2–4 Spieler, Computer-Gegner).
-- Rohstoffe: 🪵 Holz (Wald), 🪨 Stein (Steinbruch), 🌾 Korn (Feld), 🥛 Milch (Weide). Gewürfelte Landschaften liefern an angrenzende Höfe (Gutshof doppelt).
-- Bauen: Weg, Hof (1 Punkt), Gutshof (2), Dorfkarten (Feldhüter, Erntedank, Wegebau, Viehmarkt, Kirchweih = geheimer Punkt).
-- Dorfplatz in der Mitte: Brunnen, Wirtshaus, Kirche, Rathaus (je 2 Punkte, nur mit Hof/Weg am Dorfplatz). Hof direkt am Dorfplatz = Marktrecht 3:1.
-- Jahreszeiten wechseln jede Runde (Frühling Weide doppelt, Sommer Stein, Herbst Korn, Winter Holz doppelt und Felder ruhen).
+- 5 Rohstoffe: 🪵 Holz (Wald), 🪨 Stein (Steinbruch), 🌾 Korn (Feld), 🥛 Milch (Weide), 🍎 Obst (Streuobstwiese). Gewürfelte Landschaften liefern an angrenzende Höfe (Gutshof doppelt).
+- Bauen: Weg (Holz, Stein), Hof (Holz, Korn, Milch, Obst; 1 Punkt), Gutshof (3 Stein, 2 Obst; 2 Punkte), Dorfkarte (Korn, Milch, Obst).
+- 25 Dorfkarten: 12 Feldhüter, 3 Erntedank, 3 Wegebau, 3 Viehmarkt, 4 Kirchweih (geheimer Punkt).
+- Dorfplatz in der Mitte: Hof direkt daran = Marktrecht 3:1 (sonst 4:1). Optional (Lobby): Gemeinschaftsbauten Brunnen, Wirtshaus, Kirche, Rathaus (je 2 Punkte).
+- Optional (Lobby): Jahreszeiten (Frühling Weide, Sommer Feld, Herbst Obstwiese doppelt, Winter Wald doppelt und Felder ruhen).
 - 7 = Gewitter: über 8 Karten die Hälfte abgeben, Gewitter blockiert ein Feld, eine Karte klauen.
-- Handel: Markt 4:1 (3:1 mit Marktrecht) und Angebote an Mitspieler. Sieg bei 8/10/12 Punkten.
-- Längster Weg (ab 5 zusammenhängenden Wegen, fremde Höfe unterbrechen) und Stärkste Feldwache (ab 3 Feldhütern): je 2 Punkte, wechseln, wenn jemand mehr hat.
+- Längster Weg (ab 5) und Stärkste Feldwache (ab 3 Feldhütern): je 2 Punkte. Sieg bei 8/10/12 Punkten.
+- Faire Zufallskarte jede Partie (`karteFair` in `spiele/schechingen.js`): keine starken Ecken, 6/8 und 2/12 getrennt, Zahlen pro Landschaft ausgeglichen, keine Klumpen.
+- Startanimation: Karte legen, Zahlen fallen, Reihenfolge auslosen; Start- und Würfelerträge fliegen zu den Spielern.
 
 ## Stadt Land Fluss: Punkte
 | Punkte | Wann |

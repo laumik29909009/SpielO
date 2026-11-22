@@ -2,10 +2,10 @@
 //  Spiel-Modul: Schechingen – Hof & Handel
 //  Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte rund um
 //  den Dorfplatz von Schechingen.
-//  - 4 Rohstoffe: Holz (Wald), Stein (Steinbruch), Korn (Feld), Milch (Weide)
-//  - Höfe (1 Punkt), Gutshöfe (2), Wege, Dorfkarten
-//  - Dorfplatz in der Mitte: Gemeinschaftsbauten (je 2 Punkte) und Marktrecht 3:1
-//  - Jahreszeiten: jede Runde eine andere Landschaft doppelt (Winter: Felder ruhen)
+//  - 5 Rohstoffe: Holz (Wald), Stein (Steinbruch), Korn (Feld), Milch (Weide), Obst (Streuobstwiese)
+//  - Höfe (1 Punkt), Gutshöfe (2), Wege, 25 Dorfkarten
+//  - Dorfplatz in der Mitte: Marktrecht 3:1, optional Gemeinschaftsbauten (je 2 Punkte)
+//  - Optional Jahreszeiten: jede Runde eine andere Landschaft doppelt (Winter: Felder ruhen)
 //  - Bei einer 7 zieht ein Gewitter auf: Wer viele Karten hat, verliert die Hälfte
 // =============================================================
 const MAX_TEILNEHMER = 4;
@@ -14,28 +14,31 @@ const BOTS = [
   { name: "Bauer Bert", avatar: "👨‍🌾" }, { name: "Müllerin Mia", avatar: "👩‍🌾" }, { name: "Schmied Sepp", avatar: "🧔" }, { name: "Wirtin Wally", avatar: "👵" },
 ];
 const FARBEN = ["#e8524a", "#3d7dff", "#f2b33d", "#3fbf72"];
-const ROH = ["holz", "stein", "korn", "milch"];
-const LAND = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch" };
+const ROH = ["holz", "stein", "korn", "milch", "obst"];
+const LAND = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch", obstwiese: "obst" };
+// Eigene Baukosten (Schechingen)
 const KOSTEN = {
   weg: { holz: 1, stein: 1 },
-  hof: { holz: 1, stein: 1, korn: 1, milch: 1 },
-  gut: { korn: 2, stein: 3 },
-  karte: { korn: 1, milch: 1, stein: 1 },
+  hof: { holz: 1, korn: 1, milch: 1, obst: 1 },
+  gut: { stein: 3, obst: 2 },
+  karte: { korn: 1, milch: 1, obst: 1 },
 };
 const GEMEIN = {
   brunnen: { name: "Dorfbrunnen", icon: "⛲", kosten: { stein: 3, milch: 1, holz: 1 } },
-  wirtshaus: { name: "Wirtshaus", icon: "🍺", kosten: { korn: 2, milch: 2, holz: 1 } },
+  wirtshaus: { name: "Wirtshaus", icon: "🍺", kosten: { korn: 2, obst: 2, milch: 1 } },
   kirche: { name: "Kirche", icon: "⛪", kosten: { stein: 3, holz: 2 } },
-  rathaus: { name: "Rathaus", icon: "🏛️", kosten: { holz: 2, stein: 2, korn: 2 } },
+  rathaus: { name: "Rathaus", icon: "🏛️", kosten: { holz: 2, stein: 1, korn: 1, obst: 1 } },
 };
-// Jahreszeiten: welche Landschaft doppelt bzw. gar nichts bringt
+// Jahreszeiten (optional): welche Landschaft doppelt bzw. gar nichts bringt
 const SAISON = [
   { name: "Frühling", icon: "🌱", doppelt: "weide", ruht: null },
-  { name: "Sommer", icon: "☀️", doppelt: "steinbruch", ruht: null },
-  { name: "Herbst", icon: "🍂", doppelt: "feld", ruht: null },
+  { name: "Sommer", icon: "☀️", doppelt: "feld", ruht: null },
+  { name: "Herbst", icon: "🍂", doppelt: "obstwiese", ruht: null },
   { name: "Winter", icon: "❄️", doppelt: "wald", ruht: "feld" },
 ];
-const KARTEN = { feldhueter: 8, erntedank: 3, wegebau: 3, viehmarkt: 3, kirchweih: 4 };
+// 25 Dorfkarten
+const KARTEN = { feldhueter: 12, erntedank: 3, wegebau: 3, viehmarkt: 3, kirchweih: 4 };
+const INTRO_MS = 7000; // Startanimation: Karte bauen, Reihenfolge auslosen
 const LIMIT = { hof: 5, gut: 4, weg: 15 };
 
 const mischen = (a) => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -43,7 +46,7 @@ const einst = (raum) => raum.einstellungen.schechingen;
 const w6 = () => 1 + Math.floor(Math.random() * 6);
 const pips = (z) => (z ? 6 - Math.abs(7 - z) : 0);
 const summe = (o) => Object.values(o).reduce((a, b) => a + b, 0);
-const leer = () => ({ holz: 0, stein: 0, korn: 0, milch: 0 });
+const leer = () => ({ holz: 0, stein: 0, korn: 0, milch: 0, obst: 0 });
 
 // =============================================================
 //  Karte: 19 Sechsecke (spitze Oberseite), Ecken und Kanten
@@ -116,7 +119,7 @@ function karteFair(belegung, streuung = 0.9) {
   return Math.max(...schnitt) - Math.min(...schnitt) <= streuung;
 }
 function landschaftVerteilen() {
-  const typen = [...Array(5).fill("wald"), ...Array(5).fill("feld"), ...Array(4).fill("weide"), ...Array(4).fill("steinbruch")];
+  const typen = [...Array(4).fill("wald"), ...Array(4).fill("feld"), ...Array(4).fill("weide"), ...Array(3).fill("steinbruch"), ...Array(3).fill("obstwiese")];
   const zahlen = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
   let letzte = null;
   for (let versuch = 0; versuch < 20000; versuch++) {
@@ -295,7 +298,7 @@ function wuerfeln(raum, ctx) {
 
 function ertrag(raum, n) {
   const d = raum.daten;
-  const s = SAISON[d.saison];
+  const s = d.jahreszeiten ? SAISON[d.saison] : { doppelt: null, ruht: null };
   const bekommt = {};
   d.belegung.forEach((b, fid) => {
     if (b.zahl !== n || fid === d.gewitter || b.typ === s.ruht) return;
@@ -331,7 +334,7 @@ function gewitterSetzen(raum, ctx, feld) {
   if (feld === d.gewitter) return "Das Gewitter muss weiterziehen.";
   d.gewitter = feld;
   const opfer = [...new Set(KARTE.felder[feld].ecken.map((e) => d.bauten[e]?.sp).filter((s) => s && s !== d.dran && summe(d.hand[s]) > 0))];
-  log(d, `⛈️ Gewitter über ${d.belegung[feld].typ === "dorfplatz" ? "dem Dorfplatz" : `einem ${{ wald: "Wald", feld: "Feld", weide: "Weide", steinbruch: "Steinbruch" }[d.belegung[feld].typ]} (${d.belegung[feld].zahl})`}.`);
+  log(d, `⛈️ Gewitter über ${d.belegung[feld].typ === "dorfplatz" ? "dem Dorfplatz" : `${{ wald: "einem Wald", feld: "einem Feld", weide: "einer Weide", steinbruch: "einem Steinbruch", obstwiese: "einer Streuobstwiese" }[d.belegung[feld].typ]} (${d.belegung[feld].zahl})`}.`);
   if (opfer.length === 1) return stehlen(raum, ctx, opfer[0], true);
   if (opfer.length > 1) { d.zug.modus = "stehlen"; d.zug.opfer = opfer; }
   else fertigMitGewitter(d);
@@ -392,7 +395,7 @@ function bauen(raum, ctx, id, art, ort) {
 function gemeinBauen(raum, ctx, id, was) {
   const d = raum.daten;
   const g = GEMEIN[was];
-  if (!g || d.dran !== id || !d.zug.wurf || d.zug.modus) return;
+  if (!g || !d.gebaeude || d.dran !== id || !d.zug.wurf || d.zug.modus) return;
   if (d.gemein[was]) return "Das steht schon.";
   if (!amDorfplatz(d, id)) return "Du brauchst einen Hof oder Weg am Dorfplatz.";
   if (!hat(d.hand[id], g.kosten)) return "Dafür fehlen dir Rohstoffe.";
@@ -502,8 +505,7 @@ function zugEnde(raum, ctx) {
   d.dran = ids[(i + 1) % ids.length];
   if (d.dran === ids[0]) {
     d.runde++;
-    d.saison = (d.saison + 1) % 4;
-    log(d, `${SAISON[d.saison].icon} Es wird ${SAISON[d.saison].name}.`);
+    if (d.jahreszeiten) { d.saison = (d.saison + 1) % 4; log(d, `${SAISON[d.saison].icon} Es wird ${SAISON[d.saison].name}.`); }
   }
   zugStarten(raum, ctx);
 }
@@ -551,7 +553,12 @@ function aufbauSetzen(raum, ctx, id, art, ort) {
     d.letzterHof = ort;
     d.aufbauSchritt = "weg";
     // Zweiter Hof: Startrohstoffe aus den angrenzenden Landschaften
-    if (d.aufbauNr >= d.reihenfolge.length) for (const f of KARTE.ecken[ort].felder) { const t = d.belegung[f].typ; if (LAND[t]) d.hand[id][LAND[t]]++; }
+    if (d.aufbauNr >= d.reihenfolge.length) {
+      const gabe = leer();
+      for (const f of KARTE.ecken[ort].felder) { const t = d.belegung[f].typ; if (LAND[t]) { d.hand[id][LAND[t]]++; gabe[LAND[t]]++; } }
+      d.startGabe = { sp: id, ecke: ort, roh: gabe, t: Date.now() };
+      log(d, `🎁 ${name(raum, id)} bekommt Startrohstoffe.`);
+    }
   } else if (d.aufbauSchritt === "weg" && art === "weg") {
     if (!wegOrte(d, id).includes(ort)) return "Der Weg muss an deinem neuen Hof liegen.";
     d.wege[ort] = id;
@@ -561,7 +568,7 @@ function aufbauSetzen(raum, ctx, id, art, ort) {
     if (d.aufbauNr >= folge.length) {
       d.phase = "spielen";
       d.dran = d.reihenfolge[0];
-      log(d, `${SAISON[0].icon} Der Frühling beginnt. Viel Glück!`);
+      log(d, d.jahreszeiten ? `${SAISON[0].icon} Der Frühling beginnt. Viel Glück!` : "Das Spiel beginnt. Viel Glück!");
       return zugStarten(raum, ctx);
     }
     d.dran = folge[d.aufbauNr];
@@ -681,20 +688,20 @@ function botSchritt(raum, ctx) {
   if (d.zug.modus === "wegebau") { const o = wegOrte(d, id); if (o.length) { bauen(raum, ctx, id, "weg", besterWeg(d, id, o)); senden(raum, ctx); return weiter(); } d.zug.modus = null; }
   // Karten spielen (nicht die gerade gekauften)
   const spielbar = (k) => !d.zug.gespielt && d.karten[id].filter((x) => x === k).length > d.zug.gekauft.filter((x) => x === k).length;
-  if (spielbar("erntedank")) { const fehlt = ROH.filter((r) => h[r] < (KOSTEN.hof[r] || 0)); karteSpielen(raum, ctx, id, "erntedank", [fehlt[0] || "stein", fehlt[1] || fehlt[0] || "korn"]); senden(raum, ctx); return weiter(); }
+  if (spielbar("erntedank")) { const fehlt = ROH.filter((r) => h[r] < (KOSTEN.hof[r] || 0)); karteSpielen(raum, ctx, id, "erntedank", [fehlt[0] || "stein", fehlt[1] || fehlt[0] || "obst"]); senden(raum, ctx); return weiter(); }
   if (spielbar("wegebau") && wegOrte(d, id).length && !hofOrte(d, id).length) { karteSpielen(raum, ctx, id, "wegebau"); senden(raum, ctx); return weiter(); }
   if (spielbar("viehmarkt")) { const r = ROH.reduce((m, x) => (h[x] < h[m] ? x : m), "stein"); karteSpielen(raum, ctx, id, "viehmarkt", r); senden(raum, ctx); return weiter(); }
   // Bauen: Gutshof > Hof > Dorfplatz > Weg > Dorfkarte
   const gut = gutOrte(d, id), hof = hofOrte(d, id);
   if (gut.length && hat(h, KOSTEN.gut)) { bauen(raum, ctx, id, "gut", besteEcke(d, id, gut)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
   if (hof.length && hat(h, KOSTEN.hof)) { bauen(raum, ctx, id, "hof", besteEcke(d, id, hof)); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
-  const g = Object.keys(GEMEIN).find((x) => !d.gemein[x] && amDorfplatz(d, id) && hat(h, GEMEIN[x].kosten));
+  const g = d.gebaeude && Object.keys(GEMEIN).find((x) => !d.gemein[x] && amDorfplatz(d, id) && hat(h, GEMEIN[x].kosten));
   if (g) { gemeinBauen(raum, ctx, id, g); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
   const wegLohnt = !hof.length || (summe(h) >= 6 && (d.wegLengenBot = (d.wegLaengen?.[id] || 0)) >= 3 && d.laengsterWeg !== id);
   if (wegLohnt && wegOrte(d, id).length && hat(h, KOSTEN.weg)) { bauen(raum, ctx, id, "weg", besterWeg(d, id, wegOrte(d, id))); senden(raum, ctx); return weiter(); }
   // Markt: ein Tausch pro Ziel und Zug
   if ((d.zug.botTausche || 0) < 3) {
-    const ziele = [hof.length && KOSTEN.hof, gut.length && KOSTEN.gut, amDorfplatz(d, id) && Object.keys(GEMEIN).filter((x) => !d.gemein[x]).map((x) => GEMEIN[x].kosten)[0], !hof.length && KOSTEN.weg, KOSTEN.karte].filter(Boolean);
+    const ziele = [hof.length && KOSTEN.hof, gut.length && KOSTEN.gut, d.gebaeude && amDorfplatz(d, id) && Object.keys(GEMEIN).filter((x) => !d.gemein[x]).map((x) => GEMEIN[x].kosten)[0], !hof.length && KOSTEN.weg, KOSTEN.karte].filter(Boolean);
     for (const ziel of ziele) if (botMarkt(raum, ctx, id, ziel)) { d.zug.botTausche = (d.zug.botTausche || 0) + 1; senden(raum, ctx); return weiter(); }
   }
   if (d.stapel.length && hat(h, KOSTEN.karte) && (summe(h) >= 5 || !hof.length)) { karteKaufen(raum, ctx, id); if (d.phase === "ende") return; senden(raum, ctx); return weiter(); }
@@ -710,12 +717,14 @@ module.exports = {
     karte: { felder: KARTE.felder.map(({ id, q, r, x, y, ecken }) => ({ id, q, r, x, y, ecken })), ecken: KARTE.ecken.map(({ id, x, y }) => ({ id, x, y })), kanten: KARTE.kanten },
     dorfplatzEcken: [...DORFPLATZ_ECKEN],
   }),
-  standardEinstellungen: () => ({ bots: 2, sekunden: 120, ziel: 10 }),
+  standardEinstellungen: () => ({ bots: 2, sekunden: 120, ziel: 10, gebaeude: true, jahreszeiten: true }),
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
     if (e.bots !== undefined) neu.bots = Math.min(3, Math.max(0, parseInt(e.bots) || 0));
     if (e.sekunden !== undefined) { const s = parseInt(e.sekunden); neu.sekunden = [0, 60, 120, 180].includes(s) ? s : 120; }
     if (e.ziel !== undefined) { const z = parseInt(e.ziel); neu.ziel = [8, 10, 12].includes(z) ? z : 10; }
+    if (e.gebaeude !== undefined) neu.gebaeude = !!e.gebaeude;
+    if (e.jahreszeiten !== undefined) neu.jahreszeiten = !!e.jahreszeiten;
     return neu;
   },
   starten(raum, ctx) {
@@ -733,17 +742,18 @@ module.exports = {
       laengsterWeg: null, wegLaengen: {}, feldwache: null, wache: {},
       stapel: mischen(Object.entries(KARTEN).flatMap(([k, n]) => Array(n).fill(k))),
       saison: 0, runde: 1, wurfId: 0, zug: null, abwerfen: {}, angebot: null, log: [], auszeichnungen: [],
+      gebaeude: e.gebaeude !== false, jahreszeiten: e.jahreszeiten !== false, introBis: Date.now() + INTRO_MS, startGabe: null,
     };
     log(raum.daten, "Jeder setzt reihum zwei Höfe mit je einem Weg.");
-    zeitSetzen(raum, ctx);
-    if (istBot(raum.daten, raum.daten.dran)) raum.daten.botTimer = setTimeout(() => botSchritt(raum, ctx), BOT_PAUSE);
+    const d = raum.daten;
+    d.zeitTimer = setTimeout(() => { if (raum.daten !== d) return; zeitSetzen(raum, ctx); if (istBot(d, d.dran)) d.botTimer = setTimeout(() => botSchritt(raum, ctx), BOT_PAUSE); senden(raum, ctx); }, INTRO_MS);
     senden(raum, ctx);
   },
   beenden(raum) { const d = raum.daten; if (d) { clearTimeout(d.zeitTimer); clearTimeout(d.botTimer); } },
   istVorbei: (raum) => raum.daten?.phase === "ende",
   aktion(raum, { spielerId: id }, typ, daten, ctx) {
     const d = raum.daten;
-    if (d.phase === "ende" || !d.hand[id]) return;
+    if (d.phase === "ende" || !d.hand[id] || Date.now() < d.introBis) return; // während der Startanimation noch nichts
     if (raum.spieler[id]) raum.spieler[id].ohneEingabe = 0;
     const x = daten && typeof daten === "object" ? daten : {};
     if (typ === "abwerfen") return abwerfen(raum, ctx, id, x) || undefined;
@@ -793,6 +803,7 @@ module.exports = {
       kirchweihEnde: d.phase === "ende" ? d.kirchweih : null,
       laengsterWeg: d.laengsterWeg, wegLaengen: d.wegLaengen, feldwache: d.feldwache, wache: d.wache, bonusEreignis: d.bonusEreignis || null,
       stapel: d.stapel.length, angebot: d.angebot, ziel: einst(raum).ziel,
+      gebaeude: d.gebaeude, jahreszeiten: d.jahreszeiten, startGabe: d.startGabe, introMs: Math.max(0, d.introBis - Date.now()),
       restMs: d.endetUm ? Math.max(0, d.endetUm - Date.now()) : 0, sekunden: einst(raum).sekunden,
       teilnehmer: teilnehmer(raum),
       farben: Object.fromEntries(d.reihenfolge.map((x, i) => [x, FARBEN[i]])),

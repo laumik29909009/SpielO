@@ -308,3 +308,37 @@ button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
   .sc-dialog-karte { border-radius: 26px 26px 0 0; padding: 18px 14px calc(14px + env(safe-area-inset-bottom)); }
   .sc-banner { font-size: 0.8rem; top: 8px; }
 }
+
+/* Obst (5. Rohstoff) */
+.sc-karte.obst { background: linear-gradient(180deg, rgba(226, 59, 46, 0.32), rgba(121, 166, 60, 0.18)); }
+.sc-res.obst { background: linear-gradient(180deg, rgba(226, 59, 46, 0.38), rgba(121, 166, 60, 0.2)); }
+.sc-spieler.plus { animation: sc-plus 0.5s cubic-bezier(.2, 1.8, .4, 1); }
+.sc-res-reihe { grid-template-columns: repeat(5, 1fr); }
+
+/* Startanimation: Felder fallen nacheinander auf den Tisch, danach die Zahlen */
+.sc-brett.sc-intro .sc-feld { animation: sc-feld-rein 0.55s cubic-bezier(.2, 1.4, .4, 1) calc(200ms + var(--i) * 110ms) backwards; transform-box: fill-box; transform-origin: center; }
+.sc-brett.sc-intro .sc-marke { animation: sc-marke-rein 0.45s cubic-bezier(.2, 1.8, .4, 1) calc(2400ms + var(--i) * 55ms) backwards; transform-box: fill-box; transform-origin: center; }
+.sc-brett.sc-intro polygon[fill="url(#scSand)"], .sc-brett.sc-intro polygon[fill="#d8c08a"] { animation: sc-sand 0.8s ease 0s backwards; }
+@keyframes sc-feld-rein { from { transform: translateY(-60px) scale(0.2) rotate(-30deg); opacity: 0; } }
+@keyframes sc-marke-rein { from { transform: translateY(-40px) scale(2.2); opacity: 0; } }
+@keyframes sc-sand { from { opacity: 0; } }
+
+/* Reihenfolge auslosen */
+.sc-los { grid-area: 1 / 1; padding: 18px 22px; border-radius: 24px; background: rgba(20, 14, 8, 0.9); border: 2px solid var(--gold); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); text-align: center; animation: sc-dialog 0.4s cubic-bezier(.2, 1.3, .4, 1); }
+.sc-los h3 { margin: 0 0 12px; color: #ffe9a8; }
+.sc-los-reihe { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.sc-los-k { position: relative; width: 96px; padding: 14px 6px 10px; border-radius: 16px; background: var(--flaeche); border: 3px solid var(--f); display: flex; flex-direction: column; align-items: center; gap: 2px;
+  animation: sc-los-misch 1.4s ease-in-out backwards, sc-los-rein 0.5s cubic-bezier(.2, 1.5, .4, 1) calc(1.4s + var(--i) * 0.18s) backwards; }
+.sc-los-k span:nth-child(2) { font-size: 2rem; }
+.sc-los-k b { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sc-los-nr { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; background: var(--gold); color: var(--gold-text); }
+.sc-los-k.erster { box-shadow: 0 0 0 4px rgba(242, 193, 78, 0.5), 0 0 30px rgba(242, 193, 78, 0.6); transform: scale(1.08); transition: 0.3s; }
+@keyframes sc-los-misch { 0% { transform: translateX(0) rotateY(0); } 25% { transform: translateX(40px) rotateY(180deg); } 50% { transform: translateX(-40px) rotateY(360deg); } 75% { transform: translateX(20px) rotateY(540deg); } 100% { transform: none; } }
+@keyframes sc-los-rein { from { transform: translateY(20px) scale(0.6); } }
+@media (max-width: 700px) {
+  .sc-hand .sc-karte, .sc-hand .sc-dk { width: 56px; }
+  .sc-hand .sc-karte b { font-size: 1.15rem; }
+  .sc-res-reihe { grid-template-columns: repeat(3, 1fr); }
+  .sc-los-k { width: 76px; }
+}
+@media (prefers-reduced-motion: reduce) { .sc-brett.sc-intro .sc-feld, .sc-brett.sc-intro .sc-marke, .sc-los-k { animation: none !important; } }
