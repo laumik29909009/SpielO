@@ -14,22 +14,24 @@
   const gruppeVon = (deck, k) => deck.gruppen.find((g) => g.id === k.gruppe);
   const maxWerte = {};
   const maxWert = (deck, i) => (maxWerte[deck.id + i] ??= Math.max(...deck.karten.map((k) => k.w[i])));
-  // Seltenheit: aus der Summe aller (auf das Deck normierten) Werte
-  //   legendär = stärkste Hälfte der ★-Karten, episch = übrige ★-Karten,
-  //   selten = stärkstes Drittel der übrigen, sonst gewöhnlich
-  const STUFEN = { gewoehnlich: { name: "Gewöhnlich", zeichen: "●" }, selten: { name: "Selten", zeichen: "◆" }, episch: { name: "Episch", zeichen: "★★" }, legendaer: { name: "Legendär", zeichen: "★★★" } };
+  // Seltenheit: nur nach den zusammengezählten Punkten. Jeder Wert zählt im Verhältnis
+  // zum besten Wert im Deck (sonst würden km/h oder Meter alles andere überragen).
+  //   oberste 10 % legendär · nächste 15 % episch · 20 % selten · 25 % häufig · Rest gewöhnlich
+  const STUFEN = {
+    gewoehnlich: { name: "Gewöhnlich", zeichen: "●" }, haeufig: { name: "Häufig", zeichen: "◆" }, selten: { name: "Selten", zeichen: "◆◆" },
+    episch: { name: "Episch", zeichen: "★★" }, legendaer: { name: "Legendär", zeichen: "★★★" },
+  };
+  const ANTEILE = [["legendaer", 0.1], ["episch", 0.25], ["selten", 0.45], ["haeufig", 0.7], ["gewoehnlich", 1]];
   const stufenCache = {};
+  const gesamtPunkte = (deck, k) => k.w.reduce((a, v, i) => a + v / maxWert(deck, i), 0);
   function stufeVon(deck, k) {
     if (!stufenCache[deck.id]) {
-      const summe = (x) => x.w.reduce((a, v, i) => a + v / maxWert(deck, i), 0);
-      const sortiert = [...deck.karten].sort((a, b) => summe(b) - summe(a));
-      const stern = sortiert.filter((x) => x.selten), normal = sortiert.filter((x) => !x.selten);
-      const m = {};
-      stern.forEach((x, i) => (m[x.id] = i < Math.ceil(stern.length / 2) ? "legendaer" : "episch"));
-      normal.forEach((x, i) => (m[x.id] = i < Math.round(normal.length / 3) ? "selten" : "gewoehnlich"));
-      stufenCache[deck.id] = m;
+      const sortiert = deck.karten.map((x) => gesamtPunkte(deck, x)).sort((a, b) => b - a);
+      // Grenzwerte: die Punktzahl, ab der eine Stufe beginnt
+      stufenCache[deck.id] = ANTEILE.map(([stufe, anteil]) => [stufe, sortiert[Math.max(0, Math.ceil(sortiert.length * anteil) - 1)]]);
     }
-    return stufenCache[deck.id][k.id] || "gewoehnlich";
+    const p = gesamtPunkte(deck, k);
+    return stufenCache[deck.id].find(([, grenze]) => p >= grenze - 1e-9)?.[0] || "gewoehnlich";
   }
   // Champion: Die Karte mit dem besten Wert einer Kategorie im ganzen Deck (bei Gleichstand alle)
   const championCache = {};
@@ -58,7 +60,7 @@
     const stufe = stufeVon(deck, k);
     const champ = championVon(deck, k);
     return `
-      <div class="qkarte stufe-${stufe} ${stufe === "legendaer" || stufe === "episch" ? "selten" : ""} ${champ.length ? "champion" : ""} ${klasse}" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
+      <div class="qkarte stufe-${stufe} ${stufe === "legendaer" || stufe === "episch" ? "selten" : ""} ${champ.length ? "champion" : ""} ${klasse}" title="${STUFEN[stufe].name}: ${Math.round(gesamtPunkte(deck, k) * 20)} von 100 Gesamtpunkten" data-karte="${k.id}" style="--typ:${g.farbe};--typ2:${g.farbe2}">
         ${stufe === "legendaer" ? '<div class="qk-aura" aria-hidden="true"></div>' : ""}
         <div class="qk-innen">
           <div class="qk-kopf"><span class="qk-code">${k.id}</span><span class="qk-name">${esc(k.name)}</span><span class="qk-typ" title="${esc(g.name)}">${g.icon}</span></div>
@@ -118,7 +120,7 @@
         id: "deck", wichtig: true, icon: "🃏", titel: "Kartendeck", info: `${deck.icon} ${deck.name} · ${deck.karten.length} Karten`,
         html: `<div class="q-deck-wahl">
           ${meta().decks.map((d) => {
-            const vorschau = d.karten.filter((k) => k.selten).slice(0, 3);
+            const vorschau = [...d.karten].sort((a, b) => gesamtPunkte(d, b) - gesamtPunkte(d, a)).slice(0, 3);
             return `<button class="q-deck ${e.deck === d.id ? "aktiv" : ""}" data-deck="${d.id}" ${dis}>
               <span class="q-deck-faecher">${vorschau.map((k, i) => `<span style="--i:${i}">${karte(d, k, { klasse: "mini" })}</span>`).join("")}</span>
               <span class="q-deck-text"><b>${d.icon} ${esc(d.name)}</b><span>${esc(d.beschreibung)}</span>${lizenzZeile(d)}
@@ -158,7 +160,7 @@
           <li><b>Gleichstand?</b> Die Karten kommen in den Topf. Wer die nächste Runde gewinnt, bekommt ihn dazu.</li>
           <li>Wer keine Karten mehr hat, ist raus. Gewonnen hat, wer alle Karten hat oder nach dem Rundenlimit die meisten.</li>
         </ol>
-        <p class="leise klein-text">★ Seltene Karten sind stärker, haben aber auch eine Schwäche. Tipp: Wähle den Wert, der im Vergleich zu allen Karten am besten ist.</p>`,
+        <p class="leise klein-text">Seltenheit nach Gesamtpunkten: <b style="color:#b9b9c6">● Gewöhnlich</b> · <b style="color:#3fbf72">◆ Häufig</b> · <b style="color:#4d8eff">◆◆ Selten</b> · <b style="color:#b363ff">★★ Episch</b> · <b style="color:#ffcf3f">★★★ Legendär</b>. Tipp: Wähle den Wert, der im Vergleich zu allen Karten am besten ist.</p>`,
       },
     ];
   }
@@ -192,6 +194,10 @@
         ${deck.gruppen.map((g) => `
           <div class="q-gal-gruppe" style="--typ:${g.farbe}"><b>${g.icon} ${g.id} · ${esc(g.name)}</b></div>
           <div class="q-gal-reihe">${deck.karten.filter((k) => k.gruppe === g.id).map((k) => karte(deck, k, { klasse: "gal" })).join("")}</div>`).join("")}
+        ${GN.zustand?.vorschau && deck.bald ? `<div class="q-gal-bald"><b>🔒 Demnächst</b> · Ideen für neue Karten, noch nicht im Spiel (nur im Vorschau-Raum sichtbar)</div>
+          ${deck.bald.gruppen.map((g) => `
+            <div class="q-gal-gruppe" style="--typ:${g.farbe}"><b>${g.icon} ${g.id} · ${esc(g.name)}</b></div>
+            <div class="q-gal-reihe">${deck.bald.karten.filter((k) => k.gruppe === g.id).map((k) => karte({ ...deck, gruppen: [...deck.gruppen, ...deck.bald.gruppen] }, k, { klasse: "gal bald" })).join("")}</div>`).join("")}` : ""}
       </div>`;
     $("[data-schliessen]", d).onclick = () => d.close();
     $$(".qkarte", d).forEach(kippen);

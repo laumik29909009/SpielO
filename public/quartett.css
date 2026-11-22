@@ -486,3 +486,25 @@ dialog.q-galerie .fenster-inhalt { max-height: calc(min(86vh, 900px) - 64px); }
 .q-szene.drei + .q-ich, .q-szene.drei ~ .q-ich { margin-top: -84px; position: relative; z-index: 4; }
 .q-szene.drei .q-tisch-mitte { bottom: 26%; }
 @media (min-width: 1000px) { .q-szene.drei { height: min(470px, 54vh); } }
+
+/* =============================================================
+   Fünf Seltenheitsstufen nach Gesamtpunkten, jede mit eigener Farbe
+   ● Gewöhnlich grau · ◆ Häufig grün · ◆◆ Selten blau · ★★ Episch lila · ★★★ Legendär gold/Regenbogen
+   ============================================================= */
+.qkarte.stufe-gewoehnlich { background: linear-gradient(160deg, #e4e4ea, #9a9aa8 45%, #5d5d6a); }
+.qkarte.stufe-gewoehnlich .qk-stufe { color: #d6d6de; }
+.qkarte.stufe-haeufig { background: linear-gradient(150deg, #c9f7d6, #3fbf72 40%, #1e7a45 80%, #8de0a8); }
+.qkarte.stufe-haeufig .qk-stufe { color: #b8f5cb; }
+.qkarte.stufe-selten { background: linear-gradient(135deg, #e0f0ff, #4d8eff 30%, #bcdcff 50%, #2f5fbf 72%, #9cc6ff); }
+.qkarte.stufe-selten .qk-stufe { color: #cfe4ff; }
+.qkarte.stufe-selten .qk-kopf { background: linear-gradient(90deg, color-mix(in srgb, var(--typ) 70%, #000), #1d3a78); }
+.qkarte.stufe-episch { background:
+  repeating-radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.16) 0 1.2%, transparent 1.2% 2.6%),
+  linear-gradient(135deg, #f1dcff, #b363ff 25%, #e6c8ff 45%, #6b2fbf 65%, #d7a8ff 85%, #8a46e0); }
+.qkarte.stufe-episch .qk-innen { box-shadow: inset 0 0 0 0.6cqw rgba(70, 20, 120, 0.6); }
+.qkarte.stufe-episch .qk-kopf { background: linear-gradient(90deg, #3d1470, color-mix(in srgb, var(--typ) 55%, #2a0e4f)); }
+.qkarte.stufe-episch .qk-stufe { color: #e6c8ff; }
+.qkarte.stufe-episch .qk-bild { border-color: #d7a8ff; }
+.qkarte.stufe-legendaer .qk-stufe { color: #ffdf6b; text-shadow: 0 0 6px rgba(255, 200, 60, 0.8); }
+.q-gal-bald { margin: 22px 0 6px; padding: 10px 14px; border-radius: 12px; background: rgba(255, 207, 63, 0.1); border: 1px dashed rgba(255, 207, 63, 0.5); font-size: 0.9rem; }
+.qkarte.bald { filter: saturate(0.85); }
