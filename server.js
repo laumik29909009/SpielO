@@ -19,6 +19,7 @@ const SPIELE = {
   wuerfel: require("./spiele/wuerfel"),
   arena: require("./spiele/arena"),
   schechingen: require("./spiele/schechingen"),
+  baulowe: require("./spiele/baulowe"),
 };
 const MAX_SPIELER = 10;
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];

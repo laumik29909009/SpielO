@@ -1,0 +1,164 @@
+/* =============================================================
+   Baulöwe: Brett in Creme und Grün, Figuren als Spielsteine
+   ============================================================= */
+body[data-spiel="baulowe"], [data-farbe="baulowe"] {
+  --bg: #0f2a1f; --flaeche: #173a2b; --flaeche-2: #1f4a37; --leise: #b7d4c4; --text: #f3fff8;
+  --gold: #ffcf3f; --gold-2: #ff9a3c; --gold-text: #2a1a00; --btn-schatten: #a8621e;
+  --glow-1: rgba(255, 207, 63, 0.12); --glow-2: rgba(63, 196, 125, 0.14); --glow-3: rgba(255, 154, 60, 0.1);
+  --konfetti: #ffcf3f, #3fc47d, #ff5d8f, #3fb6ff, #fff;
+}
+.bl-buehne { max-width: 980px; margin: 0 auto; padding-bottom: 24px; }
+
+/* Spieler */
+.bl-leute { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0; }
+.bl-person { display: flex; align-items: center; gap: 7px; padding: 5px 10px 5px 6px; border-radius: 14px; background: rgba(0, 0, 0, 0.25); border: 2px solid color-mix(in srgb, var(--b) 45%, transparent); transition: transform 0.25s, box-shadow 0.25s; }
+.bl-person.dran { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--b), 0 6px 18px color-mix(in srgb, var(--b) 45%, transparent); }
+.bl-person.pleite { opacity: 0.4; filter: grayscale(1); }
+.bl-p-ava { position: relative; font-size: 1.4rem; line-height: 1; }
+.bl-p-ava em { position: absolute; right: -6px; bottom: -4px; font-size: 0.75rem; font-style: normal; background: #fff; border-radius: 50%; width: 17px; height: 17px; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--b); }
+.bl-p-text { display: flex; flex-direction: column; line-height: 1.1; }
+.bl-p-text b { font-size: 0.85rem; }
+.bl-geld { font-variant-numeric: tabular-nums; font-weight: 800; color: #c8f5d8; transition: color 0.3s; }
+.bl-geld.plus { animation: bl-plus 0.9s; } .bl-geld.minus { animation: bl-minus 0.9s; }
+@keyframes bl-plus { 30% { color: #6fff9e; transform: scale(1.15); } }
+@keyframes bl-minus { 30% { color: #ff7a7a; transform: scale(1.15); } }
+.bl-p-info { font-size: 0.75rem; }
+
+/* Brett */
+.bl-brett-huelle { display: grid; place-items: center; }
+.bl-brett { position: relative; width: min(100%, 720px, 84vh); aspect-ratio: 1; display: grid;
+  grid-template-columns: 1.55fr repeat(9, 1fr) 1.55fr; grid-template-rows: 1.55fr repeat(9, 1fr) 1.55fr; gap: 2px; padding: 2px;
+  background: #0b1f16; border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 3px #e9dfc4, 0 0 0 6px #0b1f16; container-type: inline-size; }
+.bl-feld { all: unset; position: relative; cursor: pointer; background: #f4ecd6; color: #1c2a22; overflow: hidden; display: flex; border-radius: 3px; transition: filter 0.15s, transform 0.15s; }
+.bl-feld:hover { filter: brightness(1.08); z-index: 2; }
+.bl-feld:focus-visible { outline: 3px solid var(--gold); z-index: 3; }
+.bl-feld.ecke { background: #e9dfc4; }
+.bl-feld.unten { flex-direction: column; } .bl-feld.oben { flex-direction: column-reverse; }
+.bl-feld.links { flex-direction: row-reverse; } .bl-feld.rechts { flex-direction: row; }
+.bl-band { flex: none; background: var(--g); }
+.bl-feld.unten .bl-band, .bl-feld.oben .bl-band { height: 22%; }
+.bl-feld.links .bl-band, .bl-feld.rechts .bl-band { width: 22%; }
+.bl-feld-inhalt { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; text-align: center; min-width: 0; }
+.bl-feld.links .bl-feld-inhalt, .bl-feld.rechts .bl-feld-inhalt { padding: 1px 2px; }
+.bl-icon { font-size: 2.4cqw; line-height: 1; }
+.bl-feld.ecke .bl-icon { font-size: 4.4cqw; }
+.bl-name { font-size: 1.15cqw; font-weight: 800; line-height: 1.05; hyphens: auto; overflow-wrap: anywhere; }
+.bl-feld.ecke .bl-name { font-size: 1.35cqw; }
+.bl-preis { font-size: 1.1cqw; font-weight: 700; opacity: 0.7; }
+/* Besitz: Rahmen in Spielerfarbe, Avatar in der Ecke */
+.bl-feld.besessen { box-shadow: inset 0 0 0 2px var(--b); }
+.bl-feld.besessen .bl-preis { display: none; }
+.bl-besitzer { position: absolute; right: 1px; bottom: 1px; font-size: 1.7cqw; line-height: 1; }
+.bl-feld.hypothek { background: #b9b2a0; }
+.bl-feld.hypothek .bl-feld-inhalt { opacity: 0.55; }
+.bl-feld.hypothek::after { content: "H"; position: absolute; left: 2px; top: 1px; font-size: 1.3cqw; font-weight: 900; color: #b3261e; }
+.bl-haeuser { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 0; font-size: 1.5cqw; line-height: 1; pointer-events: none; }
+.bl-feld.unten .bl-haeuser { top: 1px; } .bl-feld.oben .bl-haeuser { bottom: 1px; }
+.bl-feld.links .bl-haeuser, .bl-feld.rechts .bl-haeuser { top: 50%; transform: translateY(-50%); flex-direction: column; width: 22%; }
+.bl-feld.links .bl-haeuser { right: 0; left: auto; } .bl-feld.rechts .bl-haeuser { left: 0; right: auto; }
+.bl-haeuser i { font-style: normal; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4)); }
+.bl-haeuser i.hotel { font-size: 2.2cqw; }
+
+/* Mitte */
+.bl-mitte { grid-row: 2 / 11; grid-column: 2 / 11; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6cqw; padding: 2cqw;
+  background: radial-gradient(circle at 50% 40%, #2a6b4c, #154a33 70%); border-radius: 4px; overflow: hidden; }
+.bl-logo { font-size: 6.5cqw; font-weight: 900; letter-spacing: -0.02em; color: #fff8e6; text-shadow: 0 0.6cqw 0 #0b2a1d, 0 1cqw 2cqw rgba(0, 0, 0, 0.4); transform: rotate(-6deg); }
+.bl-logo span { color: var(--gold); }
+.bl-panel { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.2cqw; }
+.bl-ansage { text-align: center; font-size: clamp(0.78rem, 2.1cqw, 1rem); background: rgba(0, 0, 0, 0.3); padding: 0.8cqw 1.8cqw; border-radius: 999px; }
+.bl-ansage.warnung { border-radius: 14px; background: rgba(179, 38, 30, 0.45); }
+.bl-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.bl-knoepfe.spalte { flex-direction: column; margin-top: 12px; }
+.bl-mitte .btn { font-size: clamp(0.8rem, 2.2cqw, 1.05rem); padding: 1.3cqw 2.4cqw; }
+.bl-mitte .btn.gross { font-size: clamp(0.95rem, 2.8cqw, 1.3rem); }
+.bl-log { font-size: clamp(0.62rem, 1.55cqw, 0.82rem); color: #d8f3e3; text-align: center; max-width: 92%; line-height: 1.3; }
+
+/* Würfel (3D) */
+.bl-wuerfel-reihe { display: flex; gap: 3cqw; perspective: 600px; }
+.bl-w { --wg: 7.5cqw; width: var(--wg); height: var(--wg); }
+.bl-w.rollt { animation: bl-w-hops 1s cubic-bezier(.3, .6, .4, 1); }
+@keyframes bl-w-hops { 0% { transform: translateY(0); } 25% { transform: translateY(-5cqw); } 55% { transform: translateY(0); } 70% { transform: translateY(-1.3cqw); } 85% { transform: translateY(0); } }
+.bl-w-kubus { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.bl-w-seite { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 14%; gap: 4%; border-radius: 18%;
+  background: radial-gradient(circle at 30% 25%, #fff, #f1ead8); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), inset -0.5cqw -0.5cqw 1cqw rgba(0, 0, 0, 0.12); }
+.bl-w-seite i { border-radius: 50%; }
+.bl-w-seite i.an { background: radial-gradient(circle at 35% 35%, #5a5a5a, #111); }
+.bl-w-seite.s1 i.an { background: radial-gradient(circle at 35% 35%, #ff6a6a, #b3261e); }
+.bl-w-seite.s1 { transform: translateZ(calc(var(--wg) / 2)); }
+.bl-w-seite.s6 { transform: rotateY(180deg) translateZ(calc(var(--wg) / 2)); }
+.bl-w-seite.s2 { transform: rotateY(90deg) translateZ(calc(var(--wg) / 2)); }
+.bl-w-seite.s5 { transform: rotateY(-90deg) translateZ(calc(var(--wg) / 2)); }
+.bl-w-seite.s3 { transform: rotateX(90deg) translateZ(calc(var(--wg) / 2)); }
+.bl-w-seite.s4 { transform: rotateX(-90deg) translateZ(calc(var(--wg) / 2)); }
+
+/* Figuren */
+.bl-figuren { position: absolute; inset: 0; pointer-events: none; }
+.bl-figur { position: absolute; left: 0; top: 0; width: 0; height: 0; transition: transform 0.16s ease-out; z-index: 5; }
+.bl-figur span { position: absolute; left: 0; top: 0; transform: translate(-50%, -60%); font-size: clamp(14px, 3.6cqw, 28px); line-height: 1;
+  width: 1.5em; height: 1.5em; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #e9e2cf); box-shadow: 0 0 0 2.5px var(--b), 0 4px 8px rgba(0, 0, 0, 0.45); }
+.bl-figur.dran span { box-shadow: 0 0 0 3px var(--b), 0 0 14px var(--b), 0 6px 10px rgba(0, 0, 0, 0.5); z-index: 6; }
+.bl-figur.dran { z-index: 6; }
+.bl-figur.hops span { animation: bl-hops 0.17s ease-out; }
+@keyframes bl-hops { 50% { transform: translate(-50%, -105%) scale(1.12); } }
+
+/* Karten und Fenster */
+.bl-karte { background: #fffdf5; color: #1c2a22; border-radius: 10px; overflow: hidden; width: min(250px, 100%); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); margin: 0 auto; }
+.bl-karte.hypothek { filter: grayscale(0.7); }
+.bl-karte-kopf { background: var(--g, #e9dfc4); color: #111; text-align: center; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.bl-karte-kopf b { font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em; }
+.bl-karte-kopf small { font-weight: 700; opacity: 0.8; }
+.bl-mitte .bl-karte { width: min(230px, 62cqw); font-size: clamp(0.65rem, 1.8cqw, 0.85rem); }
+.bl-miete { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+.bl-miete td { padding: 2px 12px; } .bl-miete td:last-child { text-align: right; font-weight: 800; }
+.bl-miete tr.jetzt { background: #ffe9a8; }
+.bl-karte p { padding: 8px 12px; margin: 0; }
+.bl-karte-fuss { font-size: 0.75em; padding: 6px 12px; border-top: 1px dashed #ccc; opacity: 0.8; text-align: center; }
+.bl-karte-besitzer { font-size: 0.8em; text-align: center; padding: 6px; background: #f1ead8; }
+.bl-fenster { width: min(420px, calc(100vw - 24px)); }
+
+/* Ereigniskarte groß in der Mitte */
+.bl-ereignis { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; pointer-events: auto; background: rgba(5, 15, 10, 0.35); animation: einblenden 0.2s; }
+.bl-ereignis.weg { opacity: 0; transition: opacity 0.35s; }
+.bl-ereignis-karte { width: min(320px, 82vw); background: #fffdf5; color: #1c2a22; border-radius: 16px; text-align: center; overflow: hidden; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6); animation: bl-karte-dreh 0.6s cubic-bezier(.2, 1.3, .4, 1); }
+.bl-ereignis.ereignis .bl-ereignis-kopf { background: linear-gradient(135deg, #ff9a3c, #ff5d8f); }
+.bl-ereignis.kasse .bl-ereignis-kopf { background: linear-gradient(135deg, #3fb6ff, #5ee08a); }
+.bl-ereignis-kopf { padding: 12px; font-weight: 900; font-size: 1.2rem; color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+.bl-ereignis-karte p { font-size: 1.15rem; font-weight: 700; padding: 18px 18px 8px; margin: 0; }
+.bl-ereignis-karte small { display: block; padding-bottom: 14px; opacity: 0.7; }
+@keyframes bl-karte-dreh { from { transform: perspective(800px) rotateY(-100deg) scale(0.6); opacity: 0; } }
+
+.bl-knall { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); z-index: 4; text-align: center; padding: 1cqw 3cqw; border-radius: 16px; background: rgba(10, 30, 20, 0.85); border: 1px solid rgba(255, 207, 63, 0.5); animation: bl-knall 1.8s ease forwards; pointer-events: none; white-space: nowrap; }
+.bl-knall b { display: block; font-size: clamp(1rem, 4cqw, 1.8rem); color: var(--gold); }
+.bl-knall span { font-size: clamp(0.7rem, 1.8cqw, 0.9rem); }
+@keyframes bl-knall { 0% { transform: translateX(-50%) scale(0.5); opacity: 0; } 15% { transform: translateX(-50%) scale(1.08); opacity: 1; } 25% { transform: translateX(-50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); } }
+
+/* Handel */
+.bl-h-mit { flex-wrap: wrap; margin-bottom: 10px; }
+.bl-h-spalten { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.bl-h-feld { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-left: 5px solid var(--g); margin: 3px 0; background: rgba(255, 255, 255, 0.05); border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+.bl-h-geld { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.bl-h-geld input { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rand); background: rgba(0, 0, 0, 0.25); color: inherit; font: inherit; }
+.bl-angebot { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 70; width: min(440px, calc(100vw - 24px)); animation: reinploppen 0.35s cubic-bezier(.2, 1.4, .4, 1); }
+.bl-angebot-karte { background: var(--flaeche); border: 1px solid rgba(255, 207, 63, 0.5); border-radius: 18px; padding: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; gap: 10px; }
+.bl-h-chip { display: inline-block; margin: 2px; padding: 3px 8px; border-radius: 8px; border-left: 4px solid var(--g); background: rgba(255, 255, 255, 0.08); font-size: 0.8rem; }
+.bl-h-chip.geld { border-left-color: var(--gold); }
+
+@media (max-width: 600px) {
+  /* Mitte kompakt: nur Grundmiete und Hotel, kleineres Logo und Würfel */
+  .bl-mitte { gap: 1.2cqw; padding: 1.2cqw; }
+  .bl-mitte .bl-miete tr:not(:first-child):not(:last-child), .bl-mitte .bl-karte-fuss { display: none; }
+  .bl-mitte .bl-karte-kopf { padding: 4px 8px; }
+  .bl-mitte .bl-karte-kopf b { font-size: 0.85rem; }
+  .bl-mitte .btn { padding: 8px 12px; font-size: 0.85rem; }
+  .bl-mitte .btn.gross { font-size: 1rem; padding: 10px 16px; }
+  .bl-mitte .bl-knoepfe { gap: 6px; }
+  .bl-logo { font-size: 5.5cqw !important; }
+  .bl-w { --wg: 6.5cqw; }
+  .bl-name { font-size: 1.35cqw; }
+  .bl-feld:not(.ecke) .bl-icon { font-size: 2.8cqw; }
+  .bl-logo { font-size: 7cqw; }
+  .bl-log { display: none; }
+  .bl-person { padding: 3px 8px 3px 4px; }
+  .bl-p-text b { font-size: 0.75rem; }
+}
+@media (prefers-reduced-motion: reduce) { .bl-w.rollt, .bl-figur.hops span, .bl-ereignis-karte, .bl-knall { animation: none !important; } }
