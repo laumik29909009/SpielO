@@ -1,7 +1,8 @@
 {
   "wartung": false,
   "imAufbau": [
-    "arena"
+    "arena",
+    "ludo"
   ],
   "wartungInfo": {
     "punkte": [

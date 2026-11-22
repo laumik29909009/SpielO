@@ -1,0 +1,84 @@
+/* =============================================================
+   Raus da!: Holzbrett, glänzende Hütchen, 3D-Würfel
+   ============================================================= */
+body[data-spiel="ludo"], [data-farbe="ludo"] {
+  --bg: #1b1420; --flaeche: #2a1f30; --flaeche-2: #36283d; --leise: #cdbcd6; --text: #fff8fb;
+  --gold: #ffcf3f; --gold-2: #ff8a3d; --gold-text: #2a1600; --btn-schatten: #b4521f;
+  --glow-1: rgba(255, 90, 82, 0.14); --glow-2: rgba(90, 168, 255, 0.14); --glow-3: rgba(95, 211, 106, 0.1);
+  --konfetti: #ff5a52, #5aa8ff, #5fd36a, #ffe45c, #fff;
+}
+.lu-buehne { max-width: 1100px; margin: 0 auto; padding-bottom: 24px; }
+.lu-haupt { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; margin-top: 8px; }
+.lu-brett-huelle { position: relative; }
+.lu-brett { display: block; width: 100%; max-width: 720px; margin: 0 auto; aspect-ratio: 1;
+  filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.55)); overflow: visible; }
+.lu-start-pfeil { font-size: 0.32px; fill: #fff; text-anchor: middle; opacity: 0.85; }
+.lu-mitte { font-size: 1.2px; text-anchor: middle; }
+
+/* Figuren: gleiten von Feld zu Feld, hüpfen bei jedem Schritt */
+.lu-figur { transition: transform 0.17s cubic-bezier(.3, .7, .4, 1); cursor: default; }
+.lu-figur.fliegt { transition: transform 0.65s cubic-bezier(.5, -0.3, .3, 1.2); }
+.lu-hut { transform-box: fill-box; transform-origin: 50% 100%; }
+.lu-hut.hops { animation: lu-hops 0.18s ease-out; }
+@keyframes lu-hops { 0% { transform: scale(1.05, 0.85); } 45% { transform: translateY(-0.28px) scale(0.95, 1.08); } 100% { transform: none; } }
+.lu-figur.hebt .lu-hut-form { filter: url(#luSchatten) brightness(1.1); }
+.lu-figur.kann { cursor: pointer; }
+.lu-figur.kann .lu-hut { animation: lu-kann 0.9s ease-in-out infinite; }
+@keyframes lu-kann { 50% { transform: translateY(-0.12px) scale(1.12); } }
+.lu-figur.kann .lu-hut-form path, .lu-figur.kann .lu-hut-form circle { stroke: #fff; stroke-width: 0.05; }
+.lu-zielgeist { fill: rgba(255, 255, 255, 0.35); stroke: #fff; stroke-width: 0.06; stroke-dasharray: 0.12 0.08; animation: lu-geist 1s linear infinite; }
+.lu-zielgeist.schlag { fill: rgba(255, 60, 60, 0.4); stroke: #ff3b3b; }
+.lu-zielgeist-text { font-size: 0.45px; text-anchor: middle; }
+@keyframes lu-geist { to { stroke-dashoffset: -0.4; } }
+
+/* Seitenleiste */
+.lu-seite { display: flex; flex-direction: column; gap: 10px; }
+.lu-leute { display: flex; flex-direction: column; gap: 6px; }
+.lu-person { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 14px; background: var(--flaeche); border: 2px solid color-mix(in srgb, var(--f) 40%, transparent); transition: transform 0.2s, box-shadow 0.2s; }
+.lu-person.dran { transform: translateX(4px); box-shadow: 0 0 0 2px var(--f), 0 6px 18px color-mix(in srgb, var(--f) 40%, transparent); }
+.lu-p-hut { width: 16px; height: 22px; border-radius: 50% 50% 40% 40%; background: radial-gradient(circle at 35% 30%, #fff 0 10%, var(--f) 30%, var(--f2)); flex: none; }
+.lu-p-ava { font-size: 1.3rem; }
+.lu-p-text { flex: 1; display: flex; flex-direction: column; line-height: 1.15; }
+.lu-p-text small { color: var(--leise); font-size: 0.75rem; }
+.lu-p-ziel { display: flex; gap: 3px; }
+.lu-p-ziel i { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--f); }
+.lu-p-ziel i.voll { background: var(--f); }
+.lu-punkt { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--f); margin-right: 6px; vertical-align: middle; }
+.lu-aktion { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px; border-radius: 18px; background: var(--flaeche); border: 1px solid var(--rand); }
+.lu-aktion.ich { border-color: var(--gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 40%, transparent); }
+.lu-ansage { text-align: center; min-height: 1.4em; }
+.lu-wurf { min-width: 200px; }
+.lu-log { font-size: 0.8rem; color: var(--leise); display: grid; gap: 3px; padding: 0 4px; }
+.lu-knall { position: absolute; inset: 0; pointer-events: none; display: grid; place-items: center; }
+.lu-knall-text { padding: 12px 22px; border-radius: 18px; background: rgba(20, 10, 20, 0.88); border: 2px solid #ff5a52; font-weight: 900; font-size: clamp(1.1rem, 3vw, 1.6rem); animation: lu-knall 1.8s ease forwards; }
+@keyframes lu-knall { 0% { transform: scale(0.4); opacity: 0; } 14% { transform: scale(1.08); opacity: 1; } 24% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+
+/* 3D-Würfel */
+.lu-w { --wg: 64px; width: var(--wg); height: var(--wg); perspective: 500px; }
+.lu-w.rollt { animation: lu-w-hops 0.9s cubic-bezier(.3, .6, .4, 1); }
+@keyframes lu-w-hops { 0% { transform: translateY(0); } 25% { transform: translateY(-36px); } 55% { transform: translateY(0); } 70% { transform: translateY(-9px); } 85% { transform: translateY(0) scale(1.05, 0.95); } 100% { transform: none; } }
+.lu-w-kubus { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.lu-w-seite { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 14%; gap: 4%; border-radius: 18%;
+  background: radial-gradient(circle at 30% 25%, #fff, #f1ead8); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), inset -4px -4px 8px rgba(0, 0, 0, 0.12); }
+.lu-w-seite i { border-radius: 50%; }
+.lu-w-seite i.an { background: radial-gradient(circle at 35% 35%, #5a5a5a, #111); }
+.lu-w-seite.s1 i.an { background: radial-gradient(circle at 35% 35%, #ff6a6a, #b3261e); }
+.lu-w-seite.s1 { transform: translateZ(calc(var(--wg) / 2)); }
+.lu-w-seite.s6 { transform: rotateY(180deg) translateZ(calc(var(--wg) / 2)); }
+.lu-w-seite.s2 { transform: rotateY(90deg) translateZ(calc(var(--wg) / 2)); }
+.lu-w-seite.s5 { transform: rotateY(-90deg) translateZ(calc(var(--wg) / 2)); }
+.lu-w-seite.s3 { transform: rotateX(90deg) translateZ(calc(var(--wg) / 2)); }
+.lu-w-seite.s4 { transform: rotateX(-90deg) translateZ(calc(var(--wg) / 2)); }
+
+@media (max-width: 900px) {
+  .lu-haupt { grid-template-columns: 1fr; }
+
+  .lu-aktion { position: sticky; bottom: 8px; z-index: 20; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: color-mix(in srgb, var(--flaeche) 88%, transparent); }
+  .lu-w { --wg: 48px; }
+  .lu-wurf { min-width: 0; }
+  .lu-seite { display: contents; }
+  .lu-leute { order: -1; flex-direction: row; flex-wrap: wrap; }
+  .lu-person { flex: 1 1 45%; padding: 5px 8px; }
+  .lu-p-ziel { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .lu-figur.kann .lu-hut, .lu-hut.hops, .lu-w.rollt { animation: none !important; } }

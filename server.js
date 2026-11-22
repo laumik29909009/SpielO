@@ -20,6 +20,7 @@ const SPIELE = {
   arena: require("./spiele/arena"),
   schechingen: require("./spiele/schechingen"),
   baulowe: require("./spiele/baulowe"),
+  ludo: require("./spiele/ludo"),
 };
 const MAX_SPIELER = 10;
 const LADE_MS = 1400; // Ladebildschirm vor jedem Spielstart
