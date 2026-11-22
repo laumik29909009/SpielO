@@ -455,6 +455,7 @@ button.avatar:hover { border-color: var(--gold); }
 /* ---------- Overlays ---------- */
 .intro {
   position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; text-align: center; padding: 20px;
+  pointer-events: none; /* Ansage blockiert keine Klicks (sonst geht z. B. der erste Tipp auf eine Straße verloren) */
   background: rgba(13, 11, 31, 0.88); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   animation: einblenden 0.2s;
 }
@@ -1234,3 +1235,7 @@ dialog.fenster::backdrop { background: rgba(8, 6, 20, 0.6); backdrop-filter: blu
 .demnaechst li small { color: var(--leise); }
 @keyframes dn-puls { 50% { box-shadow: 0 0 0 4px rgba(190, 140, 255, 0.18); } }
 @media (prefers-reduced-motion: reduce) { .demnaechst-marke { animation: none; } }
+
+/* Preis-Schätzer: Logos und Grafiken auf hellem Grund, nicht abgeschnitten */
+.bild-box.grafik { background: #f4f1ea; }
+.bild-box.grafik img { object-fit: contain; padding: 6%; box-sizing: border-box; }

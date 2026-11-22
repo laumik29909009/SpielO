@@ -479,7 +479,9 @@
 
   function bildBox(p, mitCredit = true) {
     const kat = meta().kategorien.find((k) => k.id === p.kat);
-    return `<div class="bild-box ${p.bild ? "" : "gezeichnet"}">
+    // Durchsichtige Logos und Grafiken (in den Daten mit "grafik": true markiert): heller Hintergrund, ganz zeigen statt zuschneiden
+    const grafik = p.bild?.grafik;
+    return `<div class="bild-box ${p.bild ? "" : "gezeichnet"} ${grafik ? "grafik" : ""}">
       ${p.bild ? "" : zeichnung(p)}
       <div class="emoji-gross">${p.emoji}</div>
       ${p.bild ? `<img src="${esc(p.bild.url)}" alt="${esc(p.name)}" decoding="async" referrerpolicy="no-referrer">` : ""}
