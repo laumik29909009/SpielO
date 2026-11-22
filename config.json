@@ -1,6 +1,8 @@
 {
   "wartung": false,
-  "imAufbau": [],
+  "imAufbau": [
+    "arena"
+  ],
   "wartungInfo": {
     "punkte": [
       "Neues Spiel: Farbrausch – der Karten-Klassiker am 3D-Tisch",
@@ -25,14 +27,12 @@
     "datum": "22.11.2026",
     "titel": "Großes Update für Würfelglück, Arena & Schechingen",
     "punkte": [
+      "🎲 Würfelglück: Würfel springen nicht mehr herum – jeder Würfel hat seinen festen Platz",
       "🌾 Schechingen: neuer Rohstoff Obst 🍎 von der Streuobstwiese, neue Baukosten, 25 Dorfkarten",
       "🗺️ Schechingen: Startanimation – Karte wird gelegt, Zahlen fallen, Reihenfolge wird ausgelost",
       "🎁 Schechingen: Startrohstoffe und Erträge fliegen sichtbar zu allen Spielern",
       "⚙️ Schechingen: Dorfplatz-Gebäude und Jahreszeiten in der Lobby abschaltbar, faire Zufallskarte",
-      "🎲 Würfelglück: Würfel-Fehler behoben, neue Würfel, Becher sammelt ein, schüttelt und kippt aus",
-      "🦉 Neu: die Würfel-Eule zeigt dir Punkte, Chancen und was du halten solltest",
-      "🏛️ Arena: 3D-Kolosseum – dein Gladiator läuft mit jedem Punkt weiter zum Goldenen Lorbeer",
-      "🔥 Arena: Serien-Anzeige nach jeder Tagesarena, rund 6000 neue richtige Antworten"
+      "🦉 Neu: die Würfel-Eule zeigt dir Punkte, Chancen und was du halten solltest"
     ]
   },
   "musikAus": [

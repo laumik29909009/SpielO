@@ -278,11 +278,31 @@
   let gesehenAufloesung = "";
   const meinVerlauf = (z) => (z.verlauf?.[GN.ich] || []).map((v) => v.stufe);
 
+  // Antworten der anderen mit Einspruch-Knopf (Mehrheit der Mitspieler entscheidet)
+  function andereZeigen(z) {
+    const box = $("#aAndere");
+    if (!box || z.phase !== "aufloesung") return;
+    const andere = (z.teilnehmer || []).filter((t) => t.id !== GN.ich);
+    const menschen = (z.teilnehmer || []).filter((t) => !t.bot && t.online && !t.afk);
+    box.innerHTML = andere.map((t) => {
+      const a = z.antworten[t.id] || { stufe: 0, leer: true };
+      const stimmen = z.einsprueche?.[t.id] || [];
+      const noetig = Math.max(1, Math.ceil((menschen.length - 1) / 2));
+      const kannEinspruch = !t.bot && !a.leer && a.stufe === 0;
+      const ichStimme = stimmen.includes(GN.ich);
+      return `<div class="a-anderer s${a.stufe}"><span class="a-ava">${t.avatar}</span><span class="a-wer">${esc(t.name)}</span><span class="a-was">${a.leer ? "–" : `„${esc(a.text)}“`}${a.quelle ? ` <small class="a-quelle">${a.quelle === "Wikipedia" ? "🔎" : "🗳️"}</small>` : ""}</span>${pille(a.stufe)}${kannEinspruch ? `<button class="a-einspruch ${ichStimme ? "an" : ""}" data-einspruch="${t.id}" ${ichStimme ? "disabled" : ""} title="Die Antwort ist eigentlich richtig">👍 Gilt! ${stimmen.length}/${noetig}</button>` : ""}</div>`;
+    }).join("");
+    $$("[data-einspruch]", box).forEach((b) => (b.onclick = () => { Ton.klick(); GN.aktion("einspruch", b.dataset.einspruch); }));
+  }
+
   function zeige(z, vorher) {
     if (z.phase === "ende") return zeigeEnde(z);
     const k = `${z.spielId}-${z.nr}-${z.phase}`;
     if (!$(".a-buehne") || GN.ansicht !== "arena-spiel") aufbauen(z);
+    // Eigene Antwort durch Einspruch nachträglich anerkannt? Dann Ergebnis neu zeigen
+    if (k === schluessel && z.phase === "aufloesung" && vorher?.antworten?.[GN.ich] && vorher.antworten[GN.ich].stufe !== z.antworten?.[GN.ich]?.stufe) { schluessel = ""; Ton.fanfare(); }
     if (k !== schluessel) { schluessel = k; z.phase === "frage" ? frageZeigen(z) : aufloesungZeigen(z); timerStarten(z); }
+    andereZeigen(z);
     leuteZeigen(z);
   }
 
@@ -373,10 +393,10 @@
         ${ich ? `
           <div class="a-medaille s${s}"><span>${STUFE[s].icon}</span></div>
           <div class="a-stufe-name">${STUFE[s].name}</div>
-          <div class="a-deine">${ich.leer ? "Keine Antwort abgegeben" : `„${esc(ich.text)}“${ich.erkannt && ich.erkannt.toLowerCase() !== ich.text.toLowerCase() ? ` <small>erkannt als ${esc(ich.erkannt)}</small>` : ""}${!ich.erkannt ? " <small>nicht in unserer Liste</small>" : ""}`}</div>
+          <div class="a-deine">${ich.leer ? "Keine Antwort abgegeben" : `„${esc(ich.text)}“${ich.erkannt && ich.erkannt.toLowerCase() !== ich.text.toLowerCase() ? ` <small>erkannt als ${esc(ich.erkannt)}</small>` : ""}${ich.quelle ? ` <small class="a-quelle">${ich.quelle === "Wikipedia" ? "🔎 per Wikipedia geprüft" : "🗳️ per Einspruch anerkannt"}</small>` : ""}${!ich.erkannt ? ` <small>nicht in unserer Liste${andere.some((t) => !t.bot) ? " · deine Mitspieler können Einspruch einlegen" : ""}</small>` : ""}`}</div>
           <div class="a-plus">+${s} Ruhm</div>` : '<div class="a-deine">Du schaust bei dieser Aufgabe zu.</div>'}
       </div>
-      ${andere.length ? `<div class="a-andere">${andere.map((t) => { const a = z.antworten[t.id] || { stufe: 0, leer: true }; return `<div class="a-anderer s${a.stufe}"><span class="a-ava">${t.avatar}</span><span class="a-wer">${esc(t.name)}</span><span class="a-was">${a.leer ? "–" : `„${esc(a.text)}“`}</span>${pille(a.stufe)}</div>`; }).join("")}</div>` : ""}
+      <div class="a-andere" id="aAndere"></div>
       <div class="a-liste">
         <div class="a-zwischen">Mögliche Antworten</div>
         ${[100, 85, 60, 30, 10].map((st) => { const l = beispiele[st] || []; const zeigen = st === 100 ? l : l.slice(0, 6); return `<div class="a-liste-zeile s${st}"><span class="a-liste-stufe">${STUFE[st].icon}<b>${st}</b></span><span class="a-liste-namen">${zeigen.map((x) => `<span class="${ich?.erkannt === x ? "meins" : ""}">${esc(x)}</span>`).join("")}${l.length > zeigen.length ? `<em>+${l.length - zeigen.length} weitere</em>` : ""}</span></div>`; }).join("")}

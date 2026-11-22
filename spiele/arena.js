@@ -11,6 +11,8 @@ const os = require("os");
 const path = require("path");
 const { AUFGABEN } = require("../daten/arena");
 const EXTRA = require("../daten/arena-extra");
+const PRUEFER = require("./arena-pruefer");
+const STUFE_NEU = 85; // Richtige Antwort, die nicht in unseren Listen steht: selten → Legende
 
 const MAX_TEILNEHMER = 10;
 const PRO_TAG = 7;
@@ -173,6 +175,7 @@ function frageStarten(raum, ctx) {
   d.nr++;
   d.phase = "frage";
   d.antworten = {};
+  d.einsprueche = {};
   d.weiter = new Set();
   const ms = einst(raum).sekunden * 1000;
   d.endetUm = Date.now() + ms;
@@ -197,19 +200,39 @@ function antworten(raum, ctx, id, text) {
   if (d.phase !== "frage" || d.antworten[id]) return;
   text = String(text || "").replace(/\s+/g, " ").trim().slice(0, 40);
   if (!text) return "Gib zuerst eine Antwort ein.";
-  const treffer = bewerten(d.aufgaben[d.nr - 1], text);
-  d.antworten[id] = { text, stufe: treffer ? treffer.stufe : 0, erkannt: treffer ? treffer.anzeige : null, t: Date.now() };
+  const aufgabe = d.aufgaben[d.nr - 1];
+  const treffer = bewerten(aufgabe, text);
+  const a = (d.antworten[id] = { text, stufe: treffer ? treffer.stufe : 0, erkannt: treffer ? treffer.anzeige : null, t: Date.now() });
   if (!istBot(d, id) && raum.spieler[id]) raum.spieler[id].ohneEingabe = 0;
-  // Alle (aktiven) Menschen und Computer fertig? Dann sofort auflösen
+  // Nicht in der Liste: schon einmal anerkannt? Sonst bei Wikipedia nachschauen
+  if (!treffer) {
+    const alt = PRUEFER.gelernt(aufgabe.id, text);
+    if (alt) Object.assign(a, { stufe: STUFE_NEU, erkannt: alt.anzeige, quelle: alt.quelle });
+    else if (PRUEFER.REGELN[aufgabe.id]) {
+      a.pruefung = true;
+      const nr = d.nr;
+      PRUEFER.pruefen(aufgabe.id, text).then((e) => {
+        if (e && d.nr === nr && d.antworten[id] === a) Object.assign(a, { stufe: STUFE_NEU, erkannt: e.anzeige, quelle: e.quelle });
+      }).finally(() => { a.pruefung = false; if (raum.daten === d && d.nr === nr) fertigPruefen(raum, ctx); });
+    }
+  }
+  fertigPruefen(raum, ctx);
+}
+// Alle (aktiven) Menschen und Computer fertig und keine Prüfung offen? Dann auflösen
+function fertigPruefen(raum, ctx) {
+  const d = raum.daten;
+  if (d.phase !== "frage") return;
   const fehlt = teilnehmer(raum).filter((t) => (t.bot || (t.online && !t.afk)) && !d.antworten[t.id]);
-  if (!fehlt.length) return aufloesen(raum, ctx);
+  if (!fehlt.length && !Object.values(d.antworten).some((x) => x.pruefung)) return aufloesen(raum, ctx);
   ctx.sende(raum);
 }
 
-function aufloesen(raum, ctx) {
+function aufloesen(raum, ctx, erzwingen = false) {
   const d = raum.daten;
   if (d.phase !== "frage") return;
   clearTimeout(d.timer);
+  // Läuft noch eine Wikipedia-Prüfung? Kurz warten (höchstens 3,5 Sekunden)
+  if (!erzwingen && Object.values(d.antworten).some((x) => x.pruefung)) { d.timer = setTimeout(() => aufloesen(raum, ctx, true), 3500); return; }
   d.bots.forEach((b) => clearTimeout(b.timer));
   d.phase = "aufloesung";
   const ids = new Set();
@@ -223,6 +246,25 @@ function aufloesen(raum, ctx) {
   punkteSetzen(raum);
   d.endetUm = Date.now() + AUFLOESUNG_MS;
   d.timer = setTimeout(() => weiter(raum, ctx), AUFLOESUNG_MS);
+  ctx.sende(raum);
+}
+
+// Einspruch: Stimmt die Mehrheit der anderen Spieler zu, zählt eine ausgebuhte Antwort als Krieger (30)
+function einspruch(raum, ctx, waehler, fuer) {
+  const d = raum.daten;
+  const a = d.antworten[fuer];
+  if (!a || a.leer || a.stufe > 0 || waehler === fuer || istBot(d, fuer) || !d.verlauf[waehler]) return;
+  d.einsprueche ||= {};
+  const stimmen = (d.einsprueche[fuer] ||= new Set());
+  stimmen.add(waehler);
+  const andere = menschen(raum).filter((t) => t.id !== fuer).length;
+  if (stimmen.size >= Math.max(1, Math.ceil(andere / 2))) {
+    a.stufe = 30; a.erkannt = a.text; a.quelle = "Abstimmung";
+    const v = d.verlauf[fuer][d.verlauf[fuer].length - 1];
+    if (v) Object.assign(v, { stufe: 30, erkannt: a.text });
+    PRUEFER.lernen(d.aufgaben[d.nr - 1].id, a.text, a.text, "Abstimmung");
+    punkteSetzen(raum);
+  }
   ctx.sende(raum);
 }
 
@@ -323,6 +365,7 @@ module.exports = {
     const d = raum.daten;
     if (!d.verlauf[spielerId]) return;
     if (typ === "antwort") return antworten(raum, ctx, spielerId, daten) || undefined;
+    if (typ === "einspruch" && d.phase === "aufloesung") return einspruch(raum, ctx, spielerId, String(daten || "")) || undefined;
     if (typ === "weiter" && d.phase === "aufloesung") {
       d.weiter.add(spielerId);
       if (menschen(raum).every((t) => d.weiter.has(t.id))) return weiter(raum, ctx);
@@ -361,6 +404,7 @@ module.exports = {
       bots: d.bots.map((b) => ({ id: b.id, name: b.name, avatar: b.avatar, punkte: b.punkte, online: true, bot: true })),
       beantwortet: Object.keys(d.antworten),
       antworten: offen ? d.antworten : null,
+      einsprueche: offen ? Object.fromEntries(Object.entries(d.einsprueche || {}).map(([k, v]) => [k, [...v]])) : null,
       weiter: [...d.weiter],
       beispiele: offen && aufgabe ? beispiele(aufgabe) : null,
       verlauf: d.verlauf, // enthält nur schon aufgelöste Aufgaben
