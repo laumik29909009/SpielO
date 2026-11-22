@@ -119,23 +119,85 @@ window.BauloweBrett3D = (() => {
     return q.setFromEuler(new THREE.Euler(...e));
   }
 
-  // ---------- Figur (Spielstein) ----------
+  // ---------- Spielfiguren: kleine Low-Poly-Modelle aus Metall, Sockel in Spielerfarbe ----------
+  function figurModell(icon) {
+    const g = new THREE.Group();
+    const silber = new THREE.MeshStandardMaterial({ color: 0xe8ebf0, metalness: 0.35, roughness: 0.32, emissive: 0x2a2d33, emissiveIntensity: 0.25 });
+    const dunkel = new THREE.MeshStandardMaterial({ color: 0x59606b, metalness: 0.3, roughness: 0.45 });
+    const m = (geo, x = 0, y = 0, z = 0, mat = silber) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); o.castShadow = true; g.add(o); return o; };
+    switch (icon) {
+      case "🎩": // Zylinder
+        m(new THREE.CylinderGeometry(0.24, 0.24, 0.03, 20), 0, 0.02);
+        m(new THREE.CylinderGeometry(0.14, 0.15, 0.32, 18), 0, 0.2);
+        m(new THREE.CylinderGeometry(0.152, 0.152, 0.05, 18), 0, 0.07, 0, dunkel);
+        break;
+      case "🚗": // Auto
+        m(new THREE.BoxGeometry(0.46, 0.12, 0.24), 0, 0.12);
+        m(new THREE.BoxGeometry(0.24, 0.11, 0.2), -0.03, 0.235);
+        for (const [x, z] of [[-0.15, 0.12], [0.15, 0.12], [-0.15, -0.12], [0.15, -0.12]]) { const r = m(new THREE.CylinderGeometry(0.065, 0.065, 0.05, 12), x, 0.065, z, dunkel); r.rotation.x = Math.PI / 2; }
+        break;
+      case "🐕": { // Hund
+        m(new THREE.BoxGeometry(0.34, 0.13, 0.14), 0, 0.2);
+        m(new THREE.SphereGeometry(0.09, 10, 8), 0.2, 0.32);
+        m(new THREE.BoxGeometry(0.09, 0.05, 0.06), 0.3, 0.3);
+        for (const z of [-0.06, 0.06]) m(new THREE.BoxGeometry(0.03, 0.08, 0.05), 0.18, 0.4, z);
+        for (const [x, z] of [[-0.12, 0.05], [-0.12, -0.05], [0.12, 0.05], [0.12, -0.05]]) m(new THREE.CylinderGeometry(0.025, 0.025, 0.14, 6), x, 0.07, z);
+        const sch = m(new THREE.CylinderGeometry(0.015, 0.02, 0.14, 6), -0.2, 0.3); sch.rotation.z = 0.8;
+        break;
+      }
+      case "🚀": // Rakete
+        m(new THREE.CylinderGeometry(0.08, 0.1, 0.36, 14), 0, 0.25);
+        m(new THREE.ConeGeometry(0.08, 0.16, 14), 0, 0.51);
+        for (let i = 0; i < 3; i++) { const f = m(new THREE.BoxGeometry(0.02, 0.14, 0.11), Math.cos((i * 2 * Math.PI) / 3) * 0.09, 0.1, Math.sin((i * 2 * Math.PI) / 3) * 0.09, dunkel); f.rotation.y = -(i * 2 * Math.PI) / 3; }
+        m(new THREE.SphereGeometry(0.035, 10, 8), 0, 0.33, 0.09, dunkel);
+        break;
+      case "🦆": { // Ente
+        const k = m(new THREE.SphereGeometry(0.15, 14, 10), 0, 0.14); k.scale.set(1.3, 0.8, 1);
+        m(new THREE.SphereGeometry(0.09, 12, 10), 0.13, 0.3);
+        const sn = m(new THREE.ConeGeometry(0.04, 0.1, 8), 0.24, 0.29, 0, dunkel); sn.rotation.z = -Math.PI / 2;
+        const sw = m(new THREE.ConeGeometry(0.05, 0.1, 8), -0.2, 0.2); sw.rotation.z = 1;
+        break;
+      }
+      case "👟": { // Schuh
+        m(new THREE.BoxGeometry(0.42, 0.05, 0.17), 0.02, 0.03, 0, dunkel);
+        const v = m(new THREE.SphereGeometry(0.11, 12, 8), 0.12, 0.09); v.scale.set(1.1, 0.6, 0.8);
+        m(new THREE.BoxGeometry(0.2, 0.18, 0.15), -0.08, 0.14);
+        break;
+      }
+      case "⛵": { // Segelboot
+        const r = m(new THREE.CylinderGeometry(0.22, 0.14, 0.1, 4), 0, 0.06); r.rotation.y = Math.PI / 4; r.scale.set(1.4, 1, 0.6);
+        m(new THREE.CylinderGeometry(0.012, 0.012, 0.45, 6), 0, 0.33, 0, dunkel);
+        const form = new THREE.Shape(); form.moveTo(0, 0); form.lineTo(0, 0.38); form.lineTo(0.2, 0); form.lineTo(0, 0);
+        const segel = m(new THREE.ShapeGeometry(form), 0.01, 0.12, 0, new THREE.MeshStandardMaterial({ color: 0xf5f5f5, side: THREE.DoubleSide, metalness: 0.2, roughness: 0.5 }));
+        segel.rotation.y = Math.PI / 2;
+        break;
+      }
+      case "🎸": { // Gitarre
+        const k1 = m(new THREE.CylinderGeometry(0.12, 0.12, 0.05, 16), 0, 0.12); k1.rotation.x = Math.PI / 2;
+        const k2 = m(new THREE.CylinderGeometry(0.09, 0.09, 0.05, 16), 0, 0.27); k2.rotation.x = Math.PI / 2;
+        m(new THREE.BoxGeometry(0.04, 0.32, 0.03), 0, 0.5, 0, dunkel);
+        m(new THREE.BoxGeometry(0.07, 0.08, 0.03), 0, 0.69);
+        const loch = m(new THREE.CylinderGeometry(0.035, 0.035, 0.06, 12), 0, 0.17, 0, dunkel); loch.rotation.x = Math.PI / 2;
+        break;
+      }
+      default: { // klassischer Spielstein
+        const profil = [[0, 0], [0.16, 0], [0.12, 0.08], [0.07, 0.25], [0.1, 0.3], [0.06, 0.34], [0.09, 0.42], [0, 0.46]].map(([x, y]) => new THREE.Vector2(x, y));
+        m(new THREE.LatheGeometry(profil, 20));
+      }
+    }
+    return g;
+  }
   function spielstein(farbe, icon) {
     const g = new THREE.Group();
-    const profil = [[0, 0], [0.2, 0], [0.21, 0.04], [0.15, 0.08], [0.09, 0.2], [0.07, 0.32], [0.12, 0.36], [0.07, 0.4], [0.1, 0.48], [0.07, 0.55], [0, 0.56]].map(([x, y]) => new THREE.Vector2(x, y));
-    const mat = new THREE.MeshStandardMaterial({ color: farbe, metalness: 0.35, roughness: 0.3 });
-    const k = new THREE.Mesh(new THREE.LatheGeometry(profil, 24), mat);
-    k.castShadow = true; g.add(k);
-    // Emoji-Symbol schwebt über dem Stein (so erkennt man ihn sofort)
-    const c = document.createElement("canvas"); c.width = c.height = 128;
-    const x = c.getContext("2d");
-    x.beginPath(); x.arc(64, 64, 58, 0, Math.PI * 2); x.fillStyle = "#fffdf6"; x.fill(); x.lineWidth = 8; x.strokeStyle = farbe; x.stroke();
-    x.font = "76px serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(icon, 64, 70);
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false }));
-    s.scale.set(0.42, 0.42, 1); s.position.y = 0.86; s.renderOrder = 5;
-    g.add(s);
-    g.userData.schild = s;
+    // Sockel in Spielerfarbe: so weiß man sofort, wem die Figur gehört
+    const sockel = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.05, 24), new THREE.MeshStandardMaterial({ color: farbe, metalness: 0.3, roughness: 0.35 }));
+    sockel.position.y = 0.025; sockel.castShadow = true; g.add(sockel);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.022, 8, 32), new THREE.MeshBasicMaterial({ color: farbe }));
+    ring.rotation.x = Math.PI / 2; ring.position.y = 0.01; g.add(ring);
+    // Körper (wird beim Springen gestaucht und gestreckt)
+    const koerper = new THREE.Group(); koerper.position.y = 0.05; g.add(koerper);
+    const modell = figurModell(icon); modell.scale.setScalar(1.15); koerper.add(modell);
+    g.userData.schild = ring; g.userData.koerper = koerper;
     return g;
   }
   function hausModell(hotel) {
@@ -192,8 +254,13 @@ window.BauloweBrett3D = (() => {
       // Felder antippen
       const ray = new THREE.Raycaster(), maus = new THREE.Vector2();
       let unten = null;
-      r.domElement.addEventListener("pointerdown", (e) => (unten = [e.clientX, e.clientY]));
+      r.domElement.addEventListener("pointerdown", (e) => {
+        unten = [e.clientX, e.clientY];
+        // Läuft gerade etwas? Dann vorspulen statt ein Feld zu öffnen
+        if (this.wurf || [...this.figuren.values()].some((f) => f.pfad.length)) { this.schnell = 5; this.gespult = true; }
+      });
       r.domElement.addEventListener("pointerup", (e) => {
+        if (this.gespult) { this.gespult = false; return; }
         if (!unten || Math.hypot(e.clientX - unten[0], e.clientY - unten[1]) > 8) return;
         const b = r.domElement.getBoundingClientRect();
         maus.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
@@ -304,17 +371,28 @@ window.BauloweBrett3D = (() => {
       });
     }
     fokus(feld) { const m = mitteVon(feld); this.fokusPunkt.set(m.x * 0.12, 0, m.z * 0.12 + 0.9); }
+    // Kamera-Schwenk auf das Feld, auf dem gerade etwas passiert (feste Perspektive, kein freies Drehen)
+    zeigeFeld(feld, sek = 1.8) { if (!ruhig()) this.feldBlick = { feld, bis: this.uhr.elapsedTime + sek }; }
 
     bild() {
-      const dt = Math.min(0.05, this.uhr.getDelta()), t = this.uhr.elapsedTime;
+      const dtEcht = Math.min(0.05, this.uhr.getDelta()), t = this.uhr.elapsedTime;
+      // Vorspulen endet von selbst, sobald nichts mehr läuft
+      if (this.schnell && !this.wurf && ![...this.figuren.values()].some((f) => f.pfad.length)) this.schnell = 0;
+      const dt = dtEcht * (this.schnell || 1);
       // Kamera: leicht schräg von vorn, wiegt sich sanft
       // Abstand nach Seitenverhältnis: immer das ganze Brett im Bild
       const a = this.kamera.aspect || 1.25;
       const abstand = 17.2 * Math.max(1, 1.36 / a), hoehe = (a < 1.1 ? 64 : 54) * Math.PI / 180;
       const ziel = new THREE.Vector3(0, abstand * Math.sin(hoehe), abstand * Math.cos(hoehe));
       if (!ruhig()) { ziel.x += Math.sin(t * 0.15) * 0.5; ziel.z += Math.sin(t * 0.11) * 0.3; }
-      this.kamera.position.lerp(ziel, 0.05);
-      this.blick = (this.blick || this.fokusPunkt.clone()).lerp(this.fokusPunkt, 0.04);
+      let blickZiel = this.fokusPunkt;
+      if (this.feldBlick && t < this.feldBlick.bis) {
+        const m = mitteVon(this.feldBlick.feld);
+        blickZiel = new THREE.Vector3(m.x * 0.45, 0, m.z * 0.45 + 0.4);
+        ziel.multiplyScalar(0.82).add(new THREE.Vector3(m.x * 0.3, 0, m.z * 0.2));
+      } else this.feldBlick = null;
+      this.kamera.position.lerp(ziel, 0.045);
+      this.blick = (this.blick || blickZiel.clone()).lerp(blickZiel, 0.05);
       this.kamera.lookAt(this.blick);
       // Würfelwurf: fallen, zweimal aufprallen, genau auf der richtigen Seite liegen bleiben
       if (this.wurf) {
@@ -347,17 +425,33 @@ window.BauloweBrett3D = (() => {
             fg.g.position.copy(fg.start);
             fg.schrittT = 0;
             this.beiSchritt?.(id, s.feld);
-            if (!fg.pfad.length) { fg.ziel = this.platzFuer(id, fg.feld, this.figurenListe || []); for (const [x, o] of this.figuren) if (x !== id && !o.pfad.length) o.ziel = this.platzFuer(x, o.feld, this.figurenListe || []); }
+            if (!fg.pfad.length) { this.zeigeFeld(s.feld); fg.ziel = this.platzFuer(id, fg.feld, this.figurenListe || []); for (const [x, o] of this.figuren) if (x !== id && !o.pfad.length) o.ziel = this.platzFuer(x, o.feld, this.figurenListe || []); }
           } else if (fg.schrittT > 0) {
             const nach = this.platzFuer(id, fg.pfad[0].feld, this.figurenListe || []);
-            fg.g.position.lerpVectors(fg.start, nach, fg.schrittT);
-            fg.g.position.y = Math.sin(fg.schrittT * Math.PI) * 0.4;
+            const u = fg.schrittT;
+            const e = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2; // langsam los, schnell, sanft bremsen
+            fg.g.position.lerpVectors(fg.start, nach, e);
+            fg.g.position.y = Math.sin(u * Math.PI) * 0.45;
+            // Ausholen (stauchen), Strecken im Flug, Nachfedern bei der Landung
+            let sy = 1;
+            if (u < 0.12) sy = 1 - 0.2 * (u / 0.12);
+            else if (u < 0.3) sy = 0.8 + 0.32 * ((u - 0.12) / 0.18);
+            else if (u < 0.85) sy = 1.12 - 0.12 * ((u - 0.3) / 0.55);
+            else sy = 1 - 0.16 * Math.sin(((u - 0.85) / 0.15) * Math.PI);
+            fg.g.userData.koerper.scale.set(1 / Math.sqrt(sy), sy, 1 / Math.sqrt(sy));
+            // in Laufrichtung drehen
+            const winkel = Math.atan2(nach.x - fg.start.x, nach.z - fg.start.z) - Math.PI / 2;
+            let d = winkel - fg.g.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
+            fg.g.rotation.y += d * Math.min(1, dt * 14);
           }
         } else if (fg.ziel) {
           fg.g.position.lerp(fg.ziel, 0.15);
-          fg.g.position.y = fg.dran && !ruhig() ? Math.abs(Math.sin(t * 2.4)) * 0.08 : 0;
+          fg.g.position.y = fg.dran && !ruhig() ? Math.abs(Math.sin(t * 2.4)) * 0.06 : 0;
+          fg.g.userData.koerper.scale.lerp(new THREE.Vector3(1, 1, 1), 0.2);
         }
-        fg.g.userData.schild.scale.setScalar(fg.dran ? 0.5 + Math.sin(t * 3) * 0.03 : 0.4);
+        fg.g.userData.schild.scale.setScalar(fg.dran ? 1 + Math.sin(t * 3) * 0.12 : 0.85);
+        fg.g.userData.schild.material.opacity = fg.dran ? 1 : 0.5;
+        fg.g.userData.schild.material.transparent = true;
       }
       // Neue Häuser fallen aufs Brett
       for (const h of this.haeuserGruppe.children) if (h.userData.fallen !== undefined) {
