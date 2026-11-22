@@ -48,7 +48,7 @@ function miete(d, f, augen, doppelt = false) {
   }
   const n = besitzVon(d, b).filter((x) => FELDER[x].art === feld.art).length;
   if (feld.art === "bahn") return 25 * 2 ** (n - 1) * (doppelt ? 2 : 1);
-  if (feld.art === "werk") return (n >= 2 ? 10 : 4) * augen;
+  if (feld.art === "werk") return (doppelt || n >= 2 ? 10 : 4) * augen; // Karte „nächstes Werk“: immer 10 × Wurf
   return 0;
 }
 function vermoegen(d, id) {
@@ -185,7 +185,9 @@ function feldAuswerten(raum, ctx, id, { doppelt = false, laufzeit = 0 } = {}) {
     if (b === undefined) {
       d.schritt = "kaufen";
     } else if (b !== id && !d.pleite.includes(b)) {
-      const m = miete(d, f, d.wuerfel[0] + d.wuerfel[1], doppelt);
+      // Per Karte aufs Werk geschickt: neu würfeln, das Zehnfache zahlen
+      const augen = doppelt && feld.art === "werk" ? w6() + w6() : d.wuerfel[0] + d.wuerfel[1];
+      const m = miete(d, f, augen, doppelt);
       if (m > 0) {
         log(d, `${name(raum, id)} zahlt ${m} Miete an ${name(raum, b)} (${feld.name}).`);
         aktion(d, { typ: "miete", spieler: id, an: b, betrag: m, feld: f });
@@ -242,7 +244,7 @@ function karteZiehen(raum, ctx, id, stapelArt, laufzeit) {
     const andere = imSpiel(d).filter((x) => x !== id);
     if (d.geld[id] >= k.anJeden * andere.length) for (const x of andere) { d.geld[id] -= k.anJeden; d.geld[x] += k.anJeden; }
     else zahlen(raum, ctx, id, null, k.anJeden * andere.length, "eine Karte");
-  } else if (k.zu !== undefined || k.zurueck || k.naechsteBahn) {
+  } else if (k.zu !== undefined || k.zurueck || k.naechsteBahn || k.naechstesWerk) {
     // Nach dem Lesen der Karte weiterlaufen
     d.schritt = "karte";
     clearTimeout(d.timer);
@@ -250,8 +252,9 @@ function karteZiehen(raum, ctx, id, stapelArt, laufzeit) {
       if (d.phase !== "spielen" || d.dran !== id) return;
       if (k.zurueck) return laufen(raum, ctx, id, k.zurueck, { zu: (d.figur[id] - k.zurueck + 40) % 40, rueckwaerts: true, keinNochmal: d.keinNochmal });
       let ziel = k.zu;
-      if (k.naechsteBahn) { ziel = d.figur[id]; do ziel = (ziel + 1) % 40; while (FELDER[ziel].art !== "bahn"); }
-      laufen(raum, ctx, id, 0, { zu: ziel, doppelt: !!k.naechsteBahn, keinNochmal: d.keinNochmal });
+      const art = k.naechsteBahn ? "bahn" : k.naechstesWerk ? "werk" : null;
+      if (art) { ziel = d.figur[id]; do ziel = (ziel + 1) % 40; while (FELDER[ziel].art !== art); }
+      laufen(raum, ctx, id, 0, { zu: ziel, doppelt: !!art, keinNochmal: d.keinNochmal });
     }, pause);
     return ctx.sende(raum);
   }
