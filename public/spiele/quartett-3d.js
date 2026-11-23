@@ -175,8 +175,8 @@ const QuartettTisch3D = (() => {
     const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t;
   }
   function filzTextur(farbe) {
-    const c = document.createElement("canvas"); c.width = 512; c.height = 512;
-    const x = c.getContext("2d");
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 1024;
+    const x = c.getContext("2d"); x.scale(2, 2);
     const g = x.createRadialGradient(256, 256, 40, 256, 256, 256);
     g.addColorStop(0, farbe); g.addColorStop(1, "#0b2418");
     x.fillStyle = g; x.fillRect(0, 0, 512, 512);
@@ -188,8 +188,8 @@ const QuartettTisch3D = (() => {
   }
   // Kartenrückseite mit SpielO-Artwork: dunkler Grund, Strahlen, großer Spielstein, Schriftzug
   function rueckenTextur() {
-    const c = document.createElement("canvas"); c.width = 256; c.height = 376;
-    const x = c.getContext("2d");
+    const c = document.createElement("canvas"); c.width = 512; c.height = 752;
+    const x = c.getContext("2d"); x.scale(2, 2);
     x.fillStyle = "#fff"; x.beginPath(); x.roundRect(0, 0, 256, 376, 24); x.fill();
     const g = x.createLinearGradient(0, 0, 256, 376); g.addColorStop(0, "#2a1450"); g.addColorStop(1, "#120a24");
     x.fillStyle = g; x.beginPath(); x.roundRect(12, 12, 232, 352, 18); x.fill();
@@ -213,7 +213,7 @@ const QuartettTisch3D = (() => {
       this.topf = [];
       this.uhr = new THREE.Clock();
       const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
-      r.setPixelRatio(Math.min(1.75, devicePixelRatio || 1));
+      r.setPixelRatio(Math.min(2, devicePixelRatio || 1));
       r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
       r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
       host.appendChild(r.domElement);

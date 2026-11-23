@@ -550,7 +550,7 @@
   const fmtVoll = (n) => n.toLocaleString("de-DE", { maximumFractionDigits: 2 });
 
   GN.spiele.preis = {
-    icon: "💰",
+    icon: "🏷️",
     titel: "Preis-Schätzer",
     kurz: "Was kostet ein Windrad? 4 Modi, 81 Fragen.",
     beschreibung: "Was kostet ein Windrad, ein Bugatti oder 1 Gramm Antimaterie? Schätzt, sortiert und zockt um Punkte.",

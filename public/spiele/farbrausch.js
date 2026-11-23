@@ -48,8 +48,9 @@
   // Dieselbe Karte als Bild für den 3D-Tisch
   function karteBild(k) {
     const c = document.createElement("canvas");
-    c.width = 256; c.height = 376;
+    c.width = 512; c.height = 752; // doppelte Auflösung, gezeichnet wird in 256 × 376
     const x = c.getContext("2d");
+    x.scale(2, 2);
     const r = (px, py, w, h, rad) => { x.beginPath(); x.roundRect(px, py, w, h, rad); };
     x.fillStyle = "#fff"; r(0, 0, 256, 376, 26); x.fill();
     x.fillStyle = FARBE[k.farbe]; r(12, 12, 232, 352, 18); x.fill();

@@ -603,7 +603,7 @@
   }
 
   GN.spiele.quartett = {
-    icon: "🃏",
+    icon: "⚔️",
     titel: "Quartett",
     kurz: "Karten-Duelle mit Kung Fu Panda und Dragons.",
     beschreibung: "Das Karten-Duell: Wähle den stärksten Wert und schnapp dir die Karten der anderen. Mit animierten Kämpfen und Holo-Karten.",

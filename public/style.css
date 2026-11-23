@@ -1351,3 +1351,72 @@ html[data-farbsicht="an"] :is(.sc-spieler, .bl-person, .sk-chip):nth-child(6)::a
 @keyframes laden-rein { from { opacity: 0; } }
 @keyframes laden-schweben { 50% { transform: translateY(-8px); } }
 @keyframes laden-fuellen { to { width: 100%; } }
+
+/* =============================================================
+   Titelbilder der Spiele (Grafik-Upgrade)
+   ============================================================= */
+.spiel-bild { overflow: hidden; isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--gold) 35%, transparent), transparent 60%),
+    radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--gold-2) 40%, transparent), transparent 50%),
+    linear-gradient(160deg, color-mix(in srgb, var(--flaeche-2) 80%, #fff 4%), var(--flaeche) 85%); }
+.spiel-bild::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), transparent 35%), radial-gradient(130% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)); }
+.cover-muster { position: absolute; inset: -20%; z-index: 0; opacity: 0.22; color: var(--gold); }
+.cover-muster.punkte { background-image: radial-gradient(currentColor 1.6px, transparent 2px); background-size: 18px 18px; transform: rotate(-12deg); }
+.cover-muster.raster { background-image: linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px); background-size: 26px 26px; transform: perspective(300px) rotateX(55deg) translateY(30%); opacity: 0.28; }
+.cover-muster.linien { background-image: repeating-linear-gradient(-35deg, currentColor 0 2px, transparent 2px 16px); opacity: 0.14; }
+.cover-muster.karten { background-image: linear-gradient(90deg, transparent 46%, currentColor 46% 54%, transparent 54%), linear-gradient(transparent 46%, currentColor 46% 54%, transparent 54%); background-size: 34px 48px; transform: rotate(16deg); opacity: 0.1; }
+.cover-muster.hex { background-image: radial-gradient(circle at 50% 0, transparent 9px, currentColor 10px, transparent 11.5px), radial-gradient(circle at 0 50%, transparent 9px, currentColor 10px, transparent 11.5px); background-size: 22px 22px; opacity: 0.16; }
+.cover-muster.strahlen { inset: -60%; background: repeating-conic-gradient(from 0deg, currentColor 0 6deg, transparent 6deg 18deg); opacity: 0.12; animation: cover-dreh 40s linear infinite; }
+@keyframes cover-dreh { to { transform: rotate(360deg); } }
+.cover-licht { position: absolute; left: 50%; top: 50%; width: 140%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 1;
+  background: conic-gradient(from 200deg, transparent, color-mix(in srgb, var(--gold) 26%, transparent) 20deg, transparent 50deg, transparent 150deg, color-mix(in srgb, var(--gold-2) 22%, transparent) 175deg, transparent 205deg);
+  filter: blur(6px); opacity: 0.7; transition: transform 1.2s cubic-bezier(.2, .7, .2, 1); }
+.spiel-gross:hover .cover-licht { transform: translate(-50%, -50%) rotate(40deg); }
+.cover-sockel { position: absolute; left: 50%; top: 52%; width: clamp(90px, 16vw, 120px); aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 1; border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--gold) 45%, transparent), transparent 68%); }
+.spiel-bild .spiel-icon { position: relative; z-index: 2; filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 22px color-mix(in srgb, var(--gold) 40%, transparent)); }
+.cover-akzent { position: absolute; z-index: 1; font-size: clamp(1.3rem, 3.6vw, 1.8rem); opacity: 0.85; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4)); animation: cover-schweben 6s ease-in-out infinite; }
+.cover-akzent.a0 { left: 12%; top: 18%; transform: rotate(-14deg); }
+.cover-akzent.a1 { right: 13%; top: 22%; animation-delay: -2s; transform: rotate(12deg); font-size: clamp(1.1rem, 3vw, 1.5rem); }
+.cover-akzent.a2 { right: 22%; bottom: 12%; animation-delay: -4s; filter: blur(0.6px) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4)); opacity: 0.65; font-size: clamp(1rem, 2.6vw, 1.3rem); }
+@keyframes cover-schweben { 50% { translate: 0 -7px; } }
+.spiel-gross:hover .cover-akzent { animation-duration: 2.6s; }
+.spiele-gitter.zwei .cover-akzent { font-size: 1.1rem; }
+@media (prefers-reduced-motion: reduce) { .cover-akzent, .cover-muster.strahlen { animation: none; } }
+
+/* =============================================================
+   Hintergrund (Grafik-Upgrade): sanft wandernde Lichtschleier,
+   feines Korn und dunkle Ränder. Nur transform/opacity animiert.
+   ============================================================= */
+.hintergrund { overflow: hidden; }
+.hintergrund::before {
+  content: ""; position: absolute; inset: -25%;
+  background:
+    radial-gradient(30% 35% at 30% 30%, var(--glow-1), transparent 70%),
+    radial-gradient(28% 30% at 72% 62%, var(--glow-2), transparent 70%),
+    radial-gradient(25% 25% at 55% 20%, var(--glow-3), transparent 70%);
+  filter: blur(30px); opacity: 0.9;
+  animation: hg-wandern 38s ease-in-out infinite alternate;
+}
+@keyframes hg-wandern {
+  0% { transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(3%, 4%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(5%, -3%, 0) rotate(-6deg) scale(1.02); }
+}
+.hintergrund::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(130% 100% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.45)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='k'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23k)'/></svg>");
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) { .hintergrund::before { animation: none; } }
+html[data-animationen="aus"] .hintergrund::before { animation: none; }
+
+/* Karten, Fenster und Flächen: feiner Glanzrand oben für mehr Tiefe */
+.spiel-gross, .karte, .fenster, .abschnitt, .raum-kopf {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+.spiel-gross:hover:not(:disabled):not(.bald) { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 22px 44px rgba(0, 0, 0, 0.4), 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent); }

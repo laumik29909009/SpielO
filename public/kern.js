@@ -204,12 +204,34 @@ function aufbauKarte(s, klein = false) {
     </div>`;
 }
 
+// Titelbilder der Spiele: Muster im Hintergrund, Lichtstrahlen, Hauptmotiv und schwebende Nebenmotive
+const COVER = {
+  baulowe: { muster: "raster", akzente: ["🏠", "🎲", "💶"] },
+  skat: { muster: "karten", akzente: ["♠️", "♥️", "👑"] },
+  ludo: { muster: "punkte", akzente: ["🎲", "🔴", "🟡"] },
+  slf: { muster: "linien", akzente: ["✏️", "🏙️", "🦊"] },
+  quartett: { muster: "karten", akzente: ["🐼", "🐉", "🃏"] },
+  farbrausch: { muster: "punkte", akzente: ["🟥", "🟦", "🟨"] },
+  schlange: { muster: "hex", akzente: ["🍏", "⚡", "✨"] },
+  schechingen: { muster: "hex", akzente: ["🏡", "🌲", "🧱"] },
+  wuerfel: { muster: "punkte", akzente: ["🎲", "🎯", "🦉"] },
+  preis: { muster: "linien", akzente: ["💶", "🚗", "📱"] },
+  duell: { muster: "raster", akzente: ["🏳️", "🗺️", "⚡"] },
+  millionen: { muster: "strahlen", akzente: ["💎", "📞", "👥"] },
+};
+function coverHtml(id, s) {
+  const c = COVER[id] || { muster: "punkte", akzente: [] };
+  return `<span class="cover-muster ${c.muster}"></span><span class="cover-licht"></span>
+    ${c.akzente.map((a, i) => `<span class="cover-akzent a${i}">${a}</span>`).join("")}
+    <span class="cover-sockel"></span><span class="spiel-icon">${s.icon}</span>`;
+}
+
 // Große Spielkarte für Startseite und Lobby
 function spielKarte(id, s, { knopf = "", aktiv = false, deaktiviert = false, alsKnopf = false } = {}) {
   const tag = alsKnopf ? "button" : "div";
   return `
     <${tag} class="spiel-gross ${aktiv ? "aktiv" : ""}" data-farbe="${id}" ${alsKnopf ? `data-spiel-wahl="${id}" ${deaktiviert ? "disabled" : ""}` : ""}>
-      <span class="spiel-bild"><span class="spiel-icon">${s.icon}</span>${aktiv ? '<span class="gewaehlt-marke">✓ Ausgewählt</span>' : ""}</span>
+      <span class="spiel-bild">${coverHtml(id, s)}${aktiv ? '<span class="gewaehlt-marke">✓ Ausgewählt</span>' : ""}</span>
       <span class="spiel-text">
         <span class="spiel-titel">${s.titel}</span>
         <span class="spiel-beschreibung">${s.beschreibung}</span>
