@@ -18,6 +18,9 @@
   const mitte = ([c, r]) => [c + 0.5, r + 0.5];
 
   let anzeige = {}; // angezeigte Positionen (laufen den echten hinterher)
+  // 3D-Ansicht (umschaltbar, wird pro Gerät gemerkt)
+  let mit3d = false, brett3d = null;
+  const dreiDMoeglich = () => !!window.LudoBrett3D?.moeglich();
   let letzteAktion = 0, letzterWurf = 0, laeuft = 0;
 
   const leute = (z) => z.teilnehmer || [];
@@ -78,12 +81,14 @@
     GN.stoppeTimer();
     anzeige = JSON.parse(JSON.stringify(z.figuren));
     letzteAktion = z.letzteAktion?.nr || 0; letzterWurf = z.wurfNr; laeuft = 0;
+    mit3d = dreiDMoeglich() && GN.speicher("luAnsicht") === "3d";
+    brett3d?.entsorgen?.(); brett3d = null;
     app.innerHTML = `
       <div class="lu-buehne">
         <div class="runden-kopf"><span class="modus-badge">🎯 Raus da!</span><span class="runden-nr" id="luInfo"></span><span class="timer-zahl" id="timerZahl"></span></div>
         <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div>
         <div class="lu-haupt">
-          <div class="lu-brett-huelle"><svg class="lu-brett" id="luBrett" viewBox="-0.35 -0.35 11.7 11.7">${brettSvg(z)}<g id="luZiele"></g><g id="luFiguren"></g></svg><div class="lu-knall" id="luKnall"></div></div>
+          <div class="lu-brett-huelle">${mit3d ? '<div class="lu-3d" id="lu3d"><div class="lu-laedt">Brett wird aufgebaut …</div></div>' : `<svg class="lu-brett" id="luBrett" viewBox="-0.35 -0.35 11.7 11.7">${brettSvg(z)}<g id="luZiele"></g><g id="luFiguren"></g></svg>`}<div class="lu-knall" id="luKnall"></div></div>
           <div class="lu-seite">
             <div class="lu-leute" id="luLeute"></div>
             <div class="lu-aktion" id="luAktion">
@@ -91,11 +96,28 @@
               <div class="lu-ansage" id="luAnsage"></div>
               <button class="btn gross lu-wurf" id="luWuerfeln">🎲 Würfeln</button>
             </div>
+            ${dreiDMoeglich() ? `<button class="btn zweit klein lu-ansicht" id="luAnsicht">${mit3d ? "🗺️ Flaches Brett (2D)" : "🧊 3D-Brett"}</button>` : ""}
             <div class="lu-log" id="luLog"></div>
           </div>
         </div>
       </div>`;
     $("#luWuerfeln").onclick = () => { Ton.klick(); $("#luWuerfeln").disabled = true; GN.aktion("wuerfeln"); };
+    $("#luAnsicht")?.addEventListener("click", () => {
+      Ton.klick();
+      GN.speicher("luAnsicht", mit3d ? "2d" : "3d");
+      aufbauen(GN.zustand); aktualisieren(GN.zustand, null);
+    });
+    if (mit3d) {
+      LudoBrett3D.einhaengen($("#lu3d"), brettSvg(z)).then((b) => {
+        if (!$("#lu3d")) return b.entsorgen();
+        $(".lu-laedt", $("#lu3d"))?.remove();
+        brett3d = b;
+        b.aufFigur = (schl) => figurAntippen(schl);
+        b.beimUeberfahren = (schl) => { const [id, k] = (schl || "").split("-"); zielZeigen(schl ? id : null, +k); };
+        b.beiSchritt = () => Ton.tick();
+        figurenZeichnen(GN.zustand, true);
+      }).catch(() => { GN.speicher("luAnsicht", "2d"); aufbauen(GN.zustand); aktualisieren(GN.zustand, null); });
+    }
     wuerfelZeigen(z.wurf || 6, true);
     figurenZeichnen(z, true);
   }
@@ -174,6 +196,7 @@
       letzterWurf = z.wurfNr;
       Ton.wusch();
       wuerfelZeigen(z.wurf, false);
+      brett3d?.wuerfeln(z.wurf);
       setTimeout(() => { Ton.klopf?.(); if (z.wurf === 6) { Ton.serie(); GN.fx?.funken($("#luWuerfel"), { anzahl: 12 }); } }, 900);
     }
     effekte(z);
@@ -184,7 +207,7 @@
     let ansage = "";
     if (z.schritt === "wuerfeln") ansage = ich ? (z.versuche > 1 ? `<b>Würfle eine 6!</b> Noch ${z.versuche} Versuche` : z.wurf === 6 ? "<b>Eine 6!</b> Nochmal würfeln" : "<b>Du bist dran!</b>") : `${t.avatar} ${esc(t.name)} würfelt${GN.wartePunkte()}`;
     else if (z.schritt === "ziehen") ansage = ich ? (z.moeglich.length > 1 ? "<b>Tippe eine leuchtende Figur an</b>" : "Deine Figur zieht …") : `${t.avatar} ${esc(t.name)} überlegt${GN.wartePunkte()}`;
-    else if (z.schritt === "nichts") ansage = `Keine ${z.wurf}-er-Zug möglich`;
+    else if (z.schritt === "nichts") ansage = `Kein ${z.wurf}er-Zug möglich`;
     else ansage = `${t.avatar} ${esc(t.name)} zieht${GN.wartePunkte()}`;
     $("#luAnsage").innerHTML = ansage;
     const knopf = $("#luWuerfeln");
@@ -221,7 +244,28 @@
       <circle cx="0" cy="-0.36" r="0.14" fill="url(#luF_${farbe})" stroke="${FARBE[farbe][1]}" stroke-width="0.03"/>
     </g>`;
   }
+  // Antippen einer Figur (2D und 3D)
+  function figurAntippen(schl) {
+    const [id, k] = schl.split("-");
+    const zz = GN.zustand;
+    if (zz.dran === GN.ich && zz.schritt === "ziehen" && id === GN.ich && zz.moeglich.some((m) => m.k === +k)) {
+      Ton.abgeben(); GN.aktion("ziehen", +k);
+      $$("#luFiguren .kann").forEach((x) => x.classList.remove("kann"));
+      zielZeigen(null);
+    }
+  }
   function figurenZeichnen(z, sofort = false) {
+    if (mit3d) {
+      if (!brett3d) return;
+      for (const id of Object.keys(z.figuren)) if (!anzeige[id]) anzeige[id] = [...z.figuren[id]];
+      if (!laeuft || sofort) for (const id of Object.keys(z.figuren)) z.figuren[id].forEach((r, k) => { if (!laeuft) anzeige[id][k] = r; });
+      const kann = z.dran === GN.ich && z.schritt === "ziehen" ? z.moeglich.map((m) => `${GN.ich}-${m.k}`) : [];
+      brett3d.setze({
+        figuren: Object.keys(z.figuren).flatMap((id) => z.figuren[id].map((_, k) => ({ schluessel: `${id}-${k}`, farbe: farbeVon(z, id), zelle: feldVon(z.slot[id], anzeige[id][k], k) }))),
+        dranZelle: z.slot[z.dran] !== undefined ? HAUS[z.slot[z.dran]][0] : null, dranFarbe: farbeVon(z, z.dran), kann,
+      });
+      return;
+    }
     const box = $("#luFiguren");
     if (!box) return;
     for (const id of Object.keys(z.figuren)) {
@@ -234,7 +278,7 @@
           el.setAttribute("class", "lu-figur"); el.dataset.f = `${id}-${k}`; el.dataset.k = k;
           el.innerHTML = `<g class="lu-hut">${hutSvg(farbe)}</g>`;
           box.appendChild(el);
-          el.addEventListener("click", () => { const zz = GN.zustand; if (zz.dran === GN.ich && zz.schritt === "ziehen" && id === GN.ich && zz.moeglich.some((m) => m.k === k)) { Ton.abgeben(); GN.aktion("ziehen", k); box.querySelectorAll(".kann").forEach((x) => x.classList.remove("kann")); } });
+          el.addEventListener("click", () => figurAntippen(`${id}-${k}`));
           el.addEventListener("pointerenter", () => zielZeigen(id, k));
           el.addEventListener("pointerleave", () => zielZeigen(null));
         }
@@ -259,9 +303,14 @@
   }
   // Beim Drüberfahren: Zielfeld als Geist zeigen
   function zielZeigen(id, k) {
+    const z = GN.zustand;
+    if (mit3d) {
+      const m = id && id === GN.ich && z.dran === GN.ich && z.schritt === "ziehen" ? z.moeglich.find((x) => x.k === k) : null;
+      brett3d?.zielZeigen(m ? feldVon(z.slot[id], m.nach, k) : null, m?.schlaegt);
+      return;
+    }
     const box = $("#luZiele");
     if (!box) return;
-    const z = GN.zustand;
     if (!id || id !== GN.ich || z.dran !== GN.ich || z.schritt !== "ziehen") { box.innerHTML = ""; return; }
     const m = z.moeglich.find((x) => x.k === k);
     if (!m) { box.innerHTML = ""; return; }
@@ -278,6 +327,7 @@
     const erstes = !letzteAktion;
     letzteAktion = a.nr;
     if (erstes || a.typ !== "zug") return;
+    if (mit3d) return effekte3d(z, a);
     $("#luZiele").innerHTML = "";
     const el = $(`#luFiguren [data-f="${a.spieler}-${a.k}"]`);
     if (!el) return;
@@ -304,6 +354,33 @@
         figurenZeichnen(GN.zustand);
       }, 170);
     }, 120 + i * 180));
+  }
+  // 3D: Figur hüpft Feld für Feld, danach dieselben Effekte wie in 2D
+  function effekte3d(z, a) {
+    if (!brett3d) return;
+    brett3d.zielZeigen(null);
+    const slot = z.slot[a.spieler];
+    const pfad = a.von === -1 ? [0] : Array.from({ length: a.nach - a.von }, (_, i) => a.von + i + 1);
+    laeuft++;
+    brett3d.laufen(`${a.spieler}-${a.k}`, pfad.map((rel) => feldVon(slot, rel, a.k)), 190).then(() => {
+      laeuft--;
+      anzeige[a.spieler][a.k] = a.nach;
+      if (a.von === -1) { brett3d.ring(feldVon(slot, 0, a.k), farbeVon(z, a.spieler)); Ton.wusch?.(); }
+      if (a.nach >= 40 && a.von < 40) {
+        Ton.richtig();
+        const fertig = (GN.zustand.figuren[a.spieler] || []).filter((x) => x >= 40).length;
+        knall(`${fertig === 4 ? "🏆" : "🎉"} ${esc(nameVon(z, a.spieler))} ${fertig === 4 ? "ist komplett im Ziel!" : `hat ${fertig}/4 im Ziel`}`, FARBE[farbeVon(z, a.spieler)][0]);
+      }
+      if (a.geschlagen) {
+        const g = a.geschlagen;
+        Ton.treffer(); GN.fx?.wackeln(2);
+        knall(`💥 ${esc(nameVon(z, g.id))} ${g.id === GN.ich ? "fliegst" : "fliegt"} raus!`);
+        if (g.id === GN.ich) navigator.vibrate?.([80, 40, 120]);
+        anzeige[g.id][g.k] = -1;
+        brett3d.fliegen(`${g.id}-${g.k}`, feldVon(z.slot[g.id], -1, g.k));
+      }
+      figurenZeichnen(GN.zustand);
+    });
   }
   // Geschlagene Figur fliegt ins Haus zurück
   function rauswurf(z, a) {

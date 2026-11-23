@@ -103,3 +103,11 @@ body[data-spiel="ludo"], [data-farbe="ludo"] {
   .lu-p-text small { font-size: 0.68rem; white-space: nowrap; }
   .lu-p-ava { font-size: 1.1rem; }
 }
+
+/* 3D-Brett */
+.lu-3d { position: relative; width: 100%; max-width: 760px; margin: 0 auto; aspect-ratio: 1; border-radius: 18px; overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, #3a2618, #160e08); box-shadow: 0 26px 50px rgba(0, 0, 0, 0.55); }
+.lu-3d canvas { display: block; width: 100% !important; height: 100% !important; touch-action: manipulation; }
+.lu-laedt { position: absolute; inset: 0; display: grid; place-items: center; color: var(--leise); }
+.lu-ansicht { width: 100%; }
+@media (max-width: 900px) { .lu-3d { aspect-ratio: 0.92; border-radius: 12px; } .lu-ansicht { order: 5; } }
