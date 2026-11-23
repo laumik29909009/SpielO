@@ -47,6 +47,16 @@ ALIASE = {
         "terribleterror": "E1", "nightlights": "E2", "changewing": "E3", "windshear": "E4", "razorwhip": "E4",
         "fireworm": "F4", "fireworkqueen": "F4", "fireworm queen": "F4", "fireworms": "F4",
     },
+    "cars": {
+        "queen": "A1", "mcqueen": "A1", "lightning": "A1", "hook": "A2", "sally": "A3", "doc": "A4",
+        "luigi": "B1", "guido": "B2", "ramone": "B3", "flo": "B4",
+        "filmore": "C1", "fillmore": "C1", "sarge": "C2", "sherrif": "C3", "sheriff": "C3", "lizze": "C4", "lizzie": "C4",
+        "king": "D1", "chickhicks": "D2", "chick": "D2", "carl": "D3", "cal": "D3", "bobby": "D4",
+        "jackson": "E1", "storm": "E1", "cruze": "E2", "cruz": "E2", "danny": "E3", "chaze": "E4", "chase": "E4",
+        "francesos": "F1", "francesco": "F1", "shu": "F2", "raoul": "F3", "carla": "F4",
+        "finn": "G1", "holley": "G2", "professor": "G3", "professorz": "G3", "sirmiles": "G4", "miles": "G4",
+        "mack": "H1", "smokey": "H2", "missfritter": "H3", "fritter": "H3", "rod": "H4", "rodredline": "H4",
+    },
 }
 
 
@@ -133,7 +143,9 @@ def zuschneiden(pfad):
         flaeche = Image.new("RGBA", (BREITE, HOEHE), (0, 0, 0, 0))
         rand = 0.05
         maxw, maxh = int(BREITE * (1 - 2 * rand)), int(HOEHE * (1 - rand))
-        frei.thumbnail((maxw, maxh), Image.LANCZOS)
+        # Auf die Fläche einpassen; kleine Vorlagen werden vergrößert (höchstens 3-fach), damit die Figur die Karte füllt
+        faktor = min(maxw / frei.width, maxh / frei.height, 3)
+        frei = frei.resize((max(1, round(frei.width * faktor)), max(1, round(frei.height * faktor))), Image.LANCZOS)
         flaeche.alpha_composite(frei, ((BREITE - frei.width) // 2, HOEHE - frei.height))
         return flaeche, True
     # Foto mit eigenem Hintergrund: 4:3, Ausschnitt eher oben (Köpfe), seitlich mittig
