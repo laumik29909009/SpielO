@@ -19,6 +19,7 @@ const SPIELE = {
   wuerfel: require("./spiele/wuerfel"),
   // arena: require("./spiele/arena"),       // ersetzt durch das Wissensduell
   duell: require("./spiele/duell"),
+  millionen: require("./spiele/millionen"),
   schechingen: require("./spiele/schechingen"),
   baulowe: require("./spiele/baulowe"),
   ludo: require("./spiele/ludo"),

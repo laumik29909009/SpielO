@@ -8,8 +8,9 @@ const LAENDER = require("./laender.json");
 
 const mischen = (a) => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
+const SCHWER = require("./schwer");
 const HAND = [];
-for (const k of KATEGORIEN) k.fragen.forEach((f, i) => {
+for (const k of KATEGORIEN) [...k.fragen, ...(SCHWER[k.id] || [])].forEach((f, i) => {
   const [text, richtig, f1, f2, f3, s, emoji] = f;
   HAND.push({ id: `${k.id}-${i}`, kat: k.id, text: emoji ? text.split("?")[0] + "?" : text, richtig, falsch: [f1, f2, f3], s, bild: emoji ? { typ: "emoji", wert: emoji } : null });
 });
@@ -58,8 +59,9 @@ function ziehen(kat, n, { gesehen = new Set(), sMin = 1, sMax = 5 } = {}) {
   return sortiert.slice(0, n);
 }
 // Für die Millionenfrage: eine Frage genau einer Schwierigkeit aus beliebiger Kategorie
-function frageMitStufe(s, gesehen = new Set()) {
-  const pool = [...HAND, ...BILD_KATS.flatMap((b) => CODES.filter(b.passt).map((c) => laenderFrage(b.id, c)))].filter((f) => f.s === s && !gesehen.has(f.id));
+function frageMitStufe(s, gesehen = new Set(), { mitBild = true } = {}) {
+  const bild = mitBild ? BILD_KATS.flatMap((b) => CODES.filter(b.passt).map((c) => laenderFrage(b.id, c))) : [];
+  const pool = [...HAND, ...bild].filter((f) => f.s === s && !gesehen.has(f.id));
   return mischen(pool)[0] || null;
 }
 // Antworten mischen; Rückgabe für den Browser (ohne Lösung) und die Position der richtigen Antwort

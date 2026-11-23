@@ -1,0 +1,138 @@
+/* =============================================================
+   Die Millionenfrage: dunkles Studio, Scheinwerfer, Lichterkranz
+   ============================================================= */
+body[data-spiel="millionen"], [data-farbe="millionen"] {
+  --bg: #070a1f; --flaeche: #121842; --flaeche-2: #1b2360; --leise: #a8b2e6; --text: #f5f6ff;
+  --gold: #ffcf3f; --gold-2: #ff9f1c; --gold-text: #231600; --btn-schatten: #a8621e;
+  --glow-1: rgba(90, 110, 255, 0.2); --glow-2: rgba(160, 80, 255, 0.14); --glow-3: rgba(255, 207, 63, 0.06);
+  --konfetti: #ffcf3f, #fff3b0, #7f8cff, #ffffff;
+  --mi-orange: #ff9a1f; --mi-blau: #2b3a9e;
+}
+.mi-studio { position: relative; min-height: calc(100dvh - 90px); border-radius: 22px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(ellipse at 50% 115%, #3a2a8a 0%, #160f4a 35%, #070a1f 75%); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55); }
+/* Scheinwerfer: schwenken langsam, bei Spannung zusammen in die Mitte */
+.mi-licht { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.mi-strahl { position: absolute; bottom: -10%; left: calc(8% + var(--i) * 16.5%); width: 18%; height: 140%; transform-origin: 50% 100%;
+  background: linear-gradient(0deg, rgba(150, 160, 255, 0.0) 0%, rgba(160, 170, 255, 0.16) 40%, rgba(200, 210, 255, 0.0) 100%);
+  clip-path: polygon(44% 100%, 56% 100%, 100% 0, 0 0); mix-blend-mode: screen; filter: blur(2px);
+  animation: mi-schwenk calc(7s + var(--i) * 0.9s) ease-in-out infinite alternate; animation-delay: calc(var(--i) * -1.3s); }
+@keyframes mi-schwenk { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+.mi-studio.spannung .mi-strahl { animation: none; transform: rotate(calc((2.5 - var(--i)) * 6deg)); background: linear-gradient(0deg, rgba(255, 160, 60, 0) 0%, rgba(255, 170, 60, 0.18) 45%, rgba(255, 200, 120, 0) 100%); transition: transform 1.2s ease, background 1s; }
+.mi-studio.gold .mi-strahl { background: linear-gradient(0deg, rgba(255, 210, 63, 0) 0%, rgba(255, 220, 90, 0.45) 45%, rgba(255, 240, 180, 0) 100%); }
+.mi-studio.rot .mi-strahl { background: linear-gradient(0deg, rgba(255, 60, 60, 0) 0%, rgba(255, 70, 70, 0.32) 45%, rgba(255, 120, 120, 0) 100%); }
+.mi-studio.blitz::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.55), transparent 60%); animation: mi-blitz 0.9s ease-out forwards; z-index: 3; pointer-events: none; }
+@keyframes mi-blitz { from { opacity: 1; } to { opacity: 0; } }
+/* Lichterkranz: Punkte im Kreis, laufen als Welle */
+.mi-kranz { position: absolute; left: 50%; top: 46%; width: min(92vw, 760px); aspect-ratio: 1; transform: translate(-50%, -50%) rotateX(68deg); pointer-events: none; z-index: 0; }
+.mi-kranz i { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 50%; background: #9fb0ff; box-shadow: 0 0 12px #7f8cff;
+  transform: rotate(var(--w)) translateY(calc(min(92vw, 760px) / -2)); animation: mi-kranz 2.8s ease-in-out infinite; animation-delay: calc(var(--i) * 0.1s); opacity: 0.35; }
+@keyframes mi-kranz { 50% { opacity: 1; } }
+.mi-studio.spannung .mi-kranz i { background: var(--mi-orange); box-shadow: 0 0 14px var(--mi-orange); animation-duration: 0.9s; }
+.mi-studio.gold .mi-kranz i { background: var(--gold); box-shadow: 0 0 18px var(--gold); opacity: 1; animation: none; }
+.mi-studio.rot .mi-kranz i { background: #ff4b4b; box-shadow: 0 0 14px #ff4b4b; opacity: 1; animation: none; }
+.mi-boden { position: absolute; left: 50%; bottom: -18%; width: 120%; height: 45%; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, rgba(120, 130, 255, 0.35), transparent 65%); pointer-events: none; z-index: 0; }
+.mi-studio.spannung .mi-boden { background: radial-gradient(ellipse at 50% 30%, rgba(255, 154, 31, 0.3), transparent 65%); }
+
+.mi-inhalt { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; padding: 18px; }
+.mi-mitte { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mi-buehne { display: flex; flex-direction: column; gap: 12px; }
+.mi-oben { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 0.85rem; color: var(--leise); }
+.mi-oben b { color: var(--gold); }
+
+/* Frage- und Antwortflächen: Kapseln mit spitzen Enden und Leuchtrand */
+.mi-frage-box { position: relative; padding: 22px 36px; text-align: center; clip-path: polygon(3% 0, 97% 0, 100% 50%, 97% 100%, 3% 100%, 0 50%);
+  background: linear-gradient(180deg, #1c2670, #0d1240); box-shadow: inset 0 0 0 2px rgba(160, 175, 255, 0.6); animation: mi-auf 0.6s cubic-bezier(.2, 1, .3, 1); }
+.mi-frage-text { font-size: clamp(1.1rem, 3.2vw, 1.55rem); font-weight: 800; line-height: 1.3; }
+@keyframes mi-auf { from { opacity: 0; transform: scaleX(0.6); } }
+.mi-antworten { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.mi-antwort { all: unset; cursor: pointer; position: relative; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 10px 26px;
+  clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%); background: linear-gradient(180deg, #1a2468, #0d1240);
+  box-shadow: inset 0 0 0 2px rgba(160, 175, 255, 0.55); font-weight: 700; transition: background 0.25s, filter 0.25s, opacity 0.4s;
+  animation: mi-auf 0.45s cubic-bezier(.2, 1, .3, 1) backwards; animation-delay: calc(0.3s + var(--i) * 0.18s); }
+.mi-buchst { color: var(--mi-orange); font-weight: 900; }
+.mi-antwort:not(:disabled):hover { background: linear-gradient(180deg, #27349a, #141c5c); }
+.mi-antwort:disabled { cursor: default; }
+.mi-antwort.vorgemerkt { box-shadow: inset 0 0 0 3px var(--gold); }
+.mi-antwort.getippt { box-shadow: inset 0 0 0 2px #8fe3ff; }
+.mi-antwort.eingeloggt { background: linear-gradient(180deg, #ffb347, #e07800); color: #1b0f00; animation: mi-puls 0.9s ease-in-out infinite; }
+.mi-antwort.eingeloggt .mi-buchst { color: #fff; }
+@keyframes mi-puls { 50% { filter: brightness(1.15); } }
+.mi-antwort.richtig { background: linear-gradient(180deg, #4be07a, #14953e); color: #fff; animation: mi-richtig 0.45s ease-in-out 3; }
+.mi-antwort.richtig .mi-buchst { color: #fff; }
+@keyframes mi-richtig { 50% { filter: brightness(1.45); } }
+.mi-antwort.falsch { background: linear-gradient(180deg, #ff7a3a, #c0390b); color: #fff; }
+.mi-antwort.weg { opacity: 0.12; }
+.mi-antwort.weg .mi-a-text { visibility: hidden; }
+.mi-flagge { display: block; width: min(220px, 60%); margin: 0 auto 12px; border-radius: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); }
+.mi-flagge.klein { width: 80px; }
+.mi-emoji { font-size: clamp(2.4rem, 9vw, 3.4rem); margin-bottom: 8px; }
+.mi-umriss { display: block; width: min(200px, 55%); margin: 0 auto 10px; }
+.mi-umriss path { fill: #8fa0ff; stroke: #fff; stroke-width: 1.2; }
+
+/* Joker */
+.mi-joker { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.mi-j { all: unset; cursor: pointer; width: 64px; height: 42px; display: grid; place-items: center; border-radius: 50%; font-weight: 900; font-size: 1.05rem;
+  background: radial-gradient(ellipse at 50% 30%, #3a4ab8, #141c5c); box-shadow: inset 0 0 0 2px rgba(160, 175, 255, 0.7), 0 4px 12px rgba(0, 0, 0, 0.4); transition: transform 0.15s; }
+.mi-j:not(:disabled):hover { transform: scale(1.08); }
+.mi-j:disabled { opacity: 0.35; cursor: default; }
+.mi-stopp { margin-left: 6px; }
+.mi-pp { font-size: 0.85rem; color: var(--leise); }
+.mi-pp b { color: var(--gold); }
+.mi-karte { padding: 12px 16px; border-radius: 16px; background: rgba(13, 18, 64, 0.85); box-shadow: inset 0 0 0 1px rgba(160, 175, 255, 0.4); text-align: center; animation: mi-auf 0.4s ease-out; }
+.mi-karte.gold { box-shadow: inset 0 0 0 2px var(--gold); }
+.mi-karte p { margin: 6px 0 0; }
+.mi-anrufen { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.mi-zitat { font-size: 1.15rem; font-style: italic; }
+.mi-klingeln { font-size: 2rem; animation: mi-klingeln 0.5s ease-in-out infinite; }
+@keyframes mi-klingeln { 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
+.mi-balken { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 140px; margin-top: 10px; align-items: end; }
+.mi-balken > div { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.mi-balken > div.weg { opacity: 0.25; }
+.mi-balken i { width: 70%; height: var(--p); background: linear-gradient(180deg, #8fe3ff, #3a6dff); border-radius: 6px 6px 0 0; animation: mi-balken 1.2s cubic-bezier(.2, 1, .3, 1); }
+@keyframes mi-balken { from { height: 0; } }
+.mi-balken em { font-style: normal; font-size: 0.8rem; margin-bottom: 4px; }
+.mi-balken span { font-weight: 900; color: var(--mi-orange); }
+.mi-hinweis { text-align: center; color: var(--leise); font-size: 0.9rem; margin: 0; }
+
+/* Geldleiter */
+.mi-leiter { padding: 10px; border-radius: 16px; background: rgba(8, 12, 44, 0.75); box-shadow: inset 0 0 0 1px rgba(160, 175, 255, 0.35); align-self: start; }
+.mi-leiter ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.mi-leiter li { display: flex; gap: 8px; align-items: center; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem; color: #ffb347; }
+.mi-leiter li span { width: 18px; text-align: right; opacity: 0.7; font-size: 0.75rem; }
+.mi-leiter li b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.mi-leiter li.sicher { color: #fff; }
+.mi-leiter li.geschafft { opacity: 0.55; }
+.mi-leiter li.jetzt { background: linear-gradient(90deg, #ffb347, #e07800); color: #1b0f00; font-weight: 900; box-shadow: 0 0 16px rgba(255, 154, 31, 0.6); }
+.mi-leiter-kurz { display: none; }
+
+/* Auswahl, Vorstellung, Zwischenstand */
+.mi-titel { text-align: center; font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.mi-auswahl, .mi-vorstellung { display: flex; flex-direction: column; gap: 12px; align-items: center; text-align: center; }
+.mi-sortier { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.mi-sort { all: unset; cursor: pointer; position: relative; padding: 14px 18px 14px 44px; border-radius: 14px; background: linear-gradient(180deg, #1a2468, #0d1240); box-shadow: inset 0 0 0 2px rgba(160, 175, 255, 0.5); font-weight: 700; text-align: left; }
+.mi-sort em { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-style: normal; background: rgba(255, 255, 255, 0.1); font-weight: 900; }
+.mi-sort.gesetzt { box-shadow: inset 0 0 0 2px var(--gold); }
+.mi-sort.gesetzt em { background: var(--gold); color: var(--gold-text); }
+.mi-wer { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; color: var(--leise); }
+.mi-wer .fertig { color: #8ff0b0; }
+.mi-kandidat { display: flex; flex-direction: column; align-items: center; gap: 4px; animation: mi-auf 0.6s ease-out; }
+.mi-kandidat span { font-size: 4.5rem; filter: drop-shadow(0 0 24px rgba(255, 207, 63, 0.6)); }
+.mi-kandidat b { font-size: 1.6rem; }
+.mi-gross { font-size: 1.3rem; font-weight: 800; margin: 0; }
+.mi-summe { font-size: clamp(2.4rem, 9vw, 4rem); font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(255, 207, 63, 0.5); }
+.mi-vorstellung.million .mi-gross { font-size: 2rem; color: var(--gold); }
+
+@media (max-width: 760px) {
+  .mi-studio { border-radius: 12px; margin: 0 -8px; }
+  .mi-inhalt { grid-template-columns: 1fr; padding: 12px 10px; }
+  .mi-leiter { order: -1; padding: 6px 10px; }
+  .mi-leiter ol { display: none; }
+  .mi-leiter-kurz { display: flex; justify-content: space-between; gap: 8px; font-size: 0.82rem; }
+  .mi-leiter-kurz b { color: var(--gold); }
+  .mi-antworten { grid-template-columns: 1fr; gap: 8px; }
+  .mi-frage-box { padding: 18px 26px; }
+  .mi-sortier { grid-template-columns: 1fr; }
+  .mi-j { width: 56px; height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) { .mi-strahl, .mi-kranz i, .mi-antwort, .mi-frage-box, .mi-klingeln { animation: none !important; } }
