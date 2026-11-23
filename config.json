@@ -3,17 +3,21 @@
   "imAufbau": [],
   "wartungInfo": {
     "punkte": [
-      "Neues Spiel: Farbrausch – der Karten-Klassiker am 3D-Tisch",
-      "Preis-Schätzer: Bilder und Animationen für jede Frage",
-      "Quartett: Bessere Artworks, Kategorie-Champions, schönerer Tisch",
-      "Neues, cleaneres SpielO-Logo",
-      "Schnellerer Start und sparsamerer Server",
-      "Spenden-Ecke und bessere Link-Vorschau für Discord"
+      "Neue Spiele: Die Millionenfrage und das Wissensduell",
+      "Neues Quartett: Cars",
+      "Raus da! jetzt auch in 3D",
+      "Baulöwe: schärferes 3D-Brett, Achsenknast, Tempowürfel und Hausregeln",
+      "Knaben von Schechingen mit neuen Baustoffen",
+      "Neue Titelbilder und schärfere Grafik überall"
     ],
     "zahlen": [
       {
-        "wert": "4",
+        "wert": "12",
         "text": "Spiele"
+      },
+      {
+        "wert": "800+",
+        "text": "Quizfragen"
       },
       {
         "wert": "3D",
@@ -30,9 +34,10 @@
       "🏎️ Neues Quartett: Cars – 27 Autos mit echten Bildern, neuen Werten (Tempo, PS, Köpfchen, Erfahrung, Herz) und fairer Balance",
       "🎯 Raus da! jetzt auch in 3D: gedrechselte Figuren, fallender Würfel, Rauswurf im hohen Bogen",
       "🎩 Baulöwe: schärferes, edleres 3D-Brett, Achsenknast statt Gefängnis, Tempowürfel, eigene Spielfigur, Startgeld und Hausregeln",
-      "🌾 Knaben von Schechingen: echte Baustoffe – Holz, Stein, Stroh, Ziegel und Werkzeug aus Wald, Steinbruch, Feld, Lehmgrube und Schmiede",
+      "🌾 Knaben von Schechingen: echte Baustoffe – Holz, Stein, Stroh, Ziegel und Werkzeug aus Wald, Steinbruch, Feld, Lehmgrube und Schmiede. Neue Baukosten, Gutshof nur noch als Ausbau eines Hofs",
       "🐍 Schlangengrube: flüssiger, und Kopf an Kopf platzt nur noch die kleinere Schlange",
-      "✨ Neue Titelbilder für alle Spiele, lebendiger Hintergrund und schärfere 3D-Tische"
+      "✨ Neue Titelbilder für alle Spiele, lebendiger Hintergrund und schärfere 3D-Tische",
+      "🧹 Die Arena ist raus – das Wissensduell ersetzt sie"
     ]
   },
   "musikAus": [],
@@ -40,14 +45,14 @@
     "titel": "Demnächst auf SpielO",
     "punkte": [
       [
-        "🏛️",
-        "Arena",
-        "Das Tages-Quiz im Kolosseum – fast fertig"
+        "🕵️",
+        "Deckname",
+        "Das Team-Wortspiel kommt zurück – ein Wort, eine Zahl, findet eure Agenten"
       ],
       [
-        "🃏",
-        "Neues Quartett",
-        "Ein komplett neues Deck ist in Planung"
+        "🏎️",
+        "Mehr Cars",
+        "Shu Todoroki, Raoul ÇaRoule, Carla Veloso, Smokey und Rod Redline folgen"
       ],
       [
         "🎰",
