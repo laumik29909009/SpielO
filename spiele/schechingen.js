@@ -18,10 +18,10 @@ const ROH = ["holz", "stein", "stroh", "ziegel", "werkzeug"];
 const LAND = { wald: "holz", steinbruch: "stein", feld: "stroh", lehmgrube: "ziegel", schmiede: "werkzeug" };
 // Eigene Baukosten
 const KOSTEN = {
-  weg: { holz: 1, stein: 1 },
+  weg: { holz: 1, ziegel: 1 },
   hof: { holz: 1, ziegel: 1, stroh: 1, werkzeug: 1 },
-  gut: { stein: 3, ziegel: 2 },
-  karte: { stroh: 1, werkzeug: 1, holz: 1 },
+  gut: { ziegel: 3, stroh: 2 }, // nur als Ausbau eines eigenen Hofs
+  karte: { werkzeug: 1, stroh: 1, stein: 1 },
 };
 const GEMEIN = {
   brunnen: { name: "Dorfbrunnen", icon: "⛲", kosten: { stein: 3, ziegel: 1, werkzeug: 1 } },

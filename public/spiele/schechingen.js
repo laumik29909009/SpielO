@@ -65,7 +65,7 @@
           <li><b>Start:</b> Reihum setzt jeder 2 Höfe mit je einem Weg. Der zweite Hof bringt die ersten Rohstoffe.</li>
           <li><b>Würfeln:</b> Jede Landschaft mit der gewürfelten Zahl liefert an alle angrenzenden Höfe (Gutshof: doppelt). 🌲 Wald → 🪵 Holz · ⛏️ Steinbruch → 🪨 Stein · 🌾 Feld → 🌾 Stroh · 🟫 Lehmgrube → 🧱 Ziegel · ⚒️ Schmiede → 🔨 Werkzeug.</li>
           <li><b>Jahreszeiten</b> (abschaltbar): 🌱 Frühling: Lehmgruben doppelt · ☀️ Sommer: Felder doppelt · 🍂 Herbst: Schmieden doppelt · ❄️ Winter: Wälder doppelt, Lehmgruben gefrieren.</li>
-          <li><b>Bauen:</b> Weg ${kostenHTML(meta().kosten.weg)} · Hof (1 Punkt) ${kostenHTML(meta().kosten.hof)} · Gutshof (2 Punkte) ${kostenHTML(meta().kosten.gut)} · Dorfkarte ${kostenHTML(meta().kosten.karte)}. Höfe brauchen Abstand und einen eigenen Weg.</li>
+          <li><b>Bauen:</b> Weg ${kostenHTML(meta().kosten.weg)} · Hof (1 Punkt) ${kostenHTML(meta().kosten.hof)} · Hof zum Gutshof ausbauen (2 Punkte, nur aus einem eigenen Hof) ${kostenHTML(meta().kosten.gut)} · Dorfkarte ${kostenHTML(meta().kosten.karte)}. Höfe brauchen Abstand und einen eigenen Weg.</li>
           <li><b>Dorfplatz:</b> Ein Hof direkt am Dorfplatz gibt <b>Marktrecht</b>: 3:1 statt 4:1 tauschen. Mit den Dorfplatz-Gebäuden (abschaltbar) darf man dort außerdem Brunnen, Wirtshaus, Kirche und Rathaus bauen (je 2 Punkte).</li>
           <li><b>7 = Gewitter:</b> Wer mehr als 8 Karten hat, gibt die Hälfte ab. Dann zieht das Gewitter auf ein Feld (es liefert nichts mehr) und du nimmst jemandem dort eine Karte ab.</li>
           <li><b>Längster Weg:</b> Wer zuerst 5 zusammenhängende Wege hat, bekommt 2 Punkte. Wer danach einen längeren Weg baut, übernimmt sie. Fremde Höfe unterbrechen einen Weg.</li>
@@ -478,7 +478,7 @@
     const kannSpielen = dran && !m && !z.zug?.gespielt;
     let knoepfe;
     if (dran && !z.zug?.wurf && !m) knoepfe = `<button class="btn gross sc-k-wurf" id="scWuerfeln">🎲 Würfeln</button>`;
-    else if (modus && dran) knoepfe = `<button class="btn zweit" id="scAbbrechen">✕ ${{ hof: "Hof", weg: "Weg", gut: "Gutshof" }[modus]} abbrechen</button>`;
+    else if (modus && dran) knoepfe = `<button class="btn zweit" id="scAbbrechen">✕ ${{ hof: "Hof", weg: "Weg", gut: "Ausbau" }[modus]} abbrechen</button>`;
     else knoepfe = `
       ${z.gebaeude ? `<button class="btn sc-k" id="scBauen" ${frei ? "" : "disabled"} title="Gebäude auf dem Dorfplatz">⛪<span>Dorfplatz</span></button>` : ""}
       <button class="btn sc-k" id="scHandeln" ${frei ? "" : "disabled"}>⚖️<span>Handeln</span></button>
@@ -519,7 +519,7 @@
   // Bau-Knöpfe mit Kosten: grün = hast du, rot = fehlt. Leuchtet, wenn du es jetzt bauen kannst.
   function bauLeiste(z, frei) {
     const k = meta().kosten;
-    const teile = [["weg", "🛤️", "Weg", k.weg, z.moeglich?.weg], ["hof", "🏠", "Hof", k.hof, z.moeglich?.hof], ["gut", "🏰", "Gutshof", k.gut, z.moeglich?.gut], ["karte", "🃏", "Karte", k.karte, z.stapel ? null : []]];
+    const teile = [["weg", "🛤️", "Weg", k.weg, z.moeglich?.weg], ["hof", "🏠", "Hof", k.hof, z.moeglich?.hof], ["gut", "🏰", "Hof → Gutshof", k.gut, z.moeglich?.gut], ["karte", "🃏", "Karte", k.karte, z.stapel ? null : []]];
     return teile.map(([art, icon, name, kosten, orte]) => {
       const fehlt = Object.entries(kosten).reduce((n, [r, x]) => n + Math.max(0, x - (hand.roh[r] || 0)), 0);
       const platz = orte === null || orte === undefined || orte.length > 0;
@@ -714,7 +714,7 @@
         <div class="sc-bau-gitter">
           ${kn("weg", "🛤️", "Weg", k.weg, z.moeglich.weg, "Verbindet deine Höfe")}
           ${kn("hof", "🏠", "Hof · +1", k.hof, z.moeglich.hof, "An deinem Weg, mit Abstand")}
-          ${kn("gut", "🏰", "Gutshof · +2", k.gut, z.moeglich.gut, "Aus einem Hof, bringt doppelt")}
+          ${kn("gut", "🏰", "Hof ausbauen · +1", k.gut, z.moeglich.gut, z.moeglich.gut.length ? "Wird zum Gutshof, bringt doppelt" : "Du brauchst erst einen eigenen Hof")}
           ${kn("karte", "🃏", "Dorfkarte", k.karte, z.stapel ? null : [], `${z.stapel} im Stapel`)}
         </div>
         ${z.gebaeude ? `<h3>⛪ Dorfplatz ${dorf ? "" : '<small>(nur mit Hof oder Weg direkt am Dorfplatz)</small>'}</h3>
