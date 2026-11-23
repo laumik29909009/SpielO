@@ -32,3 +32,14 @@ G1 Eruptodon · G2 Death Song · G3 Catastrophic Quaken · G4 Shockjaw
 H1 Snow Wraith · H2 Night Terror · H3 Speed Stinger · H4 Smothering Smokebreath
 
 Wichtig: Nur Bilder verwenden, für die ihr die Rechte habt. Das Repository sollte dafür privat sein.
+
+## Cars (Ordner `cars/`, z. B. `cars/A1.png`)
+Nur Autos mit Bild kommen ins Spiel. Das Deck erscheint, sobald mindestens 16 Autos ein Bild haben.
+A1 Lightning McQueen · A2 Hook · A3 Sally · A4 Doc Hudson
+B1 Luigi · B2 Guido · B3 Ramone · B4 Flo
+C1 Fillmore · C2 Sarge · C3 Sheriff · C4 Lizzie
+D1 The King · D2 Chick Hicks · D3 Cal Weathers · D4 Bobby Swift
+E1 Jackson Storm · E2 Cruz Ramirez · E3 Danny Swervez · E4 Chase Racelott
+F1 Francesco Bernoulli · F2 Shu Todoroki · F3 Raoul ÇaRoule · F4 Carla Veloso
+G1 Finn McMissile · G2 Holley Shiftwell · G3 Professor Z · G4 Sir Miles Axlerod
+H1 Mack · H2 Smokey · H3 Miss Fritter · H4 Rod Redline

@@ -27,6 +27,13 @@ function fotosLesen(deckId) {
   return fotos;
 }
 const FOTOS = Object.fromEntries(Object.keys(DECKS).map((id) => [id, fotosLesen(id)]));
+// Decks, die nur Karten mit Bild zeigen: Karten ohne Bild fliegen raus, zu wenige → Deck offline
+for (const deck of Object.values(DECKS)) {
+  if (!deck.nurMitBild) continue;
+  deck.karten = deck.karten.filter((k) => FOTOS[deck.id][k.id]);
+  deck.gruppen = deck.gruppen.filter((g) => deck.karten.some((k) => k.gruppe === g.id));
+  if (deck.karten.length < (deck.minKarten || 16)) deck.offline = true;
+}
 
 const MAX_TEILNEHMER = 4;
 const KAMPF_MS = 6600; // so lange läuft die Kampf-Animation
