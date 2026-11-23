@@ -20,7 +20,7 @@ const LAND = { wald: "holz", steinbruch: "stein", feld: "stroh", lehmgrube: "zie
 const KOSTEN = {
   weg: { holz: 1, ziegel: 1 },
   hof: { holz: 1, ziegel: 1, stroh: 1, werkzeug: 1 },
-  gut: { ziegel: 3, stroh: 2 }, // nur als Ausbau eines eigenen Hofs
+  gut: { stein: 3, stroh: 2 }, // nur als Ausbau eines eigenen Hofs
   karte: { werkzeug: 1, stroh: 1, stein: 1 },
 };
 const GEMEIN = {
