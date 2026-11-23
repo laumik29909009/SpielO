@@ -76,8 +76,8 @@ button.mini:hover { background: var(--gold); color: var(--gold-text); }
 .sc-karte small { font-size: 0.7rem; color: var(--leise); }
 .sc-karte.holz { background: linear-gradient(180deg, rgba(63, 154, 88, 0.35), rgba(35, 95, 54, 0.2)); }
 .sc-karte.stein { background: linear-gradient(180deg, rgba(185, 192, 200, 0.3), rgba(125, 135, 145, 0.15)); }
-.sc-karte.korn { background: linear-gradient(180deg, rgba(242, 207, 91, 0.35), rgba(201, 154, 36, 0.15)); }
-.sc-karte.milch { background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(166, 222, 124, 0.12)); }
+.sc-karte.stroh { background: linear-gradient(180deg, rgba(242, 207, 91, 0.35), rgba(201, 154, 36, 0.15)); }
+.sc-karte.ziegel { background: linear-gradient(180deg, rgba(208, 100, 60, 0.42), rgba(168, 69, 42, 0.18)); }
 .sc-dorfkarten { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .sc-dk { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 12px; background: #3a2a4a; border: 1px solid #7a5aa0; font-size: 0.85rem; font-weight: 700; }
 .sc-dk:disabled { opacity: 0.5; cursor: default; }
@@ -246,8 +246,8 @@ button.mini:hover { background: var(--gold); color: var(--gold-text); }
 .sc-res:disabled { opacity: 0.35; cursor: default; }
 .sc-res.holz { background: linear-gradient(180deg, rgba(63, 154, 88, 0.45), rgba(35, 95, 54, 0.3)); }
 .sc-res.stein { background: linear-gradient(180deg, rgba(185, 192, 200, 0.4), rgba(125, 135, 145, 0.2)); }
-.sc-res.korn { background: linear-gradient(180deg, rgba(242, 207, 91, 0.45), rgba(201, 154, 36, 0.2)); }
-.sc-res.milch { background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(166, 222, 124, 0.15)); }
+.sc-res.stroh { background: linear-gradient(180deg, rgba(242, 207, 91, 0.45), rgba(201, 154, 36, 0.2)); }
+.sc-res.ziegel { background: linear-gradient(180deg, rgba(208, 100, 60, 0.5), rgba(168, 69, 42, 0.22)); }
 .sc-res-reihe.klein .sc-res { padding: 8px 4px; }
 .sc-res-reihe.klein .sc-res span { font-size: 1.6rem; }
 .sc-res.klein { padding: 6px 10px; flex-direction: row; gap: 6px; }
@@ -309,9 +309,9 @@ button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
   .sc-banner { font-size: 0.8rem; top: 8px; }
 }
 
-/* Obst (5. Rohstoff) */
-.sc-karte.obst { background: linear-gradient(180deg, rgba(226, 59, 46, 0.32), rgba(121, 166, 60, 0.18)); }
-.sc-res.obst { background: linear-gradient(180deg, rgba(226, 59, 46, 0.38), rgba(121, 166, 60, 0.2)); }
+/* Werkzeug (5. Baustoff) */
+.sc-karte.werkzeug { background: linear-gradient(180deg, rgba(143, 155, 176, 0.42), rgba(77, 87, 107, 0.2)); }
+.sc-res.werkzeug { background: linear-gradient(180deg, rgba(143, 155, 176, 0.5), rgba(77, 87, 107, 0.22)); }
 .sc-spieler.plus { animation: sc-plus 0.5s cubic-bezier(.2, 1.8, .4, 1); }
 .sc-res-reihe { grid-template-columns: repeat(5, 1fr); }
 
@@ -446,3 +446,10 @@ button.sc-chip:hover { background: rgba(232, 82, 74, 0.35); }
 #scBrett.sc-sieg-zoom { transition: transform 1.6s cubic-bezier(.3, 0, .2, 1); transform: scale(1.35); }
 .sc-sieg-leuchten { animation: sc-sieg-leuchten 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes sc-sieg-leuchten { 50% { filter: drop-shadow(0 0 8px #ffd76a) brightness(1.4); transform: scale(1.15); } }
+
+/* Schmiede: Funken flackern */
+.sc-funke { animation: sc-funke 1.4s ease-in-out infinite; }
+.sc-funke:nth-of-type(2n) { animation-delay: .5s; }
+.sc-funke:nth-of-type(3n) { animation-delay: .9s; }
+@keyframes sc-funke { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sc-funke { animation: none; } }

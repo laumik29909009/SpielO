@@ -5,26 +5,26 @@
 (() => {
   const { $, $$, esc } = GN;
   const app = GN.app;
-  const ROH = ["holz", "stein", "korn", "milch", "obst"];
-  const ROH_INFO = { holz: ["Holz", "🪵"], stein: ["Stein", "🪨"], korn: ["Korn", "🌾"], milch: ["Milch", "🥛"], obst: ["Obst", "🍎"] };
+  const ROH = ["holz", "stein", "stroh", "ziegel", "werkzeug"];
+  const ROH_INFO = { holz: ["Holz", "🪵"], stein: ["Stein", "🪨"], stroh: ["Stroh", "🌾"], ziegel: ["Ziegel", "🧱"], werkzeug: ["Werkzeug", "🔨"] };
   const LAND = {
     wald: { name: "Wald", icon: "🌲", farbe: ["#3f9a58", "#235f36"] },
     feld: { name: "Feld", icon: "🌾", farbe: ["#f2cf5b", "#c99a24"] },
-    weide: { name: "Weide", icon: "🐄", farbe: ["#a6de7c", "#5fae45"] },
+    lehmgrube: { name: "Lehmgrube", icon: "🧱", farbe: ["#e39a6a", "#a85a32"] },
     steinbruch: { name: "Steinbruch", icon: "⛏️", farbe: ["#b9c0c8", "#7d8791"] },
-    obstwiese: { name: "Streuobstwiese", icon: "🍎", farbe: ["#ffc9d4", "#d7869b"] },
+    schmiede: { name: "Schmiede", icon: "⚒️", farbe: ["#8f9bb0", "#4d576b"] },
     dorfplatz: { name: "Dorfplatz", icon: "⛪", farbe: ["#ecd0a6", "#c79e6a"] },
   };
   const KARTEN = {
     feldhueter: ["Feldhüter", "👮", "Schick das Gewitter weiter und nimm jemandem eine Karte ab. Auch vor dem Würfeln."],
-    erntedank: ["Erntedank", "🧺", "Nimm dir 2 Rohstoffe deiner Wahl."],
+    erntedank: ["Lieferung", "🚚", "Nimm dir 2 Baustoffe deiner Wahl."],
     wegebau: ["Wegebau", "🛤️", "Baue 2 Wege gratis."],
-    viehmarkt: ["Viehmarkt", "🐮", "Jeder andere gibt dir 1 Karte des Rohstoffs, den du wählst."],
+    viehmarkt: ["Sammelbestellung", "📦", "Jeder andere gibt dir 1 Karte des Baustoffs, den du wählst."],
   };
   const S = 58; // Pixel pro Sechseck-Radius
-  let hand = { roh: { holz: 0, stein: 0, korn: 0, milch: 0, obst: 0 }, karten: [], neu: [], kirchweih: 0 };
+  let hand = { roh: { holz: 0, stein: 0, stroh: 0, ziegel: 0, werkzeug: 0 }, karten: [], neu: [], kirchweih: 0 };
   let modus = null; // "hof" | "weg" | "gut" | null
-  let auswahl = null; // Kartenwahl (Erntedank/Viehmarkt)
+  let auswahl = null; // Kartenwahl (Lieferung/Sammelbestellung)
   let abwurf = {};
   let tausch = { gib: {}, will: {} };
   let letzteWurfId = 0, letzterBauT = 0, letzterErtragT = 0, letzterBonusT = 0;
@@ -63,8 +63,8 @@
         id: "regeln", icon: "📖", titel: "So geht's", info: "Bauen, handeln, Dorfplatz",
         html: `<ol class="q-regeln">
           <li><b>Start:</b> Reihum setzt jeder 2 Höfe mit je einem Weg. Der zweite Hof bringt die ersten Rohstoffe.</li>
-          <li><b>Würfeln:</b> Jede Landschaft mit der gewürfelten Zahl liefert an alle angrenzenden Höfe (Gutshof: doppelt). 🌲 Holz · ⛏️ Stein · 🌾 Korn · 🐄 Milch · 🍎 Obst.</li>
-          <li><b>Jahreszeiten</b> (abschaltbar): 🌱 Frühling: Weiden doppelt · ☀️ Sommer: Felder doppelt · 🍂 Herbst: Obstwiesen doppelt · ❄️ Winter: Wälder doppelt, Felder ruhen.</li>
+          <li><b>Würfeln:</b> Jede Landschaft mit der gewürfelten Zahl liefert an alle angrenzenden Höfe (Gutshof: doppelt). 🌲 Wald → 🪵 Holz · ⛏️ Steinbruch → 🪨 Stein · 🌾 Feld → 🌾 Stroh · 🟫 Lehmgrube → 🧱 Ziegel · ⚒️ Schmiede → 🔨 Werkzeug.</li>
+          <li><b>Jahreszeiten</b> (abschaltbar): 🌱 Frühling: Lehmgruben doppelt · ☀️ Sommer: Felder doppelt · 🍂 Herbst: Schmieden doppelt · ❄️ Winter: Wälder doppelt, Lehmgruben gefrieren.</li>
           <li><b>Bauen:</b> Weg ${kostenHTML(meta().kosten.weg)} · Hof (1 Punkt) ${kostenHTML(meta().kosten.hof)} · Gutshof (2 Punkte) ${kostenHTML(meta().kosten.gut)} · Dorfkarte ${kostenHTML(meta().kosten.karte)}. Höfe brauchen Abstand und einen eigenen Weg.</li>
           <li><b>Dorfplatz:</b> Ein Hof direkt am Dorfplatz gibt <b>Marktrecht</b>: 3:1 statt 4:1 tauschen. Mit den Dorfplatz-Gebäuden (abschaltbar) darf man dort außerdem Brunnen, Wirtshaus, Kirche und Rathaus bauen (je 2 Punkte).</li>
           <li><b>7 = Gewitter:</b> Wer mehr als 8 Karten hat, gibt die Hälfte ab. Dann zieht das Gewitter auf ein Feld (es liefert nichts mehr) und du nimmst jemandem dort eine Karte ab.</li>
@@ -147,7 +147,7 @@
       setTimeout(() => { knall(`${s.icon} ${s.name}!<small>${SAISON_TEXT[z.saison]}</small>`, "saison", 2400); Ton.wusch(); }, 400);
     }
   }
-  const SAISON_TEXT = ["Weiden bringen doppelt Milch", "Felder bringen doppelt Korn", "Obstwiesen bringen doppelt Obst", "Wälder bringen doppelt Holz, Felder ruhen"];
+  const SAISON_TEXT = ["Lehmgruben bringen doppelt Ziegel", "Felder bringen doppelt Stroh", "Schmieden bringen doppelt Werkzeug", "Wälder bringen doppelt Holz, Lehmgruben sind gefroren"];
 
   function aufbauen(z) {
     GN.euleNeu = () => { const z2 = GN.zustand; if (z2?.spiel === "schechingen") { brett(z2); euleZeigen(z2); } };
@@ -215,15 +215,34 @@
     const at = (f) => p.map(([x, y, g]) => f(cx + x, cy + y, g)).join("");
     if (typ === "wald") return at(baum);
     if (typ === "steinbruch") return `<path d="M${cx - 40} ${cy - 18} q12 -10 24 -4 q8 -12 22 -6" stroke="#6d757d" stroke-width="3" fill="none" opacity=".5"/>` + at(fels);
-    if (typ === "weide") {
-      const r = zufall(id * 13 + 1);
-      const halme = Array.from({ length: 10 }, () => halm(cx + (r() - 0.5) * 72, cy + (r() - 0.5) * 66)).join("");
-      return `${halme}<path d="M${cx - 38} ${cy + 24} L${cx - 12} ${cy + 34} L${cx + 14} ${cy + 32}" stroke="#7a5230" stroke-width="1.8" fill="none"/>${[-38, -25, -12, 1, 14].map((dx, i) => `<rect x="${cx + dx - 1}" y="${cy + 21 + [0, 4, 9, 10, 8][i]}" width="2" height="7" fill="#7a5230"/>`).join("")}${at(tier)}`;
+    if (typ === "lehmgrube") {
+      // Lehmgrube: ausgehobene Grube, Ziegelstapel, kleiner Brennofen
+      const stapel = (x, y, g) => {
+        const s = (0.8 + g * 0.4).toFixed(2);
+        let z = "";
+        for (let reihe = 0; reihe < 3; reihe++) for (let k = 0; k < 3 - reihe; k++) z += `<rect x="${-7 + k * 5 + reihe * 2.5}" y="${-reihe * 3}" width="4.6" height="2.6" rx=".4" fill="${["#c0522f", "#a8452a", "#d0643c"][(k + reihe) % 3]}" stroke="#6e2a17" stroke-width=".4"/>`;
+        return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s})"><ellipse cx="0" cy="3.5" rx="9" ry="2" fill="rgba(0,0,0,.25)"/>${z}</g>`;
+      };
+      return `<ellipse cx="${cx - 10}" cy="${cy + 8}" rx="34" ry="18" fill="#8a4b28" opacity=".55"/><ellipse cx="${cx - 10}" cy="${cy + 6}" rx="26" ry="12" fill="#6e3a1e" opacity=".55"/>
+        <path d="M${cx - 30} ${cy + 4} q8 -6 16 0 q8 6 16 0" stroke="#b86a3e" stroke-width="1.5" fill="none" opacity=".7"/>
+        <g transform="translate(${cx + 24} ${cy - 16})"><ellipse cx="0" cy="8" rx="11" ry="2.6" fill="rgba(0,0,0,.25)"/><path d="M-9 8 L-9 -2 Q0 -12 9 -2 L9 8Z" fill="#b5653a" stroke="#6e3a1e" stroke-width="1"/><path d="M-4 8 L-4 2 Q0 -2 4 2 L4 8Z" fill="#ffb347"/><rect x="3" y="-14" width="4" height="9" fill="#8a4b28" stroke="#6e3a1e" stroke-width=".8"/><circle cx="6" cy="-18" r="3" fill="#d8d2c8" opacity=".7"/><circle cx="9" cy="-23" r="3.6" fill="#d8d2c8" opacity=".5"/></g>
+        ${streuen(id * 11 + 4, 4, 18, 44).map(([x, y, g]) => stapel(cx + x, cy + y, g)).join("")}`;
     }
-    if (typ === "obstwiese") {
+    if (typ === "schmiede") {
+      // Schmiede: Werkstatt mit Esse, Amboss, Funken
+      const funke = (x, y) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.1" fill="#ffcf3f" class="sc-funke"/>`;
       const r = zufall(id * 17 + 5);
-      const halme = Array.from({ length: 8 }, () => halm(cx + (r() - 0.5) * 72, cy + (r() - 0.5) * 66)).join("");
-      return halme + streuen(id * 11 + 2, 5, 22, 40).map(([x, y, g]) => apfelbaum(cx + x, cy + y, g)).join("");
+      return `<g transform="translate(${cx - 14} ${cy - 4})">
+          <ellipse cx="0" cy="20" rx="30" ry="5" fill="rgba(0,0,0,.25)"/>
+          <rect x="-22" y="-2" width="34" height="22" fill="#d8c8a8" stroke="#5a4630" stroke-width="1.2"/>
+          <path d="M-26 -1 L-5 -18 L16 -1Z" fill="#5d6b7e" stroke="#2f3846" stroke-width="1.2"/>
+          <rect x="4" y="-22" width="6" height="14" fill="#7a6a58" stroke="#3d3024" stroke-width="1"/>
+          <circle cx="9" cy="-27" r="3.5" fill="#a9a39a" opacity=".6"/><circle cx="13" cy="-33" r="4.5" fill="#bdb7ae" opacity=".45"/>
+          <rect x="-16" y="6" width="12" height="14" fill="#3a2a1c"/><rect x="-14" y="10" width="8" height="10" fill="#ff8a3d" opacity=".85"/>
+          <rect x="0" y="6" width="8" height="7" fill="#9fc3e0" stroke="#5a4630" stroke-width=".8"/>
+        </g>
+        <g transform="translate(${cx + 22} ${cy + 18})"><ellipse cx="0" cy="6" rx="12" ry="2.5" fill="rgba(0,0,0,.25)"/><path d="M-10 -3 L10 -3 L8 0 L4 1 L4 4 L7 6 L-7 6 L-4 4 L-4 1 L-12 0Z" fill="#4a5361" stroke="#22272f" stroke-width=".8"/><path d="M-1 -10 L2 -10 L2 -4 L-1 -4Z" fill="#6b4a2a"/><rect x="-5" y="-13" width="10" height="4" rx="1" fill="#59616e"/></g>
+        ${Array.from({ length: 6 }, () => funke(cx + 22 + (r() - 0.5) * 18, cy + 8 - r() * 14)).join("")}`;
     }
     if (typ === "feld") {
       let h = "";
@@ -295,7 +314,7 @@
 
   let feldOrdnung = null;
   const FELD_ORDNUNG = () => (feldOrdnung ||= new Map([...meta().karte.felder].sort((a, b) => Math.hypot(a.x, a.y) - Math.hypot(b.x, b.y) || Math.atan2(a.y, a.x) - Math.atan2(b.y, b.x)).map((f, i) => [f.id, i])));
-  const LAND_ROH = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch", obstwiese: "obst" };
+  const LAND_ROH = { wald: "holz", steinbruch: "stein", feld: "stroh", lehmgrube: "ziegel", schmiede: "werkzeug" };
   function brett(z) {
     const svg = $("#scBrett");
     if (!svg) return;
@@ -325,7 +344,7 @@
       const cx = f.x * S, cy = f.y * S;
       const klick = gewitterWahl && f.id !== z.gewitter;
       const blockiert = f.id === z.gewitter && b.typ !== "dorfplatz";
-      // Jahreszeit: im Winter ruhen die Kornfelder, eine Landschaft bringt doppelt
+      // Jahreszeit: im Winter ist die Lehmgrube gefroren, eine Landschaft bringt doppelt
       const saison = z.jahreszeiten ? meta().saison[z.saison] : {};
       const ruht = saison.ruht === b.typ, doppelt = saison.doppelt === b.typ;
       h += `<g class="sc-feld ${klick ? "waehlbar" : ""} ${blockiert ? "blockiert" : ""} ${ruht ? "ruht" : ""} ${b.typ}" data-feld="${f.id}" style="--i:${FELD_ORDNUNG().get(f.id)}">
@@ -441,7 +460,7 @@
     else h = `<div class="sc-hinweis">Bauen, handeln oder Zug beenden.</div>`;
     $("#scStatus").innerHTML = h;
     $("#scKosten").innerHTML = `<div class="sc-titel">Was liefert welches Feld?</div>
-      ${["wald", "steinbruch", "feld", "weide", "obstwiese"].map((t) => `<div class="sc-legende"><i style="background:linear-gradient(135deg, ${LAND[t].farbe[0]}, ${LAND[t].farbe[1]})"></i><span>${LAND[t].name}</span><b>${ROH_INFO[LAND_ROH[t]][1]} ${ROH_INFO[LAND_ROH[t]][0]}</b></div>`).join("")}
+      ${["wald", "steinbruch", "feld", "lehmgrube", "schmiede"].map((t) => `<div class="sc-legende"><i style="background:linear-gradient(135deg, ${LAND[t].farbe[0]}, ${LAND[t].farbe[1]})"></i><span>${LAND[t].name}</span><b>${ROH_INFO[LAND_ROH[t]][1]} ${ROH_INFO[LAND_ROH[t]][0]}</b></div>`).join("")}
       <div class="sc-legende"><i style="background:linear-gradient(135deg, ${LAND.dorfplatz.farbe[0]}, ${LAND.dorfplatz.farbe[1]})"></i><span>Dorfplatz</span><b>⚖️ Marktrecht</b></div>
       <button class="sc-dorfknopf" id="scDorfInfo">⛪ Was ist der Dorfplatz?</button>`;
     $("#scDorfInfo").onclick = () => { Ton.klick(); fenster = "dorfplatz"; dialog(GN.zustand); };
@@ -671,8 +690,8 @@
       h = `<h2>🫳 Wem nimmst du eine Karte ab?</h2><p>Du ziehst eine zufällige Karte.</p>
         <div class="sc-opfer">${z.zug.opfer.map((o) => `<button class="sc-opfer-k" data-stehlen="${o}" style="--f:${z.farben[o]}"><span>${person(z, o).avatar}</span><b>${esc(person(z, o).name)}</b><small>🂠 ${z.karten[o]} Karten</small></button>`).join("")}</div>`;
     } else if (auswahl) {
-      h = `<h2>${auswahl.k === "erntedank" ? "🧺 Erntedank" : "🐮 Viehmarkt"}</h2>
-        <p>${auswahl.k === "erntedank" ? `Wähle 2 Rohstoffe (${auswahl.wahl.length}/2).` : "Welchen Rohstoff sollen dir alle anderen geben?"}</p>
+      h = `<h2>${auswahl.k === "erntedank" ? "🚚 Lieferung" : "📦 Sammelbestellung"}</h2>
+        <p>${auswahl.k === "erntedank" ? `Wähle 2 Baustoffe (${auswahl.wahl.length}/2).` : "Welchen Baustoff sollen dir alle anderen geben?"}</p>
         <div class="sc-res-reihe">${ROH.map((r) => resKnopf(r, `data-wahl="${r}"`)).join("")}</div>
         ${auswahl.wahl.length ? `<div class="sc-chips">${auswahl.wahl.map((r) => `<span class="sc-chip">${ROH_INFO[r][1]}</span>`).join("")}</div>` : ""}
         <button class="btn link" id="scSchliessen">Abbrechen</button>`;

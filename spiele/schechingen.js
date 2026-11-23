@@ -2,7 +2,7 @@
 //  Spiel-Modul: Knaben von Schechingen (Aufbau & Handel)
 //  Eigenes Aufbau- und Handelsspiel auf einer Sechseck-Karte rund um
 //  den Dorfplatz von Schechingen.
-//  - 5 Rohstoffe: Holz (Wald), Stein (Steinbruch), Korn (Feld), Milch (Weide), Obst (Streuobstwiese)
+//  - 5 Baustoffe: Holz (Wald), Stein (Steinbruch), Stroh (Feld), Ziegel (Lehmgrube), Werkzeug (Schmiede)
 //  - Höfe (1 Punkt), Gutshöfe (2), Wege, 25 Dorfkarten
 //  - Dorfplatz in der Mitte: Marktrecht 3:1, optional Gemeinschaftsbauten (je 2 Punkte)
 //  - Optional Jahreszeiten: jede Runde eine andere Landschaft doppelt (Winter: Felder ruhen)
@@ -14,27 +14,27 @@ const BOTS = [
   { name: "Bauer Bert", avatar: "👨‍🌾" }, { name: "Müllerin Mia", avatar: "👩‍🌾" }, { name: "Schmied Sepp", avatar: "🧔" }, { name: "Wirtin Wally", avatar: "👵" },
 ];
 const FARBEN = ["#e8524a", "#3d7dff", "#f2b33d", "#3fbf72"];
-const ROH = ["holz", "stein", "korn", "milch", "obst"];
-const LAND = { wald: "holz", steinbruch: "stein", feld: "korn", weide: "milch", obstwiese: "obst" };
+const ROH = ["holz", "stein", "stroh", "ziegel", "werkzeug"];
+const LAND = { wald: "holz", steinbruch: "stein", feld: "stroh", lehmgrube: "ziegel", schmiede: "werkzeug" };
 // Eigene Baukosten
 const KOSTEN = {
   weg: { holz: 1, stein: 1 },
-  hof: { holz: 1, korn: 1, milch: 1, obst: 1 },
-  gut: { stein: 3, obst: 2 },
-  karte: { korn: 1, milch: 1, obst: 1 },
+  hof: { holz: 1, ziegel: 1, stroh: 1, werkzeug: 1 },
+  gut: { stein: 3, ziegel: 2 },
+  karte: { stroh: 1, werkzeug: 1, holz: 1 },
 };
 const GEMEIN = {
-  brunnen: { name: "Dorfbrunnen", icon: "⛲", kosten: { stein: 3, milch: 1, holz: 1 } },
-  wirtshaus: { name: "Wirtshaus", icon: "🍺", kosten: { korn: 2, obst: 2, milch: 1 } },
+  brunnen: { name: "Dorfbrunnen", icon: "⛲", kosten: { stein: 3, ziegel: 1, werkzeug: 1 } },
+  wirtshaus: { name: "Wirtshaus", icon: "🍺", kosten: { ziegel: 2, holz: 2, stroh: 1 } },
   kirche: { name: "Kirche", icon: "⛪", kosten: { stein: 3, holz: 2 } },
-  rathaus: { name: "Rathaus", icon: "🏛️", kosten: { holz: 2, stein: 1, korn: 1, obst: 1 } },
+  rathaus: { name: "Rathaus", icon: "🏛️", kosten: { ziegel: 2, stein: 1, holz: 1, werkzeug: 1 } },
 };
 // Jahreszeiten (optional): welche Landschaft doppelt bzw. gar nichts bringt
 const SAISON = [
-  { name: "Frühling", icon: "🌱", doppelt: "weide", ruht: null },
+  { name: "Frühling", icon: "🌱", doppelt: "lehmgrube", ruht: null },
   { name: "Sommer", icon: "☀️", doppelt: "feld", ruht: null },
-  { name: "Herbst", icon: "🍂", doppelt: "obstwiese", ruht: null },
-  { name: "Winter", icon: "❄️", doppelt: "wald", ruht: "feld" },
+  { name: "Herbst", icon: "🍂", doppelt: "schmiede", ruht: null },
+  { name: "Winter", icon: "❄️", doppelt: "wald", ruht: "lehmgrube" },
 ];
 // 25 Dorfkarten
 const KARTEN = { feldhueter: 12, erntedank: 3, wegebau: 3, viehmarkt: 3, kirchweih: 4 };
@@ -46,7 +46,7 @@ const einst = (raum) => raum.einstellungen.schechingen;
 const w6 = () => 1 + Math.floor(Math.random() * 6);
 const pips = (z) => (z ? 6 - Math.abs(7 - z) : 0);
 const summe = (o) => Object.values(o).reduce((a, b) => a + b, 0);
-const leer = () => ({ holz: 0, stein: 0, korn: 0, milch: 0, obst: 0 });
+const leer = () => ({ holz: 0, stein: 0, stroh: 0, ziegel: 0, werkzeug: 0 });
 
 // =============================================================
 //  Karte: 19 Sechsecke (spitze Oberseite), Ecken und Kanten
@@ -119,7 +119,7 @@ function karteFair(belegung, streuung = 0.9) {
   return Math.max(...schnitt) - Math.min(...schnitt) <= streuung;
 }
 function landschaftVerteilen() {
-  const typen = [...Array(4).fill("wald"), ...Array(4).fill("feld"), ...Array(4).fill("weide"), ...Array(3).fill("steinbruch"), ...Array(3).fill("obstwiese")];
+  const typen = [...Array(4).fill("wald"), ...Array(4).fill("feld"), ...Array(4).fill("lehmgrube"), ...Array(3).fill("steinbruch"), ...Array(3).fill("schmiede")];
   const zahlen = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
   let letzte = null;
   for (let versuch = 0; versuch < 20000; versuch++) {
@@ -334,7 +334,7 @@ function gewitterSetzen(raum, ctx, feld) {
   if (feld === d.gewitter) return "Das Gewitter muss weiterziehen.";
   d.gewitter = feld;
   const opfer = [...new Set(KARTE.felder[feld].ecken.map((e) => d.bauten[e]?.sp).filter((s) => s && s !== d.dran && summe(d.hand[s]) > 0))];
-  log(d, `⛈️ Gewitter über ${d.belegung[feld].typ === "dorfplatz" ? "dem Dorfplatz" : `${{ wald: "einem Wald", feld: "einem Feld", weide: "einer Weide", steinbruch: "einem Steinbruch", obstwiese: "einer Streuobstwiese" }[d.belegung[feld].typ]} (${d.belegung[feld].zahl})`}.`);
+  log(d, `⛈️ Gewitter über ${d.belegung[feld].typ === "dorfplatz" ? "dem Dorfplatz" : `${{ wald: "einem Wald", feld: "einem Feld", lehmgrube: "einer Lehmgrube", steinbruch: "einem Steinbruch", schmiede: "einer Schmiede" }[d.belegung[feld].typ]} (${d.belegung[feld].zahl})`}.`);
   if (opfer.length === 1) return stehlen(raum, ctx, opfer[0], true);
   if (opfer.length > 1) { d.zug.modus = "stehlen"; d.zug.opfer = opfer; }
   else fertigMitGewitter(d);
@@ -451,7 +451,7 @@ function karteSpielen(raum, ctx, id, k, wahl) {
   if (pruefeSieg(raum, ctx)) return;
   if (!istBot(d, id)) senden(raum, ctx);
 }
-const KARTEN_NAME = { feldhueter: "den Feldhüter", erntedank: "Erntedank", wegebau: "Wegebau", viehmarkt: "Viehmarkt", kirchweih: "Kirchweih" };
+const KARTEN_NAME = { feldhueter: "den Feldhüter", erntedank: "Lieferung", wegebau: "Wegebau", viehmarkt: "Sammelbestellung", kirchweih: "Kirchweih" };
 
 // ---------- Handel ----------
 function bankTausch(raum, ctx, id, gib, nimm) {
@@ -463,7 +463,7 @@ function bankTausch(raum, ctx, id, gib, nimm) {
   log(d, `${name(raum, id)} tauscht ${k} ${ROH_NAME[gib]} gegen 1 ${ROH_NAME[nimm]} beim Markt.`);
   if (!istBot(d, id)) senden(raum, ctx);
 }
-const ROH_NAME = { holz: "Holz", stein: "Stein", korn: "Korn", milch: "Milch" };
+const ROH_NAME = { holz: "Holz", stein: "Stein", stroh: "Stroh", ziegel: "Ziegel", werkzeug: "Werkzeug" };
 function angebotMachen(raum, ctx, id, gib, will) {
   const d = raum.daten;
   if (d.dran !== id || !d.zug.wurf || d.zug.modus) return;
@@ -692,7 +692,7 @@ function botSchritt(raum, ctx) {
   if (d.zug.modus === "wegebau") { const o = wegOrte(d, id); if (o.length) { bauen(raum, ctx, id, "weg", besterWeg(d, id, o)); senden(raum, ctx); return weiter(); } d.zug.modus = null; }
   // Karten spielen (nicht die gerade gekauften)
   const spielbar = (k) => !d.zug.gespielt && d.karten[id].filter((x) => x === k).length > d.zug.gekauft.filter((x) => x === k).length;
-  if (spielbar("erntedank")) { const fehlt = ROH.filter((r) => h[r] < (KOSTEN.hof[r] || 0)); karteSpielen(raum, ctx, id, "erntedank", [fehlt[0] || "stein", fehlt[1] || fehlt[0] || "obst"]); senden(raum, ctx); return weiter(); }
+  if (spielbar("erntedank")) { const fehlt = ROH.filter((r) => h[r] < (KOSTEN.hof[r] || 0)); karteSpielen(raum, ctx, id, "erntedank", [fehlt[0] || "stein", fehlt[1] || fehlt[0] || "werkzeug"]); senden(raum, ctx); return weiter(); }
   if (spielbar("wegebau") && wegOrte(d, id).length && !hofOrte(d, id).length) { karteSpielen(raum, ctx, id, "wegebau"); senden(raum, ctx); return weiter(); }
   if (spielbar("viehmarkt")) { const r = ROH.reduce((m, x) => (h[x] < h[m] ? x : m), "stein"); karteSpielen(raum, ctx, id, "viehmarkt", r); senden(raum, ctx); return weiter(); }
   // Bauen: Gutshof > Hof > Dorfplatz > Weg > Dorfkarte
