@@ -1,0 +1,104 @@
+/* =============================================================
+   Wissensduell: klare App-Optik, kräftige Kategoriefarben
+   ============================================================= */
+body[data-spiel="duell"], [data-farbe="duell"] {
+  --bg: #0f1630; --flaeche: #1a2347; --flaeche-2: #232e5c; --leise: #aeb8de; --text: #f5f7ff;
+  --gold: #ffd23f; --gold-2: #ff9f1c; --gold-text: #241a00; --btn-schatten: #b5651d;
+  --glow-1: rgba(80, 120, 255, 0.18); --glow-2: rgba(255, 90, 160, 0.12); --glow-3: rgba(46, 230, 214, 0.08);
+  --konfetti: #ffd23f, #3d7dff, #ff5a8a, #2ee6d6, #fff;
+}
+.du-buehne { max-width: 760px; margin: 0 auto; padding-bottom: 28px; }
+.du-buehne .timer { margin: 10px 0 14px; }
+
+/* Kopf */
+.du-kopf { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.du-spieler { flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 16px; background: var(--flaeche); min-width: 0; }
+.du-spieler.ich { box-shadow: inset 0 0 0 2px var(--gold); }
+.du-spieler.rechts { flex-direction: row-reverse; text-align: right; }
+.du-ava { font-size: 1.7rem; }
+.du-name { flex: 1; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.du-punkte { font-size: 1.4rem; font-variant-numeric: tabular-nums; color: var(--gold); }
+.du-runde { display: flex; flex-direction: column; align-items: center; padding: 6px 12px; border-radius: 14px; background: var(--flaeche-2); }
+.du-runde small { font-size: 0.66rem; color: var(--leise); text-transform: uppercase; letter-spacing: 0.08em; }
+.du-runde b { font-size: 1.1rem; }
+.du-reihe { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.du-reihe .du-spieler { flex: 1 1 150px; padding: 6px 10px; }
+.du-reihe .du-ava { font-size: 1.3rem; }
+
+/* Kategorienwahl */
+.du-wahl h2 { text-align: center; font-size: 1.25rem; margin: 6px 0 16px; }
+.du-kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.du-kachel { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; aspect-ratio: 0.9; border-radius: 22px; text-align: center; padding: 10px;
+  background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--k) 70%, #fff), var(--k) 60%, color-mix(in srgb, var(--k) 70%, #000));
+  box-shadow: 0 8px 0 color-mix(in srgb, var(--k) 55%, #000), 0 16px 30px rgba(0, 0, 0, 0.35); color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  animation: du-rein 0.5s cubic-bezier(.2, 1.4, .4, 1) backwards; animation-delay: calc(var(--i) * 90ms); transition: transform 0.15s, box-shadow 0.15s; }
+.du-kachel:not(:disabled):hover { transform: translateY(-4px) rotate(-1deg); }
+.du-kachel:not(:disabled):active { transform: translateY(5px); box-shadow: 0 3px 0 color-mix(in srgb, var(--k) 55%, #000); }
+.du-kachel:disabled { cursor: default; filter: saturate(0.85); }
+.du-kachel.gewaehlt { transform: scale(1.08); box-shadow: 0 0 0 4px #fff, 0 16px 40px rgba(0, 0, 0, 0.45); }
+.du-kachel-icon { font-size: clamp(2.2rem, 9vw, 3.4rem); filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3)); }
+.du-kachel-name { font-weight: 900; font-size: clamp(0.85rem, 3vw, 1.1rem); line-height: 1.15; }
+@keyframes du-rein { from { opacity: 0; transform: translateY(24px) scale(0.85); } }
+
+/* Frage */
+.du-frage { border-radius: 24px; background: var(--flaeche); overflow: hidden; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); animation: du-rein 0.4s ease-out; }
+.du-kat { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: linear-gradient(90deg, var(--k), color-mix(in srgb, var(--k) 70%, #000)); color: #fff; }
+.du-kat span { font-size: 1.3rem; }
+.du-kat em { margin-left: auto; font-style: normal; font-size: 0.85rem; opacity: 0.9; }
+.du-bild { display: grid; place-items: center; padding: 18px 16px 4px; }
+.du-bild.klein { padding-top: 12px; }
+.du-flagge { width: min(260px, 70%); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15); }
+.du-bild.klein .du-flagge { width: 90px; }
+.du-umriss { width: min(240px, 62%); height: auto; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45)); }
+.du-umriss path { fill: color-mix(in srgb, var(--k) 70%, #fff); stroke: #fff; stroke-width: 1.2; stroke-linejoin: round; }
+.du-emoji { font-size: clamp(2.6rem, 11vw, 4rem); letter-spacing: 0.08em; }
+.du-text { padding: 14px 18px 4px; font-size: clamp(1.1rem, 3.6vw, 1.4rem); font-weight: 800; text-align: center; line-height: 1.3; }
+.du-antworten { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+.du-antwort { all: unset; cursor: pointer; position: relative; min-height: 58px; padding: 12px 14px; border-radius: 16px; background: var(--flaeche-2); border: 2px solid rgba(255, 255, 255, 0.08);
+  display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 800; line-height: 1.2; transition: transform 0.12s, background 0.2s, border-color 0.2s, opacity 0.3s;
+  animation: du-rein 0.35s ease-out backwards; animation-delay: calc(0.15s + var(--i) * 60ms); }
+.du-antwort:not(:disabled):hover { background: color-mix(in srgb, var(--k) 30%, var(--flaeche-2)); border-color: color-mix(in srgb, var(--k) 60%, transparent); }
+.du-antwort:not(:disabled):active { transform: scale(0.97); }
+.du-antwort:disabled { cursor: default; }
+.du-antwort.gewaehlt { background: color-mix(in srgb, var(--gold) 28%, var(--flaeche-2)); border-color: var(--gold); }
+.du-antwort.richtig { background: linear-gradient(180deg, #3ccf6e, #1f9d4c); border-color: #9cf0b7; color: #fff; animation: du-richtig 0.5s ease; }
+.du-antwort.falsch { background: linear-gradient(180deg, #ff6262, #c62828); border-color: #ffb4b4; color: #fff; animation: du-wackeln 0.4s ease; }
+.du-antwort.blass { opacity: 0.45; }
+@keyframes du-richtig { 40% { transform: scale(1.06); } }
+@keyframes du-wackeln { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.du-a-wer { position: absolute; top: -10px; right: -4px; font-size: 1.1rem; letter-spacing: -2px; }
+.du-warten { display: flex; justify-content: center; gap: 10px; padding: 0 14px 14px; font-size: 0.85rem; color: var(--leise); flex-wrap: wrap; }
+.du-warten .fertig { color: #8ff0b0; }
+
+/* Rundentafel */
+.du-tafel { text-align: center; padding: 10px 0; animation: du-rein 0.4s ease-out; }
+.du-tafel h2 { margin: 6px 0 16px; }
+.du-tafel-gitter { display: grid; grid-template-columns: minmax(90px, auto) repeat(var(--n), 1fr) auto; gap: 8px 6px; align-items: center; padding: 14px; border-radius: 20px; background: var(--flaeche); }
+.du-tafel-kat { justify-self: center; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: var(--k); font-size: 1.1rem; box-shadow: 0 3px 0 color-mix(in srgb, var(--k) 55%, #000); }
+.du-tafel-name { text-align: left; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
+.du-tafel-runde { display: flex; justify-content: center; gap: 3px; }
+.du-tafel-runde i { width: 12px; height: 12px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); }
+.du-tafel-runde i.ja { background: #3ccf6e; animation: du-pop 0.3s ease-out backwards; }
+.du-tafel-runde i.nein { background: #ff5a5a; animation: du-pop 0.3s ease-out backwards; }
+@keyframes du-pop { from { transform: scale(0); } }
+.du-tafel-summe { color: var(--gold); font-size: 1.2rem; min-width: 26px; }
+
+/* Lobby: Themenwahl */
+.du-themen { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; margin-top: 10px; }
+.du-thema { all: unset; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 12px; background: color-mix(in srgb, var(--k) 22%, var(--flaeche-2)); font-size: 0.82rem; font-weight: 700; border: 2px solid transparent; }
+.du-thema span { font-size: 1.1rem; }
+.du-thema.aktiv { border-color: var(--gold); background: color-mix(in srgb, var(--k) 45%, var(--flaeche-2)); }
+.du-thema:disabled { cursor: default; }
+
+@media (max-width: 560px) {
+  .du-kacheln { gap: 8px; }
+  .du-kachel { border-radius: 16px; aspect-ratio: 0.8; }
+  .du-antworten { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+  .du-antwort { min-height: 50px; }
+  .du-spieler { padding: 6px 8px; }
+  .du-ava { font-size: 1.3rem; }
+  .du-tafel-gitter { grid-template-columns: minmax(70px, auto) repeat(var(--n), 1fr) auto; padding: 10px 8px; gap: 8px 3px; }
+  .du-tafel-runde i { width: 9px; height: 9px; }
+  .du-tafel-kat { width: 26px; height: 26px; font-size: 0.9rem; }
+}
+@media (prefers-reduced-motion: reduce) { .du-kachel, .du-antwort, .du-frage, .du-tafel, .du-tafel-runde i { animation: none !important; } }

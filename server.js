@@ -17,7 +17,8 @@ const SPIELE = {
   farbrausch: require("./spiele/farbrausch"),
   skat: require("./spiele/skat"),
   wuerfel: require("./spiele/wuerfel"),
-  // arena: require("./spiele/arena"),       // vorübergehend ausgeblendet
+  // arena: require("./spiele/arena"),       // ersetzt durch das Wissensduell
+  duell: require("./spiele/duell"),
   schechingen: require("./spiele/schechingen"),
   baulowe: require("./spiele/baulowe"),
   ludo: require("./spiele/ludo"),
