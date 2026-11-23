@@ -1420,3 +1420,27 @@ html[data-animationen="aus"] .hintergrund::before { animation: none; }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 30px rgba(0, 0, 0, 0.22);
 }
 .spiel-gross:hover:not(:disabled):not(.bald) { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 22px 44px rgba(0, 0, 0, 0.4), 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent); }
+
+/* Einmaliges Fenster „Was ist neu?“ */
+.neu-fenster { width: min(600px, calc(100% - 24px)); }
+.neu-kopf { position: relative; padding: 22px 20px 16px; text-align: center; overflow: hidden;
+  background: radial-gradient(120% 140% at 50% -20%, color-mix(in srgb, var(--gold) 45%, transparent), transparent 60%), var(--flaeche-2); border-bottom: 1px solid var(--rand); }
+.neu-kopf h2 { margin: 8px 0 2px; font-size: clamp(1.2rem, 4.5vw, 1.6rem); line-height: 1.2; }
+.neu-kopf small { color: var(--leise); }
+.neu-marke { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--gold); color: var(--gold-text); font-weight: 900; font-size: 0.8rem; letter-spacing: 0.04em; }
+.neu-liste { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }
+.neu-liste li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; background: var(--flaeche-2); line-height: 1.4;
+  animation: neu-rein 0.45s cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(0.15s + var(--i) * 70ms); }
+.neu-icon { font-size: 1.5rem; line-height: 1; flex: none; }
+@keyframes neu-rein { from { opacity: 0; transform: translateX(-14px); } }
+@media (prefers-reduced-motion: reduce) { .neu-liste li { animation: none; } }
+.neu-fenster[open] { display: flex; flex-direction: column; }
+.neu-fenster .fenster-inhalt { flex: 1; min-height: 0; max-height: none; }
+@media (max-width: 700px) {
+  .neu-kopf { padding: 16px 16px 12px; }
+  .neu-liste li { padding: 8px 10px; font-size: 0.9rem; gap: 10px; }
+  .neu-icon { font-size: 1.2rem; }
+}
+.neu-kopf, .neu-fuss { flex: none; }
+.neu-fuss { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--rand); background: var(--flaeche); }
+.neu-liste { margin-bottom: 0; }

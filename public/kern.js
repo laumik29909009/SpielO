@@ -326,6 +326,7 @@ function zeigeStart() {
     if (codeAusLink) $("#beitretenBtn").click();
     else $("#erstellenBtn").click();
   });
+  neuigkeitenZeigen();
 }
 
 // Kleiner Spenden-Block (Link und Text aus config.json → "spende")
@@ -359,6 +360,34 @@ function demnaechstBlock() {
       <div class="demnaechst-kopf"><span class="demnaechst-marke">⏳ Bald</span><b>${esc(d.titel || "Demnächst")}</b></div>
       <ul>${d.punkte.map(([icon, titel, text]) => `<li><span class="dn-icon">${icon}</span><span><b>${esc(titel)}</b>${text ? `<small>${esc(text)}</small>` : ""}</span></li>`).join("")}</ul>
     </div>`;
+}
+
+// Einmaliges Fenster „Was ist neu?“ beim ersten Besuch nach einem Update
+// (gemerkt pro Update: Datum + Titel aus config.json → "patch")
+function neuigkeitenZeigen() {
+  const p = GN.meta.patch;
+  if (!p || !p.punkte?.length) return;
+  const schluessel = `${p.datum}|${p.titel}`;
+  if (speicher("neuGesehen") === schluessel) return;
+  if (new URLSearchParams(location.search).get("raum")) return; // Einladung: nicht im Weg stehen
+  setTimeout(() => {
+    if (GN.ansicht !== "start" || $("#neuFenster")?.open) return;
+    let d = $("#neuFenster");
+    if (!d) { d = document.createElement("dialog"); d.id = "neuFenster"; d.className = "fenster neu-fenster"; document.body.appendChild(d); }
+    d.innerHTML = `
+      <div class="neu-kopf"><span class="neu-marke">🆕 Neu auf SpielO</span><h2>${esc(p.titel || "Was ist neu?")}</h2><small>${esc(p.datum || "")}</small></div>
+      <div class="fenster-inhalt"><ul class="neu-liste">${p.punkte.map((x, i) => {
+        const m = x.match(/^(\p{Extended_Pictographic}\uFE0F?)\s*(.*)$/u);
+        return `<li style="--i:${i}"><span class="neu-icon">${m ? m[1] : "✨"}</span><span>${esc(m ? m[2] : x)}</span></li>`;
+      }).join("")}</ul></div>
+      <div class="neu-fuss"><button class="btn voll" id="neuOk">Los geht’s! 🎉</button></div>`;
+    const zu = () => { speicher("neuGesehen", schluessel); d.close(); };
+    $("#neuOk", d).onclick = () => { Ton.klick(); zu(); };
+    d.addEventListener("click", (ev) => ev.target === d && zu());
+    d.addEventListener("cancel", () => speicher("neuGesehen", schluessel));
+    d.showModal();
+    GN.konfetti?.(90);
+  }, 1400);
 }
 
 function patchBlock() {
