@@ -78,8 +78,8 @@
           <li>Freie Felder, Bahnhöfe und Werke kannst du <b>kaufen</b>. Wer auf deinem Feld landet, zahlt dir <b>Miete</b>.</li>
           <li>Hast du eine <b>ganze Farbgruppe</b>, verdoppelt sich die Miete und du darfst <b>Häuser bauen</b> (gleichmäßig, bis zum Hotel).</li>
           <li>Bahnhöfe: 25 / 50 / 100 / 200 € je nachdem, wie viele du hast. Werke: 4-fache Augenzahl, mit beiden Werken 10-fache.</li>
-          <li><b>Pasch</b>: nochmal würfeln. Der dritte Pasch in Folge bringt dich ins Gefängnis.</li>
-          <li>Raus aus dem Gefängnis: 50 € zahlen, Frei-Karte oder einen Pasch würfeln (3 Versuche).</li>
+          <li><b>Pasch</b>: nochmal würfeln. Der dritte Pasch in Folge bringt dich in den Achsenknast.</li>
+          <li>Raus aus dem Achsenknast: 50 € zahlen, Frei-Karte oder einen Pasch würfeln (3 Versuche).</li>
           <li>Knapp bei Kasse? <b>Hypothek</b> (halber Kaufpreis) aufnehmen oder Häuser verkaufen. Zurückzahlen kostet 10 % Zinsen.</li>
           <li>Wer nicht zahlen kann, ist <b>pleite</b>.</li></ol>`,
       },
@@ -305,7 +305,7 @@
     const html = `
       <div class="bl-konto-kopf" style="--b:${farbeVon(z, GN.ich)}">
         <span class="bl-konto-figur">${z.figurIcon[GN.ich]}</span>
-        <div><small>Dein Guthaben</small><b id="blGuthaben">${geldText(z.geld[GN.ich])}</b><small>Vermögen ${geldText(z.vermoegen?.[GN.ich])}${z.freiKarten.includes(GN.ich) ? " · 🎫 Frei-Karte" : ""}${z.knast[GN.ich] !== undefined ? " · 🚔 im Gefängnis" : ""}</small></div>
+        <div><small>Dein Guthaben</small><b id="blGuthaben">${geldText(z.geld[GN.ich])}</b><small>Vermögen ${geldText(z.vermoegen?.[GN.ich])}${z.freiKarten.includes(GN.ich) ? " · 🎫 Frei-Karte" : ""}${z.knast[GN.ich] !== undefined ? " · 🚔 im Achsenknast" : ""}</small></div>
       </div>
       <div class="bl-hand-titel">🃏 Deine Karten <b>${meine.length}</b>${meine.length ? "<small>Antippen für die ganze Karte</small>" : ""}</div>
       <div class="bl-hand">${gruppen.length ? gruppen.map(({ g, felder }) => {
@@ -404,7 +404,7 @@
     else if (!ich) html = `<div class="bl-ansage">${wer} ist dran${GN.wartePunkte()}</div>`;
     else if (z.schritt === "wuerfeln") {
       const knast = z.knast[GN.ich] !== undefined;
-      html = `<div class="bl-ansage"><b>Du bist dran!</b>${knast ? ` Im Gefängnis (Versuch ${z.knast[GN.ich] + 1}/3)` : z.pasch ? " Pasch – nochmal würfeln!" : ""}</div>
+      html = `<div class="bl-ansage"><b>Du bist dran!</b>${knast ? ` Im Achsenknast (Versuch ${z.knast[GN.ich] + 1}/3)` : z.pasch ? " Pasch – nochmal würfeln!" : ""}</div>
         <div class="bl-knoepfe"><button class="btn gross bl-wurf-knopf" data-a="wuerfeln">🎲 Würfeln</button>
         ${knast ? `<button class="btn zweit" data-a="freikaufen" ${z.geld[GN.ich] < 50 ? "disabled" : ""}>💶 50 € zahlen</button>${z.freiKarten.includes(GN.ich) ? '<button class="btn zweit" data-a="freikarte">🎫 Frei-Karte</button>' : ""}` : ""}</div>`;
     } else if (z.schritt === "kaufen") {
@@ -486,7 +486,7 @@
         <p class="bk-text">Besitzt man <b>beide</b> Werke, beträgt die Miete das <b>10-Fache</b> der gewürfelten Augen.</p>
         <div class="bk-trenn"></div><div class="bk-zeile klein"><span>Hypothekenwert</span><b>${f.preis / 2} €</b></div>`;
     } else {
-      inhalt = `<p class="bk-text">${{ start: "Wer über Los kommt oder darauf landet, bekommt 200 €.", ereignis: "Ziehe eine Glück-Karte.", kasse: "Ziehe eine Dorfkasse-Karte.", steuer: `Zahle ${f.betrag} €.`, knast: "Nur zu Besuch – oder du sitzt hier fest.", parken: z.topf ? `Hier liegt der Topf: ${z.topf} €` : "Eine Runde Pause auf dem Dorfplatz.", geheKnast: "Direkt ins Gefängnis, ohne über Los." }[f.art] || ""}</p>`;
+      inhalt = `<p class="bk-text">${{ start: "Wer über Los kommt oder darauf landet, bekommt 200 €.", ereignis: "Ziehe eine Glück-Karte.", kasse: "Ziehe eine Dorfkasse-Karte.", steuer: `Zahle ${f.betrag} €.`, knast: "Nur zu Besuch – oder du sitzt hier fest.", parken: z.topf ? `Hier liegt der Topf: ${z.topf} €` : "Eine Runde Pause auf dem Dorfplatz.", geheKnast: "Direkt in den Achsenknast, ohne über Los." }[f.art] || ""}</p>`;
     }
     const kopfFarbe = g ? g.farbe : f.art === "bahn" ? "#e9e2cf" : f.art === "werk" ? "#e9e2cf" : "#e9dfc4";
     return `<div class="bl-besitzkarte ${z.hypothek[i] ? "hypothek" : ""} ${kompakt ? "kompakt" : ""}" style="--g:${kopfFarbe}">
@@ -651,7 +651,7 @@
       if (a.typ === "miete") { (a.spieler === GN.ich ? Ton.falsch : a.an === GN.ich ? Ton.richtig : Ton.klick)(); knall(`💸 ${a.betrag} € Miete`, `${wer} → ${esc(nameVon(z, a.an))}`); }
       if (a.typ === "kauf") { Ton.richtig(); knall("🏷️ Gekauft!", `${wer}: ${esc(F()[a.feld].name)}`); if (a.gruppeVoll) setTimeout(() => { Ton.volltreffer(); knall("🎉 Farbgruppe komplett!", "Jetzt kann gebaut werden"); if (a.spieler === GN.ich) GN.konfetti(80); }, 900); }
       if (a.typ === "bauen") { Ton.abgeben(); knall(a.hotel ? "🏨 Hotel!" : "🏠 Neues Haus", `${wer}: ${esc(F()[a.feld].name)}`); }
-      if (a.typ === "knast" || (a.typ === "wurf" && a.dreiPasch)) { Ton.alarm(); knall("🚔 Ab ins Gefängnis!", wer); }
+      if (a.typ === "knast" || (a.typ === "wurf" && a.dreiPasch)) { Ton.alarm(); knall("🚔 Ab in den Achsenknast!", wer); }
       if (a.typ === "topf") { Ton.volltreffer(); knall(`⛲ +${a.betrag} €`, `${wer} räumt den Topf ab`); GN.konfetti(60); }
       if (a.typ === "pleite") { Ton.falsch(); knall("💥 Pleite!", wer); }
       if (a.typ === "handel") { Ton.richtig(); knall("🤝 Handel!", `${wer} & ${esc(nameVon(z, a.an))}`); }

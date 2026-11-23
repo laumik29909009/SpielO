@@ -32,7 +32,7 @@ const FELDER = [
   { art: "ereignis", name: "Glück", icon: "❓" },
   S("Haghof", "hellblau", 100, [6, 30, 90, 270, 400, 550]),
   S("Leinweiler", "hellblau", 120, [8, 40, 100, 300, 450, 600]),
-  { art: "knast", name: "Gefängnis / Nur zu Besuch", icon: "🚔" },
+  { art: "knast", name: "Achsenknast / Nur zu Besuch", icon: "🚔" },
   S("Kindergarten St. Josef", "pink", 140, [10, 50, 150, 450, 625, 750]),
   { art: "werk", name: "EnBW", icon: "⚡", preis: 150 },
   S("Grundschule", "pink", 140, [10, 50, 150, 450, 625, 750]),
@@ -52,7 +52,7 @@ const FELDER = [
   S("TC Schechingen", "gelb", 260, [22, 110, 330, 800, 975, 1150]),
   { art: "werk", name: "Wasserturm", icon: "🚰", preis: 150 },
   S("Kaiser-Friedrich-Straße", "gelb", 280, [24, 120, 360, 850, 1025, 1200]),
-  { art: "geheKnast", name: "Ab ins Gefängnis!", icon: "👮" },
+  { art: "geheKnast", name: "Ab in den Achsenknast!", icon: "👮" },
   S("Kirche St. Sebastian", "gruen", 300, [26, 130, 390, 900, 1100, 1275]),
   S("Freibad", "gruen", 300, [26, 130, 390, 900, 1100, 1275]),
   { art: "kasse", name: "Dorfkasse", icon: "💰" },
@@ -65,7 +65,7 @@ const FELDER = [
 ];
 
 // Karten. wirkung:
-//  geld (+/-), zu (Feld-Index, über Los gibt Geld), zurueck (Felder), knast, frei (Gefängnis-frei-Karte),
+//  geld (+/-), zu (Feld-Index, über Los gibt Geld), zurueck (Felder), knast, frei (Achsenknast-frei-Karte),
 //  reparatur {haus, hotel}, vonJedem (jeder zahlt dir), anJeden (du zahlst jedem), naechsteBahn (doppelte Miete),
 //  naechstesWerk (würfeln, 10 × Augen zahlen)
 const EREIGNIS = [
@@ -76,9 +76,9 @@ const EREIGNIS = [
   { text: "Ab zum nächsten Bahnhof. Gehört er jemandem, zahlst du doppelte Miete.", naechsteBahn: true },
   { text: "Der Zug nach Gmünd wartet: Rücke vor zum nächsten Bahnhof. Gehört er jemandem, zahlst du doppelte Miete.", naechsteBahn: true },
   { text: "Deine EnBW-Aktien zahlen eine Dividende: Du erhältst 50.", geld: 50 },
-  { text: "Der Bürgermeister drückt ein Auge zu: Du kommst aus dem Gefängnis frei. Behalte die Karte, bis du sie brauchst.", frei: true },
+  { text: "Der Bürgermeister drückt ein Auge zu: Du kommst aus dem Achsenknast frei. Behalte die Karte, bis du sie brauchst.", frei: true },
   { text: "Du hast deinen Geldbeutel im Ochsen liegen lassen: Gehe 3 Felder zurück.", zurueck: 3 },
-  { text: "Beim Maibaumklau erwischt! Gehe ins Gefängnis, direkt und ohne über Los.", knast: true },
+  { text: "Beim Maibaumklau erwischt! Gehe in den Achsenknast, direkt und ohne über Los.", knast: true },
   { text: "Sturm über Schechingen: Zahle für jedes Haus 25 und für jedes Hotel 100.", reparatur: { haus: 25, hotel: 100 } },
   { text: "Zu schnell durch Leinweiler gefahren: Zahle 15.", geld: -15 },
   { text: "Ausflug nach Aalen: Rücke vor zum Bahnhof Aalen. Über Los bekommst du 200.", zu: 5 },
@@ -91,8 +91,8 @@ const KASSE = [
   { text: "Fehler der Raiffeisenbank zu deinen Gunsten: Du erhältst 200.", geld: 200 },
   { text: "Arztrechnung nach dem Fußballspiel beim FC: Zahle 50.", geld: -50 },
   { text: "Erlös vom Flohmarkt in der Gemeindehalle: Du erhältst 50.", geld: 50 },
-  { text: "Die Feuerwehr holt dich raus: Du kommst aus dem Gefängnis frei. Behalte die Karte, bis du sie brauchst.", frei: true },
-  { text: "Beim Osterbrunnen-Schmücken Eier geklaut: Gehe ins Gefängnis, direkt und ohne über Los.", knast: true },
+  { text: "Die Feuerwehr holt dich raus: Du kommst aus dem Achsenknast frei. Behalte die Karte, bis du sie brauchst.", frei: true },
+  { text: "Beim Osterbrunnen-Schmücken Eier geklaut: Gehe in den Achsenknast, direkt und ohne über Los.", knast: true },
   { text: "Deine Urlaubskasse ist voll: Du erhältst 100.", geld: 100 },
   { text: "Steuerrückzahlung vom Rathaus: Du erhältst 20.", geld: 20 },
   { text: "Du hast Geburtstag! Jeder Spieler schenkt dir 10.", vonJedem: 10 },

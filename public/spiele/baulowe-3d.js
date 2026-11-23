@@ -31,71 +31,233 @@ window.BauloweBrett3D = (() => {
   const nachInnen = { unten: [0, -1], links: [1, 0], oben: [0, 1], rechts: [-1, 0] };
 
   // ---------- Brett-Textur ----------
-  function brettTextur(felder, gruppen) {
-    const S = 2048, k = S / B;
+  // Brett-Textur: Auflösung nach Gerät (scharf auch am Handy), alles relativ zur Größe gezeichnet
+  function brettTextur(felder, gruppen, S = 2048, anisotropie = 8) {
+    const k = S / B, u = S / 2048; // u: Maßstab gegenüber der alten 2048er-Textur
     const c = document.createElement("canvas"); c.width = c.height = S;
     const g = c.getContext("2d");
     const px = (x) => (x + B / 2) * k;
-    // Mitte: grünes Spielfeld mit Logo
-    const verlauf = g.createRadialGradient(S / 2, S / 2, 50, S / 2, S / 2, S * 0.55);
-    verlauf.addColorStop(0, "#2f7d55"); verlauf.addColorStop(1, "#174a33");
-    g.fillStyle = "#0e2b1e"; g.fillRect(0, 0, S, S);
-    g.fillStyle = verlauf; g.fillRect(C * k, C * k, S - 2 * C * k, S - 2 * C * k);
+    const SCHRIFT = "Outfit, system-ui, sans-serif";
+    const EMOJI = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+    const font = (gew, gr) => `${gew} ${Math.round(gr * u)}px ${SCHRIFT}`;
+    // Papier: Grundfarbe mit feinem Korn
+    const korn = document.createElement("canvas"); korn.width = korn.height = 256;
+    const kg = korn.getContext("2d"), bild = kg.createImageData(256, 256);
+    for (let i = 0; i < bild.data.length; i += 4) { const v = Math.random() * 255; bild.data[i] = bild.data[i + 1] = bild.data[i + 2] = v; bild.data[i + 3] = 10; }
+    kg.putImageData(bild, 0, 0);
+    // Außenrand dunkelgrün, Mitte Filz mit Verlauf
+    g.fillStyle = "#0d2a1d"; g.fillRect(0, 0, S, S);
+    const innen = C * k;
+    const verlauf = g.createRadialGradient(S / 2, S / 2, S * 0.05, S / 2, S / 2, S * 0.6);
+    verlauf.addColorStop(0, "#33885c"); verlauf.addColorStop(0.6, "#22684a"); verlauf.addColorStop(1, "#154530");
+    g.fillStyle = verlauf; g.fillRect(innen, innen, S - 2 * innen, S - 2 * innen);
+    g.fillStyle = g.createPattern(korn, "repeat"); g.fillRect(innen, innen, S - 2 * innen, S - 2 * innen);
+    // Zierrahmen innen
+    g.strokeStyle = "rgba(255, 215, 106, .55)"; g.lineWidth = 5 * u;
+    g.strokeRect(innen + 40 * u, innen + 40 * u, S - 2 * innen - 80 * u, S - 2 * innen - 80 * u);
+    g.strokeStyle = "rgba(255, 215, 106, .25)"; g.lineWidth = 2 * u;
+    g.strokeRect(innen + 56 * u, innen + 56 * u, S - 2 * innen - 112 * u, S - 2 * innen - 112 * u);
+    // Logo diagonal, mit Banner
     g.save(); g.translate(S / 2, S / 2); g.rotate(-Math.PI / 4);
     g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = "900 190px Outfit, system-ui, sans-serif";
-    g.fillStyle = "rgba(0,0,0,.35)"; g.fillText("Baulöwe", 8, 14);
-    g.fillStyle = "#fff8e6"; g.fillText("Baulöwe", 0, 0);
-    g.font = "700 64px Outfit, system-ui, sans-serif"; g.fillStyle = "#ffd76a"; g.fillText("Schechingen-Edition", 0, 140);
+    g.fillStyle = "#b3261e"; g.beginPath(); g.roundRect(-560 * u, -150 * u, 1120 * u, 260 * u, 40 * u); g.fill();
+    g.strokeStyle = "#fff8e6"; g.lineWidth = 10 * u; g.stroke();
+    g.font = font(900, 200);
+    g.lineWidth = 14 * u; g.strokeStyle = "rgba(0,0,0,.35)"; g.strokeText("BAULÖWE", 0, -14 * u);
+    g.fillStyle = "#fff8e6"; g.fillText("BAULÖWE", 0, -20 * u);
+    g.font = font(800, 62); g.fillStyle = "#ffd76a"; g.fillText("✦ Schechingen-Edition ✦", 0, 190 * u);
     g.restore();
-    // Kartenfelder in der Mitte
-    const kartenFeld = (x, y, w, h, rot, text, farbe) => {
-      g.save(); g.translate(x, y); g.rotate(rot);
-      g.fillStyle = "rgba(255,255,255,.08)"; g.strokeStyle = farbe; g.lineWidth = 8; g.setLineDash([22, 14]);
-      g.beginPath(); g.roundRect(-w / 2, -h / 2, w, h, 26); g.fill(); g.stroke(); g.setLineDash([]);
-      g.fillStyle = farbe; g.font = "800 58px Outfit, system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 0, 0);
+    // Kartenstapel-Felder
+    const kartenFeld = (x, y, text, farbe, zeichne) => {
+      g.save(); g.translate(x, y); g.rotate(-Math.PI / 4);
+      const w = 440 * u, h = 270 * u;
+      g.fillStyle = "rgba(0,0,0,.18)"; g.strokeStyle = farbe; g.lineWidth = 7 * u; g.setLineDash([24 * u, 14 * u]);
+      g.beginPath(); g.roundRect(-w / 2, -h / 2, w, h, 26 * u); g.fill(); g.stroke(); g.setLineDash([]);
+      zeichne(0, -30 * u, 70 * u);
+      g.fillStyle = farbe; g.font = font(800, 50); g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 0, h / 2 + 48 * u);
       g.restore();
     };
-    kartenFeld(S * 0.32, S * 0.32, 420, 260, -Math.PI / 4, "❓ Glück", "#ffb35a");
-    kartenFeld(S * 0.68, S * 0.68, 420, 260, -Math.PI / 4, "💰 Dorfkasse", "#7fd3ff");
+    kartenFeld(S * 0.32, S * 0.32, "GLÜCK", "#ffb35a", (x, y, gr) => fragezeichen(g, x, y, gr, "#ffb35a"));
+    kartenFeld(S * 0.68, S * 0.68, "DORFKASSE", "#7fd3ff", (x, y, gr) => truhe(g, x, y, gr));
     // Felder
     felder.forEach((f, i) => {
       const r = rechteck(i);
       const x = px(r.x0), y = px(r.z0), w = (r.x1 - r.x0) * k, h = (r.z1 - r.z0) * k;
-      g.fillStyle = r.ecke ? "#ece1c4" : "#f6eedb"; g.fillRect(x, y, w, h);
-      g.strokeStyle = "#2a3a30"; g.lineWidth = 4; g.strokeRect(x, y, w, h);
+      g.fillStyle = r.ecke ? "#efe4c6" : "#f8f0dc"; g.fillRect(x, y, w, h);
+      g.fillStyle = g.createPattern(korn, "repeat"); g.fillRect(x, y, w, h);
       g.save();
       g.translate(x + w / 2, y + h / 2);
       g.rotate(r.ecke ? ECK_WINKEL[i] : WINKEL[r.seite]);
       g.textAlign = "center"; g.textBaseline = "middle";
+      const dunkel = "#1c2a22";
       if (r.ecke) {
-        g.font = "150px serif"; g.fillText(f.icon || "", 0, -40);
-        g.fillStyle = "#1c2a22"; g.font = "800 46px Outfit, system-ui, sans-serif";
-        zeilen(g, f.name.split(" /")[0], 0, 90, C * k * 1.05, 44);
+        const gr = C * k;
+        if (f.art === "start") {
+          g.fillStyle = "#c62828"; g.font = font(900, 150); g.fillText("LOS", 0, -30 * u);
+          pfeil(g, 0, 110 * u, 250 * u, "#c62828");
+          g.fillStyle = dunkel; g.font = font(700, 30); g.fillText("+200 € beim Vorbeiziehen", 0, -160 * u);
+        } else if (f.art === "knast") {
+          // Wie im Original: Zellenquadrat in der Ecke, außen herum "Nur zu Besuch"
+          g.rotate(-ECK_WINKEL[i]); // zurück zur Brettausrichtung
+          const z = gr * 0.62, x0 = gr / 2 - z, y0 = -gr / 2;
+          g.fillStyle = "#f08a24"; g.fillRect(x0, y0, z, z);
+          g.strokeStyle = dunkel; g.lineWidth = 5 * u; g.strokeRect(x0, y0, z, z);
+          gitter(g, x0 + z / 2, y0 + z / 2, z * 0.62);
+          g.save(); g.translate(x0 + z / 2, y0 + z / 2); g.rotate(Math.PI / 4);
+          g.fillStyle = dunkel; g.font = font(900, 40); g.fillText("ACHSENKNAST", 0, z * 0.42); g.restore();
+          g.fillStyle = dunkel; g.font = font(900, 40);
+          g.save(); g.translate(x0 - 40 * u, 0); g.rotate(Math.PI / 2); g.fillText("NUR ZU", 0, 0); g.restore();
+          g.fillText("BESUCH", 0, gr / 2 - 46 * u);
+        } else if (f.art === "parken") {
+          brunnen(g, 0, -40 * u, 200 * u);
+          g.fillStyle = dunkel; g.font = font(900, 46); zeilen(g, "DORFPLATZ", 0, 130 * u, gr, 46 * u);
+          g.font = font(700, 32); g.fillText("Schechingen", 0, 180 * u);
+        } else if (f.art === "geheKnast") {
+          g.font = `${Math.round(150 * u)}px ${EMOJI}`; g.fillText("👮", 0, -50 * u);
+          g.fillStyle = dunkel; g.font = font(900, 40); zeilen(g, "AB IN DEN ACHSENKNAST!", 0, 130 * u, gr * 0.9, 44 * u);
+        }
       } else {
         const fw = N * k, fh = C * k; // Breite und Tiefe im gedrehten Feld
         const gr = f.gruppe ? gruppen[f.gruppe] : null;
-        if (gr) { g.fillStyle = gr.farbe; g.fillRect(-fw / 2, -fh / 2, fw, fh * 0.22); g.strokeStyle = "#2a3a30"; g.lineWidth = 3; g.strokeRect(-fw / 2, -fh / 2, fw, fh * 0.22); }
-        g.fillStyle = "#1c2a22";
-        const top = gr ? -fh / 2 + fh * 0.32 : -fh / 2 + fh * 0.16;
-        if (f.icon) { g.font = "64px serif"; g.fillText(f.icon, 0, top + (gr ? 0 : 40)); }
-        g.font = "800 34px Outfit, system-ui, sans-serif";
-        zeilen(g, f.name.replace(/^Bahnhof /, "Bhf. ").replace(/^Kirche /, ""), 0, f.icon ? top + 92 : top + 40, fw * 0.92, 36);
-        if (f.preis || f.betrag) { g.font = "800 36px Outfit, system-ui, sans-serif"; g.fillText(`${f.preis || f.betrag} €`, 0, fh / 2 - 36); }
+        if (gr) {
+          const bh = fh * 0.22;
+          const band = g.createLinearGradient(0, -fh / 2, 0, -fh / 2 + bh);
+          band.addColorStop(0, aufhellen(gr.farbe, 0.25)); band.addColorStop(1, gr.farbe);
+          g.fillStyle = band; g.fillRect(-fw / 2, -fh / 2, fw, bh);
+          g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(-fw / 2, -fh / 2, fw, bh * 0.18);
+          g.strokeStyle = dunkel; g.lineWidth = 3 * u; g.beginPath(); g.moveTo(-fw / 2, -fh / 2 + bh); g.lineTo(fw / 2, -fh / 2 + bh); g.stroke();
+        }
+        g.fillStyle = dunkel;
+        const name = f.name.replace(/^Bahnhof /, "").replace(/^Kirche /, "").toUpperCase();
+        const iconY = -fh * 0.06;
+        if (f.art === "bahn") { g.font = font(700, 24); g.fillText("BAHNHOF", 0, -fh / 2 + 44 * u); lok(g, 0, fh * 0.1, 112 * u); }
+        else if (f.art === "werk") (f.icon === "⚡" ? blitz : wasserturm)(g, 0, iconY + 10 * u, 120 * u);
+        else if (f.art === "ereignis") fragezeichen(g, 0, iconY, 120 * u, "#e07b00");
+        else if (f.art === "kasse") truhe(g, 0, iconY, 110 * u);
+        else if (f.art === "steuer") { g.font = `${Math.round(84 * u)}px ${EMOJI}`; g.fillText(f.icon || "🧾", 0, iconY); }
+        g.fillStyle = dunkel;
+        // Schrift so lange verkleinern, bis das längste Wort ins Feld passt
+        let titel = (f.art === "ereignis" ? "GLÜCK" : f.art === "kasse" ? "DORFKASSE" : name).replace(/-/g, " ");
+        let groesse = gr ? 30 : 28;
+        g.font = font(800, groesse);
+        // Zu lange Wörter an der Wortfuge trennen (OSTER- / BRUNNEN)
+        titel = titel.split(" ").map((w) => (g.measureText(w).width > fw * 0.86 ? w.replace(/^(.{3,}?)(BRUNNEN|FORUM|HALLE|HAUS|SCHULE|VEREIN|SAAL|GARTEN|STEUER|STRASSE|SCHECHINGEN)$/, "$1- $2") : w)).join(" ");
+        const laengstes = titel.split(/[\s-]/).reduce((a, w) => (g.measureText(w).width > g.measureText(a).width ? w : a), "");
+        while (groesse > 25 && g.measureText(laengstes).width > fw * 0.86) { groesse -= 1; g.font = font(800, groesse); }
+        const textY = gr ? -fh / 2 + fh * 0.22 + 70 * u : f.art === "bahn" ? -fh / 2 + 90 * u : -fh / 2 + 52 * u;
+        zeilen(g, titel, 0, gr ? textY : f.art === "bahn" ? -fh / 2 + 88 * u : -fh / 2 + 50 * u, fw * 0.88, 32 * u);
+        if (f.preis || f.betrag) { g.font = font(800, 32); const preis = f.art === "steuer" ? `${f.betrag} €` : `${f.preis} €`; g.fillText(preis, 0, fh / 2 - 38 * u); }
       }
       g.restore();
+      // Feldlinien zuletzt, damit sie über allem liegen
+      g.strokeStyle = "#22332a"; g.lineWidth = 4 * u; g.strokeRect(x, y, w, h);
     });
+    // Rand um die Felder
+    g.strokeStyle = "#22332a"; g.lineWidth = 8 * u; g.strokeRect(4 * u, 4 * u, S - 8 * u, S - 8 * u);
+    g.strokeRect(innen, innen, S - 2 * innen, S - 2 * innen);
     const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = anisotropie;
+    t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter;
+    return t;
+  }
+  const aufhellen = (hex, f) => {
+    const n = parseInt(hex.slice(1), 16), r = n >> 16, gg = (n >> 8) & 255, b = n & 255;
+    const m = (v) => Math.round(v + (255 - v) * f);
+    return `rgb(${m(r)},${m(gg)},${m(b)})`;
+  };
+  // ---------- Gezeichnete Symbole (scharf in jeder Größe) ----------
+  function pfeil(g, x, y, l, farbe) {
+    g.save(); g.translate(x, y); g.fillStyle = farbe;
+    g.beginPath(); g.moveTo(l / 2, 0); g.lineTo(l / 2 - l * 0.3, -l * 0.22); g.lineTo(l / 2 - l * 0.3, -l * 0.08); g.lineTo(-l / 2, -l * 0.08);
+    g.lineTo(-l / 2, l * 0.08); g.lineTo(l / 2 - l * 0.3, l * 0.08); g.lineTo(l / 2 - l * 0.3, l * 0.22); g.closePath(); g.fill(); g.restore();
+  }
+  function gitter(g, x, y, gr) {
+    g.save(); g.translate(x, y); g.rotate(Math.PI / 4);
+    g.fillStyle = "#fff3dc"; g.fillRect(-gr / 2, -gr / 2, gr, gr);
+    g.font = `${Math.round(gr * 0.62)}px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("😬", 0, 0);
+    g.strokeStyle = "#3a3a3a"; g.lineWidth = gr * 0.05;
+    for (let i = 1; i < 5; i++) { const sx = -gr / 2 + (gr * i) / 5; g.beginPath(); g.moveTo(sx, -gr / 2); g.lineTo(sx, gr / 2); g.stroke(); }
+    g.lineWidth = gr * 0.06; g.strokeRect(-gr / 2, -gr / 2, gr, gr);
+    g.restore();
+  }
+  function fragezeichen(g, x, y, gr, farbe) {
+    g.save(); g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = `900 ${gr}px Outfit, system-ui, sans-serif`;
+    g.lineWidth = gr * 0.08; g.strokeStyle = "#1c2a22"; g.strokeText("?", x, y);
+    g.fillStyle = farbe; g.fillText("?", x, y); g.restore();
+  }
+  function truhe(g, x, y, gr) {
+    g.save(); g.translate(x, y);
+    const w = gr, h = gr * 0.62;
+    g.fillStyle = "#8b5a2b"; g.strokeStyle = "#3b2412"; g.lineWidth = gr * 0.05;
+    g.beginPath(); g.roundRect(-w / 2, -h * 0.1, w, h * 0.7, gr * 0.06); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(-w / 2, -h * 0.1); g.quadraticCurveTo(0, -h * 0.75, w / 2, -h * 0.1); g.closePath(); g.fillStyle = "#a86f38"; g.fill(); g.stroke();
+    g.fillStyle = "#ffcf3f"; g.fillRect(-w * 0.09, -h * 0.2, w * 0.18, h * 0.3); g.strokeRect(-w * 0.09, -h * 0.2, w * 0.18, h * 0.3);
+    g.fillStyle = "#ffcf3f"; g.fillRect(-w / 2, h * 0.2, w, h * 0.06); g.restore();
+  }
+  function lok(g, x, y, gr) {
+    g.save(); g.translate(x, y); g.fillStyle = "#1c2a22";
+    const w = gr, h = gr * 0.55;
+    g.beginPath(); g.roundRect(-w * 0.5, -h * 0.3, w * 0.62, h * 0.6, gr * 0.04); g.fill(); // Kessel
+    g.fillRect(w * 0.1, -h * 0.7, w * 0.36, h); // Führerhaus
+    g.fillRect(-w * 0.38, -h * 0.75, w * 0.12, h * 0.5); // Schornstein
+    g.fillStyle = "#f8f0dc"; g.fillRect(w * 0.18, -h * 0.58, w * 0.2, h * 0.3);
+    g.fillStyle = "#1c2a22";
+    for (const rx of [-0.34, -0.06, 0.28]) { g.beginPath(); g.arc(w * rx, h * 0.42, gr * 0.13, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = "#f8f0dc"; for (const rx of [-0.34, -0.06, 0.28]) { g.beginPath(); g.arc(w * rx, h * 0.42, gr * 0.05, 0, Math.PI * 2); g.fill(); }
+    g.restore();
+  }
+  function blitz(g, x, y, gr) {
+    g.save(); g.translate(x, y);
+    g.beginPath(); g.moveTo(gr * 0.1, -gr * 0.55); g.lineTo(-gr * 0.3, gr * 0.06); g.lineTo(-gr * 0.02, gr * 0.06); g.lineTo(-gr * 0.14, gr * 0.55); g.lineTo(gr * 0.3, -gr * 0.08); g.lineTo(gr * 0.02, -gr * 0.08); g.closePath();
+    g.fillStyle = "#ffcf00"; g.fill(); g.strokeStyle = "#1c2a22"; g.lineWidth = gr * 0.05; g.lineJoin = "round"; g.stroke(); g.restore();
+  }
+  function wasserturm(g, x, y, gr) {
+    g.save(); g.translate(x, y); g.strokeStyle = "#1c2a22"; g.lineWidth = gr * 0.05;
+    g.fillStyle = "#4aa3df"; g.beginPath(); g.roundRect(-gr * 0.32, -gr * 0.55, gr * 0.64, gr * 0.42, gr * 0.12); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(-gr * 0.36, -gr * 0.55); g.lineTo(0, -gr * 0.78); g.lineTo(gr * 0.36, -gr * 0.55); g.closePath(); g.fillStyle = "#b3261e"; g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(-gr * 0.22, -gr * 0.13); g.lineTo(-gr * 0.3, gr * 0.5); g.moveTo(gr * 0.22, -gr * 0.13); g.lineTo(gr * 0.3, gr * 0.5); g.moveTo(-gr * 0.26, gr * 0.18); g.lineTo(gr * 0.26, gr * 0.18); g.stroke();
+    g.restore();
+  }
+  function brunnen(g, x, y, gr) {
+    g.save(); g.translate(x, y); g.strokeStyle = "#1c2a22"; g.lineWidth = gr * 0.035;
+    g.fillStyle = "#9aa5b1"; g.beginPath(); g.ellipse(0, gr * 0.3, gr * 0.48, gr * 0.14, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = "#6ec6ff"; g.beginPath(); g.ellipse(0, gr * 0.27, gr * 0.38, gr * 0.09, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#9aa5b1"; g.fillRect(-gr * 0.06, -gr * 0.12, gr * 0.12, gr * 0.4); g.strokeRect(-gr * 0.06, -gr * 0.12, gr * 0.12, gr * 0.4);
+    g.beginPath(); g.ellipse(0, -gr * 0.12, gr * 0.22, gr * 0.06, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.strokeStyle = "#6ec6ff"; g.lineWidth = gr * 0.03;
+    for (const s of [-1, 1]) { g.beginPath(); g.moveTo(0, -gr * 0.2); g.quadraticCurveTo(s * gr * 0.3, -gr * 0.5, s * gr * 0.34, gr * 0.2); g.stroke(); }
+    g.restore();
+  }
+  // Holzmaserung für Tisch und Brettkante
+  function holzTextur(hell, dunkel, ringe, aniso) {
+    const c = document.createElement("canvas"); c.width = c.height = 1024;
+    const g = c.getContext("2d");
+    g.fillStyle = hell; g.fillRect(0, 0, 1024, 1024);
+    for (let i = 0; i < 140; i++) {
+      const y = Math.random() * 1024, a = 0.04 + Math.random() * 0.12;
+      g.strokeStyle = dunkel; g.globalAlpha = a; g.lineWidth = 1 + Math.random() * 5;
+      g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= 1024; x += 64) g.lineTo(x, y + Math.sin(x / (80 + ringe * 20) + i) * (4 + ringe));
+      g.stroke();
+    }
+    g.globalAlpha = 1;
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = aniso;
     return t;
   }
   // Text in mehrere Zeilen umbrechen
   function zeilen(g, text, x, y, breite, hoehe) {
-    const woerter = text.split(/[\s-]/);
+    const woerter = text.split(/\s+/);
     const z = []; let akt = "";
     for (const w of woerter) { const t = akt ? akt + " " + w : w; if (g.measureText(t).width > breite && akt) { z.push(akt); akt = w; } else akt = t; }
     z.push(akt);
-    z.forEach((l, i) => g.fillText(l, x, y + (i - (z.length - 1) / 2) * hoehe));
+    // Zu lange Zeilen schmaler machen statt über den Rand laufen zu lassen
+    z.forEach((l, i) => {
+      const ly = y + (i - (z.length - 1) / 2) * hoehe, b = g.measureText(l).width;
+      if (b <= breite) return g.fillText(l, x, ly);
+      g.save(); g.translate(x, ly); g.scale(breite / b, 1); g.fillText(l, 0, 0); g.restore();
+    });
   }
 
   // ---------- Würfel ----------
@@ -243,11 +405,18 @@ window.BauloweBrett3D = (() => {
       sonne.shadow.bias = -0.0005;
       s.add(sonne);
       // Tisch und Brett
-      const tisch = new THREE.Mesh(new THREE.CircleGeometry(16, 48), new THREE.MeshStandardMaterial({ color: 0x3a2516, roughness: 0.85 }));
+      const aniso = r.capabilities.getMaxAnisotropy?.() || 8;
+      const tischHolz = holzTextur("#4a2e18", "#2e1a0c", 6, aniso);
+      tischHolz.repeat.set(3, 3);
+      const tisch = new THREE.Mesh(new THREE.CircleGeometry(16, 64), new THREE.MeshStandardMaterial({ map: tischHolz, roughness: 0.6, metalness: 0.05 }));
       tisch.rotation.x = -Math.PI / 2; tisch.position.y = -0.31; tisch.receiveShadow = true; s.add(tisch);
-      const rand = new THREE.Mesh(new THREE.BoxGeometry(B + 0.3, 0.3, B + 0.3), new THREE.MeshStandardMaterial({ color: 0x0e2b1e, roughness: 0.6 }));
+      // Brett mit Holzkante und schmaler Goldleiste
+      const kante = new THREE.MeshStandardMaterial({ map: holzTextur("#7a4a22", "#4d2c12", 2, aniso), roughness: 0.45 });
+      const rand = new THREE.Mesh(new THREE.BoxGeometry(B + 0.36, 0.3, B + 0.36), kante);
       rand.position.y = -0.16; rand.castShadow = true; rand.receiveShadow = true; s.add(rand);
-      const oben = this.oben = new THREE.Mesh(new THREE.PlaneGeometry(B, B), new THREE.MeshStandardMaterial({ map: brettTextur(felder, gruppen), roughness: 0.75 }));
+      const leiste = new THREE.Mesh(new THREE.BoxGeometry(B + 0.08, 0.31, B + 0.08), new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.7, roughness: 0.3 }));
+      leiste.position.y = -0.155; s.add(leiste);
+      const oben = this.oben = new THREE.Mesh(new THREE.PlaneGeometry(B, B), new THREE.MeshStandardMaterial({ map: brettTextur(felder, gruppen, Math.min(4096, r.capabilities.maxTextureSize || 2048), r.capabilities.getMaxAnisotropy?.() || 8), roughness: 0.7 }));
       oben.rotation.x = -Math.PI / 2; oben.position.y = 0.001; oben.receiveShadow = true; s.add(oben);
       // Ebenen für Besitz, Hypothek, Häuser
       this.markierungen = new THREE.Group(); s.add(this.markierungen);
@@ -499,6 +668,8 @@ window.BauloweBrett3D = (() => {
     moeglich: webglDa,
     async einhaengen(host, felder, gruppen) {
       if (!THREE) { laden ||= import("/vendor/three.module.min.js").then((m) => { THREE = m; }); await laden; }
+      // Schrift muss geladen sein, bevor sie ins Brett gemalt wird
+      try { await Promise.race([document.fonts?.load?.("800 40px Outfit"), new Promise((ok) => setTimeout(ok, 1500))]); } catch {}
       return new Brett(host, felder, gruppen);
     },
   };

@@ -1,9 +1,9 @@
 // =============================================================
 //  Spiel-Modul: Baulöwe (Brettspiel: Straßen kaufen, Häuser bauen, Miete kassieren)
-//  - 2 Würfel (kryptografischer Zufall), Pasch = nochmal, dritter Pasch = Gefängnis
+//  - 2 Würfel (kryptografischer Zufall), Pasch = nochmal, dritter Pasch = Achsenknast
 //  - Straßen, Haltestellen und Werke kaufen; volle Farbgruppe = doppelte Miete, dann bauen
 //  - Häuser gleichmäßig bauen (bis Hotel), Hypotheken, Handel zwischen Spielern
-//  - Glück- und Dorfkasse-Karten, Gefängnis, Steuern
+//  - Glück- und Dorfkasse-Karten, Achsenknast, Steuern
 //  - Wer nicht zahlen kann, ist pleite. Ende: einer bleibt übrig oder Rundenlimit (reichster gewinnt)
 //  Spielfeld und Kartentexte: daten/baulowe.js
 // =============================================================
@@ -120,11 +120,11 @@ function wuerfeln(raum, ctx, id) {
   const d = raum.daten;
   const w = [w6(), w6()], pasch = w[0] === w[1], summe = w[0] + w[1];
   d.wuerfel = w; d.wurfNr++;
-  // Tempowürfel (dritter Würfel): 1, 2, 3, zweimal Mr. Monopoly, einmal Bus. Im Gefängnis zählt er nicht.
+  // Tempowürfel (dritter Würfel): 1, 2, 3, zweimal Mr. Monopoly, einmal Bus. Im Achsenknast zählt er nicht.
   d.tempo = einst(raum).tempo && d.knast[id] === undefined ? TEMPO_SEITEN[randomInt(0, 6)] : null;
   (d.statistik[id] ||= {}).wuerfe = (d.statistik[id].wuerfe || 0) + 1;
   if (pasch) d.statistik[id].pasch = (d.statistik[id].pasch || 0) + 1;
-  // Im Gefängnis: Pasch befreit, sonst nach dem dritten Versuch zahlen
+  // Im Achsenknast: Pasch befreit, sonst nach dem dritten Versuch zahlen
   if (d.knast[id] !== undefined) {
     if (pasch) {
       delete d.knast[id];
@@ -137,10 +137,10 @@ function wuerfeln(raum, ctx, id) {
       delete d.knast[id];
       log(d, `${name(raum, id)} zahlt nach drei Versuchen ${KNAST_PREIS} und kommt frei.`);
       aktion(d, { typ: "wurf", spieler: id, wuerfel: w, freiGekauft: true });
-      if (!zahlen(raum, ctx, id, null, KNAST_PREIS, "das Gefängnis")) { d.nachZahlen = { laufen: summe }; planen(raum, ctx); return ctx.sende(raum); }
+      if (!zahlen(raum, ctx, id, null, KNAST_PREIS, "den Achsenknast")) { d.nachZahlen = { laufen: summe }; planen(raum, ctx); return ctx.sende(raum); }
       return laufen(raum, ctx, id, summe, { keinNochmal: true });
     }
-    log(d, `${name(raum, id)} bleibt im Gefängnis (${d.knast[id]}/3).`);
+    log(d, `${name(raum, id)} bleibt im Achsenknast (${d.knast[id]}/3).`);
     aktion(d, { typ: "wurf", spieler: id, wuerfel: w, knastBleibt: true });
     d.schritt = "fertig";
     planen(raum, ctx, 1200);
@@ -150,7 +150,7 @@ function wuerfeln(raum, ctx, id) {
   d.nochmal = pasch && d.pasch < 3;
   if (d.pasch >= 3) {
     aktion(d, { typ: "wurf", spieler: id, wuerfel: w, dreiPasch: true });
-    log(d, `${name(raum, id)}: dritter Pasch, ab ins Gefängnis!`);
+    log(d, `${name(raum, id)}: dritter Pasch, ab in den Achsenknast!`);
     insKnast(d, id);
     d.schritt = "fertig";
     planen(raum, ctx, 1500);
@@ -240,7 +240,7 @@ function feldAuswerten(raum, ctx, id, { doppelt = false, laufzeit = 0 } = {}) {
     d.topf += feld.betrag;
     zahlen(raum, ctx, id, null, feld.betrag, feld.name);
   } else if (feld.art === "geheKnast") {
-    log(d, `${name(raum, id)} muss ins Gefängnis!`);
+    log(d, `${name(raum, id)} muss in den Achsenknast!`);
     insKnast(d, id);
     aktion(d, { typ: "knast", spieler: id });
     d.keinNochmal = true;
@@ -315,7 +315,7 @@ function zugBeenden(raum, ctx) {
       return laufen(raum, ctx, id, 0, { zu: ziel, keinNochmal: d.keinNochmal });
     }
   }
-  // Pasch: nochmal würfeln (außer im Gefängnis gelandet)
+  // Pasch: nochmal würfeln (außer im Achsenknast gelandet)
   if (d.nochmal && !d.keinNochmal && d.knast[id] === undefined && !d.pleite.includes(id)) {
     d.nochmal = false;
     d.schritt = "wuerfeln";
@@ -380,7 +380,7 @@ function auszeichnungen(raum) {
   let b;
   if ((b = beste((s) => s.miete || 0, 100))) liste.push({ icon: "💰", titel: "Miethai", spieler: b.ids, text: `${b.max} Miete kassiert` });
   if ((b = beste((s) => s.gebaut || 0, 3))) liste.push({ icon: "🏗️", titel: "Baulöwe", spieler: b.ids, text: `${b.max} Häuser gebaut` });
-  if ((b = beste((s) => s.knast || 0, 2))) liste.push({ icon: "🚔", titel: "Stammgast im Knast", spieler: b.ids, text: `${b.max}× im Gefängnis` });
+  if ((b = beste((s) => s.knast || 0, 2))) liste.push({ icon: "🚔", titel: "Stammgast im Knast", spieler: b.ids, text: `${b.max}× im Achsenknast` });
   if ((b = beste((s) => s.pasch || 0, 3))) liste.push({ icon: "🎲", titel: "Pasch-König", spieler: b.ids, text: `${b.max} Pasche` });
   if ((b = beste((s) => s.handel || 0, 1))) liste.push({ icon: "🤝", titel: "Händler", spieler: b.ids, text: `${b.max} Geschäfte` });
   return liste;
@@ -466,7 +466,7 @@ function bot(raum, ctx, id) {
   if (d.schritt === "wuerfeln") {
     if (d.knast[id] !== undefined) {
       if (d.freiKarten.some((k) => k.spieler === id)) return handle(raum, ctx, id, "freikarte");
-      // Früh im Spiel lieber freikaufen, später im Gefängnis sitzen und Miete kassieren
+      // Früh im Spiel lieber freikaufen, später im Achsenknast sitzen und Miete kassieren
       if (d.runde < 12 && d.geld[id] > 400) return handle(raum, ctx, id, "freikaufen");
     }
     return handle(raum, ctx, id, "wuerfeln");
