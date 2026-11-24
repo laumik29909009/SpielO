@@ -31,6 +31,10 @@ const LADE_MS = 1400; // Ladebildschirm vor jedem Spielstart
 const AVATARE = ["🦊", "🐼", "🐸", "🦁", "🐙", "🦄", "🐵", "🐯", "🐨", "🦖", "🐧", "🦉", "🐝", "🐳", "🦩", "🐲"];
 
 const app = express();
+// gzip für HTML/CSS/JS: spart beim ersten Laden gut zwei Drittel der Datenmenge
+app.use(require("compression")());
+// Für einen externen Wecker (z. B. UptimeRobot), damit Render den Server nicht schlafen legt
+app.get("/health", (_req, res) => res.set("Cache-Control", "no-store").type("text").send("ok"));
 const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 25000, pingTimeout: 20000 });
 // Wartungsmodus: in config.json "wartung": true setzen → alle sehen nur die Wartungsseite
@@ -204,14 +208,41 @@ const ctx = {
   },
 };
 
+// Spieleabend: Nach jedem Spiel gibt es Abendpunkte nach Platz (10, 7, 5, 3, sonst 1), Gleichstand = gleicher Platz
+const ABEND_PUNKTE = [10, 7, 5, 3];
+function abendErfassen(raum) {
+  const a = raum.abend;
+  if (!a || a.fertig || a.erfasst === a.index || raum.phase !== "spiel" || !modul(raum).istVorbei?.(raum)) return;
+  a.erfasst = a.index;
+  const menschen = Object.values(raum.spieler).filter((s) => !s.zuschauer);
+  const sortiert = [...menschen].sort((x, y) => (y.punkte || 0) - (x.punkte || 0));
+  const ergebnis = {};
+  sortiert.forEach((s) => {
+    const platz = sortiert.filter((o) => (o.punkte || 0) > (s.punkte || 0)).length;
+    const p = menschen.length > 1 ? (ABEND_PUNKTE[platz] ?? 1) : 0;
+    a.punkte[s.id] = (a.punkte[s.id] || 0) + p;
+    a.namen[s.id] = { name: s.name, avatar: s.avatar };
+    ergebnis[s.id] = { platz: platz + 1, punkte: p };
+  });
+  a.ergebnisse.push({ spiel: raum.spiel, ergebnis });
+  if (a.index >= a.spiele.length - 1) a.fertig = true;
+}
+function abendAnsicht(raum) {
+  const a = raum.abend;
+  if (!a) return null;
+  return { spiele: a.spiele, index: a.index, punkte: a.punkte, namen: a.namen, ergebnisse: a.ergebnisse, fertig: !!a.fertig, erfasst: a.erfasst === a.index };
+}
+
 function sendeZustand(raum) {
   const m = modul(raum);
+  abendErfassen(raum);
   const imSpiel = raum.phase === "spiel";
   io.to(raum.code).emit("zustand", {
     code: raum.code,
     hostId: raum.hostId,
     spiel: raum.spiel,
     vorschau: !!raum.vorschau,
+    abend: abendAnsicht(raum),
     phase: "lobby", // wird vom Spiel-Modul überschrieben, solange ein Spiel läuft
     einstellungen: raum.einstellungen[raum.spiel],
     spieler: Object.values(raum.spieler).map((s) => ({
@@ -257,6 +288,7 @@ function freierAvatar(raum, aktuell) {
 
 function zurLobby(raum) {
   const m = modul(raum);
+  raum.abend = null; // Lobby beendet einen laufenden Spieleabend
   m.beenden?.(raum);
   raum.phase = "lobby";
   raum.daten = null;
@@ -266,6 +298,68 @@ function zurLobby(raum) {
   }
   alleZuruecksetzen(raum);
 }
+
+// ---------- Admin-Seite (/admin) ----------
+// Passwort kommt aus der Umgebungsvariable ADMIN_PASSWORT (auf Render unter „Environment“ setzen).
+// Ohne Passwort ist die Seite abgeschaltet. Zu viele Fehlversuche sperren die IP für 10 Minuten.
+const START_ZEIT = Date.now();
+const fehlversuche = new Map();
+function adminOk(req, res) {
+  const pw = process.env.ADMIN_PASSWORT;
+  if (!pw) { res.status(503).json({ fehler: "Admin-Seite ist nicht eingerichtet (ADMIN_PASSWORT fehlt)." }); return false; }
+  const ip = String(req.headers["x-forwarded-for"] || req.ip || "").split(",")[0].trim();
+  const f = fehlversuche.get(ip);
+  if (f && f.n >= 8 && Date.now() - f.t < 10 * 60 * 1000) { res.status(429).json({ fehler: "Zu viele Fehlversuche. Bitte 10 Minuten warten." }); return false; }
+  const a = Buffer.from(String(req.headers["x-admin"] || "")), b = Buffer.from(pw);
+  if (a.length !== b.length || !require("crypto").timingSafeEqual(a, b)) {
+    fehlversuche.set(ip, { n: (f && Date.now() - f.t < 10 * 60 * 1000 ? f.n : 0) + 1, t: Date.now() });
+    res.status(401).json({ fehler: "Falsches Passwort." });
+    return false;
+  }
+  fehlversuche.delete(ip);
+  return true;
+}
+app.get("/admin", (_req, res) => res.set("Cache-Control", "no-store").set("X-Robots-Tag", "noindex").sendFile(path.join(__dirname, "admin", "index.html")));
+app.get("/api/admin/status", (req, res) => {
+  if (!adminOk(req, res)) return;
+  const liste = Object.values(raeume).map((r) => {
+    const sp = Object.values(r.spieler);
+    return {
+      code: r.code, spiel: r.spiel, titel: SPIELE[r.spiel]?.meta?.titel || r.spiel, phase: r.phase, erstellt: r.erstellt || null,
+      abend: r.abend ? `${r.abend.index + 1}/${r.abend.spiele.length}` : null,
+      spieler: sp.map((s) => ({ name: s.name, avatar: s.avatar, online: !!s.online, host: s.id === r.hostId, zuschauer: !!s.zuschauer })),
+    };
+  }).sort((x, y) => (y.erstellt || 0) - (x.erstellt || 0));
+  res.set("Cache-Control", "no-store").json({
+    version: VERSION, seit: START_ZEIT, jetzt: Date.now(),
+    speicherMB: Math.round(process.memoryUsage().rss / 1048576),
+    verbindungen: io.engine.clientsCount,
+    raeume: liste,
+    gespielt: Object.entries(GESPIELT).map(([id, n]) => ({ id, titel: SPIELE[id]?.meta?.titel || id, n })).sort((a, b) => b.n - a.n),
+    meldungen: MELDUNGEN.slice().reverse(),
+    wartung: !!WARTUNG, imAufbau: IM_AUFBAU,
+  });
+});
+app.delete("/api/admin/meldung", express.json(), (req, res) => {
+  if (!adminOk(req, res)) return;
+  const zeit = String(req.body?.zeit || "");
+  const i = MELDUNGEN.findIndex((m) => m.zeit === zeit);
+  if (i < 0) return res.status(404).json({ fehler: "Nicht gefunden." });
+  MELDUNGEN.splice(i, 1);
+  require("fs").writeFile(MELDUNG_DATEI, JSON.stringify(MELDUNGEN), () => {});
+  res.json({ ok: true });
+});
+app.post("/api/admin/raumSchliessen", express.json(), (req, res) => {
+  if (!adminOk(req, res)) return;
+  const r = raeume[String(req.body?.code || "")];
+  if (!r) return res.status(404).json({ fehler: "Raum gibt es nicht mehr." });
+  modul(r).beenden?.(r);
+  const code = r.code;
+  delete raeume[code];
+  io.to(code).emit("rausgeworfen", "Dieser Raum wurde geschlossen.");
+  for (const id of [...(io.sockets.adapter.rooms.get(code) || [])]) io.sockets.sockets.get(id)?.data.rauswerfen?.();
+  res.json({ ok: true });
+});
 
 // ---------- Verbindungen ----------
 io.on("connection", (socket) => {
@@ -354,6 +448,7 @@ io.on("connection", (socket) => {
     const code = neuerRaumCode();
     raeume[code] = {
       code,
+      erstellt: Date.now(),
       hostId: spielerId,
       spiel: SPIELE[spiel] && (!IM_AUFBAU.includes(spiel) || vorschau === true) ? spiel : "preis",
       vorschau: vorschau === true,
@@ -439,6 +534,37 @@ io.on("connection", (socket) => {
     sendeZustand(meinRaum);
   });
 
+  // Spieleabend: mehrere Spiele hintereinander mit Gesamtwertung
+  function laden(raum) {
+    raum.laedt = true;
+    io.to(raum.code).emit("spielLaedt", { spiel: raum.spiel, ms: LADE_MS });
+    setTimeout(() => { raum.laedt = false; spielWirklichStarten(raum, socket); }, LADE_MS);
+  }
+  auf("abendStarten", (liste) => {
+    if (!istHost() || meinRaum.phase !== "lobby" || meinRaum.laedt || !Array.isArray(liste)) return;
+    const spiele = liste.filter((s) => typeof s === "string" && waehlbar(meinRaum, s)).slice(0, 8);
+    if (spiele.length < 2) return socket.emit("fehler", "Wähle mindestens zwei Spiele für den Abend.");
+    meinRaum.abend = { spiele, index: 0, punkte: {}, namen: {}, ergebnisse: [], erfasst: -1, fertig: false };
+    meinRaum.spiel = spiele[0];
+    laden(meinRaum);
+  });
+  auf("abendWeiter", () => {
+    const raum = meinRaum, a = raum?.abend;
+    if (!istHost() || !a || a.fertig || raum.laedt || a.erfasst !== a.index) return;
+    a.index++;
+    modul(raum).beenden?.(raum); // altes Spiel sauber aufräumen, bevor das neue Modul übernimmt
+    raum.phase = "lobby";
+    raum.daten = null;
+    raum.spiel = a.spiele[a.index];
+    laden(raum);
+  });
+  auf("abendBeenden", () => {
+    if (!istHost() || !meinRaum.abend) return;
+    meinRaum.abend = null;
+    if (meinRaum.phase === "spiel") zurLobby(meinRaum);
+    sendeZustand(meinRaum);
+  });
+
   auf("spielStarten", () => {
     if (!istHost()) return;
     const raum = meinRaum;
@@ -461,6 +587,7 @@ io.on("connection", (socket) => {
     const fehler = modul(raum).starten(raum, ctx);
     if (fehler) {
       raum.phase = "lobby";
+      if (raum.abend) { raum.abend = null; sendeZustand(raum); }
       return socket.emit("fehler", fehler);
     }
     gespielt(raum.spiel);

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>SpielO Admin</title>
+<link rel="icon" type="image/png" href="/icons/icon-192.png" />
+<style>
+  :root { --bg: #0d0b1f; --flaeche: #1a1838; --flaeche2: #24224a; --rand: #34315f; --text: #f3f1ff; --leise: #a19dc7; --gold: #ffc533; --gruen: #3ccf6e; --rot: #ff5d6c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { margin: 0; font-size: 1.5rem; } h1 span { color: var(--gold); }
+  h2 { font-size: 1.05rem; margin: 26px 0 10px; display: flex; gap: 8px; align-items: baseline; }
+  h2 small { color: var(--leise); font-weight: 500; }
+  .kopf { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .leise { color: var(--leise); font-size: 0.85rem; }
+  button, input { font: inherit; }
+  button { cursor: pointer; border: 0; border-radius: 10px; padding: 8px 14px; font-weight: 700; background: var(--flaeche2); color: var(--text); }
+  button.gold { background: var(--gold); color: #2a1d00; }
+  button.rot { background: color-mix(in srgb, var(--rot) 25%, var(--flaeche2)); color: #ffd6da; }
+  button.klein { padding: 4px 10px; font-size: 0.8rem; }
+  .login { max-width: 360px; margin: 18vh auto 0; display: grid; gap: 12px; padding: 24px; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 18px; }
+  .login input { padding: 12px; border-radius: 10px; border: 1px solid var(--rand); background: var(--bg); color: var(--text); }
+  .fehler { color: var(--rot); min-height: 1.2em; font-size: 0.9rem; }
+  .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+  .kachel { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 14px; padding: 12px 14px; }
+  .kachel b { display: block; font-size: 1.5rem; } .kachel small { color: var(--leise); }
+  .karte { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+  .raum { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; align-items: center; }
+  .code { font-weight: 900; letter-spacing: 0.12em; color: var(--gold); font-size: 1.1rem; }
+  .phase { font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; background: var(--flaeche2); margin-left: 6px; }
+  .phase.spiel { background: color-mix(in srgb, var(--gruen) 30%, var(--flaeche2)); }
+  .leute { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .leute span { background: var(--flaeche2); padding: 2px 8px; border-radius: 99px; font-size: 0.85rem; }
+  .leute span.off { opacity: 0.45; } .leute span.host { box-shadow: inset 0 0 0 1px var(--gold); }
+  .balken { display: grid; grid-template-columns: 150px 1fr 50px; gap: 10px; align-items: center; margin: 5px 0; font-size: 0.9rem; }
+  .balken div { height: 10px; border-radius: 99px; background: var(--flaeche2); overflow: hidden; }
+  .balken i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), #ff9a1f); border-radius: 99px; }
+  .balken em { font-style: normal; text-align: right; color: var(--leise); }
+  .meldung .zeile { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .meldung q { display: block; font-weight: 700; margin: 4px 0; quotes: "„" "“"; }
+  .meldung ul { margin: 4px 0; padding-left: 18px; color: var(--leise); font-size: 0.88rem; }
+  .meldung li.richtig { color: var(--gruen); font-weight: 700; }
+  .grund { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; background: color-mix(in srgb, var(--rot) 25%, var(--flaeche2)); }
+  .kommentar { background: var(--bg); border-radius: 8px; padding: 6px 10px; margin-top: 6px; font-size: 0.88rem; white-space: pre-wrap; }
+  .leer { color: var(--leise); padding: 14px; text-align: center; background: var(--flaeche); border-radius: 14px; border: 1px dashed var(--rand); }
+  .hinweis { margin-top: 26px; padding: 14px; border-radius: 14px; background: var(--flaeche); border: 1px solid var(--rand); font-size: 0.88rem; color: var(--leise); }
+  .hinweis b { color: var(--text); }
+  @media (max-width: 560px) { .balken { grid-template-columns: 100px 1fr 40px; } }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+  const app = document.getElementById("app");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const GRUENDE = { falsch: "Antwort falsch", mehrdeutig: "Mehrdeutig", tippfehler: "Tippfehler", veraltet: "Veraltet", anderes: "Sonstiges" };
+  const TITEL = { arena: "⚔️ Arena", baulowe: "🎩 Baulöwe", deckname: "🕵️ Deckname", duell: "🧠 Wissensduell", farbrausch: "🌈 GoonO", ludo: "🎯 Raus da!", millionen: "💰 Die Millionenfrage", preis: "🏷️ Preis-Schätzer", quartett: "⚔️ Quartett", schechingen: "🌾 Knaben von Schechingen", schlange: "🐍 Schlangengrube", skat: "🃏 Jonkler", slf: "🌍 Stadt Land Puss", wuerfel: "🎲 Kiffel" };
+  const titel = (id) => TITEL[id] || id;
+  let pw = sessionStorage.getItem("adminPw") || "";
+  let daten = null, uhr = null;
+
+  async function api(pfad, opt = {}) {
+    const r = await fetch(pfad, { ...opt, headers: { "x-admin": pw, "Content-Type": "application/json", ...(opt.headers || {}) } });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.fehler || "Fehler " + r.status), { status: r.status });
+    return j;
+  }
+
+  function login(fehler = "") {
+    clearInterval(uhr);
+    app.innerHTML = `<form class="login" id="login">
+      <h1>Spiel<span>O</span> Admin</h1>
+      <input type="password" id="pw" placeholder="Passwort" autocomplete="current-password" autofocus />
+      <button class="gold">Anmelden</button>
+      <div class="fehler">${esc(fehler)}</div>
+    </form>`;
+    document.getElementById("login").onsubmit = (e) => {
+      e.preventDefault();
+      pw = document.getElementById("pw").value;
+      sessionStorage.setItem("adminPw", pw);
+      laden(true);
+    };
+  }
+
+  async function laden(start) {
+    try {
+      daten = await api("/api/admin/status");
+      zeichnen();
+      if (start) { clearInterval(uhr); uhr = setInterval(() => laden(), 5000); }
+    } catch (e) {
+      if (e.status === 401 || e.status === 429 || e.status === 503) { sessionStorage.removeItem("adminPw"); pw = ""; login(e.message); }
+    }
+  }
+
+  const dauer = (ms) => { const m = Math.floor(ms / 60000); return m < 60 ? `${m} Min.` : m < 1440 ? `${Math.floor(m / 60)} Std. ${m % 60} Min.` : `${Math.floor(m / 1440)} Tg. ${Math.floor((m % 1440) / 60)} Std.`; };
+
+  function zeichnen() {
+    const d = daten;
+    const spielerOnline = d.raeume.reduce((n, r) => n + r.spieler.filter((s) => s.online).length, 0);
+    const maxN = Math.max(1, ...d.gespielt.map((g) => g.n));
+    const gesamt = d.gespielt.reduce((n, g) => n + g.n, 0);
+    app.innerHTML = `
+      <div class="kopf"><h1>Spiel<span>O</span> Admin</h1>
+        <div><span class="leise">Version ${esc(d.version)} · aktualisiert sich alle 5 s</span> <button class="klein" id="abmelden">Abmelden</button></div></div>
+      ${d.wartung ? `<p class="fehler">⚠️ Wartungsmodus ist aktiv (config.json).</p>` : ""}
+      <div class="kacheln">
+        <div class="kachel"><b>${d.raeume.length}</b><small>Räume offen</small></div>
+        <div class="kachel"><b>${spielerOnline}</b><small>Spieler online</small></div>
+        <div class="kachel"><b>${d.verbindungen}</b><small>Verbindungen</small></div>
+        <div class="kachel"><b>${gesamt.toLocaleString("de-DE")}</b><small>Spiele gespielt</small></div>
+        <div class="kachel"><b>${dauer(d.jetzt - d.seit)}</b><small>Server läuft seit</small></div>
+        <div class="kachel"><b>${d.speicherMB} MB</b><small>Arbeitsspeicher</small></div>
+      </div>
+
+      <h2>🏠 Live-Räume <small>${d.raeume.length}</small></h2>
+      ${d.raeume.length ? d.raeume.map((r) => `<div class="karte raum">
+        <span class="code">${esc(r.code)}</span>
+        <span>${esc(titel(r.spiel))} <span class="phase ${r.phase}">${r.phase === "spiel" ? "spielt" : "Lobby"}</span>${r.abend ? ` <span class="phase">🎉 Abend ${esc(r.abend)}</span>` : ""}
+          ${r.erstellt ? `<span class="leise"> · seit ${dauer(d.jetzt - r.erstellt)}</span>` : ""}</span>
+        <button class="rot klein" data-schliessen="${esc(r.code)}">Schließen</button>
+        <div class="leute">${r.spieler.map((s) => `<span class="${s.online ? "" : "off"} ${s.host ? "host" : ""}" title="${s.host ? "Host" : ""}${s.online ? "" : " (offline)"}">${esc(s.avatar)} ${esc(s.name)}${s.zuschauer ? " 👀" : ""}</span>`).join("") || '<span class="off">leer</span>'}</div>
+      </div>`).join("") : '<div class="leer">Gerade ist niemand online.</div>'}
+
+      <h2>⚑ Gemeldete Fragen <small>${d.meldungen.length}</small>
+        ${d.meldungen.length ? `<button class="klein" id="export" style="margin-left:auto">⬇ Als JSON herunterladen</button>` : ""}</h2>
+      ${d.meldungen.length ? d.meldungen.map((m) => `<div class="karte meldung"><div class="zeile">
+          <div><span class="grund">${esc(GRUENDE[m.grund] || m.grund || "Meldung")}</span> <span class="leise">${esc(titel(m.spiel))} · ${new Date(m.zeit).toLocaleString("de-DE")}${m.id ? ` · ID ${esc(m.id)}` : ""}</span></div>
+          <button class="klein" data-erledigt="${esc(m.zeit)}">✓ Erledigt</button></div>
+        <q>${esc(m.frage)}</q>
+        ${m.antworten?.length ? `<ul>${m.antworten.map((a) => `<li class="${a === m.richtig ? "richtig" : ""}">${esc(a)}</li>`).join("")}</ul>` : ""}
+        ${m.kommentar ? `<div class="kommentar">${esc(m.kommentar)}</div>` : ""}
+      </div>`).join("") : '<div class="leer">Keine offenen Meldungen. 🎉</div>'}
+
+      <h2>📊 Beliebteste Spiele</h2>
+      <div class="karte">${d.gespielt.length ? d.gespielt.map((g) => `<div class="balken"><span>${esc(titel(g.id))}</span><div><i style="width:${(g.n / maxN) * 100}%"></i></div><em>${g.n}</em></div>`).join("") : '<span class="leise">Noch keine Spiele.</span>'}</div>
+
+      <div class="hinweis"><b>Gut zu wissen:</b> Auf dem kostenlosen Render-Tarif wird die Festplatte bei jedem Neustart geleert.
+        Meldungen und Spielzahlen gehen dann verloren. Lade Meldungen deshalb regelmäßig herunter. Sie stehen außerdem im Render-Log (Suche nach „⚑“).</div>`;
+
+    document.getElementById("abmelden").onclick = () => { sessionStorage.removeItem("adminPw"); pw = ""; login(); };
+    document.getElementById("export")?.addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(d.meldungen, null, 2)], { type: "application/json" }));
+      a.download = `spielo-meldungen-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    });
+    document.querySelectorAll("[data-erledigt]").forEach((b) => (b.onclick = async () => {
+      b.disabled = true;
+      try { await api("/api/admin/meldung", { method: "DELETE", body: JSON.stringify({ zeit: b.dataset.erledigt }) }); } catch (e) { alert(e.message); }
+      laden();
+    }));
+    document.querySelectorAll("[data-schliessen]").forEach((b) => (b.onclick = async () => {
+      if (!confirm(`Raum ${b.dataset.schliessen} wirklich schließen? Alle Spieler fliegen raus.`)) return;
+      try { await api("/api/admin/raumSchliessen", { method: "POST", body: JSON.stringify({ code: b.dataset.schliessen }) }); } catch (e) { alert(e.message); }
+      laden();
+    }));
+  }
+
+  pw ? laden(true) : login();
+</script>
+</body>
+</html>

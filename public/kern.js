@@ -399,6 +399,46 @@ function demnaechstBlock() {
     </div>`;
 }
 
+// Spieleabend: Gesamtwertung über alle Spiele des Abends
+function abendTafel(z) {
+  const a = z.abend;
+  const ids = Object.keys(a.namen).sort((x, y) => (a.punkte[y] || 0) - (a.punkte[x] || 0));
+  return `<div class="abend-tafel ${a.fertig ? "fertig" : ""}">
+    <div class="abend-kopf">🎉 Spieleabend <span>${a.fertig ? "Endstand" : `nach Spiel ${a.index + 1} von ${a.spiele.length}`}</span></div>
+    <div class="abend-spiele">${a.spiele.map((s, i) => `<span class="${i < a.index || (i === a.index && a.erfasst) ? "fertig" : i === a.index ? "jetzt" : ""}" title="${esc(GN.spiele[s]?.titel || s)}">${GN.spiele[s]?.icon || "🎮"}</span>`).join("")}</div>
+    <ol class="abend-liste">${ids.map((id, i) => `<li class="${id === spielerId ? "ich" : ""}"><span>${((n) => n === 0 ? "👑" : n + 1)(ids.filter((o) => (a.punkte[o] || 0) > (a.punkte[id] || 0)).length)}</span>${a.namen[id].avatar} <b>${esc(id === spielerId ? "Du" : a.namen[id].name)}</b>
+      <em>${a.ergebnisse.map((e) => `<i title="${esc(GN.spiele[e.spiel]?.titel || "")}">${e.ergebnis[id] ? `+${e.ergebnis[id].punkte}` : "–"}</i>`).join("")}</em><strong>${a.punkte[id] || 0}</strong></li>`).join("")}</ol>
+    <small class="leise">Punkte pro Spiel: 1. Platz 10 · 2. Platz 7 · 3. Platz 5 · 4. Platz 3 · sonst 1</small>
+  </div>`;
+}
+function abendPlaner() {
+  let d = $("#abendFenster");
+  if (!d) { d = document.createElement("dialog"); d.id = "abendFenster"; d.className = "fenster abend-fenster"; document.body.appendChild(d); d.addEventListener("click", (ev) => ev.target === d && d.close()); }
+  const verfuegbar = nachBeliebtheit().filter(([id]) => !imAufbau(id) || GN.zustand?.vorschau);
+  let auswahl = [];
+  const zeichnen = () => {
+    d.innerHTML = `<div class="fenster-kopf"><h2>🎉 Spieleabend planen</h2><button class="icon-btn klein" data-zu aria-label="Schließen">✕</button></div>
+      <div class="fenster-inhalt">
+        <p class="leise klein-text" style="margin-top:0">Tippe die Spiele in der Reihenfolge an, in der ihr sie spielen wollt (2 bis 8). Nach jedem Spiel gibt es Abendpunkte, am Ende gewinnt, wer insgesamt vorne liegt. Jedes Spiel nutzt seine aktuellen Einstellungen.</p>
+        <div class="abend-wahl">${verfuegbar.map(([id, s]) => { const n = auswahl.indexOf(id); return `<button data-abend="${id}" class="${n >= 0 ? "gewaehlt" : ""}"><span>${s.icon}</span>${esc(s.titel)}${n >= 0 ? `<em>${n + 1}</em>` : ""}</button>`; }).join("")}</div>
+        <div class="abend-aktionen"><button class="btn zweit klein" id="abendZufall">🎲 Zufällige 4</button><button class="btn zweit klein" id="abendLeeren" ${auswahl.length ? "" : "disabled"}>Leeren</button></div>
+        <button class="btn gross voll" id="abendLos" ${auswahl.length >= 2 ? "" : "disabled"}>▶ Abend starten${auswahl.length >= 2 ? ` (${auswahl.length} Spiele)` : ""}</button>
+      </div>`;
+    $("[data-zu]", d).onclick = () => d.close();
+    $$("[data-abend]", d).forEach((b) => (b.onclick = () => {
+      Ton.klick();
+      const id = b.dataset.abend, n = auswahl.indexOf(id);
+      if (n >= 0) auswahl.splice(n, 1); else if (auswahl.length < 8) auswahl.push(id);
+      zeichnen();
+    }));
+    $("#abendZufall", d).onclick = () => { Ton.klick(); auswahl = verfuegbar.map(([id]) => id).sort(() => Math.random() - 0.5).slice(0, 4); zeichnen(); };
+    $("#abendLeeren", d).onclick = () => { auswahl = []; zeichnen(); };
+    $("#abendLos", d).onclick = () => { Ton.abgeben(); socket.emit("abendStarten", auswahl); d.close(); };
+  };
+  zeichnen();
+  d.showModal();
+}
+
 // Quizfrage melden: kleines Fenster mit Grund und optionalem Kommentar
 GN.frageMelden = (spiel, f) => {
   let d = $("#meldeFenster");
@@ -521,6 +561,11 @@ function zeigeLobby() {
       </div>
     </section>
 
+    ${host ? `<section class="kapitel abend-karte">
+      <div><b>🎉 Spieleabend</b><small>Mehrere Spiele hintereinander mit Gesamtwertung – wer gewinnt den Abend?</small></div>
+      <button class="btn" id="abendBtn">Abend planen</button>
+    </section>` : ""}
+
     <section class="kapitel" id="spielEinstellungen">
       <div class="einstellungen-kopf">
         <h2 class="kapitel-titel">Einstellungen</h2>
@@ -551,6 +596,7 @@ function zeigeLobby() {
     </div>`;
 
   if (host) spiel.binde?.($("#spielEinstellungen"), z);
+  $("#abendBtn")?.addEventListener("click", () => { Ton.klick(); abendPlaner(); });
   if (host) for (const b of document.querySelectorAll("[data-ki-stufe]")) b.onclick = () => GN.einstellungen({ stufe: b.dataset.kiStufe });
   spiel.lobbyFertig?.(z, host);
   // Fenster für Regeln & Punkte
@@ -856,18 +902,29 @@ GN.podest = (key, { einheit = "Pkt." } = {}) => {
               </div>
             </div>`).join("")}
         </div>` : ""}
-      <div class="abschnitt-titel">Endstand</div>
+      ${z.abend ? abendTafel(z) : ""}
+      <div class="abschnitt-titel">${z.abend ? "Endstand dieses Spiels" : "Endstand"}</div>
       <div class="rangliste" id="rangliste"></div>
       <div class="start-leiste">
-        ${host
-          ? `<button class="btn gross voll" id="nochmalBtn">🔁 Nochmal spielen</button>
-             <button class="btn zweit voll" id="lobbyBtn">🎮 Anderes Spiel / Einstellungen</button>`
-          : `<div class="warte">Der Host entscheidet, wie es weitergeht${punkte()}</div>`}
+        ${z.abend
+          ? host
+            ? z.abend.fertig
+              ? `<button class="btn gross voll" id="abendEndeBtn">🏆 Abend beenden</button>`
+              : `<button class="btn gross voll" id="abendWeiterBtn">▶ Weiter: ${GN.spiele[z.abend.spiele[z.abend.index + 1]]?.icon || ""} ${esc(GN.spiele[z.abend.spiele[z.abend.index + 1]]?.titel || "")} (${z.abend.index + 2}/${z.abend.spiele.length})</button>
+                 <button class="btn zweit voll" id="abendEndeBtn">Abend abbrechen</button>`
+            : `<div class="warte">${z.abend.fertig ? "Der Spieleabend ist vorbei!" : "Gleich geht’s weiter mit dem nächsten Spiel"}${punkte()}</div>`
+          : host
+            ? `<button class="btn gross voll" id="nochmalBtn">🔁 Nochmal spielen</button>
+               <button class="btn zweit voll" id="lobbyBtn">🎮 Anderes Spiel / Einstellungen</button>`
+            : `<div class="warte">Der Host entscheidet, wie es weitergeht${punkte()}</div>`}
         <button class="btn link" id="verlassenBtn">Raum verlassen</button>
       </div>
     </div>`;
   GN.rangliste($("#rangliste"));
   $("#nochmalBtn")?.addEventListener("click", () => socket.emit("spielStarten"));
+  $("#abendWeiterBtn")?.addEventListener("click", () => { Ton.klick(); socket.emit("abendWeiter"); });
+  $("#abendEndeBtn")?.addEventListener("click", () => { Ton.klick(); socket.emit("abendBeenden"); });
+  if (z.abend?.fertig && !schonGesehen) setTimeout(() => { Ton.fanfare(); GN.konfetti(220); }, 2600);
   $("#lobbyBtn")?.addEventListener("click", () => socket.emit("zurLobby"));
   $("#verlassenBtn").onclick = verlassen;
 

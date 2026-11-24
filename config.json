@@ -26,18 +26,16 @@
     ]
   },
   "patch": {
-    "datum": "23.11.2026",
-    "titel": "Großes Update: Millionenfrage, Wissensduell und neue Grafik",
+    "datum": "24.11.2026",
+    "titel": "Spieleabend, Profil und mehr",
     "punkte": [
-      "💰 Neues Spiel: Die Millionenfrage – 15 Fragen bis zur Million, Studio-Lichtshow, Auswahlrunde, Publikums- und Telefonjoker mit euren Mitspielern",
-      "🧠 Neues Spiel: Wissensduell – Kategorie wählen, drei Fragen, wer weiß mehr? Über 800 Fragen, mit Flaggen, Länderumrissen und Emoji-Rätseln",
-      "🏎️ Neues Quartett: Cars – 27 Autos mit echten Bildern, neuen Werten (Tempo, PS, Köpfchen, Erfahrung, Herz) und fairer Balance",
-      "🎯 Raus da! jetzt auch in 3D: gedrechselte Figuren, fallender Würfel, Rauswurf im hohen Bogen",
-      "🎩 Baulöwe: schärferes, edleres 3D-Brett, Achsenknast statt Gefängnis, Tempowürfel, eigene Spielfigur, Startgeld und Hausregeln",
-      "🌾 Knaben von Schechingen: echte Baustoffe – Holz, Stein, Stroh, Ziegel und Werkzeug aus Wald, Steinbruch, Feld, Lehmgrube und Schmiede. Neue Baukosten, Gutshof nur noch als Ausbau eines Hofs",
-      "🐍 Schlangengrube: flüssiger, und Kopf an Kopf platzt nur noch die kleinere Schlange",
-      "✨ Neue Titelbilder für alle Spiele, lebendiger Hintergrund und schärfere 3D-Tische",
-      "🧹 Die Arena ist raus – das Wissensduell ersetzt sie"
+      "🎉 Neu: Spieleabend – mehrere Spiele hintereinander, nach jedem Spiel gibt es Abendpunkte, am Ende wird der Sieger des Abends gekürt",
+      "👤 Dein Profil: Spiele, Siege, Siegquote, beste Serie, Lieblingsspiel und 12 Erfolge zum Freischalten (oben auf 👤)",
+      "😀 Emoji-Reaktionen in allen Spielen – unten links antippen, alle sehen sie fliegen (in den Einstellungen abschaltbar)",
+      "🎩 Baulöwe: Versteigerungen und weitere Hausregeln – kein Mieteinzug aus dem Knast, begrenzte Häuser und Hotels, Kaufen erst nach der ersten Runde",
+      "🐍 Schlangengrube: 8 Skins von Feuer bis Galaxie und ein Team-Modus",
+      "⚑ Falsche Quizfrage entdeckt? Im Wissensduell und in der Millionenfrage kannst du sie jetzt melden",
+      "⚡ Die Seite lädt schneller"
     ]
   },
   "musikAus": [],
