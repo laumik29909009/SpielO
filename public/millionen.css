@@ -136,3 +136,93 @@ body[data-spiel="millionen"], [data-farbe="millionen"] {
   .mi-j { width: 56px; height: 38px; }
 }
 @media (prefers-reduced-motion: reduce) { .mi-strahl, .mi-kranz i, .mi-antwort, .mi-frage-box, .mi-klingeln { animation: none !important; } }
+
+/* =============================================================
+   Studio-Rework: 3D-Bühne oben, Uhr-Ring, lange Panels mit Leuchtlinie,
+   Leiter rechts mit Jokern obendrauf
+   ============================================================= */
+.mi-inhalt { grid-template-columns: minmax(0, 1fr) 250px; align-items: start; }
+.mi-studio.mit3d { background: #03041a; }
+.mi-studio.mit3d .mi-licht, .mi-studio.mit3d .mi-kranz, .mi-studio.mit3d .mi-boden { display: none; }
+.mi-studio .timer { display: none; }
+.mi-3d { position: relative; display: flex; justify-content: flex-end; }
+.mi-studio.mit3d .mi-3d { height: clamp(240px, 46vh, 520px); border-radius: 18px; overflow: hidden; background: radial-gradient(ellipse at 50% 70%, #1a2370, #03041a 70%);
+  box-shadow: inset 0 0 0 1px rgba(160, 175, 255, 0.25), 0 20px 40px rgba(0, 0, 0, 0.5); }
+.mi-3d canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; transition: opacity 0.9s; }
+.mi-3d.bereit canvas { opacity: 1; }
+.mi-studio.mit3d .mi-3d::after { content: ""; position: absolute; inset: auto 0 0; height: 30%; background: linear-gradient(0deg, rgba(3, 4, 26, 0.85), transparent); pointer-events: none; }
+.mi-3d-knopf { all: unset; cursor: pointer; position: relative; z-index: 2; margin: 8px; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 900;
+  background: rgba(10, 14, 50, 0.7); box-shadow: inset 0 0 0 1px rgba(160, 175, 255, 0.5); color: #c8d2ff; height: fit-content; }
+/* Uhr: Ring mit Sekunden (ohne Zeitlimit: Betrag der Frage) */
+.mi-uhr { position: relative; width: 92px; height: 92px; margin: 0 auto; z-index: 2; }
+.mi-studio.mit3d .mi-uhr { margin-top: -58px; }
+.mi-ring { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #26338f, #0a0f45 70%); box-shadow: 0 0 0 3px #0a0f45, 0 0 0 5px rgba(160, 175, 255, 0.55), 0 8px 24px rgba(0, 0, 0, 0.6); }
+.mi-ring svg { position: absolute; inset: 4px; transform: rotate(-90deg); }
+.mi-ring circle { fill: none; stroke-width: 7; }
+.mi-ring-grund { stroke: rgba(255, 255, 255, 0.08); }
+.mi-ring-voll { stroke: #8fa0ff; stroke-linecap: round; stroke-dasharray: 289; transition: stroke-dashoffset 0.2s linear, stroke 0.4s; filter: drop-shadow(0 0 4px #8fa0ff); }
+.mi-ring.knapp .mi-ring-voll { stroke: var(--mi-orange); filter: drop-shadow(0 0 5px var(--mi-orange)); }
+.mi-ring.aus .mi-ring-voll { stroke: transparent; filter: none; }
+.mi-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 1.45rem; line-height: 1; font-variant-numeric: tabular-nums; color: #fff; text-align: center; }
+.mi-ring-text small { font-size: 0.6rem; font-weight: 700; color: var(--leise); letter-spacing: 0.05em; margin: 2px 0; }
+.mi-ring.knapp + .mi-ring-text { color: var(--mi-orange); animation: pochen 0.5s infinite alternate; }
+
+/* Panels: langgezogene Sechsecke mit hellem Rand, eine Leuchtlinie läuft durch jede Reihe */
+.mi-buehne { gap: 10px; }
+.mi-antworten { display: flex; flex-direction: column; gap: 10px; }
+.mi-zeile { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+.mi-zeile::before { content: ""; position: absolute; left: -18px; right: -18px; top: 50%; height: 2px; transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, #6f7fd8 6%, #c8d2ff 50%, #6f7fd8 94%, transparent); box-shadow: 0 0 8px rgba(143, 160, 255, 0.6); }
+.mi-frage-zeile { grid-template-columns: 1fr; padding: 0 22px; }
+.mi-frage-box, .mi-antwort { --spitze: 22px; isolation: isolate; clip-path: polygon(var(--spitze) 0, calc(100% - var(--spitze)) 0, 100% 50%, calc(100% - var(--spitze)) 100%, var(--spitze) 100%, 0 50%);
+  background: linear-gradient(180deg, #d6ddff, #6f7fd8 50%, #c8d2ff); box-shadow: none; }
+.mi-frage-box::before, .mi-antwort::before { content: ""; position: absolute; inset: 2px; z-index: -1; clip-path: polygon(calc(var(--spitze) - 1px) 0, calc(100% - var(--spitze) + 1px) 0, 100% 50%, calc(100% - var(--spitze) + 1px) 100%, calc(var(--spitze) - 1px) 100%, 0 50%);
+  background: radial-gradient(ellipse at 50% 0%, #2a3aa8 0%, #0f1660 45%, #050826 100%); transition: background 0.3s; }
+.mi-frage-box { padding: 20px 46px; }
+.mi-antwort { padding: 10px 34px; min-height: 50px; justify-content: flex-start; }
+.mi-antwort .mi-buchst { color: var(--mi-orange); min-width: 1.6ch; }
+.mi-antwort:not(:disabled):hover::before { background: radial-gradient(ellipse at 50% 0%, #3a4cd0 0%, #18227a 50%, #070b33 100%); }
+.mi-antwort:not(:disabled):hover, .mi-antwort.eingeloggt, .mi-antwort.richtig, .mi-antwort.falsch { background: linear-gradient(180deg, #d6ddff, #6f7fd8 50%, #c8d2ff); }
+.mi-antwort.vorgemerkt { background: linear-gradient(180deg, #fff3b0, var(--gold) 50%, #fff3b0); box-shadow: none; }
+.mi-antwort.getippt { background: linear-gradient(180deg, #d6f6ff, #4fd6ff 50%, #d6f6ff); box-shadow: none; }
+.mi-antwort.eingeloggt::before { background: linear-gradient(180deg, #ffc56b, #f08a00 55%, #c86400); }
+.mi-antwort.richtig::before { background: linear-gradient(180deg, #6ff09a, #19a84a 55%, #0d7a34); }
+.mi-antwort.falsch::before { background: linear-gradient(180deg, #ffc56b, #f08a00 55%, #c86400); }
+.mi-antwort.falsch { filter: saturate(0.8) brightness(0.9); }
+.mi-antwort.eingeloggt, .mi-antwort.richtig, .mi-antwort.falsch { color: #fff; }
+.mi-antwort.eingeloggt .mi-buchst, .mi-antwort.richtig .mi-buchst, .mi-antwort.falsch .mi-buchst { color: #fff; }
+
+/* Leiter mit Jokern */
+.mi-leiter { padding: 12px 10px; border-radius: 18px; background: linear-gradient(180deg, rgba(14, 20, 80, 0.92), rgba(5, 8, 38, 0.95)); box-shadow: inset 0 0 0 1px rgba(160, 175, 255, 0.4), 0 20px 40px rgba(0, 0, 0, 0.45); display: grid; gap: 10px; }
+.mi-leiter .mi-joker { flex-direction: column; gap: 8px; }
+.mi-j-reihe { display: flex; gap: 8px; justify-content: center; }
+.mi-j { position: relative; width: 62px; height: 40px; border-radius: 50%; font-size: 0.85rem; color: #fff;
+  background: radial-gradient(ellipse at 50% 30%, #3a4ab8, #0e145a 75%); box-shadow: inset 0 0 0 2px #b8c4ff, 0 0 10px rgba(143, 160, 255, 0.35); }
+.mi-j svg { width: 24px; height: 24px; fill: #fff; stroke: none; }
+.mi-j.benutzt { opacity: 0.45; }
+.mi-j.benutzt::after { content: ""; position: absolute; inset: 6px 12px; background: linear-gradient(35deg, transparent 46%, #ff3b3b 46%, #ff3b3b 54%, transparent 54%), linear-gradient(-35deg, transparent 46%, #ff3b3b 46%, #ff3b3b 54%, transparent 54%); }
+.mi-j:disabled:not(.benutzt) { opacity: 0.8; }
+.mi-leiter .mi-stopp { margin: 0; width: 100%; justify-content: center; }
+.mi-leiter .mi-pp { text-align: center; }
+.mi-leiter li { padding: 4px 10px; font-weight: 700; }
+.mi-leiter li i { width: 12px; font-style: normal; color: #ffb347; font-size: 0.7rem; }
+.mi-leiter li.sicher { color: #fff; }
+.mi-leiter li.jetzt i { color: #1b0f00; }
+
+@media (max-width: 760px) {
+  .mi-inhalt { grid-template-columns: 1fr; }
+  .mi-studio.mit3d .mi-3d { height: clamp(190px, 30vh, 280px); border-radius: 14px; }
+  .mi-uhr { width: 74px; height: 74px; }
+  .mi-studio.mit3d .mi-uhr { margin-top: -44px; }
+  .mi-ring-text { font-size: 1.15rem; }
+  .mi-zeile { grid-template-columns: 1fr; gap: 8px; }
+  .mi-zeile::before { display: none; }
+  .mi-frage-zeile { padding: 0; }
+  .mi-frage-box { --spitze: 16px; padding: 16px 28px; }
+  .mi-antwort { --spitze: 16px; padding: 8px 24px; min-height: 46px; }
+  .mi-leiter { padding: 8px; gap: 6px; }
+  .mi-leiter .mi-joker { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .mi-j { width: 52px; height: 34px; font-size: 0.75rem; }
+  .mi-j svg { width: 20px; height: 20px; }
+  .mi-leiter .mi-stopp { width: auto; }
+}

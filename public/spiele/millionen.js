@@ -10,6 +10,9 @@
   const BUCHST = ["A", "B", "C", "D"];
   const euro = (n) => `${Number(n || 0).toLocaleString("de-DE")} €`;
   let letzte = {}, herz = null, sortierFolge = [], vorgemerkt = null;
+  let studio3d = null, ring = { ende: 0, gesamt: 0, an: false };
+  const ruhig = () => matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.animationen === "aus";
+  const will3d = () => GN.speicher("mi3d") !== "aus" && !!window.MiStudio3D?.moeglich() && !ruhig();
 
   const person = (id) => GN.spieler(id);
   const ichKandidat = (z) => z.kandidat === GN.ich;
@@ -57,7 +60,63 @@
       $("#timer").style.visibility = mitZeit ? "visible" : "hidden";
       if (mitZeit) GN.starteTimer(z.restMs, z.restMs, { tickAb: 5000 });
       else GN.stoppeTimer();
+      // Uhr-Ring im Studio: gesamte Zeit = beim ersten Sehen dieser Phase verbleibende Zeit
+      ring = mitZeit ? { ende: Date.now() + z.restMs, gesamt: neu || !ring.an ? z.restMs : ring.gesamt, an: true } : { an: false };
+      ringZeichnen();
     }
+    studioStimmung(z);
+  }
+
+  // ---------- 3D-Studio ----------
+  function studioStimmung(z) {
+    // Bildschirm hinten und Uhr-Mitte
+    const mitte = $("#miRingText");
+    const betrag = z.leiter?.[Math.min(14, z.stufe)];
+    if (mitte && !ring.an) mitte.innerHTML = ["frage", "eingeloggt", "aufloesung", "publikum", "telefon"].includes(z.phase) ? `<small>Frage ${z.stufe + 1}</small>${euro(betrag).replace(" €", "")}<small>€</small>` : "💰";
+    if (!studio3d) return;
+    const k = z.kandidat ? person(z.kandidat) : null;
+    const kSchluessel = ["auswahl"].includes(z.phase) ? "" : z.kandidat || "";
+    if (studio3d.kandidatId !== (kSchluessel || null)) studio3d.kandidat(kSchluessel && k ? { id: z.kandidat, avatar: k.avatar, name: z.kandidat === GN.ich ? "Du" : k.name, unter: "Kandidat" } : null);
+    const bild = z.phase === "auswahl" ? ["AUSWAHLRUNDE", "Wer ist am schnellsten?"]
+      : z.phase === "zwischen" ? [z.zwischen?.grund === "million" ? "MILLIONÄR!" : "GEWINN", euro(z.zwischen?.gewinn)]
+      : z.phase === "vorstellung" ? ["AUF DEM STUHL", k?.name || ""]
+      : [`FRAGE ${z.stufe + 1}`, euro(betrag)];
+    const bs = bild.join("|");
+    if (letzte.bild !== bs) { letzte.bild = bs; studio3d.bildschirm(...bild); }
+    let st = { auswahl: "auswahl", publikum: "publikum", telefon: "telefon", eingeloggt: "spannung", vorstellung: "ruhe" }[z.phase] || "ruhe";
+    if (z.phase === "aufloesung") st = z.ergebnis === true ? "gold" : z.ergebnis === false ? "rot" : "ruhe";
+    if (z.phase === "zwischen") st = z.zwischen?.grund === "million" ? "million" : z.zwischen?.grund === "falsch" || z.zwischen?.grund === "zeit" ? "rot" : "ruhe";
+    const stSchluessel = `${st}|${z.phase}|${z.stufe}|${z.kandidat}`;
+    if (letzte.stimmung !== stSchluessel) {
+      letzte.stimmung = stSchluessel;
+      studio3d.stimmung(st);
+      if (z.phase === "vorstellung") studio3d.vorstellen();
+    }
+  }
+  function ringZeichnen() {
+    const el = $("#miRing");
+    if (!el) return;
+    el.classList.toggle("aus", !ring.an);
+    if (!ring.an) return;
+    const rest = Math.max(0, ring.ende - Date.now());
+    const anteil = ring.gesamt ? rest / ring.gesamt : 0;
+    $("circle.mi-ring-voll", el).style.strokeDashoffset = String(289 * (1 - anteil));
+    el.classList.toggle("knapp", rest <= 10000);
+    $("#miRingText").innerHTML = `${Math.ceil(rest / 1000)}<small>Sek.</small>`;
+    if (rest > 0) requestAnimationFrame(() => setTimeout(ringZeichnen, 120));
+  }
+  async function studioStarten() {
+    studio3d?.zerstoeren?.(); studio3d = null;
+    const host = $("#mi3d");
+    if (!host || !will3d()) { $(".mi-studio")?.classList.remove("mit3d"); return; }
+    $(".mi-studio").classList.add("mit3d");
+    try {
+      const s = await window.MiStudio3D.einhaengen(host);
+      if (!host.isConnected) return s.zerstoeren();
+      studio3d = s; letzte.bild = letzte.stimmung = null;
+      host.classList.add("bereit");
+      if (GN.zustand?.spiel === "millionen") studioStimmung(GN.zustand);
+    } catch (e) { console.warn("3D-Studio nicht verfügbar", e); $(".mi-studio")?.classList.remove("mit3d"); }
   }
 
   function aufbauen() {
@@ -70,12 +129,27 @@
         <div class="mi-boden" aria-hidden="true"></div>
         <div class="mi-inhalt">
           <div class="mi-mitte">
+            <div class="mi-3d" id="mi3d">
+              <button class="mi-3d-knopf" id="mi3dKnopf" title="3D-Studio an/aus">${will3d() ? "3D" : "2D"}</button>
+            </div>
+            <div class="mi-uhr">
+              <div class="mi-ring aus" id="miRing"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" class="mi-ring-grund"/><circle cx="50" cy="50" r="46" class="mi-ring-voll"/></svg></div>
+              <div class="mi-ring-text" id="miRingText">💰</div>
+            </div>
             <div class="timer" id="timer"><div class="timer-balken" id="timerBalken"></div></div><span class="timer-zahl versteckt" id="timerZahl"></span>
             <div class="mi-buehne" id="miBuehne"></div>
           </div>
-          <aside class="mi-leiter" id="miLeiter"></aside>
+          <aside class="mi-leiter"><div class="mi-joker" id="miJoker"></div><div id="miLeiter"></div></aside>
         </div>
       </div>`;
+    $("#mi3dKnopf").onclick = () => {
+      Ton.klick();
+      GN.speicher("mi3d", will3d() || GN.speicher("mi3d") !== "aus" ? "aus" : "an");
+      $("#mi3dKnopf").textContent = GN.speicher("mi3d") === "aus" ? "2D" : "3D";
+      if (GN.speicher("mi3d") === "aus") { studio3d?.zerstoeren(); studio3d = null; $(".mi-studio").classList.remove("mit3d"); $("#mi3d").classList.remove("bereit"); }
+      else studioStarten();
+    };
+    studioStarten();
   }
 
   // Geldleiter rechts (am Handy als kompakte Leiste oben)
@@ -83,7 +157,7 @@
     const box = $("#miLeiter");
     const aktiv = ["frage", "eingeloggt", "aufloesung", "publikum", "telefon"].includes(z.phase);
     const html = `<div class="mi-leiter-kurz"><span>Sicher: <b>${euro(z.gesichert)}</b></span><span>Frage ${Math.min(15, z.stufe + 1)}: <b>${euro(z.leiter[Math.min(14, z.stufe)])}</b></span></div>
-      <ol>${z.leiter.map((b, i) => `<li class="${i === z.stufe && aktiv ? "jetzt" : ""} ${i < z.stufe ? "geschafft" : ""} ${z.sicher.includes(i) ? "sicher" : ""}"><span>${i + 1}</span><b>${euro(b)}</b></li>`).reverse().join("")}</ol>`;
+      <ol>${z.leiter.map((b, i) => `<li class="${i === z.stufe && aktiv ? "jetzt" : ""} ${i < z.stufe ? "geschafft" : ""} ${z.sicher.includes(i) ? "sicher" : ""}"><span>${i + 1}</span><i>${i < z.stufe ? "◆" : ""}</i><b>${euro(b)}</b></li>`).reverse().join("")}</ol>`;
     if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
   }
 
@@ -160,9 +234,8 @@
       vorgemerkt = null;
       $("#miBuehne").innerHTML = `
         <div class="mi-oben"><span class="mi-wer-spielt">${k.avatar} ${esc(ich ? "Du" : k.name)} · Frage ${z.stufe + 1} um <b>${euro(z.leiter[z.stufe])}</b></span><span class="mi-kat">${f.kat?.icon || ""} ${esc(f.kat?.name || "")}</span></div>
-        <div class="mi-frage-box">${bildHtml(f.bild)}<div class="mi-frage-text">${esc(f.text)}</div></div>
-        <div class="mi-antworten">${f.antworten.map((a, i) => `<button class="mi-antwort" data-i="${i}" style="--i:${i}"><span class="mi-buchst">${BUCHST[i]}</span><span class="mi-a-text">${esc(a)}</span></button>`).join("")}</div>
-        <div class="mi-joker" id="miJoker"></div>
+        <div class="mi-zeile mi-frage-zeile"><div class="mi-frage-box">${bildHtml(f.bild)}<div class="mi-frage-text">${esc(f.text)}</div></div></div>
+        <div class="mi-antworten">${[0, 2].map((r) => `<div class="mi-zeile">${[r, r + 1].map((i) => `<button class="mi-antwort" data-i="${i}" style="--i:${i}"><span class="mi-buchst">${BUCHST[i]}:</span><span class="mi-a-text">${esc(f.antworten[i])}</span></button>`).join("")}</div>`).join("")}</div>
         <div class="mi-extra" id="miExtra"></div>`;
       if (f.bild?.typ === "umriss") fetch("/quiz/umrisse.json").then((r) => r.json()).then((u) => { const s = $(".mi-umriss"); if (s && u[s.dataset.code]) s.innerHTML = `<path d="${u[s.dataset.code]}"/>`; }).catch(() => {});
       $$(".mi-antwort").forEach((b, i) => {
@@ -211,7 +284,7 @@
       // Sicherheitsfrage wie im Studio: Ist das Ihre endgültige Antwort?
       const b = $(`.mi-antwort[data-i="${i}"]`);
       if (vorgemerkt !== i) { $$(".mi-antwort.vorgemerkt").forEach((x) => x.classList.remove("vorgemerkt")); b.classList.add("vorgemerkt"); vorgemerkt = i; extra(z); return; }
-      vorgemerkt = null; GN.aktion("antwort", i);
+      vorgemerkt = null; b.classList.remove("vorgemerkt"); GN.aktion("antwort", i);
     } else if (z.phase === "publikum") { Ton.klick(); GN.aktion("stimme", i); }
     else if (z.phase === "frage" || z.phase === "telefon") {
       if (z.telefon?.an === GN.ich && z.phase === "telefon") return;
@@ -225,9 +298,11 @@
     const ich = ichKandidat(z);
     const j = z.joker;
     const html = `
-      <button class="mi-j" data-j="fifty" ${ich && j.fifty && z.phase === "frage" ? "" : "disabled"} title="50:50">${j.fifty ? "50:50" : "<s>50:50</s>"}</button>
-      <button class="mi-j" data-j="publikum" ${ich && j.publikum && z.phase === "frage" ? "" : "disabled"} title="Publikum">👥</button>
-      <button class="mi-j" data-j="telefon" ${ich && j.telefon && z.phase === "frage" ? "" : "disabled"} title="Telefon">📞</button>
+      <div class="mi-j-reihe">
+      <button class="mi-j ${j.fifty ? "" : "benutzt"}" data-j="fifty" ${ich && j.fifty && z.phase === "frage" ? "" : "disabled"} title="50:50-Joker">50:50</button>
+      <button class="mi-j ${j.publikum ? "" : "benutzt"}" data-j="publikum" ${ich && j.publikum && z.phase === "frage" ? "" : "disabled"} title="Publikumsjoker"><svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="2.6"/><circle cx="17" cy="8" r="2.6"/><circle cx="12" cy="6.5" r="3"/><path d="M2.5 18c0-3 2-5 4.5-5s3 1 3 1M21.5 18c0-3-2-5-4.5-5s-3 1-3 1M6.5 19c0-3.5 2.5-6 5.5-6s5.5 2.5 5.5 6z"/></svg></button>
+      <button class="mi-j ${j.telefon ? "" : "benutzt"}" data-j="telefon" ${ich && j.telefon && z.phase === "frage" ? "" : "disabled"} title="Telefonjoker"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></button>
+      </div>
       ${ich ? `<button class="btn zweit klein mi-stopp" data-j="aufhoeren" ${z.phase === "frage" ? "" : "disabled"}>✋ Aufhören (${euro(z.aktuell)})</button>` : `<span class="mi-pp">🎟️ Deine Publikumspunkte: <b>${z.publikumPunkte?.[GN.ich] || 0}</b></span>`}`;
     if (box.dataset.html === html) return;
     box.dataset.html = html; box.innerHTML = html;
@@ -274,7 +349,7 @@
     const wichtig = box.querySelector(".mi-karte.gold");
     if (wichtig) { wichtig.scrollIntoView({ behavior: "smooth", block: "center" }); navigator.vibrate?.(30); }
     $("#miMelden")?.addEventListener("click", () => GN.frageMelden("millionen", GN.zustand.frage));
-    $("#miLogIn")?.addEventListener("click", () => { const i = vorgemerkt; vorgemerkt = null; GN.aktion("antwort", i); });
+    $("#miLogIn")?.addEventListener("click", () => { const i = vorgemerkt; vorgemerkt = null; $$(".mi-antwort.vorgemerkt").forEach((x) => x.classList.remove("vorgemerkt")); GN.aktion("antwort", i); });
     $("#miDoch")?.addEventListener("click", () => { vorgemerkt = null; $$(".mi-antwort.vorgemerkt").forEach((x) => x.classList.remove("vorgemerkt")); extra(GN.zustand); });
     let sicher = "sicher";
     $$("[data-sicher]", box).forEach((b) => (b.onclick = () => { sicher = b.dataset.sicher; $$("[data-sicher]", box).forEach((x) => x.classList.toggle("aktiv", x === b)); }));
