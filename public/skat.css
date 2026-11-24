@@ -181,3 +181,12 @@ body[data-spiel="skat"], [data-farbe="skat"] {
 @keyframes sk-umdrehen-hand { 0%, 45% { filter: brightness(0.15) sepia(1) hue-rotate(-30deg); transform: rotateY(180deg); } 100% { filter: none; transform: rotateY(0); } }
 .sk-flug-karte { display: block; width: 34px; height: 48px; border-radius: 5px; background: repeating-linear-gradient(45deg, #b3261e 0 4px, #8c1c16 4px 8px); border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
 @media (prefers-reduced-motion: reduce) { .sk-hand.austeilen .sk-handkarte, .sk-hand.austeilen .sk-handkarte .sk { animation: none; } }
+
+/* Du bist dran: deutlich sichtbar (leuchtender Rahmen um deine Hand, große Ansage) */
+.sk-ich.ich-dran { border-radius: 26px; box-shadow: 0 0 0 3px var(--gold), 0 0 34px color-mix(in srgb, var(--gold) 55%, transparent); animation: sk-dran-puls 1.4s ease-in-out infinite; padding-top: 34px; }
+.sk-ich.ich-dran::before { content: "👉 DU BIST DRAN"; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); padding: 3px 16px; border-radius: 99px; white-space: nowrap;
+  background: linear-gradient(90deg, var(--gold), var(--gold-2)); color: var(--gold-text); font-weight: 900; letter-spacing: 0.08em; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); }
+.sk-szene.ich-dran .fr-ansage b { font-size: 1.6rem; }
+.sk-szene.ich-dran .sk-mitte .fr-ansage { box-shadow: 0 0 0 2px var(--gold); }
+@keyframes sk-dran-puls { 50% { box-shadow: 0 0 0 3px var(--gold), 0 0 50px color-mix(in srgb, var(--gold) 75%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .sk-ich.ich-dran { animation: none; } }

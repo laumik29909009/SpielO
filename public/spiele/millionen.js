@@ -163,6 +163,7 @@
 
   // ---------- Auswahlrunde ----------
   function auswahl(z) {
+    letzte.frage = null;
     const a = z.auswahl;
     const dabei = a.teilnehmer.includes(GN.ich);
     $("#miBuehne").innerHTML = `
@@ -191,6 +192,7 @@
     box.innerHTML = z.auswahl.teilnehmer.map((id) => `<span class="${z.auswahl.abgegeben.includes(id) ? "fertig" : ""}">${person(id).avatar} ${z.auswahl.abgegeben.includes(id) ? "✓" : "…"}</span>`).join("");
   }
   function vorstellung(z) {
+    letzte.frage = null;
     const k = person(z.kandidat), info = z.auswahlInfo;
     herzStopp();
     $("#miBuehne").innerHTML = `
@@ -204,6 +206,7 @@
     $(".mi-studio").classList.add("blitz"); setTimeout(() => $(".mi-studio")?.classList.remove("blitz"), 900);
   }
   function zwischen(z) {
+    letzte.frage = null;
     const w = z.zwischen, k = person(w.id);
     herzStopp();
     const text = { million: "🎉 GEWINNT EINE MILLION!", falsch: "geht mit", aufgehoert: "hört auf und nimmt", zeit: "Zeit abgelaufen – mitgenommen:" }[w.grund];
@@ -229,7 +232,10 @@
     if (!f) return;
     const ich = ichKandidat(z);
     const k = person(z.kandidat);
-    if (neu && z.phase === "frage" && !$(".mi-antwort")) {
+    // Neue Frage (anderer Kandidat oder andere Frage): Bühne neu aufbauen. Die Stufe zählt schon bei der Auflösung hoch, deshalb nicht im Schlüssel.
+    const frageKey = `${z.kandidat}|${f.text}|${f.antworten.join("|")}`;
+    if (letzte.frage !== frageKey || !$(".mi-antwort")) {
+      letzte.frage = frageKey;
       herzStopp();
       vorgemerkt = null;
       $("#miBuehne").innerHTML = `

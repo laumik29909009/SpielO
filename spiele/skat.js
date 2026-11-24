@@ -88,13 +88,15 @@ const aktivMensch = (raum, id) => { const s = raum.spieler[id]; if (s) s.ohneEin
 //  SCHWIMMEN (Schnautz / 31)
 //  Werte: Ass 11, Bild und 10 je 10, sonst Augen. Gezählt wird die beste Farbe.
 //  Drei gleiche Werte = 30,5. Drei Asse = Feuer (sofort Ende, alle anderen verlieren ein Leben).
+//  Hausregel Steine (Farbe egal): 7-8-9 = kleiner Stein (25), 8-9-10 = großer Stein (28).
 // =============================================================
+const STEINE = { "7,8,9": 25, "10,8,9": 28 };
 const SW_WERT = (w) => (w === "A" ? 11 : ["K", "D", "B", "10"].includes(w) ? 10 : Number(w));
 function swPunkte(hand) {
   if (hand.length !== 3) return 0;
   if (hand.every((k) => k.wert === "A")) return 33;
   if (hand.every((k) => k.wert === hand[0].wert)) return 30.5;
-  let best = 0;
+  let best = STEINE[hand.map((k) => k.wert).sort().join(",")] || 0;
   for (const f of FARBEN) best = Math.max(best, hand.filter((k) => k.farbe === f).reduce((a, k) => a + SW_WERT(k.wert), 0));
   return best;
 }
@@ -249,11 +251,15 @@ const Schwimmen = {
 //  Ab Runde 2: Arschloch gibt dem König seine 2 besten Karten und bekommt 2 schlechteste zurück
 //  (Vize-Arschloch ↔ Vize-König je 1 Karte ab 4 Spielern).
 // =============================================================
-const AR_RANG = (w) => WERTE32.indexOf(w);
+// Hausregel „hohe 10“: die 10 ist die höchste Karte (über dem Ass)
+const AR_HOCH10 = ["7", "8", "9", "B", "D", "K", "A", "10"];
+const arRang = (d, w) => (d.hoheZehn ? AR_HOCH10 : WERTE32).indexOf(w);
+const TAUSCH_MS = 30000;
 const Arschloch = {
   starten(raum, ctx) {
     const d = raum.daten;
     d.runde = 0; d.gesamt = {}; d.letzteRaenge = null;
+    d.hoheZehn = !!einst(raum).hoheZehn;
     this.neueRunde(raum, ctx);
   },
   neueRunde(raum, ctx) {
@@ -264,23 +270,57 @@ const Arschloch = {
     karten.forEach((k, i) => d.haende[d.reihenfolge[i % d.reihenfolge.length]].push(k));
     d.fertig = []; d.stich = null; d.stichVon = null; d.gepasst = []; d.ergebnis = null;
     d.tausch = null;
-    // Kartentausch nach der Rangfolge der letzten Runde
+    // Kartentausch nach der Rangfolge der letzten Runde:
+    // Das Arschloch muss dem König seine 2 besten Karten geben, der König sucht 2 Karten aus, die er zurückgibt.
+    // Genauso Vize-Arschloch → Vize-König mit 1 Karte (ab 4 Spielern).
     if (d.letzteRaenge && d.letzteRaenge.length >= 3) {
       const r = d.letzteRaenge.filter((id) => d.haende[id]);
       const paare = [[r[0], r[r.length - 1], 2]];
       if (r.length >= 4) paare.push([r[1], r[r.length - 2], 1]);
       d.tausch = [];
       for (const [koenig, arsch, n] of paare) {
-        const besteArsch = [...d.haende[arsch]].sort((a, b) => AR_RANG(b.wert) - AR_RANG(a.wert)).slice(0, n);
-        const schlechteKoenig = [...d.haende[koenig]].sort((a, b) => AR_RANG(a.wert) - AR_RANG(b.wert)).slice(0, n);
-        d.haende[arsch] = d.haende[arsch].filter((k) => !besteArsch.includes(k)).concat(schlechteKoenig);
-        d.haende[koenig] = d.haende[koenig].filter((k) => !schlechteKoenig.includes(k)).concat(besteArsch);
-        d.tausch.push({ von: arsch, an: koenig, karten: besteArsch, zurueck: schlechteKoenig });
+        const besteArsch = [...d.haende[arsch]].sort((a, b) => arRang(d, b.wert) - arRang(d, a.wert)).slice(0, n);
+        d.haende[arsch] = d.haende[arsch].filter((k) => !besteArsch.includes(k));
+        d.haende[koenig] = d.haende[koenig].concat(besteArsch);
+        d.tausch.push({ von: arsch, an: koenig, n, karten: besteArsch, zurueck: null });
       }
       d.dran = r[r.length - 1]; // das Arschloch fängt an
-    } else d.dran = d.reihenfolge.find((id) => d.haende[id].some((k) => k.id === "kreuz-7")) || d.reihenfolge[0];
+      d.letzteAktion = { typ: "austeilen", t: Date.now(), tausch: d.tausch.map(({ von, an, karten }) => ({ von, an, karten })) };
+      // Computer (und Abwesende) geben sofort ihre schlechtesten Karten zurück
+      for (const t of d.tausch) if (istBot(d, t.an) || !raum.spieler[t.an]?.online) this.zurueckgeben(d, t, null);
+      if (d.tausch.some((t) => !t.zurueck)) {
+        d.phase = "tausch";
+        clearTimeout(d.timer);
+        d.endetUm = Date.now() + TAUSCH_MS + AUSTEIL_MS;
+        d.timer = setTimeout(() => { for (const t of d.tausch) if (!t.zurueck) this.zurueckgeben(d, t, null); this.tauschFertig(raum, ctx); }, TAUSCH_MS + AUSTEIL_MS);
+        handSenden(raum, ctx);
+        return ctx.sende(raum);
+      }
+      return this.tauschFertig(raum, ctx);
+    }
+    d.dran = d.reihenfolge.find((id) => d.haende[id].some((k) => k.id === "kreuz-7")) || d.reihenfolge[0];
     d.phase = "spielen";
-    d.letzteAktion = { typ: "austeilen", t: Date.now(), tausch: d.tausch };
+    d.letzteAktion = { typ: "austeilen", t: Date.now(), tausch: null };
+    this.zug(raum, ctx);
+  },
+  // König gibt Karten zurück (ohne Wahl: seine schlechtesten, aber nicht die gerade bekommenen)
+  zurueckgeben(d, t, ids) {
+    const h = d.haende[t.an];
+    let karten;
+    if (ids) karten = ids.map((x) => h.find((k) => k.id === x)).filter(Boolean);
+    else karten = [...h].filter((k) => !t.karten.includes(k)).sort((a, b) => arRang(d, a.wert) - arRang(d, b.wert)).slice(0, t.n);
+    if (karten.length !== t.n || new Set(karten).size !== t.n) return false;
+    d.haende[t.an] = h.filter((k) => !karten.includes(k));
+    d.haende[t.von] = d.haende[t.von].concat(karten);
+    t.zurueck = karten;
+    return true;
+  },
+  tauschFertig(raum, ctx) {
+    const d = raum.daten;
+    clearTimeout(d.timer);
+    // Lief der Tausch ohne Wartezeit (nur Computer), bleibt die Austeil-Animation die letzte Aktion
+    if (d.phase === "tausch") d.letzteAktion = { typ: "getauscht", t: Date.now(), tausch: d.tausch.map(({ von, an, zurueck }) => ({ von, an, anzahl: zurueck?.length || 0 })) };
+    d.phase = "spielen";
     this.zug(raum, ctx);
   },
   aktiv: (d) => (id) => !d.fertig.includes(id),
@@ -294,7 +334,7 @@ const Arschloch = {
   kannLegen(d, karten) {
     if (!karten.length || karten.length > 4 || !karten.every((k) => k.wert === karten[0].wert)) return false;
     if (!d.stich) return true;
-    return karten.length === d.stich.length && AR_RANG(karten[0].wert) > AR_RANG(d.stich[0].wert);
+    return karten.length === d.stich.length && arRang(d, karten[0].wert) > arRang(d, d.stich[0].wert);
   },
   bot(raum, ctx, id) {
     const d = raum.daten;
@@ -305,16 +345,26 @@ const Arschloch = {
     const optionen = Object.values(gruppen).flatMap((g) => {
       if (!d.stich) return [g];
       return g.length >= d.stich.length ? [g.slice(0, d.stich.length)] : [];
-    }).filter((g) => this.kannLegen(d, g)).sort((a, b) => AR_RANG(a[0].wert) - AR_RANG(b[0].wert));
+    }).filter((g) => this.kannLegen(d, g)).sort((a, b) => arRang(d, a[0].wert) - arRang(d, b[0].wert));
     if (!optionen.length) return this.aktion(raum, ctx, id, "passen");
     // Ausspielen: möglichst viele niedrige Karten; Stechen: so niedrig wie möglich, Asse sparen (außer kurz vor Schluss)
-    let wahl = d.stich ? optionen[0] : optionen.sort((a, b) => b.length - a.length || AR_RANG(a[0].wert) - AR_RANG(b[0].wert))[0];
+    let wahl = d.stich ? optionen[0] : optionen.sort((a, b) => b.length - a.length || arRang(d, a[0].wert) - arRang(d, b[0].wert))[0];
     if (istBot(d, id) && patzer(raum)) wahl = irgendeine(optionen);
-    if (d.stich && wahl[0].wert === "A" && h.length > 4 && Math.random() < 0.6) return this.aktion(raum, ctx, id, "passen");
+    if (d.stich && arRang(d, wahl[0].wert) === 7 && h.length > 4 && Math.random() < 0.6) return this.aktion(raum, ctx, id, "passen");
     return this.aktion(raum, ctx, id, "legen", wahl.map((k) => k.id));
   },
   aktion(raum, ctx, id, typ, daten) {
     const d = raum.daten;
+    if (typ === "zurueckgeben" && d.phase === "tausch") {
+      const t = d.tausch?.find((x) => x.an === id && !x.zurueck);
+      if (!t) return;
+      const ids = Array.isArray(daten) ? daten.map(String) : [];
+      if (ids.length !== t.n || !this.zurueckgeben(d, t, ids)) return `Wähle genau ${t.n} Karte${t.n > 1 ? "n" : ""} zum Zurückgeben.`;
+      aktivMensch(raum, id);
+      if (d.tausch.every((x) => x.zurueck)) return this.tauschFertig(raum, ctx);
+      handSenden(raum, ctx);
+      return ctx.sende(raum);
+    }
     if (d.phase !== "spielen" || d.dran !== id) return;
     const h = d.haende[id];
     if (typ === "legen") {
@@ -368,18 +418,21 @@ const Arschloch = {
   ansicht(d) {
     return {
       stich: d.stich, stichVon: d.stichVon, gepasst: d.gepasst, fertig: d.fertig, gesamt: d.gesamt,
-      ergebnis: d.phase !== "spielen" ? d.ergebnis : null, tausch: d.tausch, letzteRaenge: d.letzteRaenge,
+      ergebnis: !["spielen", "tausch"].includes(d.phase) ? d.ergebnis : null, letzteRaenge: d.letzteRaenge, hoheZehn: !!d.hoheZehn,
+      // Was getauscht wurde, sehen nur die Beteiligten (Karten gehen privat mit der Hand); öffentlich nur, wer wem wie viele gibt
+      tausch: d.tausch ? d.tausch.map(({ von, an, n, zurueck }) => ({ von, an, n, fertig: !!zurueck })) : null,
     };
   },
   weg(raum, ctx, id) {
     const d = raum.daten;
     if (!d.fertig.includes(id)) d.fertig.push(id);
     if (d.reihenfolge.length - d.fertig.length <= 1) return this.rundeEnde(raum, ctx);
-    if (d.dran === id) { d.dran = nachster(d, id, this.aktiv(d)); this.zug(raum, ctx); }
+    if (d.phase === "tausch") { for (const t of d.tausch) if (!t.zurueck && (t.an === id || t.von === id)) this.zurueckgeben(d, t, null); if (d.tausch.every((x) => x.zurueck)) return this.tauschFertig(raum, ctx); }
+    if (d.dran === id && d.phase === "spielen") { d.dran = nachster(d, id, this.aktiv(d)); this.zug(raum, ctx); }
   },
 };
 function titelListe(n) {
-  const t = Array.from({ length: n }, () => "Bürger");
+  const t = Array.from({ length: n }, () => "Mitläufer");
   t[0] = "König"; t[n - 1] = "Arschloch";
   if (n >= 4) { t[1] = "Vize-König"; t[n - 2] = "Vize-Arschloch"; }
   return t;
@@ -1342,6 +1395,7 @@ module.exports = {
       if (RUNDEN[neu.modus] && !RUNDEN[neu.modus].includes(neu.runden)) neu.runden = RUNDEN_STANDARD[neu.modus];
     }
     if (e.bots !== undefined) neu.bots = Math.min(7, Math.max(0, parseInt(e.bots) || 0));
+    if (e.hoheZehn !== undefined) neu.hoheZehn = !!e.hoheZehn;
     if (e.leben !== undefined) neu.leben = [2, 3, 4].includes(parseInt(e.leben)) ? parseInt(e.leben) : 3;
     if (e.runden !== undefined) { const r = parseInt(e.runden); neu.runden = (RUNDEN[neu.modus] || [3, 5, 8]).includes(r) ? r : RUNDEN_STANDARD[neu.modus] || 5; }
     if (e.sekunden !== undefined) { const s = parseInt(e.sekunden); neu.sekunden = s === 0 ? 0 : Math.min(60, Math.max(10, s || 30)); }

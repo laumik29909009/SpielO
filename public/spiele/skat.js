@@ -85,6 +85,7 @@
         html: `<div class="einstellungs-zeile">
           <div><div class="unter-titel">Computer-Gegner</div><div class="segment">${[0, 1, 2, 3, 4, 5].map((n) => `<button data-sk-bots="${n}" class="${e.bots === n ? "aktiv" : ""}" ${dis}>${n === 0 ? "Keine" : n}</button>`).join("")}</div></div>
           <div><div class="unter-titel">Zeit pro Zug</div><div class="segment">${[15, 30, 0].map((n) => `<button data-sk-sek="${n}" class="${e.sekunden === n ? "aktiv" : ""}" ${dis}>${n ? n + "s" : "∞"}</button>`).join("")}</div></div>
+          ${e.modus === "arschloch" ? `<div><div class="unter-titel">Hohe 10</div><div class="segment"><button data-sk-zehn="0" class="${!e.hoheZehn ? "aktiv" : ""}" ${dis}>Aus</button><button data-sk-zehn="1" class="${e.hoheZehn ? "aktiv" : ""}" ${dis}>An: 10 sticht alles</button></div></div>` : ""}
           ${e.modus === "schwimmen" ? `<div><div class="unter-titel">Leben</div><div class="segment">${[2, 3, 4].map((n) => `<button data-sk-leben="${n}" class="${e.leben === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>` : ""}
           ${rundenWahl ? `<div><div class="unter-titel">${e.modus === "poker" ? "Hände" : "Runden"}</div><div class="segment">${rundenWahl.map((n) => `<button data-sk-runden="${n}" class="${e.runden === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>` : ""}
         </div>
@@ -93,8 +94,8 @@
       {
         id: "regeln", icon: "📖", titel: "Regeln", info: SPIELNAME[e.modus],
         html: ({
-          schwimmen: `<ol class="q-regeln"><li>Jeder hat 3 Karten, 3 liegen offen in der Mitte.</li><li>Pro Zug: <b>eine Karte tauschen</b>, <b>alle drei tauschen</b>, <b>schieben</b> (nichts tun) oder <b>klopfen</b> (ab der 2. Runde: jeder ist noch einmal dran, dann wird aufgedeckt).</li><li>Gezählt wird die beste Farbe: Ass 11, Bilder und 10 je 10, sonst Augen. Drei Gleiche = 30,5.</li><li><b>31</b> beendet sofort. <b>Feuer</b> (drei Asse) beendet sofort, alle anderen verlieren ein Leben.</li><li>Wer am wenigsten hat, verliert ein Leben. Ohne Leben <b>schwimmt</b> man noch eine Runde, beim nächsten Verlust ist man raus.</li></ol>`,
-          arschloch: `<ol class="q-regeln"><li>Alle Karten werden verteilt. Reihenfolge: 7 &lt; 8 &lt; 9 &lt; 10 &lt; B &lt; D &lt; K &lt; A.</li><li>Ausspielen: 1 bis 4 gleiche Karten. Der Nächste legt <b>gleich viele, aber höhere</b> oder passt.</li><li>Passen alle, räumt der Letzte ab und spielt neu aus.</li><li>Wer zuerst fertig ist, wird <b>König</b>, der Letzte ist das <b>Arschloch</b>.</li><li>Ab Runde 2 gibt das Arschloch dem König seine 2 besten Karten und bekommt 2 schlechte zurück (Vize je 1 Karte).</li></ol>`,
+          schwimmen: `<ol class="q-regeln"><li>Jeder hat 3 Karten, 3 liegen offen in der Mitte.</li><li>Pro Zug: <b>eine Karte tauschen</b>, <b>alle drei tauschen</b>, <b>schieben</b> (nichts tun) oder <b>klopfen</b> (ab der 2. Runde: jeder ist noch einmal dran, dann wird aufgedeckt).</li><li>Gezählt wird die beste Farbe: Ass 11, Bilder und 10 je 10, sonst Augen. Drei Gleiche = 30,5. <b>Kleiner Stein</b> (7-8-9) = 25, <b>großer Stein</b> (8-9-10) = 28, Farbe egal.</li><li><b>31</b> beendet sofort. <b>Feuer</b> (drei Asse) beendet sofort, alle anderen verlieren ein Leben.</li><li>Wer am wenigsten hat, verliert ein Leben. Ohne Leben <b>schwimmt</b> man noch eine Runde, beim nächsten Verlust ist man raus.</li></ol>`,
+          arschloch: `<ol class="q-regeln"><li>Alle Karten werden verteilt. Reihenfolge: ${e.hoheZehn ? "7 &lt; 8 &lt; 9 &lt; B &lt; D &lt; K &lt; A &lt; <b>10</b> (hohe 10)" : "7 &lt; 8 &lt; 9 &lt; 10 &lt; B &lt; D &lt; K &lt; A"}.</li><li>Ausspielen: 1 bis 4 gleiche Karten. Der Nächste legt <b>gleich viele, aber höhere</b> oder passt.</li><li>Passen alle, räumt der Letzte ab und spielt neu aus.</li><li>Wer zuerst fertig ist, wird <b>König</b>, der Letzte ist das <b>Arschloch</b>.</li><li>Ab Runde 2 muss das Arschloch dem König seine <b>2 besten Karten</b> geben. Der König sucht sich aus, welche 2 Karten er zurückgibt. Vize-Arschloch und Vize-König tauschen genauso 1 Karte. Alle anderen sind <b>Mitläufer</b>.</li></ol>`,
           maumau: `<ol class="q-regeln"><li>Jeder bekommt 5 Karten. Lege eine Karte mit <b>gleicher Farbe oder gleichem Wert</b> auf die Ablage, sonst ziehst du eine.</li><li><b>7</b>: Der Nächste zieht 2 Karten, außer er legt auch eine 7 (dann zieht der Übernächste 4 …).</li><li><b>8</b>: Der Nächste setzt aus.</li><li><b>Bube</b> passt auf alles außer einen Buben. Du wünschst dir eine Farbe.</li><li>Bevor du deine vorletzte Karte legst, drücke <b>„Mau!“</b>, sonst gibt es eine Strafkarte.</li><li>Wer zuerst keine Karten mehr hat, bekommt die Punkte der Karten der anderen (Bube 20, Ass 11, 10 = 10, K 4, D 3, sonst Augen).</li></ol>`,
           siebzehn: `<ol class="q-regeln"><li>Jeder startet mit <b>100 Chips</b> und setzt vor jeder Runde (mindestens 10).</li><li>Du und die Bank bekommen 2 Karten, eine Karte der Bank ist verdeckt. Zahlen zählen ihre Augen, Bilder 10, <b>Ass 11 oder 1</b>.</li><li><b>Karte</b> ziehen, so oft du willst. Über 21 hast du sofort verloren. <b>Halten</b> beendet deinen Zug. <b>Verdoppeln</b>: doppelter Einsatz, genau eine Karte.</li><li>Die Bank zieht bis 16 und bleibt ab 17 stehen.</li><li>Näher an 21 als die Bank = doppelter Einsatz zurück. <b>21 mit zwei Karten</b> zahlt 3 zu 2. Gleichstand = Einsatz zurück.</li></ol>`,
           poker: `<ol class="q-regeln"><li>Jeder startet mit <b>1000 Chips</b>. Zwei Spieler setzen Pflichteinsätze (Blinds).</li><li>Du bekommst 2 verdeckte Karten. Danach kommen 3 offene Karten (Flop), eine 4. (Turn) und eine 5. (River).</li><li>In jeder Setzrunde: <b>Passen</b> (aussteigen), <b>Schieben</b> (wenn nichts zu zahlen ist), <b>Mitgehen</b>, <b>Erhöhen</b> oder <b>All-in</b>.</li><li>Am Ende gewinnt die beste Hand aus 5 der 7 Karten: Höchste Karte &lt; Paar &lt; Zwei Paare &lt; Drilling &lt; Straße &lt; Flush &lt; Full House &lt; Vierling &lt; Straight Flush.</li><li>Steigen alle anderen aus, gewinnst du den Pot ohne Aufdecken. Bei All-in gibt es Nebentöpfe.</li></ol>`,
@@ -107,6 +108,7 @@
     $$("[data-sk-modus]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ modus: b.dataset.skModus })));
     $$("[data-sk-bots]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ bots: +b.dataset.skBots })));
     $$("[data-sk-sek]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ sekunden: +b.dataset.skSek })));
+    $$("[data-sk-zehn]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ hoheZehn: b.dataset.skZehn === "1" })));
     $$("[data-sk-leben]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ leben: +b.dataset.skLeben })));
     $$("[data-sk-runden]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ runden: +b.dataset.skRunden })));
   }
@@ -166,10 +168,13 @@
     zeichneLeiste(z);
     zeichneMitte(z);
     zeichneHand(z);
+    const ichDranJetzt = z.dran === GN.ich && z.phase === "spielen";
+    $(".sk-ich")?.classList.toggle("ich-dran", ichDranJetzt);
+    $("#skSzene")?.classList.toggle("ich-dran", ichDranJetzt);
     effekte(z);
     if (!vorher || vorher.zug !== z.zug || vorher.phase !== z.phase || GN.timerNeu) {
       GN.timerNeu = false;
-      if ((z.phase === "spielen" || z.phase === "setzen") && z.restMs > 0) { $("#timer")?.classList.remove("unendlich"); GN.starteTimer(z.restMs, z.restMs, { tickAb: 5000, tonAus: () => GN.zustand?.dran !== GN.ich }); }
+      if ((z.phase === "spielen" || z.phase === "setzen" || z.phase === "tausch") && z.restMs > 0) { $("#timer")?.classList.remove("unendlich"); GN.starteTimer(z.restMs, z.restMs, { tickAb: 5000, tonAus: () => GN.zustand?.dran !== GN.ich }); }
       else GN.ohneZeitlimit();
       if (vorher && z.dran === GN.ich && vorher.dran !== GN.ich && z.phase === "spielen") { Ton.ding(); navigator.vibrate?.(40); }
     }
@@ -218,7 +223,14 @@
       html = `<div class="sk-reihe">${(z.mitte || []).map((k) => `<button class="sk-wahl ${mitteAuswahl === k.id ? "gewaehlt" : ""}" data-mitte="${k.id}" ${ichDran ? "" : "disabled"}>${karte(k)}</button>`).join("")}</div>
         <div class="fr-ansage">${ichDran ? "<b>Du bist dran!</b> Tauschen, schieben oder klopfen" : `${person(z, z.dran).avatar} ${esc(person(z, z.dran).name)} ist dran${GN.wartePunkte()}`}${z.geklopft ? ` · ✊ ${esc(nameVon(z, z.geklopft))} hat geklopft` : ""}</div>`;
     }
-    if (z.modus === "arschloch") {
+    if (z.modus === "arschloch" && z.phase === "tausch") {
+      const offen = (z.tausch || []).filter((t) => !t.fertig);
+      const mein = offen.find((t) => t.an === GN.ich), ichGebe = (z.tausch || []).find((t) => t.von === GN.ich);
+      html = `<div class="sk-reihe stich"><div class="sk-leer">🔁 Kartentausch</div></div>
+        <div class="fr-ansage">${mein ? `<b>Du bist ${mein.n === 2 ? "König" : "Vize-König"}!</b> ${esc(nameVon(z, mein.von))} hat dir ${mein.n === 2 ? "seine 2 besten Karten" : "seine beste Karte"} gegeben. Wähle ${mein.n} Karte${mein.n > 1 ? "n" : ""} zum Zurückgeben.`
+          : ichGebe ? `Du hast ${esc(nameVon(z, ichGebe.an))} ${ichGebe.n === 2 ? "deine 2 besten Karten" : "deine beste Karte"} gegeben. ${ichGebe.fertig ? "Du hast deine Karten zurück." : `${esc(nameVon(z, ichGebe.an))} sucht aus${GN.wartePunkte()}`}`
+          : `${offen.map((t) => esc(nameVon(z, t.an))).join(" und ")} ${offen.length > 1 ? "suchen" : "sucht"} Karten zum Zurückgeben aus${GN.wartePunkte()}`}</div>`;
+    } else if (z.modus === "arschloch") {
       html = `<div class="sk-reihe stich">${z.stich ? z.stich.map((k, i) => `<div class="sk-stichkarte" style="--i:${i}">${karte(k)}</div>`).join("") : '<div class="sk-leer">Ausspielen</div>'}</div>
         <div class="fr-ansage">${z.stich ? `${esc(nameVon(z, z.stichVon))} liegt vorn · ` : ""}${ichDran ? (z.stich ? `<b>Du bist dran!</b> ${z.stich.length}× höher als ${z.stich[0].wert} oder passen` : "<b>Du spielst aus!</b> 1 bis 4 gleiche Karten") : `${person(z, z.dran).avatar} ${esc(person(z, z.dran).name)} ist dran${GN.wartePunkte()}`}</div>`;
     }
@@ -271,7 +283,8 @@
       if (z.dran !== GN.ich) return false;
       if (!z.stich) return true;
       const gleiche = hand.filter((x) => x.wert === k.wert).length;
-      return gleiche >= z.stich.length && "7 8 9 10 B D K A".split(" ").indexOf(k.wert) > "7 8 9 10 B D K A".split(" ").indexOf(z.stich[0].wert);
+      const AR = (z.hoheZehn ? "7 8 9 B D K A 10" : "7 8 9 10 B D K A").split(" ");
+      return gleiche >= z.stich.length && AR.indexOf(k.wert) > AR.indexOf(z.stich[0].wert);
     }
     if (z.modus === "maumau") {
       if (z.dran !== GN.ich || !z.oben) return false;
@@ -300,7 +313,7 @@
     if (!box) return;
     const ich = leute(z).find((t) => t.id === GN.ich);
     if (!ich) { box.innerHTML = '<div class="q-hinweis">👀 Du schaust diese Partie zu.</div>'; $("#skAktionen").innerHTML = ""; return; }
-    const R = RANG, F = { kreuz: 0, pik: 1, herz: 2, karo: 3 };
+    const R = z.modus === "arschloch" && z.hoheZehn ? "7 8 9 B D K A 10".split(" ") : RANG, F = { kreuz: 0, pik: 1, herz: 2, karo: 3 };
     const karten = z.modus === "siebzehn" ? [...hand] : [...hand].sort((a, b) => (z.modus === "arschloch" || z.modus === "poker" ? R.indexOf(a.wert) - R.indexOf(b.wert) || F[a.farbe] - F[b.farbe] : F[a.farbe] - F[b.farbe] || R.indexOf(a.wert) - R.indexOf(b.wert)));
     const n = karten.length;
     const breite = Math.min(innerWidth - 24, 900);
@@ -326,6 +339,13 @@
   function handKlick(id) {
     const z = GN.zustand;
     const k = hand.find((x) => x.id === id);
+    const meinTausch = z.phase === "tausch" && z.tausch?.find((t) => t.an === GN.ich && !t.fertig);
+    if (k && meinTausch) {
+      Ton.klick();
+      if (auswahl.has(id)) auswahl.delete(id);
+      else { if (auswahl.size >= meinTausch.n) auswahl.delete([...auswahl][0]); auswahl.add(id); }
+      return zeichneHand(z);
+    }
     if (!k || z.phase !== "spielen") return;
     if (z.modus === "schwimmen") {
       if (z.dran !== GN.ich) return GN.toast("Du bist nicht dran.");
@@ -401,6 +421,8 @@
         <button class="btn zweit" id="skSchieben">⏭ Schieben</button>
         ${z.darfKlopfen ? '<button class="btn sk-klopfen" id="skKlopfen">✊ Klopfen</button>' : ""}`;
     }
+    const meinTausch = z.modus === "arschloch" && z.phase === "tausch" && z.tausch?.find((t) => t.an === GN.ich && !t.fertig);
+    if (meinTausch) html = `<button class="btn" id="skZurueck" ${auswahl.size === meinTausch.n ? "" : "disabled"}>🔁 ${meinTausch.n} Karte${meinTausch.n > 1 ? "n" : ""} an ${esc(nameVon(z, meinTausch.von))} geben</button>`;
     if (z.modus === "arschloch" && ichDran) {
       html = `<button class="btn" id="skLegen" ${auswahl.size ? "" : "disabled"}>🃏 ${auswahl.size || ""} Karte${auswahl.size === 1 ? "" : "n"} legen</button>
         ${z.stich ? '<button class="btn zweit" id="skPassen">✋ Passen</button>' : ""}`;
@@ -444,6 +466,7 @@
     $("#skAlle")?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("alleTauschen"); auswahl.clear(); mitteAuswahl = null; });
     $("#skSchieben")?.addEventListener("click", () => { Ton.klick(); GN.aktion("schieben"); });
     $("#skKlopfen")?.addEventListener("click", () => { Ton.treffer(); GN.aktion("klopfen"); });
+    $("#skZurueck")?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("zurueckgeben", [...auswahl]); auswahl.clear(); });
     $("#skLegen")?.addEventListener("click", () => { Ton.abgeben(); GN.aktion("legen", [...auswahl]); auswahl.clear(); });
     $("#skPassen")?.addEventListener("click", () => { Ton.klick(); GN.aktion("passen"); auswahl.clear(); });
     $("#skNehmen")?.addEventListener("click", () => { Ton.falsch(); GN.aktion("nehmen"); });
@@ -496,7 +519,9 @@
     const W = (w) => (w === "A" ? 11 : ["K", "D", "B", "10"].includes(w) ? 10 : Number(w));
     if (h.every((k) => k.wert === "A")) return "Feuer! 🔥";
     if (h.every((k) => k.wert === h[0].wert)) return "30,5";
-    return Math.max(...Object.keys(SYM).map((f) => h.filter((k) => k.farbe === f).reduce((a, k) => a + W(k.wert), 0)));
+    const farbe = Math.max(...Object.keys(SYM).map((f) => h.filter((k) => k.farbe === f).reduce((a, k) => a + W(k.wert), 0)));
+    const stein = { "7,8,9": 25, "10,8,9": 28 }[h.map((k) => k.wert).sort().join(",")] || 0;
+    return stein > farbe ? `${stein} (${stein === 25 ? "kleiner" : "großer"} Stein)` : farbe;
   }
 
   // =============================================================
@@ -517,7 +542,8 @@
     };
     const wer = esc(nameVon(z, a.spieler));
     if (a.typ === "austeilen" && (z.modus === "poker" || z.modus === "siebzehn")) { Ton.wusch(); return; }
-    if (a.typ === "austeilen") { austeilenZeigen(z); Ton.wusch(); zeige("<b>🃏 Karten werden verteilt</b>"); if (a.tausch?.length) a.tausch.forEach((t) => zeige(`<b>🔁 Kartentausch</b><span>${esc(nameVon(z, t.von))} gibt ${esc(nameVon(z, t.an))} ${t.karten.length} Karte${t.karten.length > 1 ? "n" : ""}</span>`, "gold", 2400)); return; }
+    if (a.typ === "austeilen") { austeilenZeigen(z); Ton.wusch(); zeige("<b>🃏 Karten werden verteilt</b>"); if (a.tausch?.length) a.tausch.forEach((t) => zeige(`<b>🔁 Kartentausch</b><span>${esc(nameVon(z, t.von))} gibt ${esc(nameVon(z, t.an))} ${t.karten.length === 2 ? "die 2 besten Karten" : "die beste Karte"}</span>`, "gold", 2400)); return; }
+    if (a.typ === "getauscht") { Ton.wusch(); zeige("<b>🔁 Tausch erledigt</b><span>Das Arschloch spielt aus</span>", "gold", 2000); return; }
     if (a.typ === "klopfen") { Ton.klopf(); GN.fx?.wackeln(2); zeige(`<b class="riesig">✊</b><span>${wer} ${a.spieler === GN.ich ? "klopfst" : "klopft"}! Letzte Runde</span>`, "gold", 1800); }
     if (a.typ === "neueMitte") { Ton.wusch(); zeige("<b>🔄 Alle haben geschoben: neue Mitte</b>"); }
     if (a.typ === "alleTauschen") { Ton.wusch(); zeige(`<b>🔁 ${wer} ${a.spieler === GN.ich ? "tauschst" : "tauscht"} alle 3</b>`); }
@@ -629,7 +655,7 @@
     ov.innerHTML = `<div class="fr-rundenende-karte">${inhalt}${z.phase !== "ende" ? `<span class="leise klein-text">Nächste Runde gleich${GN.wartePunkte()}</span>` : ""}</div>`;
     document.body.appendChild(ov);
     Ton.fanfare();
-    const weg = setInterval(() => { if (GN.zustand?.phase === "spielen" || GN.zustand?.phase === "setzen" || GN.ansicht.startsWith("skat-podest") || GN.zustand?.spiel !== "skat") { clearInterval(weg); ov.remove(); } }, 300);
+    const weg = setInterval(() => { if (GN.zustand?.phase === "spielen" || GN.zustand?.phase === "setzen" || GN.zustand?.phase === "tausch" || GN.ansicht.startsWith("skat-podest") || GN.zustand?.spiel !== "skat") { clearInterval(weg); ov.remove(); } }, 300);
   }
 
   GN.spiele.skat = {
