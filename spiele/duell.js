@@ -199,7 +199,7 @@ module.exports = {
       phase: d.phase, runde: d.runde, runden: d.runden, frageNr: d.frageNr, fragenProRunde: FRAGEN_PRO_RUNDE,
       waehler: d.phase === "wahl" ? d.waehler : null, wahl: d.phase === "wahl" ? d.wahl.map(Q.katInfo) : null,
       kategorie: d.kategorie ? Q.katInfo(d.kategorie) : null,
-      frage: f && d.phase !== "wahl" ? { nr: d.frageNr, text: f.f.text, antworten: f.antworten, bild: f.f.bild, s: f.f.s, richtig: offen ? f.richtig : null } : null,
+      frage: f && d.phase !== "wahl" ? { id: f.f.id, nr: d.frageNr, text: f.f.text, antworten: f.antworten, bild: f.f.bild, s: f.f.s, richtig: offen ? f.richtig : null } : null,
       beantwortet: Object.keys(d.antworten),
       antworten: offen ? Object.fromEntries(Object.entries(d.antworten).map(([id, a]) => [id, a.i])) : null,
       verlauf: d.verlauf.map((r) => ({ kat: Q.katInfo(r.kat), ergebnisse: r.ergebnisse })),

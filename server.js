@@ -43,6 +43,16 @@ const BELIEBT_DATEI = process.env.BELIEBT_DATEI || require("path").join(require(
 let GESPIELT = {};
 try { GESPIELT = JSON.parse(require("fs").readFileSync(BELIEBT_DATEI, "utf8")) || {}; } catch {}
 let beliebtTimer = null;
+// Gemeldete Quizfragen (Datei im Temp-Ordner; auf Render geht sie bei einem Neustart verloren, steht aber auch im Log)
+const MELDUNG_DATEI = process.env.MELDUNG_DATEI || require("path").join(require("os").tmpdir(), "spielo-meldungen.json");
+let MELDUNGEN = [];
+try { MELDUNGEN = JSON.parse(require("fs").readFileSync(MELDUNG_DATEI, "utf8")) || []; } catch {}
+function meldungSpeichern(m) {
+  MELDUNGEN.push(m);
+  if (MELDUNGEN.length > 500) MELDUNGEN.shift();
+  console.log("⚑ Frage gemeldet:", JSON.stringify(m));
+  require("fs").writeFile(MELDUNG_DATEI, JSON.stringify(MELDUNGEN), () => {});
+}
 function gespielt(spiel) {
   GESPIELT[spiel] = (GESPIELT[spiel] || 0) + 1;
   clearTimeout(beliebtTimer);
@@ -377,6 +387,20 @@ io.on("connection", (socket) => {
     const s = meinRaum.spieler[meineId];
     s.avatar = freierAvatar(meinRaum, s.avatar);
     sendeZustand(meinRaum);
+  });
+
+  // Quizfrage melden (falsch, mehrdeutig, Tippfehler …); höchstens 10 pro Verbindung
+  let meldungen = 0;
+  auf("frageMelden", (m) => {
+    m = daten(m);
+    const kurz = (t, n) => String(t ?? "").slice(0, n);
+    if (++meldungen > 10 || !m.frage) return;
+    meldungSpeichern({
+      zeit: new Date().toISOString(), spiel: kurz(m.spiel, 20), id: kurz(m.id, 40), frage: kurz(m.frage, 300),
+      antworten: Array.isArray(m.antworten) ? m.antworten.slice(0, 4).map((a) => kurz(a, 120)) : [],
+      richtig: kurz(m.richtig, 120), grund: kurz(m.grund, 40), kommentar: kurz(m.kommentar, 500),
+    });
+    socket.emit("frageGemeldet");
   });
 
   // Persönliche Wünsche für ein Spiel (z. B. Lieblingsfigur in Baulöwe), jeder für sich

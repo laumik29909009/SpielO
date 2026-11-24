@@ -1444,3 +1444,14 @@ html[data-animationen="aus"] .hintergrund::before { animation: none; }
 .neu-kopf, .neu-fuss { flex: none; }
 .neu-fuss { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--rand); background: var(--flaeche); }
 .neu-liste { margin-bottom: 0; }
+
+/* Frage melden */
+.melde-frage { margin: 0 0 12px; font-weight: 700; line-height: 1.4; }
+.melde-frage small { font-weight: 400; color: var(--leise); }
+.melde-gruende { display: grid; gap: 6px; margin-bottom: 10px; }
+.melde-gruende label { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 12px; background: var(--flaeche-2); cursor: pointer; }
+.du-melden, .mi-melden { all: unset; cursor: pointer; font-size: 0.78rem; color: var(--leise); opacity: 0.75; padding: 4px 8px; border-radius: 8px; }
+.du-melden:hover, .mi-melden:hover { opacity: 1; background: rgba(255, 255, 255, 0.06); }
+.mi-melden { display: block; margin: 6px auto 0; }
+textarea.feld, #meldeText { display: block; width: 100%; box-sizing: border-box; resize: vertical; min-height: 70px; font: inherit; color: var(--text);
+  background: var(--flaeche-2); border: 1px solid var(--rand); border-radius: 12px; padding: 10px 12px; }

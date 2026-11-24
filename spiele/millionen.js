@@ -280,7 +280,7 @@ module.exports = {
       gesichert: gesichert(d.stufe), aktuell: gewinnBeiStufe(d.stufe),
       auswahl: d.phase === "auswahl" ? { aufgabe: d.auswahl.aufgabe, begriffe: d.auswahl.gemischt.map((i) => d.auswahl.reihe[i]), abgegeben: Object.keys(d.auswahl.abgaben), teilnehmer: d.auswahl.teilnehmer } : null,
       auswahlInfo: d.auswahlInfo || null,
-      frage: f && ["frage", "eingeloggt", "aufloesung", "publikum", "telefon"].includes(d.phase) ? { text: f.f.text, antworten: f.antworten, bild: f.f.bild, richtig: offen ? f.richtig : null, kat: Q.katInfo(f.f.kat) } : null,
+      frage: f && ["frage", "eingeloggt", "aufloesung", "publikum", "telefon"].includes(d.phase) ? { id: f.f.id, text: f.f.text, antworten: f.antworten, bild: f.f.bild, richtig: offen ? f.richtig : null, kat: Q.katInfo(f.f.kat) } : null,
       eingeloggt: d.eingeloggt, ergebnis: d.phase === "aufloesung" ? d.letztesErgebnis : null,
       weg: d.weg, joker: d.joker, publikum: d.publikum ? (d.publikum.ergebnis ? { ergebnis: d.publikum.ergebnis, echt: d.publikum.echt } : { abgestimmt: Object.keys(d.publikum.stimmen || {}) }) : null,
       telefon: d.telefon ? { an: d.telefon.an, name: d.telefon.name, avatar: d.telefon.avatar, antwort: d.telefon.antwort, sicher: d.telefon.sicher } : null,

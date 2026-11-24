@@ -362,6 +362,27 @@ function demnaechstBlock() {
     </div>`;
 }
 
+// Quizfrage melden: kleines Fenster mit Grund und optionalem Kommentar
+GN.frageMelden = (spiel, f) => {
+  let d = $("#meldeFenster");
+  if (!d) { d = document.createElement("dialog"); d.id = "meldeFenster"; d.className = "fenster"; document.body.appendChild(d); d.addEventListener("click", (ev) => ev.target === d && d.close()); }
+  const gruende = [["falsch", "❌ Antwort ist falsch"], ["mehrdeutig", "🤔 Mehrere Antworten passen"], ["tippfehler", "✏️ Tippfehler"], ["veraltet", "📅 Veraltet"], ["anderes", "💬 Etwas anderes"]];
+  d.innerHTML = `<div class="fenster-kopf"><h2>⚑ Frage melden</h2><button class="icon-btn klein" data-zu aria-label="Schließen">✕</button></div>
+    <div class="fenster-inhalt">
+      <p class="melde-frage">„${esc(f.text)}“${f.richtig != null ? `<br><small>Lösung laut Spiel: <b>${esc(f.antworten[f.richtig])}</b></small>` : ""}</p>
+      <div class="melde-gruende">${gruende.map(([id, t], i) => `<label><input type="radio" name="grund" value="${id}" ${i ? "" : "checked"}> ${t}</label>`).join("")}</div>
+      <textarea class="feld" id="meldeText" maxlength="500" rows="3" placeholder="Was stimmt nicht? (optional)"></textarea>
+      <button class="btn voll" id="meldeSenden" style="margin-top:10px">Meldung senden</button>
+    </div>`;
+  $("[data-zu]", d).onclick = () => d.close();
+  $("#meldeSenden", d).onclick = () => {
+    socket.emit("frageMelden", { spiel, id: f.id, frage: f.text, antworten: f.antworten, richtig: f.richtig != null ? f.antworten[f.richtig] : "", grund: $("input[name=grund]:checked", d).value, kommentar: $("#meldeText", d).value });
+    d.close();
+    toast("Danke! Die Frage wird geprüft. ⚑");
+  };
+  d.showModal();
+};
+
 // Einmaliges Fenster „Was ist neu?“ beim ersten Besuch nach einem Update
 // (gemerkt pro Update: Datum + Titel aus config.json → "patch")
 function neuigkeitenZeigen() {

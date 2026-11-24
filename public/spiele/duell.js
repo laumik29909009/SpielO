@@ -179,7 +179,8 @@
       const wer = Object.entries(z.antworten || {}).filter(([, x]) => x === i).map(([id]) => person(z, id).avatar).join("");
       $(".du-a-wer", b).textContent = wer;
     });
-    $("#duWarten").innerHTML = "";
+    $("#duWarten").innerHTML = `<button class="du-melden" id="duMelden">⚑ Frage melden</button>`;
+    $("#duMelden").onclick = () => GN.frageMelden("duell", f);
     const imSpiel = leute(z).some((t) => t.id === GN.ich);
     if (!imSpiel) return;
     if (meine === f.richtig) { Ton.richtig(); GN.fx?.funken($(".du-antwort.richtig"), { anzahl: 14 }); }

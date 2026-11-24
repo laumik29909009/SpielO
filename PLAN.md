@@ -1,5 +1,17 @@
 # Merkzettel: geplante Arbeiten
 
+## 0. Planungsliste – Ideen für später (Stand 24.11.2026)
+Noch nicht beauftragt, nur zum Merken:
+- **Freunde-Quartett:** eigenes Deck mit Fotos von euch, selbst ausgedachten Werten und Sprüchen.
+  Fotos wie bei Cars in `bilder-eingang/` hochladen, Werte und Kategorien gemeinsam festlegen.
+- **TV-Modus:** Laptop/Fernseher zeigt das Spielfeld groß, Handys sind die Fernbedienung.
+- **Tagesduell:** jeden Tag dieselben 10 Quizfragen für alle, mit Tages-Bestenliste.
+- **Neue Partyspiele:** Zeichnen und Raten, Wer ist der Spion?, Werwolf mit SpielO als Erzähler, Begriffe erklären (Teams).
+- **Kleine Klassiker:** 4 gewinnt.
+- **Eigene Fragen:** Kategorie „Unsere Clique“ / „Schechingen“ für Wissensduell und Millionenfrage.
+- **Als App installierbar** (Symbol auf dem Handy-Startbildschirm, Vollbild).
+- **Angekündigt:** Deckname (zurück), Casino, restliche Cars (Shu, Raoul, Carla, Smokey, Rod Redline).
+
 **Stand: Abschnitt 1 (Fehler/Wünsche) und 2 (Qualitäts-Plan) sind umgesetzt, bis auf die Punkte, die noch auf Material warten (Baulöwe-Straßen, Quartett-Bilder) und das Casino.**
 
 ## 1. Fehler und Wünsche (Stand 22.11.2026)

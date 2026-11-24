@@ -267,11 +267,13 @@
       html += `<div class="mi-karte"><b>📞 ${t.avatar} ${esc(t.name)}:</b><p class="mi-zitat">${spruch}</p></div>`;
     }
     if (!ich && z.tipps.includes(GN.ich) && ["frage", "eingeloggt"].includes(z.phase)) html += `<p class="mi-hinweis">✓ Dein Tipp ist abgegeben.</p>`;
+    if (z.phase === "aufloesung" && z.frage?.richtig != null) html += `<button class="mi-melden" id="miMelden">⚑ Frage melden</button>`;
     if (box.dataset.html === html) return;
     box.dataset.html = html; box.innerHTML = html;
     // Aufforderungen (Anruf, Abstimmung, Sicherheitsfrage) ins Bild holen, vor allem am Handy
     const wichtig = box.querySelector(".mi-karte.gold");
     if (wichtig) { wichtig.scrollIntoView({ behavior: "smooth", block: "center" }); navigator.vibrate?.(30); }
+    $("#miMelden")?.addEventListener("click", () => GN.frageMelden("millionen", GN.zustand.frage));
     $("#miLogIn")?.addEventListener("click", () => { const i = vorgemerkt; vorgemerkt = null; GN.aktion("antwort", i); });
     $("#miDoch")?.addEventListener("click", () => { vorgemerkt = null; $$(".mi-antwort.vorgemerkt").forEach((x) => x.classList.remove("vorgemerkt")); extra(GN.zustand); });
     let sicher = "sicher";
