@@ -149,6 +149,41 @@ function seitenWechsel() {
   app.classList.add("seite-rein");
 }
 
+// =============================================================
+//  Emoji-Reaktionen: Leiste unten links, Emojis fliegen bei allen hoch
+// =============================================================
+const REAKTIONEN = ["😂", "🔥", "😱", "👏", "😡", "❤️", "🤯", "🎉"];
+(() => {
+  const box = $("#reaktionen"), leiste = $("#reaktionLeiste"), knopf = $("#reaktionKnopf");
+  leiste.innerHTML = REAKTIONEN.map((e) => `<button data-r="${e}" aria-label="${e}">${e}</button>`).join("");
+  const auf = (an) => { box.classList.toggle("offen", an); knopf.setAttribute("aria-expanded", String(an)); };
+  knopf.onclick = () => { Ton.klick(); auf(!box.classList.contains("offen")); };
+  let sperre = 0;
+  leiste.onclick = (ev) => {
+    const b = ev.target.closest("[data-r]");
+    if (!b || Date.now() < sperre) return;
+    sperre = Date.now() + 450;
+    socket.emit("reaktion", b.dataset.r);
+    b.classList.remove("tipp"); void b.offsetWidth; b.classList.add("tipp");
+  };
+  document.addEventListener("pointerdown", (ev) => { if (!box.contains(ev.target)) auf(false); });
+})();
+socket.on("reaktion", ({ id, e }) => {
+  if (document.documentElement.dataset.reaktionen === "aus") return;
+  const flug = $("#reaktionFlug");
+  if (flug.childElementCount > 24) return; // nicht zuschütten
+  const p = GN.spieler(id);
+  const el = document.createElement("div");
+  el.className = "reaktion-teil";
+  el.style.left = `${8 + Math.random() * 30}%`;
+  el.style.setProperty("--dx", `${(Math.random() - 0.5) * 120}px`);
+  el.style.setProperty("--dreh", `${(Math.random() - 0.5) * 40}deg`);
+  el.innerHTML = `<span class="r-emoji">${e}</span><span class="r-wer">${p.avatar || ""}</span>`;
+  flug.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+  if (id !== spielerId) Ton.tick?.();
+});
+
 socket.on("zustand", (z) => {
   const alteAnsicht = GN.ansicht;
   verarbeiteZustand(z);
@@ -161,6 +196,7 @@ function verarbeiteZustand(z) {
   document.body.dataset.spiel = z.spiel;
   $("#raumChip").textContent = z.code;
   $("#raumChip").classList.remove("versteckt");
+  $("#reaktionen").classList.remove("versteckt");
   $("#stoppSpielBtn").classList.toggle("versteckt", !(GN.istHost() && z.phase !== "lobby"));
   const ich = z.spieler.find((s) => s.id === spielerId);
   const warAfk = vorher?.spieler.find((s) => s.id === spielerId)?.afk;
@@ -249,6 +285,7 @@ function zeigeStart() {
   GN.stoppeTimer();
   document.body.dataset.spiel = "hub";
   $("#raumChip").classList.add("versteckt");
+  $("#reaktionen").classList.add("versteckt");
   $("#stoppSpielBtn").classList.add("versteckt");
   const codeAusLink = (new URLSearchParams(location.search).get("raum") || "").toUpperCase();
 

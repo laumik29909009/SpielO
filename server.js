@@ -389,6 +389,17 @@ io.on("connection", (socket) => {
     sendeZustand(meinRaum);
   });
 
+  // Emoji-Reaktionen: fliegen bei allen im Raum über den Bildschirm (höchstens etwa 2 pro Sekunde)
+  const REAKTIONEN = ["😂", "🔥", "😱", "👏", "😡", "❤️", "🤯", "🎉"];
+  let letzteReaktion = 0;
+  auf("reaktion", (e) => {
+    if (!meinRaum || !meinRaum.spieler[meineId] || !REAKTIONEN.includes(e)) return;
+    const jetzt = Date.now();
+    if (jetzt - letzteReaktion < 450) return;
+    letzteReaktion = jetzt;
+    io.to(meinRaum.code).emit("reaktion", { id: meineId, e });
+  });
+
   // Quizfrage melden (falsch, mehrdeutig, Tippfehler …); höchstens 10 pro Verbindung
   let meldungen = 0;
   auf("frageMelden", (m) => {

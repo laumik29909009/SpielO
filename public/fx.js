@@ -13,11 +13,12 @@
   const wenigBewegung = () => html.dataset.animationen === "aus" || matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------- Einstellungen laden ----------
-  const EIN = { animationen: "an", farbsicht: "aus", vibration: "an" };
+  const EIN = { animationen: "an", farbsicht: "aus", vibration: "an", reaktionen: "an" };
   for (const k of Object.keys(EIN)) { const v = GN.speicher("e_" + k); if (v) EIN[k] = v; }
   function anwenden() {
     html.dataset.animationen = EIN.animationen;
     html.dataset.farbsicht = EIN.farbsicht;
+    html.dataset.reaktionen = EIN.reaktionen;
   }
   anwenden();
 
@@ -208,6 +209,7 @@
         ${schalter("animationen", "✨ Animationen", "Aus: weniger Bewegung, kein Wackeln, schlichte Übergänge")}
         ${schalter("farbsicht", "🎨 Farbsicht-Hilfe", "Zusätzliche Formen auf farbigen Karten (z. B. GoonO)", "an", "aus")}
         ${schalter("vibration", "📳 Vibration", "Kurzes Vibrieren, wenn du dran bist (nur Handy)")}
+        ${schalter("reaktionen", "😀 Emoji-Reaktionen", "Knopf unten links und fliegende Emojis der anderen")}
         <div class="e-zeile"><span><b>🎵 Hintergrundmusik</b><small>Stücke und Lautstärke wählst du über den Notenknopf oben</small></span><button class="btn zweit klein" id="eMusik">Öffnen</button></div>
       </div>
       <p class="leise klein-text e-fuss">Gilt nur auf diesem Gerät.</p>`;

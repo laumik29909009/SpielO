@@ -1455,3 +1455,32 @@ html[data-animationen="aus"] .hintergrund::before { animation: none; }
 .mi-melden { display: block; margin: 6px auto 0; }
 textarea.feld, #meldeText { display: block; width: 100%; box-sizing: border-box; resize: vertical; min-height: 70px; font: inherit; color: var(--text);
   background: var(--flaeche-2); border: 1px solid var(--rand); border-radius: 12px; padding: 10px 12px; }
+
+/* Emoji-Reaktionen */
+.reaktion-box { position: fixed; left: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.reaktion-knopf { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--rand-stark); background: color-mix(in srgb, var(--flaeche) 88%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 1.35rem; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); opacity: 0.75; transition: transform 0.15s, opacity 0.2s; }
+.reaktion-knopf:hover, .reaktion-box.offen .reaktion-knopf { opacity: 1; transform: scale(1.06); }
+.reaktion-leiste { display: flex; flex-direction: column; gap: 4px; padding: 6px; border-radius: 999px; background: color-mix(in srgb, var(--flaeche) 92%, transparent);
+  border: 1px solid var(--rand-stark); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transform-origin: 50% 100%; transform: scale(0.6) translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.2s cubic-bezier(.2, 1.4, .4, 1), opacity 0.15s; }
+.reaktion-box.offen .reaktion-leiste { transform: none; opacity: 1; pointer-events: auto; }
+.reaktion-leiste button { all: unset; cursor: pointer; width: 34px; height: 34px; display: grid; place-items: center; font-size: 1.35rem; border-radius: 50%; transition: transform 0.12s; }
+.reaktion-leiste button:hover { transform: scale(1.25); background: rgba(255, 255, 255, 0.08); }
+.reaktion-leiste button.tipp { animation: r-tipp 0.35s ease; }
+@keyframes r-tipp { 40% { transform: scale(1.5); } }
+.reaktion-flug { position: fixed; inset: 0; pointer-events: none; z-index: 70; overflow: hidden; }
+.reaktion-teil { position: absolute; bottom: 70px; display: flex; flex-direction: column; align-items: center; animation: r-flug 2.6s cubic-bezier(.2, .6, .3, 1) forwards; }
+.r-emoji { font-size: 2.6rem; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+.r-wer { font-size: 0.95rem; margin-top: -6px; padding: 1px 5px; border-radius: 999px; background: rgba(0, 0, 0, 0.35); }
+@keyframes r-flug {
+  0% { transform: translate(0, 30px) scale(0.4); opacity: 0; }
+  12% { transform: translate(0, 0) scale(1.15); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(var(--dx), -55vh) scale(0.9) rotate(var(--dreh)); opacity: 0; }
+}
+/* Spiele mit eigenen Bedienelementen unten links: Knopf weiter nach oben */
+body[data-spiel="schlange"] .reaktion-box { bottom: 150px; }
+@media (max-width: 900px) { body[data-spiel="ludo"] .reaktion-box, body[data-spiel="baulowe"] .reaktion-box { bottom: 110px; } }
+@media (prefers-reduced-motion: reduce) { .reaktion-teil { animation-duration: 1.2s; } }
+html[data-reaktionen="aus"] .reaktion-box { display: none; }
