@@ -251,8 +251,8 @@ const Schwimmen = {
 //  Ab Runde 2: Arschloch gibt dem König seine 2 besten Karten und bekommt 2 schlechteste zurück
 //  (Vize-Arschloch ↔ Vize-König je 1 Karte ab 4 Spielern).
 // =============================================================
-// Hausregel „hohe 10“: die 10 ist die höchste Karte (über dem Ass)
-const AR_HOCH10 = ["7", "8", "9", "B", "D", "K", "A", "10"];
+// Hausregel „hohe 10“: die 10 liegt zwischen König und Ass
+const AR_HOCH10 = ["7", "8", "9", "B", "D", "K", "10", "A"];
 const arRang = (d, w) => (d.hoheZehn ? AR_HOCH10 : WERTE32).indexOf(w);
 const TAUSCH_MS = 30000;
 const Arschloch = {
