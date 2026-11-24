@@ -802,6 +802,7 @@ GN.podest = (key, { einheit = "Pkt." } = {}) => {
   const host = GN.istHost();
   const sortiert = GN.alle(z).filter((s) => !s.zuschauer && (z.spiel !== "quartett" || !z.teilnehmer || z.teilnehmer.some((t) => t.id === s.id))).sort((a, b) => b.punkte - a.punkte);
   const solo = sortiert.length === 1;
+  if (!schonGesehen) try { GN.profilErfassen?.(z, sortiert, key); } catch (e) { console.warn("Profil:", e); }
   const fmt = (n) => Math.round(n).toLocaleString("de-DE");
   // Plätze wie beim Sport: Gleichstand = gleicher Platz
   const platzNr = sortiert.map((s, i) => (i > 0 && s.punkte === sortiert[i - 1].punkte ? null : i + 1));
