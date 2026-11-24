@@ -21,6 +21,8 @@ const BOTS = [
   { name: "Wanda Wurm", avatar: "🪱" }, { name: "Kalle Kobra", avatar: "🐉" }, { name: "Fritzi Frosch", avatar: "🐸" },
 ];
 const FARBEN = 12; // Farbmuster im Browser
+// Besondere Looks (Skins), die man in der Lobby wählen kann; ohne Wahl gibt es eine Farbe
+const SKINS = ["regenbogen", "feuer", "galaxie", "gold", "zebra", "tiger", "neon", "melone"];
 const einst = (raum) => raum.einstellungen.schlange;
 const laenge = (m) => 40 + m * 7;
 const radius = (m) => 7 + Math.min(12, Math.sqrt(m) * 0.95);
@@ -108,11 +110,13 @@ function rasterBauen(d) {
 // Liegt (x,y) in einer fremden Schlange? Gibt den Index der Schlange zurück (oder -1)
 function treffer(d, x, y, eigen, extra) {
   const cx = Math.floor(x / ZELLE), cy = Math.floor(y / ZELLE);
+  // Team-Modus: durch Teamkollegen fährt man hindurch
+  const team = d.teams ? d.schlangen[eigen].team : null;
   for (let ix = cx - 1; ix <= cx + 1; ix++) for (let iy = cy - 1; iy <= cy + 1; iy++) {
     const z = d.raster.get(ix * 100003 + iy);
     if (!z) continue;
     for (let j = 0; j < z.length; j += 5) {
-      if (z[j + 2] === eigen) continue;
+      if (z[j + 2] === eigen || (team !== null && d.schlangen[z[j + 2]].team === team)) continue;
       const dx = z[j] - x, dy = z[j + 1] - y, rr = z[j + 3] + extra;
       if (dx * dx + dy * dy < rr * rr) return z[j + 2];
     }
@@ -303,6 +307,15 @@ function ende(raum, ctx) {
   }
   const rang = [...d.schlangen].sort((a, b) => b.best - a.best || b.faenge - a.faenge);
   d.rangliste = rang.map((s) => ({ i: s.i, best: Math.round(s.best), faenge: s.faenge, tode: s.tode }));
+  if (d.teams) {
+    // Team-Wertung: Summe der größten Längen; das Gewinnerteam bekommt +50 Punkte pro Kopf
+    const summe = [0, 1].map((t) => Math.round(d.schlangen.filter((s) => s.team === t).reduce((a, s) => a + s.best, 0)));
+    d.teamErgebnis = { summe, sieger: summe[0] === summe[1] ? -1 : summe[0] > summe[1] ? 0 : 1 };
+    for (const s of d.schlangen) if (s.team === d.teamErgebnis.sieger) {
+      if (s.bot) d.bots.find((b) => b.id === s.id).punkte += 50;
+      else if (raum.spieler[s.id]) raum.spieler[s.id].punkte += 50;
+    }
+  }
   ctx.sende(raum);
 }
 
@@ -320,9 +333,19 @@ function starten(raum, ctx) {
     phase: "countdown", tick: 0, R, stufe: e.stufe || "mittel", bots,
     futter: new Map(), futterRaster: new Map(), futterNr: 0, normalFutter: 0, futterZiel: Math.round(110 + (R * R) / 11000),
     neuesFutter: [], gefressen: [], ereignisse: [], raster: new Map(),
-    schlangen: alle.map((a, i) => ({ i, id: a.id, bot: a.bot, farbe: farben[i % FARBEN], best: START_MASSE, faenge: 0, tode: 0, lebt: false, pfad: [], masse: START_MASSE, x: 0, y: 0, a: 0, ziel: 0 })),
+    teams: !!e.teams,
+    schlangen: alle.map((a, i) => {
+      const wunsch = raum.spieler[a.id]?.wunsch?.skin;
+      const skin = SKINS.includes(wunsch) ? wunsch : a.bot ? SKINS[(i * 5 + Math.floor(Math.random() * SKINS.length)) % SKINS.length] : null;
+      return { i, id: a.id, bot: a.bot, farbe: farben[i % FARBEN], skin, team: e.teams ? null : null, best: START_MASSE, faenge: 0, tode: 0, lebt: false, pfad: [], masse: START_MASSE, x: 0, y: 0, a: 0, ziel: 0 };
+    }),
     startUm: Date.now() + COUNTDOWN_MS, endetUm: Date.now() + COUNTDOWN_MS + e.dauer * 1000,
   };
+  // Teams: Menschen und Bots abwechselnd verteilen, damit beide Seiten fair besetzt sind
+  if (d.teams) {
+    const menschIds = mischen(d.schlangen.filter((s) => !s.bot)), botIds = mischen(d.schlangen.filter((s) => s.bot));
+    [...menschIds, ...botIds].forEach((s, k) => (s.team = k % 2));
+  }
   futterAuffuellen(d, 1e4);
   for (const s of d.schlangen) einsetzen(d, s);
   d.neuesFutter = [];
@@ -337,11 +360,12 @@ function starten(raum, ctx) {
 
 module.exports = {
   meta: () => ({ max: MAX_SCHLANGEN }),
-  standardEinstellungen: () => ({ bots: 6, dauer: 180 }),
+  standardEinstellungen: () => ({ bots: 6, dauer: 180, teams: false }),
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
     if (e.bots !== undefined) neu.bots = Math.min(10, Math.max(0, parseInt(e.bots) || 0));
     if (e.dauer !== undefined) neu.dauer = [120, 180, 300].includes(+e.dauer) ? +e.dauer : 180;
+    if (e.teams !== undefined) neu.teams = !!e.teams;
     return neu;
   },
   starten,
@@ -370,7 +394,8 @@ module.exports = {
     const d = raum.daten;
     return {
       phase: d.phase, R: d.R,
-      schlangen: d.schlangen.map((s) => ({ i: s.i, id: s.id, farbe: s.farbe, bot: s.bot, faenge: s.faenge, tode: s.tode, best: Math.round(s.best) })),
+      schlangen: d.schlangen.map((s) => ({ i: s.i, id: s.id, farbe: s.farbe, skin: s.skin, team: s.team, bot: s.bot, faenge: s.faenge, tode: s.tode, best: Math.round(s.best) })),
+      teams: d.teams, teamErgebnis: d.teamErgebnis || null,
       bots: d.bots,
       startInMs: Math.max(0, d.startUm - Date.now()), restMs: Math.max(0, d.endetUm - Date.now()),
       rangliste: d.rangliste || null,

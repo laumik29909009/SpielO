@@ -16,6 +16,28 @@
     ["#2ee6d6", "#cbfffa"], ["#ff5fb5", "#ffd3ec"], ["#9be15d", "#2f6b1f"], ["#f4f4f4", "#3a3a3a"], ["#6a5cff", "#ffcf3f"], ["#ff3b3b", "#1a1a1a"],
   ];
 
+  // Skins: Grundfarbe, Streifenfarbe je Position, Streifengröße, Leuchten
+  const SKINS = {
+    regenbogen: { name: "Regenbogen", icon: "🌈", basis: "#2a2a3a", streifen: (k) => `hsl(${(k * 32) % 360} 90% 60%)`, gr: 0.95, deckend: true },
+    feuer: { name: "Feuer", icon: "🔥", basis: "#c62828", streifen: (k) => ["#ff6f00", "#ffca28", "#ff3d00"][k % 3], gr: 0.8, glow: "#ff6f00" },
+    galaxie: { name: "Galaxie", icon: "🌌", basis: "#1b1145", streifen: (k) => (k % 4 === 0 ? "#b388ff" : "#ffffff"), gr: 0.28 },
+    gold: { name: "Gold", icon: "👑", basis: "#c9a227", streifen: () => "#fff3b0", gr: 0.5, glow: "#ffd54f" },
+    zebra: { name: "Zebra", icon: "🦓", basis: "#f2f2f2", streifen: () => "#151515", gr: 0.85, deckend: true },
+    tiger: { name: "Tiger", icon: "🐯", basis: "#ff8f00", streifen: () => "#1a1a1a", gr: 0.7, deckend: true },
+    neon: { name: "Neon", icon: "⚡", basis: "#00e5ff", streifen: () => "#e0ffff", gr: 0.45, glow: "#00e5ff" },
+    melone: { name: "Wassermelone", icon: "🍉", basis: "#2e7d32", streifen: (k) => (k % 2 ? "#a5d64c" : "#1b5e20"), gr: 0.75, kopf: "#ff4d6d" },
+  };
+  const TEAM_FARBE = ["#ff4b4b", "#4b8dff"];
+  // Look einer Schlange: Skin oder Farbmuster
+  const look = (i) => {
+    const s = info(i);
+    const sk = s?.skin && SKINS[s.skin];
+    if (sk) return sk;
+    const m = MUSTER[s?.farbe ?? i % MUSTER.length];
+    return { basis: m[0], streifen: () => m[1], gr: 0.62 };
+  };
+  const hauptfarbe = (i) => look(i).basis;
+
   // ---------- Welt im Browser ----------
   let welt = null; // { R, n, schlangen: Map(i → {...}), futter: Map }
   let lauf = null; // requestAnimationFrame-Schleife
@@ -92,7 +114,7 @@
     if (ev.typ === "tod") {
       if (s) {
         // Platzen: Funken entlang des Körpers
-        const farbe = MUSTER[info(ev.i)?.farbe ?? 0];
+        const lk = look(ev.i), farbe = [lk.basis, lk.streifen(1)];
         for (let k = 0; k < s.pfad.length; k += Math.max(1, Math.floor(s.pfad.length / 40))) {
           const p = s.pfad[k];
           partikel.push({ typ: "funke", x: p[0], y: p[1], vx: (Math.random() - 0.5) * 160, vy: (Math.random() - 0.5) * 160, t: 0, dauer: 0.5 + Math.random() * 0.4, c: farbe[k % 2] });
@@ -115,13 +137,25 @@
   }
 
   // ---------- Lobby ----------
+  let skinGemeldet = false;
+  GN.socket.on("zustand", (z) => {
+    if (z.spiel !== "schlange" || z.phase !== "lobby" || skinGemeldet) return;
+    const s = GN.speicher("sgSkin"), ich = z.spieler.find((x) => x.id === GN.ich);
+    if (s && ich && !ich.wunsch?.skin) { skinGemeldet = true; GN.socket.emit("wunsch", { skin: s }); }
+  });
   function abschnitte(z, host) {
     const e = z.einstellungen, dis = host ? "" : "disabled";
     return [{
       id: "arena", wichtig: true, icon: "🐍", titel: "Arena", info: `${e.bots} Bots · ${e.dauer / 60} min`,
       html: `<div class="einstellungs-zeile">
         <div><div class="unter-titel">Computer-Schlangen</div><div class="segment">${[0, 3, 6, 10].map((n) => `<button data-sg-bots="${n}" class="${e.bots === n ? "aktiv" : ""}" ${dis}>${n}</button>`).join("")}</div></div>
-        <div><div class="unter-titel">Rundenlänge</div><div class="segment">${[120, 180, 300].map((s) => `<button data-sg-dauer="${s}" class="${e.dauer === s ? "aktiv" : ""}" ${dis}>${s / 60} min</button>`).join("")}</div></div></div>`,
+        <div><div class="unter-titel">Rundenlänge</div><div class="segment">${[120, 180, 300].map((s) => `<button data-sg-dauer="${s}" class="${e.dauer === s ? "aktiv" : ""}" ${dis}>${s / 60} min</button>`).join("")}</div></div>
+        <div><div class="unter-titel">Modus</div><div class="segment"><button data-sg-teams="0" class="${!e.teams ? "aktiv" : ""}" ${dis}>Jeder gegen jeden</button><button data-sg-teams="1" class="${e.teams ? "aktiv" : ""}" ${dis}>🟥 Teams 🟦</button></div></div></div>
+        ${e.teams ? '<p class="leise klein-text" style="margin-top:8px">Rot gegen Blau: Durch eure eigenen Teamkollegen fahrt ihr hindurch. Gewertet wird die Summe der größten Längen jedes Teams.</p>' : ""}`,
+    }, {
+      id: "skin", wichtig: true, icon: "🎨", titel: "Dein Look", info: SKINS[meinSkin(z)]?.name || "Zufallsfarbe",
+      html: `<div class="sg-skins">${Object.entries(SKINS).map(([id, s]) => `<button data-sg-skin="${id}" class="sg-skin ${meinSkin(z) === id ? "aktiv" : ""}" style="--b:${s.basis};--s:${s.streifen(1)};--s2:${s.streifen(2)}"><i></i><span>${s.icon} ${s.name}</span></button>`).join("")}
+        <button data-sg-skin="" class="sg-skin ${!meinSkin(z) ? "aktiv" : ""}" style="--b:#888;--s:#ccc;--s2:#aaa"><i></i><span>🎲 Zufallsfarbe</span></button></div>`,
     }, {
       id: "regeln", icon: "📖", titel: "So geht's", info: "Fressen, wachsen, nicht anstoßen",
       html: `<ol class="q-regeln">
@@ -132,7 +166,10 @@
         <li>Gewertet wird deine <b>größte Länge</b> in der Runde.</li></ol>`,
     }];
   }
+  const meinSkin = (z) => z.spieler.find((s) => s.id === GN.ich)?.wunsch?.skin || "";
   function binde(el) {
+    $$("[data-sg-teams]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ teams: b.dataset.sgTeams === "1" })));
+    $$("[data-sg-skin]", el).forEach((b) => (b.onclick = () => { Ton.klick(); GN.speicher("sgSkin", b.dataset.sgSkin || null); GN.socket.emit("wunsch", { skin: b.dataset.sgSkin }); }));
     $$("[data-sg-bots]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ bots: +b.dataset.sgBots })));
     $$("[data-sg-dauer]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ dauer: +b.dataset.sgDauer })));
   }
@@ -335,7 +372,8 @@
   }
 
   function schlangeZeichnen(c, s, kopf, zuBild, z, jetzt) {
-    const m = MUSTER[info(s.i)?.farbe ?? s.i % MUSTER.length];
+    const lk = look(s.i);
+    const m = [lk.basis];
     const r = radius(s.masse) * z;
     // Nur Punkte, die sichtbar etwas ändern (Abstand ≥ ~⅓ Radius), und nichts außerhalb des Bildes
     const pts = [];
@@ -357,18 +395,25 @@
     const pfadZiehen = () => { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); };
     c.lineCap = "round"; c.lineJoin = "round";
     c.globalAlpha = neu;
-    if (s.sprint) { c.strokeStyle = m[0] + "30"; c.lineWidth = r * 2 + 18 * z; pfadZiehen(); c.stroke(); c.strokeStyle = m[0] + "55"; c.lineWidth = r * 2 + 8 * z; pfadZiehen(); c.stroke(); }
+    const leucht = lk.glow || m[0];
+    if (s.sprint || lk.glow) { c.strokeStyle = leucht + (s.sprint ? "30" : "18"); c.lineWidth = r * 2 + 18 * z; pfadZiehen(); c.stroke(); c.strokeStyle = leucht + (s.sprint ? "55" : "30"); c.lineWidth = r * 2 + 8 * z; pfadZiehen(); c.stroke(); }
     // Schatten, Rand, Körper
     c.strokeStyle = "rgba(0,0,0,0.35)"; c.lineWidth = r * 2 + 3; c.save(); c.translate(3 * z, 5 * z); pfadZiehen(); c.stroke(); c.restore();
-    c.strokeStyle = "rgba(0,0,0,0.55)"; c.lineWidth = r * 2 + 3; pfadZiehen(); c.stroke();
+    // Team-Modus: Rand in Teamfarbe, sonst dunkler Rand
+    const team = GN.zustand?.teams ? info(s.i)?.team : null;
+    c.strokeStyle = team !== null && team !== undefined ? TEAM_FARBE[team] : "rgba(0,0,0,0.55)"; c.lineWidth = r * 2 + (team !== null && team !== undefined ? 5 * z + 3 : 3); pfadZiehen(); c.stroke();
     c.strokeStyle = m[0]; c.lineWidth = r * 2; pfadZiehen(); c.stroke();
     // Streifen: Punkte in festem Abstand ab dem Schwanz (wandern so nicht beim Wachsen)
-    c.fillStyle = m[1];
-    let summe = 0, naechster = r * 1.4;
+    let summe = 0, naechster = r * 1.4, k = 0;
+    const abstand = lk.deckend ? r * 1.25 : r * 2.4;
     for (let i = 1; i < pts.length - 2; i++) {
       const dx = pts[i][0] - pts[i - 1][0], dy = pts[i][1] - pts[i - 1][1];
       summe += Math.hypot(dx, dy);
-      if (summe >= naechster) { naechster += r * 2.4; c.globalAlpha = 0.55 * neu; c.beginPath(); c.arc(pts[i][0], pts[i][1], r * 0.62, 0, Math.PI * 2); c.fill(); }
+      if (summe >= naechster) {
+        naechster += abstand; k++;
+        c.fillStyle = lk.streifen(k); c.globalAlpha = (lk.deckend ? 0.95 : 0.6) * neu;
+        c.beginPath(); c.arc(pts[i][0], pts[i][1], r * lk.gr, 0, Math.PI * 2); c.fill();
+      }
     }
     c.globalAlpha = neu;
     // Glanzlinie
@@ -376,7 +421,7 @@
     // Kopf mit Augen, die in Fahrtrichtung schauen
     const [hx, hy] = pts[pts.length - 1];
     const a = s.a;
-    c.fillStyle = m[0]; c.beginPath(); c.arc(hx, hy, r * 1.08, 0, Math.PI * 2); c.fill();
+    c.fillStyle = lk.kopf || m[0]; c.beginPath(); c.arc(hx, hy, r * 1.08, 0, Math.PI * 2); c.fill();
     for (const seite of [-1, 1]) {
       const ex = hx + Math.cos(a + seite * 0.75) * r * 0.62, ey = hy + Math.sin(a + seite * 0.75) * r * 0.62;
       c.fillStyle = "#fff"; c.beginPath(); c.arc(ex, ey, r * 0.42, 0, Math.PI * 2); c.fill();
@@ -407,7 +452,13 @@
     const rh = zeilen.map((s, k) => `<div class="${s.i === ichI ? "ich" : ""}"><span>${k + 1}.</span>${GN.spieler(s.id).avatar} <em>${esc(GN.spieler(s.id).name)}</em><b>${Math.round(s.m)}</b></div>`).join("")
       + (meinPlatz >= 5 ? `<div class="ich"><span>${meinPlatz + 1}.</span>${GN.spieler(GN.ich).avatar} <em>Du</em><b>${Math.round(rang[meinPlatz].m)}</b></div>` : "");
     const re = $("#sgRang");
-    if (re.dataset.h !== rh) { re.dataset.h = rh; re.innerHTML = rh; }
+    let teamKopf = "";
+    if (z.teams) {
+      const summe = [0, 1].map((t) => Math.round(rang.filter((s) => s.team === t).reduce((a, s) => a + s.m, 0)));
+      teamKopf = `<div class="sg-teamstand"><span class="rot">🟥 ${summe[0]}</span><span class="blau">${summe[1]} 🟦</span></div>`;
+    }
+    const rhGanz = teamKopf + rh;
+    if (re.dataset.h !== rhGanz) { re.dataset.h = rhGanz; re.innerHTML = rhGanz; }
     // Eigene Werte
     const ich = meine(), mi = info(ichI);
     const ih = ich?.lebt ? `<b>${Math.round(ich.masse)}</b> lang · 🍽️ ${mi?.faenge || 0} · 🏆 ${Math.max(mi?.best || 0, Math.round(ich.masse))}` : "";
@@ -442,7 +493,7 @@
     const ichI = meinIndex();
     for (const sch of welt.schlangen.values()) {
       if (!sch.lebt) continue;
-      const m = MUSTER[info(sch.i)?.farbe ?? 0];
+      const m = [GN.zustand?.teams ? TEAM_FARBE[info(sch.i)?.team ?? 0] : hauptfarbe(sch.i)];
       const [x, y] = sch.kopf;
       const g = sch.i === ichI ? 4 : 1.5 + Math.min(3, sch.masse / 120);
       c.fillStyle = sch.i === ichI ? "#fff" : m[0];
@@ -460,8 +511,10 @@
     if (platz === 0) { Ton.fanfare(); GN.konfetti(180); } else Ton.ding?.();
     app.innerHTML = `<div class="sg-ergebnis">
       <h2>🐍 Runde vorbei!</h2>
+      ${z.teamErgebnis ? `<div class="sg-teams-ende"><div class="sg-team rot ${z.teamErgebnis.sieger === 0 ? "sieg" : ""}">🟥 Team Rot<b>${z.teamErgebnis.summe[0]}</b></div><span>gegen</span><div class="sg-team blau ${z.teamErgebnis.sieger === 1 ? "sieg" : ""}">🟦 Team Blau<b>${z.teamErgebnis.summe[1]}</b></div></div>
+        <p class="leise">${z.teamErgebnis.sieger < 0 ? "Unentschieden!" : `Team ${z.teamErgebnis.sieger === 0 ? "Rot" : "Blau"} gewinnt (+50 Punkte für jeden im Team).`}</p>` : ""}
       <p class="leise">${platz >= 0 ? `Du bist auf Platz <b>${platz + 1}</b> von ${r.length}.` : ""}</p>
-      <div class="sg-tabelle">${r.map((x, k) => { const p = person(x.i); const m = MUSTER[info(x.i)?.farbe ?? 0]; return `<div class="sg-zeile ${x.i === ichI ? "ich" : ""}" style="--f:${m[0]};--i:${k}"><span class="sg-platz">${k + 1}</span><span class="sg-farbe"></span>${p.avatar} <b>${esc(p.name)}</b><span class="sg-werte"><em>📏 ${x.best}</em><em>🍽️ ${x.faenge}</em><em>💥 ${x.tode}</em></span></div>`; }).join("")}</div>
+      <div class="sg-tabelle">${r.map((x, k) => { const p = person(x.i); const m = [z.teams ? TEAM_FARBE[info(x.i)?.team ?? 0] : hauptfarbe(x.i)]; return `<div class="sg-zeile ${x.i === ichI ? "ich" : ""}" style="--f:${m[0]};--i:${k}"><span class="sg-platz">${k + 1}</span><span class="sg-farbe"></span>${p.avatar} <b>${esc(p.name)}</b><span class="sg-werte"><em>📏 ${x.best}</em><em>🍽️ ${x.faenge}</em><em>💥 ${x.tode}</em></span></div>`; }).join("")}</div>
     </div>`;
     setTimeout(() => GN.zustand?.phase === "ende" && GN.ansicht === "sg-ende" && GN.podest("sg-podest", { einheit: "lang" }), 6000);
   }
