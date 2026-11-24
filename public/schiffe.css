@@ -1,0 +1,91 @@
+/* =============================================================
+   Schiffe versenken: Hochsee-Blau, Raster mit Schiffsteilen, 3D-Meer
+   ============================================================= */
+body[data-spiel="schiffe"], [data-farbe="schiffe"] {
+  --bg: #06192b; --flaeche: #0e2a44; --flaeche-2: #153a5c; --leise: #9fc0dc; --text: #f2f8ff;
+  --gold: #ffc533; --gold-2: #ff8a3d; --gold-text: #241a00; --btn-schatten: #a8541e;
+  --glow-1: rgba(40, 150, 220, 0.2); --glow-2: rgba(20, 90, 160, 0.16); --glow-3: rgba(255, 197, 51, 0.06);
+  --konfetti: #ffc533, #3ba3ff, #ffffff, #ff5a52;
+  --sv-wasser: #0f4c75; --sv-wasser-2: #145a8a; --sv-schiff: #8a9aaa;
+}
+.sv-buehne { max-width: 1180px; margin: 0 auto; padding-bottom: 24px; }
+.sv-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
+.sv-status { font-size: 1rem; line-height: 1.35; }
+.sv-status .sv-dran { color: var(--gold); }
+.sv-status .sv-warn { color: #ff6b5e; }
+.sv-umschalten { all: unset; cursor: pointer; padding: 5px 12px; border-radius: 99px; font-weight: 900; font-size: 0.8rem; background: var(--flaeche-2); box-shadow: inset 0 0 0 1px rgba(159, 192, 220, 0.4); }
+.sv-buehne .timer { margin: 8px 0 10px; visibility: hidden; }
+.sv-haupt { display: grid; gap: 14px; }
+.sv-buehne.drei .sv-haupt { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+.sv-3d { position: relative; height: min(74vh, 720px); min-height: 380px; border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, #3b7fd0, #9cc8ee 55%, #145a8a 56%, #0f4c75);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.12); touch-action: manipulation; }
+.sv-3d canvas { display: block; width: 100% !important; height: 100% !important; cursor: crosshair; }
+.sv-laedt { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+.sv-panel { display: grid; gap: 12px; }
+.sv-karte { padding: 14px; border-radius: 18px; background: var(--flaeche); box-shadow: inset 0 0 0 1px rgba(159, 192, 220, 0.2); display: grid; gap: 10px; }
+.sv-karte h3 { margin: 0; }
+
+/* Aufstellen */
+.sv-schiffe { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+.sv-schiff { all: unset; cursor: pointer; position: relative; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 12px; background: var(--flaeche-2); font-size: 0.85rem; box-shadow: inset 0 0 0 2px transparent; }
+.sv-schiff.aktiv { box-shadow: inset 0 0 0 2px var(--gold); }
+.sv-schiff.gesetzt { opacity: 0.75; }
+.sv-schiff.aktiv.gesetzt { opacity: 1; }
+.sv-schiff em { position: absolute; right: 8px; top: 6px; font-style: normal; color: #6ff09a; font-weight: 900; }
+.sv-laenge { letter-spacing: 1px; color: var(--sv-schiff); font-size: 0.9rem; }
+.sv-schiff.aktiv .sv-laenge { color: var(--gold); }
+.sv-knoepfe { display: flex; gap: 6px; flex-wrap: wrap; }
+.sv-bereit-liste { display: flex; gap: 8px; flex-wrap: wrap; color: var(--leise); }
+.sv-bereit-liste .ok { color: #6ff09a; }
+
+/* Raster */
+.sv-raster { display: grid; grid-template-columns: 22px repeat(10, 1fr); gap: 2px; padding: 6px; border-radius: 14px; background: linear-gradient(180deg, var(--sv-wasser-2), var(--sv-wasser)); user-select: none; touch-action: manipulation; }
+.sv-achse { display: grid; place-items: center; font-size: 0.7rem; font-weight: 800; color: rgba(255, 255, 255, 0.7); }
+.sv-feld { all: unset; aspect-ratio: 1; border-radius: 4px; background: rgba(255, 255, 255, 0.06); position: relative; cursor: default; }
+.sv-raster.setzen .sv-feld, .sv-raster.ziel .sv-feld:not(:disabled) { cursor: pointer; }
+.sv-raster.ziel .sv-feld:not(:disabled):hover { background: rgba(255, 90, 82, 0.35); box-shadow: inset 0 0 0 2px #ff5a52; }
+.sv-feld.schiff { background: linear-gradient(180deg, #a9b6c4, #6f7f90); }
+.sv-feld.schiff.q.kopf { border-radius: 4px 2px 2px 4px; } .sv-feld.schiff.q.ende { border-radius: 2px 50% 50% 2px; }
+.sv-feld.schiff.s.kopf { border-radius: 4px 4px 2px 2px; } .sv-feld.schiff.s.ende { border-radius: 2px 2px 50% 50%; }
+.sv-feld.schiff.gewaehlt { background: linear-gradient(180deg, #ffe08a, #e0a22a); }
+.sv-feld.vor { background: rgba(111, 240, 154, 0.55); }
+.sv-feld.vor-falsch { background: rgba(255, 90, 82, 0.5); }
+.sv-feld.nein { animation: sv-nein 0.35s; }
+@keyframes sv-nein { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+.sv-feld.s-w::after, .sv-feld.s-r::after { content: ""; position: absolute; inset: 34%; border-radius: 50%; background: #fff; opacity: 0.9; }
+.sv-feld.s-r::after { opacity: 0.35; inset: 40%; }
+.sv-feld.s-t { background: radial-gradient(circle, #ffd23f 0 18%, #ff5a2a 30%, #8a1a10 75%); animation: sv-glut 1s ease-in-out infinite alternate; }
+.sv-feld.s-v { background: linear-gradient(180deg, #4a4f58, #2a2e35); }
+.sv-feld.s-v::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; color: #ff5a52; font-weight: 900; font-size: 0.8rem; }
+@keyframes sv-glut { to { filter: brightness(1.25); } }
+.sv-r-paar { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sv-r-box { display: grid; gap: 6px; }
+.sv-r-box.aktiv .sv-raster { box-shadow: 0 0 0 3px var(--gold), 0 0 24px rgba(255, 197, 51, 0.35); }
+.sv-r-titel { font-weight: 800; }
+
+/* Flotten-Übersicht */
+.sv-flotten { gap: 6px; }
+.sv-flotte { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 12px; background: var(--flaeche-2); font-size: 0.9rem; }
+.sv-flotte.dran { box-shadow: inset 0 0 0 2px var(--gold); }
+.sv-flotte.raus { opacity: 0.45; text-decoration: line-through; }
+.sv-flotte b { color: var(--gold); min-width: 36px; text-align: right; }
+.sv-rest { display: flex; gap: 4px; font-style: normal; }
+.sv-rest i { font-style: normal; font-size: 0.65rem; letter-spacing: 0.5px; color: #a9b6c4; }
+.sv-rest i.weg { color: #ff5a52; opacity: 0.55; text-decoration: line-through; }
+.sv-zielwahl { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.sv-zielwahl span { color: var(--leise); font-size: 0.85rem; }
+.sv-zielwahl button { all: unset; cursor: pointer; padding: 6px 10px; border-radius: 99px; background: var(--flaeche-2); font-weight: 700; font-size: 0.85rem; box-shadow: inset 0 0 0 2px transparent; }
+.sv-zielwahl button.aktiv { box-shadow: inset 0 0 0 2px #ff5a52; background: color-mix(in srgb, #ff5a52 20%, var(--flaeche-2)); }
+.sv-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 0.82rem; color: var(--leise); }
+
+@media (max-width: 900px) {
+  .sv-buehne.drei .sv-haupt { grid-template-columns: 1fr; }
+  .sv-3d { height: 56vh; min-height: 300px; border-radius: 14px; }
+  .sv-r-paar { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .sv-status { font-size: 0.9rem; }
+  .sv-raster { grid-template-columns: 18px repeat(10, 1fr); padding: 4px; gap: 1.5px; }
+  .sv-schiffe { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
+  .sv-schiff { font-size: 0.78rem; padding: 6px 8px; }
+}

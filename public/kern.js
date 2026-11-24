@@ -254,6 +254,7 @@ const COVER = {
   preis: { muster: "linien", akzente: ["💶", "🚗", "📱"] },
   duell: { muster: "raster", akzente: ["🏳️", "🗺️", "⚡"] },
   millionen: { muster: "strahlen", akzente: ["💎", "📞", "👥"] },
+  schiffe: { muster: "linien", akzente: ["💥", "⚓", "🌊"] },
 };
 function coverHtml(id, s) {
   const c = COVER[id] || { muster: "punkte", akzente: [] };

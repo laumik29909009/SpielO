@@ -25,6 +25,7 @@ const SPIELE = {
   ludo: require("./spiele/ludo"),
   // deckname: require("./spiele/deckname"), // vorübergehend ausgeblendet
   schlange: require("./spiele/schlange"),
+  schiffe: require("./spiele/schiffe"),
 };
 const MAX_SPIELER = 10;
 const LADE_MS = 1400; // Ladebildschirm vor jedem Spielstart
