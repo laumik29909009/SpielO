@@ -207,6 +207,7 @@ function laufen(raum, ctx, id, n, { zu = null, keinNochmal = false, doppelt = fa
   if (!rueckwaerts && (zu !== null ? nach < von || (nach === 0 && von !== 0) : von + n >= 40)) {
     const betrag = nach === 0 && einst(raum).losDoppelt ? LOS_GELD * 2 : LOS_GELD;
     geldAn(d, id, betrag);
+    (d.rum ||= {})[id] = true;
     log(d, `${name(raum, id)} ${betrag > LOS_GELD ? "landet genau auf Los" : "kommt über Los"}: +${betrag}.`);
   }
   d.figur[id] = nach;
@@ -222,7 +223,12 @@ function feldAuswerten(raum, ctx, id, { doppelt = false, laufzeit = 0 } = {}) {
   if (kaufbar(f)) {
     const b = d.besitz[f];
     if (b === undefined) {
-      d.schritt = "kaufen";
+      if (einst(raum).ersteRunde && !d.rum?.[id]) {
+        log(d, `${name(raum, id)} darf erst kaufen, wenn die erste Runde geschafft ist.`);
+      } else d.schritt = "kaufen";
+    } else if (b !== id && einst(raum).knastKeineMiete && d.knast[b] !== undefined) {
+      log(d, `🚔 ${name(raum, b)} sitzt im Achsenknast und kassiert keine Miete.`);
+      aktion(d, { typ: "keineMiete", spieler: id, an: b, feld: f });
     } else if (b !== id && !d.pleite.includes(b)) {
       // Per Karte aufs Werk geschickt: neu würfeln, das Zehnfache zahlen
       const augen = doppelt && feld.art === "werk" ? w6() + w6() : d.wuerfel[0] + d.wuerfel[1];
@@ -387,6 +393,12 @@ function auszeichnungen(raum) {
 }
 
 // ---------- Bauen, Hypothek, Handel ----------
+const HAEUSER_MAX = 32, HOTELS_MAX = 12;
+function bankBestand(d) {
+  let haeuser = 0, hotels = 0;
+  for (const h of Object.values(d.haeuser)) { if (h === 5) hotels++; else haeuser += h || 0; }
+  return { haeuser: HAEUSER_MAX - haeuser, hotels: HOTELS_MAX - hotels };
+}
 function kannBauen(d, id, f) {
   const feld = FELDER[f];
   if (feld?.art !== "strasse" || d.besitz[f] !== id || !hatGruppe(d, id, feld.gruppe)) return "Du brauchst erst die ganze Farbgruppe.";
@@ -396,6 +408,11 @@ function kannBauen(d, id, f) {
   if (h >= 5) return "Hier steht schon ein Hotel.";
   if (h > Math.min(...gf.map((x) => d.haeuser[x] || 0))) return "Erst gleichmäßig bauen: die anderen Straßen der Gruppe zuerst.";
   if (d.geld[id] < GRUPPEN[feld.gruppe].haus) return "Dafür reicht dein Geld nicht.";
+  if (d.limit) {
+    const bank = bankBestand(d);
+    if (h < 4 && bank.haeuser <= 0) return "Die Bank hat keine Häuser mehr.";
+    if (h === 4 && bank.hotels <= 0) return "Die Bank hat keine Hotels mehr.";
+  }
   return null;
 }
 function kannVerkaufen(d, id, f) {
@@ -445,6 +462,83 @@ function handelAusfuehren(raum, d, a) {
   for (const x of [a.von, a.an]) (d.statistik[x] ||= {}).handel = (d.statistik[x].handel || 0) + 1;
   log(d, `🤝 ${name(raum, a.von)} und ${name(raum, a.an)} handeln.`);
   aktion(d, { typ: "handel", spieler: a.von, an: a.an });
+}
+
+// ---------- Versteigerung ----------
+// Jeder bietet in 10er-Schritten. Nach jedem Gebot läuft die Uhr neu (8 s).
+// Ende: Zeit abgelaufen oder alle außer dem Höchstbietenden haben gepasst.
+const AUKTION_MS = 8000;
+function auktionStarten(raum, ctx, feld) {
+  const d = raum.daten;
+  d.schritt = "auktion";
+  d.auktion = { feld, hoechst: 0, von: null, passt: [], nr: (d.auktion?.nr || 0) + 1, endetUm: Date.now() + AUKTION_MS * 1.5 };
+  log(d, `🔨 ${FELDER[feld].name} wird versteigert!`);
+  aktion(d, { typ: "auktion", feld });
+  clearTimeout(d.timer);
+  auktionUhr(raum, ctx, AUKTION_MS * 1.5);
+  botsBieten(raum, ctx);
+  ctx.sende(raum);
+}
+function auktionUhr(raum, ctx, ms) {
+  const d = raum.daten;
+  clearTimeout(d.auktionTimer);
+  d.auktion.endetUm = Date.now() + ms;
+  const nr = d.auktion.nr;
+  d.auktionTimer = setTimeout(() => { if (raum.daten === d && d.auktion?.nr === nr) auktionEnde(raum, ctx); }, ms);
+}
+function auktionAktion(raum, ctx, id, typ, daten) {
+  const d = raum.daten, a = d.auktion;
+  if (d.schritt !== "auktion" || !a || d.pleite.includes(id) || !d.reihenfolge.includes(id)) return;
+  if (typ === "passen") {
+    if (!a.passt.includes(id)) a.passt.push(id);
+    const offen = imSpiel(d).filter((x) => !a.passt.includes(x) && x !== a.von);
+    if (!offen.length) return auktionEnde(raum, ctx);
+    return ctx.sende(raum);
+  }
+  const betrag = Math.round((parseInt(daten) || 0) / 10) * 10;
+  if (a.passt.includes(id)) return "Du hast schon gepasst.";
+  if (betrag <= a.hoechst) return `Biete mehr als ${a.hoechst}.`;
+  if (betrag > d.geld[id]) return "So viel Geld hast du nicht.";
+  a.hoechst = betrag; a.von = id;
+  log(d, `🔨 ${name(raum, id)} bietet ${betrag}.`);
+  auktionUhr(raum, ctx, AUKTION_MS);
+  const offen = imSpiel(d).filter((x) => !a.passt.includes(x) && x !== a.von);
+  if (!offen.length) return auktionEnde(raum, ctx);
+  botsBieten(raum, ctx);
+  ctx.sende(raum);
+}
+function auktionEnde(raum, ctx) {
+  const d = raum.daten, a = d.auktion;
+  if (!a || d.schritt !== "auktion") return;
+  clearTimeout(d.auktionTimer);
+  if (a.von && d.geld[a.von] >= a.hoechst) {
+    d.geld[a.von] -= a.hoechst; d.besitz[a.feld] = a.von;
+    log(d, `🔨 Zuschlag: ${name(raum, a.von)} ersteigert ${FELDER[a.feld].name} für ${a.hoechst}.`);
+    aktion(d, { typ: "kauf", spieler: a.von, feld: a.feld, auktion: true, betrag: a.hoechst, gruppeVoll: FELDER[a.feld].gruppe && hatGruppe(d, a.von, FELDER[a.feld].gruppe) });
+  } else log(d, `🔨 Niemand hat geboten, ${FELDER[a.feld].name} bleibt frei.`);
+  d.auktion = { nr: a.nr };
+  d.schritt = "fertig";
+  planen(raum, ctx);
+  ctx.sende(raum);
+}
+// Computer bieten bis zu einem eigenen Höchstwert, mit kleiner Bedenkzeit
+function botsBieten(raum, ctx) {
+  const d = raum.daten, a = d.auktion;
+  const stufe = einst(raum).stufe || "mittel";
+  for (const b of d.bots) {
+    if (d.pleite.includes(b.id) || a.passt.includes(b.id) || a.von === b.id) continue;
+    const reserve = (stufe === "schwer" ? 100 : 150) + 20 * d.runde;
+    const wert = wertFuer(d, b.id, a.feld) * ({ einfach: 0.7, mittel: 0.9, schwer: 1.05 })[stufe];
+    const grenze = Math.min(d.geld[b.id] - reserve, wert);
+    const nr = a.nr, hoechst = a.hoechst;
+    setTimeout(() => {
+      if (raum.daten !== d || d.auktion?.nr !== nr || d.auktion.hoechst !== hoechst || d.schritt !== "auktion") return;
+      const schritt = hoechst < 100 ? 10 : hoechst < 300 ? 20 : 50;
+      const gebot = Math.ceil((hoechst + schritt) / 10) * 10;
+      if (gebot <= grenze) auktionAktion(raum, ctx, b.id, "bieten", gebot);
+      else auktionAktion(raum, ctx, b.id, "passen");
+    }, 900 + Math.random() * 1600);
+  }
 }
 
 // ---------- Computer (und Vertretung für abwesende Menschen) ----------
@@ -593,6 +687,8 @@ function handle(raum, ctx, id, typ, daten, still = false) {
     if (d.angebot?.von !== id) return;
     d.angebot = null; planen(raum, ctx); return ctx.sende(raum);
   }
+  // Versteigerung: alle dürfen mitbieten, nicht nur wer dran ist
+  if (typ === "bieten" || typ === "passen") return auktionAktion(raum, ctx, id, typ, daten);
   if (d.dran !== id) return;
   if (d.angebot) return "Warte auf die Antwort zum Angebot.";
   switch (typ) {
@@ -642,6 +738,7 @@ function handle(raum, ctx, id, typ, daten, still = false) {
     }
     case "nichtKaufen":
       if (d.schritt !== "kaufen") return;
+      if (einst(raum).auktion && imSpiel(d).length > 1) return auktionStarten(raum, ctx, d.figur[id]);
       d.schritt = "fertig";
       planen(raum, ctx);
       return ctx.sende(raum);
@@ -669,7 +766,7 @@ function handle(raum, ctx, id, typ, daten, still = false) {
 // ---------- Schnittstelle ----------
 module.exports = {
   meta: () => ({ felder: FELDER, gruppen: GRUPPEN, max: MAX, startGeld: START_GELD, figuren: SPIELFIGUREN }),
-  standardEinstellungen: () => ({ bots: 2, sekunden: 60, runden: 30, topf: true, startGeld: 1500, losDoppelt: false, tempo: false }),
+  standardEinstellungen: () => ({ bots: 2, sekunden: 60, runden: 30, topf: true, startGeld: 1500, losDoppelt: false, tempo: false, auktion: true, knastKeineMiete: false, haeuserLimit: false, ersteRunde: false }),
   einstellungenSetzen(alt, e) {
     const neu = { ...alt };
     if (e.bots !== undefined) neu.bots = Math.min(5, Math.max(0, parseInt(e.bots) || 0));
@@ -679,6 +776,7 @@ module.exports = {
     if (e.startGeld !== undefined) neu.startGeld = [1000, 1500, 2000].includes(+e.startGeld) ? +e.startGeld : 1500;
     if (e.losDoppelt !== undefined) neu.losDoppelt = !!e.losDoppelt;
     if (e.tempo !== undefined) neu.tempo = !!e.tempo;
+    for (const k of ["auktion", "knastKeineMiete", "haeuserLimit", "ersteRunde"]) if (e[k] !== undefined) neu[k] = !!e[k];
     return neu;
   },
   starten(raum, ctx) {
@@ -702,7 +800,7 @@ module.exports = {
       bots, reihenfolge, dran: reihenfolge[0], runde: 1, zugNr: 0, wurfNr: 0, pasch: 0, wuerfel: [1, 1],
       geld: Object.fromEntries(reihenfolge.map((id) => [id, startGeld])),
       figur: Object.fromEntries(reihenfolge.map((id) => [id, 0])),
-      figurIcon, tempo: null, mrOffen: false,
+      figurIcon, tempo: null, mrOffen: false, limit: !!e.haeuserLimit, rum: {}, auktion: null,
       besitz: {}, haeuser: {}, hypothek: {}, knast: {}, freiKarten: [], pleite: [], topf: 0,
       stapel: { ereignis: mischen(EREIGNIS.map((_, i) => i)), kasse: mischen(KASSE.map((_, i) => i)) },
       schritt: "wuerfeln", schulden: null, angebot: null, log: [], statistik: {}, timer: null, phase: "spielen", auszeichnungen: [],
@@ -711,7 +809,7 @@ module.exports = {
     aktion(raum.daten, { typ: "start" });
     zugStarten(raum, ctx);
   },
-  beenden(raum) { if (raum.daten) clearTimeout(raum.daten.timer); },
+  beenden(raum) { if (raum.daten) { clearTimeout(raum.daten.timer); clearTimeout(raum.daten.auktionTimer); } },
   istVorbei: (raum) => raum.daten?.phase === "ende",
   aktion(raum, { spielerId }, typ, daten, ctx) {
     const d = raum.daten;
@@ -738,6 +836,8 @@ module.exports = {
       geld: d.geld, figur: d.figur, figurIcon: d.figurIcon, besitz: d.besitz, haeuser: d.haeuser, hypothek: d.hypothek,
       knast: d.knast, freiKarten: d.freiKarten.map((k) => k.spieler), pleite: d.pleite, topf: d.topf,
       schulden: d.schulden, angebot: d.angebot, bewegung: d.bewegung || null,
+      auktion: d.schritt === "auktion" && d.auktion ? { feld: d.auktion.feld, hoechst: d.auktion.hoechst, von: d.auktion.von, passt: d.auktion.passt, restMs: Math.max(0, d.auktion.endetUm - Date.now()), nr: d.auktion.nr } : null,
+      bank: d.limit ? bankBestand(d) : null, regeln: { auktion: !!einst(raum).auktion, knastKeineMiete: !!einst(raum).knastKeineMiete, ersteRunde: !!einst(raum).ersteRunde },
       miete: Object.fromEntries(Object.keys(d.besitz).map((f) => [f, miete(d, +f, 7)])),
       vermoegen: Object.fromEntries(d.reihenfolge.map((id) => [id, vermoegen(d, id)])),
       log: d.log.slice(-12), letzteAktion: d.letzteAktion || null,

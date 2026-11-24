@@ -332,3 +332,26 @@ body[data-spiel="baulowe"], [data-farbe="baulowe"] {
 .bl-w.tempo .bl-w-seite:has(b) { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .bl-bus-ziel { display: block; font-size: 0.7rem; font-weight: 600; opacity: 0.8; }
 .bl-ansicht-knopf { width: 100%; }
+
+/* Hausregeln in der Lobby */
+.bl-regeln { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; margin-top: 12px; }
+.bl-regel { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; background: var(--flaeche-2); border: 2px solid transparent; cursor: pointer; }
+.bl-regel.an { border-color: var(--gold); }
+.bl-regel input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--gold); }
+.bl-regel span { display: flex; flex-direction: column; gap: 2px; }
+.bl-regel small { color: var(--leise); font-size: 0.78rem; line-height: 1.3; }
+/* Versteigerung */
+.bl-auktion { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.bl-auktion-kopf { display: flex; align-items: center; gap: 12px; text-align: left; }
+.bl-hammer { font-size: 2.4rem; animation: bl-hammer 1.2s ease-in-out infinite; transform-origin: 70% 80%; }
+@keyframes bl-hammer { 0%, 70%, 100% { transform: rotate(0); } 80% { transform: rotate(-30deg); } 90% { transform: rotate(8deg); } }
+.bl-auktion-kopf small { display: block; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.7rem; font-weight: 800; }
+.bl-auktion-kopf b { display: block; font-size: 1.2rem; }
+.bl-auktion-kopf em { font-style: normal; color: var(--leise); font-size: 0.8rem; }
+.bl-gebot { padding: 8px 16px; border-radius: 14px; background: color-mix(in srgb, var(--gold) 18%, var(--flaeche-2)); font-size: 1.05rem; }
+.bl-gebot strong { color: var(--gold); font-size: 1.25rem; }
+.bl-gebot.leer { background: var(--flaeche-2); color: var(--leise); }
+.bl-auktion-uhr { width: min(320px, 90%); height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.bl-auktion-uhr i { display: block; height: 100%; background: linear-gradient(90deg, #ff5a52, var(--gold)); transform-origin: left; animation: bl-uhr linear forwards; }
+@keyframes bl-uhr { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.bl-fuehre { color: var(--gold); font-weight: 800; }

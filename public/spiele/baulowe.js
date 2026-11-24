@@ -69,6 +69,13 @@
           <div><div class="unter-titel">🎲 Tempowürfel (3. Würfel)</div><div class="segment"><button data-bl-tempo="1" class="${e.tempo ? "aktiv" : ""}" ${dis}>An</button><button data-bl-tempo="0" class="${!e.tempo ? "aktiv" : ""}" ${dis}>Aus</button></div></div>
           <div><div class="unter-titel">Genau auf Los = 400 €</div><div class="segment"><button data-bl-los="1" class="${e.losDoppelt ? "aktiv" : ""}" ${dis}>An</button><button data-bl-los="0" class="${!e.losDoppelt ? "aktiv" : ""}" ${dis}>Aus</button></div></div>
         </div>
+        <div class="bl-regeln">${[
+          ["auktion", "🔨 Versteigerung", "Wer ein Feld nicht kauft, gibt es zur Versteigerung an alle frei."],
+          ["knastKeineMiete", "🚔 Keine Miete aus dem Achsenknast", "Wer im Achsenknast sitzt, kassiert keine Miete."],
+          ["haeuserLimit", "🏘️ Häuserlimit", "Die Bank hat wie im Original nur 32 Häuser und 12 Hotels."],
+          ["ersteRunde", "🔄 Erst eine Runde ums Brett", "Kaufen geht erst, wenn man einmal über Los gezogen ist."],
+        ].map(([k, t, text]) => `<label class="bl-regel ${e[k] ? "an" : ""}"><input type="checkbox" data-bl-regel="${k}" ${e[k] ? "checked" : ""} ${dis}><span><b>${t}</b><small>${text}</small></span></label>`).join("")}
+        </div>
         <p class="leise klein-text" style="margin-top:8px"><b>Tempowürfel:</b> 1–3 Augen zählen dazu. 🎩 <b>Mr. Monopoly</b>: Nach deinem Zug fährst du weiter zum nächsten freien Grundstück (gibt es keins mehr, zum nächsten fremden und zahlst Miete). 🚌 <b>Bus</b>: Du wählst, ob du einen Würfel oder die Summe läufst. Dreimal dieselbe Zahl: Spring auf ein beliebiges Feld!</p>`,
       },
       {
@@ -101,6 +108,7 @@
     $$("[data-bl-start]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ startGeld: +b.dataset.blStart })));
     $$("[data-bl-tempo]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ tempo: b.dataset.blTempo === "1" })));
     $$("[data-bl-los]", el).forEach((b) => (b.onclick = () => GN.einstellungen({ losDoppelt: b.dataset.blLos === "1" })));
+    $$("[data-bl-regel]", el).forEach((c) => (c.onchange = () => GN.einstellungen({ [c.dataset.blRegel]: c.checked })));
     $$("[data-bl-figur]", el).forEach((b) => (b.onclick = () => { Ton.klick(); GN.speicher("blFigur", b.dataset.blFigur || null); GN.socket.emit("wunsch", { figur: b.dataset.blFigur }); }));
   }
 
@@ -215,7 +223,7 @@
 
   function aktualisieren(z, vorher) {
     const ich = z.dran === GN.ich;
-    $("#blRunde").textContent = `Runde ${z.runde} / ${z.rundenLimit}${z.topf ? ` · ⛲ ${z.topf} €` : ""}`;
+    $("#blRunde").textContent = `Runde ${z.runde} / ${z.rundenLimit}${z.topf ? ` · ⛲ ${z.topf} €` : ""}${z.bank ? ` · Bank: 🏠 ${z.bank.haeuser} 🏨 ${z.bank.hotels}` : ""}`;
     // Würfel
     if (z.wurfNr !== letzterWurf) {
       letzterWurf = z.wurfNr;
@@ -400,7 +408,20 @@
     const ich = z.dran === GN.ich;
     let html = "";
     const wer = `${person(z, z.dran).avatar} ${esc(person(z, z.dran).name)}`;
-    if (z.angebot) html = `<div class="bl-ansage">🤝 Handel läuft${GN.wartePunkte()}</div>`;
+    if (z.auktion) {
+      const a = z.auktion, f = F()[a.feld];
+      const ichDabei = leute(z).some((t) => t.id === GN.ich) && !z.pleite.includes(GN.ich);
+      const gepasst = a.passt.includes(GN.ich), fuehre = a.von === GN.ich;
+      const schritte = [10, 50, 100].map((s) => Math.ceil((a.hoechst + s) / 10) * 10);
+      html = `<div class="bl-auktion">
+        <div class="bl-auktion-kopf"><span class="bl-hammer">🔨</span><div><small>Versteigerung</small><b>${esc(f.name)}</b><em>Listenpreis ${geldText(f.preis)}</em></div></div>
+        <div class="bl-gebot ${a.von ? "" : "leer"}">${a.von ? `${person(z, a.von).avatar} <b>${esc(nameVon(z, a.von))}</b> bietet <strong>${geldText(a.hoechst)}</strong>` : "Noch kein Gebot – wer bietet zuerst?"}</div>
+        <div class="bl-auktion-uhr"><i style="animation-duration:${a.restMs}ms"></i></div>
+        ${!ichDabei ? "" : gepasst ? '<div class="leise">Du hast gepasst.</div>' : fuehre ? '<div class="bl-fuehre">👑 Du führst! Warte, ob jemand überbietet …</div>'
+          : `<div class="bl-knoepfe">${schritte.map((b) => `<button class="btn ${b === schritte[0] ? "" : "zweit"}" data-biete="${b}" ${z.geld[GN.ich] < b ? "disabled" : ""}>${geldText(b)}</button>`).join("")}<button class="btn zweit" data-a-passen>Passen</button></div>`}
+        <small class="leise">${a.passt.length ? `Gepasst: ${a.passt.map((id) => person(z, id).avatar).join(" ")}` : "Jedes Gebot startet die Uhr neu."}</small>
+      </div>`;
+    } else if (z.angebot) html = `<div class="bl-ansage">🤝 Handel läuft${GN.wartePunkte()}</div>`;
     else if (!ich) html = `<div class="bl-ansage">${wer} ist dran${GN.wartePunkte()}</div>`;
     else if (z.schritt === "wuerfeln") {
       const knast = z.knast[GN.ich] !== undefined;
@@ -435,6 +456,8 @@
       box.dataset.html = html; box.innerHTML = html;
       box.classList.toggle("ich", ich && !z.angebot);
       $$("[data-info]", box).forEach((b) => (b.onclick = () => { Ton.klick(); feldInfo(+b.dataset.info); }));
+      $$("[data-biete]", box).forEach((b) => (b.onclick = () => { Ton.abgeben(); GN.fx?.pop(b, 1.1); GN.aktion("bieten", +b.dataset.biete); }));
+      $("[data-a-passen]", box)?.addEventListener("click", () => { Ton.klick(); GN.aktion("passen"); });
       $$("[data-bus]", box).forEach((b) => (b.onclick = () => { Ton.klick(); GN.aktion("bus", +b.dataset.bus); }));
       $("#blDreierLos", box)?.addEventListener("click", () => { Ton.richtig(); GN.aktion("dreier", +$("#blDreierZiel").value); });
       $$("[data-a]", box).forEach((b) => (b.onclick = () => {
@@ -638,6 +661,9 @@
     setTimeout(() => {
       if (GN.ansicht !== "bl-spiel") return;
       const wer = esc(nameVon(z, a.spieler));
+      if (a.typ === "auktion") { Ton.klopf?.(); knall("🔨 Versteigerung!", esc(F()[a.feld].name)); navigator.vibrate?.(40); return; }
+      if (a.typ === "keineMiete") { knall("🚔 Keine Miete", `${esc(nameVon(z, a.an))} sitzt im Achsenknast`); return; }
+      if (a.typ === "kauf" && a.auktion) { Ton.volltreffer?.(); knall("🔨 Zuschlag!", `${wer}: ${esc(F()[a.feld].name)} für ${geldText(a.betrag)}`); return; }
       if (a.typ === "karte") {
         Ton.wusch();
         const ov = document.createElement("div");
